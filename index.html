@@ -323,7 +323,7 @@
     box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
   }
   .coord-tooltip span { color: var(--blueprint); display: inline-block; width: 14px; margin-right: 4px; }
-  
+  .rhino-logo{width:30px;position:absolute;right:30px}
   @media (max-width:880px){
     .hero-grid{grid-template-columns:1fr;}
     .hero-aside{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:24px;display:flex;flex-direction:column;gap:12px;}
@@ -342,6 +342,7 @@
       display:flex;position:absolute;top:100%;left:0;right:0;background:var(--paper);
       flex-direction:column;padding:20px 32px;border-bottom:1px solid var(--line);gap:18px;
     }
+    .rhino-logo{width:120px;}
   }
 </style>
 </head>
@@ -360,6 +361,7 @@
       <a href="https://www.instagram.com/yaft_designs/">Projects</a>
       <a href="#faculty">Faculty</a>
       <a href="#contact" class="cta-btn">Enquire</a>
+      <img class="rhino-logo"src="/assets/logos/rhino logo.jpeg"/>
     </div>
     <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -367,32 +369,25 @@
 
 <main id="top">
 
-  <section class="hero" style="border-bottom:1px solid var(--line);padding-bottom:64px;">
-    <div class="wrap">
+ <section class="hero" id="hero-section" style="position:relative; overflow:hidden; border-bottom:1px solid var(--line); padding-bottom:64px; min-height: 90vh; display:flex; align-items:center;">
+    
+    <div id="hero-bg" style="position:absolute; inset:0; z-index:0; cursor:grab;">
+      <canvas id="model-canvas" style="width:100%; height:100%; display:block;"></canvas>
+      <div style="position:absolute; bottom:16px; right:24px; font-family:var(--mono); font-size:10px; color:var(--ink-soft); letter-spacing:.05em; pointer-events:none;">
+        DRAG BACKGROUND TO ROTATE 
+      </div>
+    </div>
 
-      <div class="hero-grid">
-        <div>
-          <h1>Where computational design <em>is taught</em> by people who build with it.</h1>
-          <p class="lede">YAFT Designs trains architects, students, and design teams in Rhino3D, Grasshopper, and Rhino.Inside.Revit — workflows we use daily on live facade and fabrication projects, not just in a classroom.</p>
-          <div class="hero-actions">
-            <a href="#courses" class="btn-primary">View Courses</a>
-            <a href="#contact" class="btn-secondary">Talk to Us</a>
-          </div>
-          <p class="credline"><strong>Authorized Rhino Training Center (ARTC)</strong> — recognized by McNeel &amp; Associates. We teach the tools; we don't sell software licenses.</p>
+    <div class="wrap" style="position:relative; z-index:10; pointer-events:none; width:100%;">
+    
+      <div style="max-width: 640px; pointer-events:auto;">
+        <h1>Where computational design <em>is taught</em> by people who build with it.</h1>
+        <p class="lede">YAFT Designs trains architects, students, and design teams in Rhino3D, Grasshopper, and Rhino.Inside.Revit — workflows we use daily on live facade and fabrication projects, not just in a classroom.</p>
+        <div class="hero-actions">
+          <a href="#courses" class="btn-primary">View Courses</a>
+          <a href="#contact" class="btn-secondary">Talk to Us</a>
         </div>
-        <div class="hero-aside">
-          <div id="model-viewer" style="width:100%;aspect-ratio:1/1;border:1px solid var(--ink);position:relative;cursor:grab;overflow:hidden;">
-            <canvas id="model-canvas" style="width:100%;height:100%;display:block;"></canvas>
-            <div id="coord-tooltip" class="coord-tooltip"></div>
-            <div style="position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.05em;pointer-events:none;">
-              DRAG TO ROTATE · SCROLL TO ZOOM
-            </div>
-          </div>
-          <div class="scalebar" style="margin-top:12px;">
-            <div class="bar"></div>
-            3D MODEL — INTERACTIVE<br>2026
-          </div>
-        </div>
+        <p class="credline"><strong>Authorized Rhino Training Center (ARTC)</strong> — recognized by McNeel & Associates. We teach the tools; we don't sell software licenses.</p>
       </div>
     </div>
   </section>
@@ -530,8 +525,8 @@
       <div class="track-grid">
         <div class="track-card">
           <span class="place">Hong Kong</span>
-          <h3>Yuen Long Stadium roof gutter panels</h3>
-          <p>Sheet metal unroll documentation for 39 panels, scripted end-to-end in Grasshopper.</p>
+          <h3>Stadium roof aluminium panels</h3>
+          <p>Sheet metal unroll documentation for 2000+ panels, scripted end-to-end in Grasshopper.</p>
         </div>
         <div class="track-card">
           <span class="place">India</span>
@@ -554,7 +549,7 @@
         <h2>Founder &amp; lead instructor</h2>
       </div>
       <div class="faculty-wrap">
-        <img src="./profile.jpeg" class="faculty-photo-stand"/>
+        <img src="./assets/images/profile.jpeg" class="faculty-photo-stand"/>
         <div class="faculty-text">
           <h3>Yokes Marapa</h3>
           <div class="faculty-role">Founder, YAFT Designs — Head of Design, VS-CRAFT Facades &amp; Roofing</div>
@@ -682,7 +677,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-const container = document.getElementById('model-viewer');
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+const container = document.getElementById('hero-bg');
 const canvas = document.getElementById('model-canvas');
 
 // Scene
@@ -698,15 +694,18 @@ renderer.setSize(container.clientWidth, container.clientHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x000000, 1); // Set to true black, fully opaque
 
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+pmremGenerator.compileEquirectangularShader();
+scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).texture;
 // Lighting — Boosted to make the black pop!
-const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
 scene.add(ambientLight);
 
-const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.0); // Increased intensity
+const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.5); // Increased intensity
 dirLight1.position.set(5000, 8000, 5000);
 scene.add(dirLight1);
 
-const dirLight2 = new THREE.DirectionalLight(0xffffff, 3.0); // Swapped to white light
+const dirLight2 = new THREE.DirectionalLight(0xffffff, 1); // Swapped to white light
 dirLight2.position.set(-5000, 3000, -5000);
 scene.add(dirLight2);
 
@@ -717,12 +716,14 @@ scene.add(dirLight2);
 // scene.add(gridHelper);
 
 // Orbit controls (Removed hardcoded min/max limits)
+// Orbit controls
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.autoRotate = true;
-controls.autoRotateSpeed = 1.2;
+controls.autoRotateSpeed = 0.9; // Slowed it down slightly so it's not distracting as a background
 controls.enablePan = false;
+controls.enableZoom = false; // <-- THIS IS CRITICAL FOR BACKGROUNDS
 controls.maxPolarAngle = Math.PI / 1.8;
 
 
@@ -845,7 +846,14 @@ loader.load('point1.obj', function(object) {
   });
 
   // 2. Material for the spheres (red)
-  const planeMaterial = new THREE.MeshPhongMaterial({
+  // Shining Rose Gold / Warm Brass Material
+  const planeMaterial = new THREE.MeshStandardMaterial({
+    color: '#9E653B',     // The warm golden hex color
+    metalness: 1.0,      // 1.0 makes it fully metallic (like real metal)
+    roughness: 0.15,     // 0.0 is a perfect mirror, 1.0 is totally matte. 0.15 gives a highly polished shine!
+    side: THREE.DoubleSide, 
+  });
+  const planeMaterial3 = new THREE.MeshPhongMaterial({
     color: 0xB11030, 
     specular: 0x444444,
     shininess: 810,
