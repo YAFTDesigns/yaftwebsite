@@ -361,7 +361,7 @@
       <a href="https://www.instagram.com/yaft_designs/">Projects</a>
       <a href="#faculty">Faculty</a>
       <a href="#contact" class="cta-btn">Enquire</a>
-      <img class="rhino-logo"src="/assets/logos/rhino logo.jpeg"/>
+      <img class="rhino-logo"src="/assets/logos/rhino_logo.jpeg"/>
     </div>
     <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -683,6 +683,9 @@ const canvas = document.getElementById('model-canvas');
 
 // Scene
 const scene = new THREE.Scene();
+let myModel;
+let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
 
 // Camera (Setting generic bounds initially, they will update when the model loads)
 const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000000);
@@ -720,7 +723,7 @@ scene.add(dirLight2);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.autoRotate = true;
+controls.enableRotate = false;
 controls.autoRotateSpeed = 0.9; // Slowed it down slightly so it's not distracting as a background
 controls.enablePan = false;
 controls.enableZoom = false; // <-- THIS IS CRITICAL FOR BACKGROUNDS
@@ -920,20 +923,34 @@ const sphereMaterial2 = new THREE.MeshPhongMaterial({
   object.position.sub(center);
 
   // Dynamically set camera and control limits
+// Dynamically set camera and control limits
   const maxDim = Math.max(size.x, size.y, size.z);
   
   controls.minDistance = maxDim * 0.1;
   controls.maxDistance = maxDim * 10;
   
-  camera.position.set(maxDim * 0.7, maxDim * 0.6, maxDim * 0.7);
-  controls.target.set(0, 0, 0);
+  const isMobile = window.innerWidth <= 880;
+
+  if (isMobile) {
+    // ======== MOBILE VIEW ========
+    // Camera is centered, target is exact center (0,0,0)
+    camera.position.set(maxDim * 0.8, maxDim * 0.4, maxDim * 0.8); 
+    controls.target.set(0, 0, 0);
+  } else {
+    // ======== DESKTOP VIEW ========
+    // Camera is shifted left, looking slightly to the right
+    camera.position.set(maxDim * 0.9, maxDim * 0.4, maxDim * 0.7);
+    controls.target.set(-maxDim * 0.6, 0, 0); // Adjust this to -maxDim * 0.6 if you prefer!
+  }
   controls.update();
 
   scene.add(object);
+  myModel = object;
 
 }, undefined, function(error) {
   console.error('Error loading OBJ:', error);
 });
+
 
 
 canvas.addEventListener('mousedown', () => { canvas.style.cursor = 'grabbing'; });
@@ -958,11 +975,41 @@ const onResize = () => {
   renderer.setSize(w, h);
 };
 window.addEventListener('resize', onResize);
+// ==========================================
+// CUSTOM DRAG-TO-ROTATE LOGIC
+// ==========================================
+container.addEventListener('pointerdown', (e) => {
+  isDragging = true;
+  previousMousePosition = { x: e.offsetX, y: e.offsetY };
+  canvas.style.cursor = 'grabbing';
+});
 
+container.addEventListener('pointermove', (e) => {
+  if (isDragging && myModel) {
+    const deltaMove = {
+      x: e.offsetX - previousMousePosition.x,
+      y: e.offsetY - previousMousePosition.y
+    };
+
+    // Spin the model based on mouse movement
+    // (You can increase or decrease the 0.005 to change the drag speed)
+    myModel.rotation.y += deltaMove.x * 0.005;
+    myModel.rotation.x += deltaMove.y * 0.005; 
+  }
+  previousMousePosition = { x: e.offsetX, y: e.offsetY };
+});
+
+window.addEventListener('pointerup', () => {
+  isDragging = false;
+  canvas.style.cursor = 'grab';
+});
 // Animation loop
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
+  if (myModel&& !isDragging) {
+    myModel.rotation.y += 0.002; // Change this number to adjust the speed
+  }
   renderer.render(scene, camera);
 }
 animate();
