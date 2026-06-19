@@ -873,10 +873,10 @@ loader.load('point1.obj', function(object) {
     side: THREE.DoubleSide, 
   });
 
-const sphereMaterial2 = new THREE.MeshPhongMaterial({
+const sphereMaterial2 = new THREE.MeshStandardMaterial({
     color: 0x063970, // <-- Updated to the new deep blue
-    specular: 0x444444,
-    shininess: 30,
+    metalness: 1.0,      // 1.0 makes it fully metallic (like real metal)
+    roughness: 0,
     side: THREE.DoubleSide, 
   });
 
