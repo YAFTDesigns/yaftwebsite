@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YAFT Designs — Computational Design Training &amp; Consulting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #0A0A0A;         /* Deepest black for main background */
+    --paper-2: #161616;       /* Slightly elevated dark grey for cards */
+    --ink: #FFFFFF;           /* Crisp white for headings and main text */
+    --ink-soft: #A3A3A3;      /* Muted grey for paragraphs */
+    --blueprint: #40E0D0;     /* Turquoise to match your 3D spheres */
+    --brass: #E63946;         /* Bright, punchy red for buttons/accents */
+    --brass-dark: #FF5252;    /* Lighter red for hover states */
+    --line: #2A2A2A;          /* Subtle dark grey for grid lines & borders */
+    
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Source Serif 4', serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  /* faint drafting grid texture on paper sections */
+  .grid-bg{
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:48px 48px;
+    background-position:-1px -1px;
+    opacity:1;
+  }
+  .grid-overlay{position:relative;}
+  .grid-overlay::before{
+    content:"";
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:48px 48px;
+    opacity:.35;
+    pointer-events:none;
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--blueprint);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:18px;height:1px;
+    background:var(--blueprint);
+    display:inline-block;
+  }
+  h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.01em;color:var(--ink);}
+  .hr{height:1px;background:var(--line);border:none;width:100%;}
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(10, 10, 10, 0.85); /* Dark frosted glass */
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    max-width:1180px;margin:0 auto;padding:18px 32px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
+  .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
+  .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
+  .navlinks{display:flex;gap:28px;align-items:center;}
+  .navlinks a{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    color:var(--ink-soft);
+    border-bottom:1px solid transparent;
+    padding-bottom:2px;
+    transition:border-color .2s,color .2s;
+  }
+  .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
+  .navlinks .sheet-no{color:var(--blueprint);margin-right:4px;}
+  .cta-btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    background:var(--brass-dark);color:var(--ink);
+    padding:10px 18px;border:1px solid var(--ink);
+    transition:background .2s,color .2s;
+    white-space:nowrap;
+  }
+  .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
+  .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
+  .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
+
+  /* ===== HERO / COVER SHEET ===== */
+  .hero{
+    padding:64px 0 80px;
+    border-bottom:1px solid var(--line);
+  }
+  .titleblock{
+    border:1px solid var(--line);
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    margin-bottom:48px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.04em;
+  }
+  .titleblock div{
+    padding:10px 14px;
+    border-right:1px solid var(--line);
+  }
+  .titleblock div:last-child{border-right:none;}
+  .titleblock .label{display:block;color:var(--blueprint);text-transform:uppercase;font-size:10px;margin-bottom:4px;}
+  .titleblock .val{color:var(--ink);font-weight:500;}
+
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.4fr .8fr;
+    gap:56px;
+    align-items:end;
+  }
+  .hero h1{
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.08;
+    margin-bottom:22px;
+  }
+  .hero h1 em{font-style:normal;color:var(--brass);}
+  .hero p.lede{
+    font-size:18px;
+    color:var(--ink-soft);
+    max-width:540px;
+    margin-bottom:30px;
+  }
+  .hero-actions{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;}
+  .btn-primary{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    background:var(--brass);color:#fff;padding:13px 24px;
+    border:1px solid var(--brass);
+    transition:background .2s;
+  }
+  .btn-primary:hover{background:var(--brass-dark);}
+  .btn-secondary{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    color:var(--ink);padding:13px 24px;
+    border:1px solid var(--ink);
+    transition:all .2s;
+  }
+  .btn-secondary:hover{background:var(--ink);color:var(--paper);}
+  .credline{
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    border-top:1px solid var(--line);padding-top:14px;
+  }
+  .credline strong{color:var(--ink);}
+
+  .hero-aside{
+    border-left:1px solid var(--line);
+    padding-left:32px;
+  }
+  /* Overrides the inline white border on your viewer to a sleek dark grey */
+  #model-viewer { border-color: var(--line) !important; }
+  
+  .hero-aside .compass{
+    width:120px;height:120px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 0 22px auto;position:relative;
+  }
+  .hero-aside .compass::after{
+    content:"N";font-family:var(--mono);font-size:13px;color:var(--brass);
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  }
+  .hero-aside .compass::before{
+    content:"";width:1px;height:70px;background:var(--line);
+  }
+  .scalebar{font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-align:right;letter-spacing:.05em;}
+  .scalebar .bar{height:4px;background:repeating-linear-gradient(90deg,var(--line) 0 10px, transparent 10px 20px);margin:6px 0 4px auto;width:120px;}
+
+  /* ===== SECTION SHELL ===== */
+  section{padding:84px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;gap:24px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(26px,3.4vw,38px);}
+  .section-head .note{font-family:var(--mono);font-size:12px;color:var(--ink-soft);max-width:280px;text-align:right;}
+
+  /* ===== NOTES / CREDENTIALS ===== */
+  .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
+  .note-card{border-top:2px solid var(--line);padding-top:18px;}
+  .note-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
+  .note-card h3{font-size:19px;margin-bottom:8px;}
+  .note-card p{color:var(--ink-soft);font-size:15px;}
+
+  /* ===== COURSES ===== */
+  .course-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .course-card{
+    background:var(--paper);
+    padding:32px;
+    display:flex;flex-direction:column;
+    min-height:240px;
+  }
+  .course-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .course-tag{font-family:var(--mono);font-size:11px;color:var(--blueprint);border:1px solid var(--blueprint);padding:3px 8px;letter-spacing:.04em;}
+  .course-card h3{font-size:21px;margin-bottom:10px;}
+  .course-card p{color:var(--ink-soft);font-size:15px;flex-grow:1;margin-bottom:18px;}
+  .course-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;}
+  .course-foot .fmt{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);}
+  .enquire:hover{color:var(--brass-dark);}
+
+  .software-note{
+    margin-top:28px;padding:18px 22px;
+    border:1px dashed var(--line);
+    font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  }
+  .software-note a{color:var(--blueprint);border-bottom:1px solid var(--blueprint);}
+
+  /* ===== SERVICES ===== */
+  .services-list{border-top:1px solid var(--line);}
+  .service-row{
+    display:grid;grid-template-columns:60px 1fr 1.3fr;gap:24px;
+    padding:26px 0;border-bottom:1px solid var(--line);align-items:start;
+  }
+  .service-row .idx{font-family:var(--mono);color:var(--brass);font-size:14px;}
+  .service-row h3{font-size:19px;}
+  .service-row p{color:var(--ink-soft);font-size:15px;}
+
+  /* ===== PROJECTS / TRACK RECORD ===== */
+  .dark{background:var(--paper-2);color:var(--ink);border-bottom:1px solid var(--line);}
+  .dark .eyebrow{color:var(--blueprint);}
+  .dark .eyebrow::before{background:var(--blueprint);}
+  .dark h2{color:var(--ink);}
+  .dark .hr{background:var(--line);}
+  .track-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:40px;}
+  .track-card{border-top:1px solid var(--line);padding-top:18px;}
+  .track-card .place{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;}
+  .track-card h3{color:var(--ink);font-size:18px;margin-bottom:8px;}
+  .track-card p{color:var(--ink-soft);font-size:14.5px;}
+  .track-lede{max-width:620px;color:var(--ink-soft);font-size:16px;margin-top:18px;}
+
+  /* ===== FACULTY ===== */
+  .faculty-wrap{display:grid;grid-template-columns:.9fr 1.4fr;gap:56px;}
+  .faculty-photo-stand{
+    border:1px solid var(--line);aspect-ratio:4/5;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    background:var(--paper-2);text-align:center;padding:24px;
+  }
+  .faculty-text h3{font-size:24px;margin-bottom:6px;}
+  .faculty-role{font-family:var(--mono);font-size:13px;color:var(--blueprint);margin-bottom:18px;}
+  .faculty-text p{color:var(--ink-soft);margin-bottom:14px;}
+  .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+  .badge{font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:6px 10px;color:var(--ink-soft);}
+
+  /* ===== FAQ ===== */
+  .faq-item{border-bottom:1px solid var(--line);padding:20px 0;}
+  .faq-q{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:var(--display);font-weight:500;font-size:17px;}
+  .faq-q .plus{font-family:var(--mono);color:var(--brass);font-size:18px;transition:transform .25s;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .faq-item.open .faq-a{max-height:240px;}
+  .faq-a p{padding-top:12px;color:var(--ink-soft);max-width:620px;font-size:15px;}
+
+  /* ===== CONTACT ===== */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+    padding:8px 2px;font-family:var(--body);font-size:15px;color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brass);}
+  .field input::placeholder, .field textarea::placeholder { color: #555; }
+  .contact-info dt{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--blueprint);margin-top:22px;letter-spacing:.05em;}
+  .contact-info dd{font-size:16px;margin-top:4px;}
+  .contact-info a{border-bottom:1px solid var(--line);}
+  .contact-info a:hover{border-color:var(--brass);}
+
+  /* ===== FOOTER ===== */
+  footer{padding:48px 0 32px;}
+  .rev-table{
+    width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-bottom:36px;
+  }
+  .rev-table th,.rev-table td{border:1px solid var(--line);padding:8px 12px;text-align:left;color:var(--ink-soft);}
+  .rev-table th{color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .foot-bottom .fcol h4{font-family:var(--mono);font-size:11px;color:var(--ink);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
+  .foot-bottom .fcol p{line-height:1.7;}
+
+  /* ===== 3D COORDINATE TOOLTIP ===== */
+  .coord-tooltip {
+    position: absolute;
+    background: var(--paper-2); 
+    color: var(--ink);
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .05em;
+    border: 1px solid var(--line);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+    white-space: nowrap;
+    line-height: 1.4;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+  }
+  .coord-tooltip span { color: var(--blueprint); display: inline-block; width: 14px; margin-right: 4px; }
+  
+  @media (max-width:880px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-aside{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:24px;display:flex;flex-direction:column;gap:12px;}
+    #model-viewer{max-height:300px;}
+    .titleblock{grid-template-columns:repeat(2,1fr);}
+    .notes-grid{grid-template-columns:1fr;gap:28px;}
+    .course-grid{grid-template-columns:1fr;}
+    .service-row{grid-template-columns:36px 1fr;}
+    .service-row p{grid-column:2/3;}
+    .track-grid{grid-template-columns:1fr;}
+    .faculty-wrap{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+    .navtoggle{display:flex;}
+    .navlinks.open{
+      display:flex;position:absolute;top:100%;left:0;right:0;background:var(--paper);
+      flex-direction:column;padding:20px 32px;border-bottom:1px solid var(--line);gap:18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#top" class="logo">
+      <span class="mark">YAFT</span>
+      <span class="sub">Designs</span>
+    </a>
+    <div class="navlinks" id="navlinks">
+      <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/">About</a>
+      <a href="https://www.rhino3d.com/training/sites/1650/">Courses</a>
+      <a href="#services">Services</a>
+      <a href="https://www.instagram.com/yaft_designs/">Projects</a>
+      <a href="#faculty">Faculty</a>
+      <a href="#contact" class="cta-btn">Enquire</a>
+    </div>
+    <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="hero" style="border-bottom:1px solid var(--line);padding-bottom:64px;">
+    <div class="wrap">
+
+      <div class="hero-grid">
+        <div>
+          <h1>Where computational design <em>is taught</em> by people who build with it.</h1>
+          <p class="lede">YAFT Designs trains architects, students, and design teams in Rhino3D, Grasshopper, and Rhino.Inside.Revit — workflows we use daily on live facade and fabrication projects, not just in a classroom.</p>
+          <div class="hero-actions">
+            <a href="#courses" class="btn-primary">View Courses</a>
+            <a href="#contact" class="btn-secondary">Talk to Us</a>
+          </div>
+          <p class="credline"><strong>Authorized Rhino Training Center (ARTC)</strong> — recognized by McNeel &amp; Associates. We teach the tools; we don't sell software licenses.</p>
+        </div>
+        <div class="hero-aside">
+          <div id="model-viewer" style="width:100%;aspect-ratio:1/1;border:1px solid var(--ink);position:relative;cursor:grab;overflow:hidden;">
+            <canvas id="model-canvas" style="width:100%;height:100%;display:block;"></canvas>
+            <div id="coord-tooltip" class="coord-tooltip"></div>
+            <div style="position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.05em;pointer-events:none;">
+              DRAG TO ROTATE · SCROLL TO ZOOM
+            </div>
+          </div>
+          <div class="scalebar" style="margin-top:12px;">
+            <div class="bar"></div>
+            3D MODEL — INTERACTIVE<br>2026
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="eyebrow">GENERAL NOTES</div>
+      <div class="section-head">
+        <h2>Trained on real production work, not theory alone.</h2>
+        <p class="note">YAFT Designs sits alongside VS-CRAFT Facades &amp; Roofing, so course content is shaped by what's actually being fabricated and installed, not a generic syllabus.</p>
+      </div>
+      <div class="notes-grid">
+        <div class="note-card">
+          <span class="num">NOTE 01</span>
+          <h3>McNeel-recognized</h3>
+          <p>YAFT Designs is an Authorized Rhino Training Center (ARTC), recognized directly by McNeel &amp; Associates, the makers of Rhino.</p>
+        </div>
+        <div class="note-card">
+          <span class="num">NOTE 02</span>
+          <h3>Academic ties</h3>
+          <p>Visiting faculty roles at VIT Vellore and ASADI College of Architecture, plus workshops delivered at IIT Kharagpur.</p>
+        </div>
+        <div class="note-card">
+          <span class="num">NOTE 03</span>
+          <h3>Fabrication-grade skills</h3>
+          <p>Curriculum draws from live facade panel rationalization, unrolling, and documentation work running across five countries.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="courses">
+    <div class="wrap">
+      <div class="eyebrow">COURSES</div>
+      <div class="section-head">
+        <h2>Courses</h2>
+        <p class="note">One-on-one, small cohort, or institutional workshop format. Enquire for the next available batch.</p>
+      </div>
+
+      <div class="course-grid">
+        <div class="course-card">
+          <div class="course-top">
+            <h3>Rhino3D for Architecture</h3>
+            <span class="course-tag">Beginner→Inter</span>
+          </div>
+          <p>NURBS modeling fundamentals through to freeform architectural geometry, documentation, and presentation-ready output.</p>
+          <div class="course-foot">
+            <span class="fmt">1:1 or cohort</span>
+            <a href="#contact" class="enquire">Enquire →</a>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-top">
+            <h3>Grasshopper for Computational Design</h3>
+            <span class="course-tag">Intermediate</span>
+          </div>
+          <p>Parametric logic, data structures, and rationalization workflows — built around the same panel and facade problems we solve at VS-CRAFT.</p>
+          <div class="course-foot">
+            <span class="fmt">1:1 or cohort</span>
+            <a href="#contact" class="enquire">Enquire →</a>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-top">
+            <h3>Rhino.Inside.Revit</h3>
+            <span class="course-tag">Advanced</span>
+          </div>
+          <p>Bridging parametric Rhino/Grasshopper workflows directly into Revit — for teams who need both design freedom and BIM compliance.</p>
+          <div class="course-foot">
+            <span class="fmt">1:1 or team</span>
+            <a href="#contact" class="enquire">Enquire →</a>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-top">
+            <h3>Wearables &amp; Product Design</h3>
+            <span class="course-tag">All levels</span>
+          </div>
+          <p>Applying Rhino and Grasshopper to wearable and product geometry — fit, surface continuity, and prep for fabrication or 3D printing.</p>
+          <div class="course-foot">
+            <span class="fmt">1:1 or workshop</span>
+            <a href="#contact" class="enquire">Enquire →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="software-note">
+        <span>YAFT Designs provides training and consulting only — we don't sell or resell Rhino licenses.</span>
+        <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="services">
+    <div class="wrap">
+      <div class="eyebrow">SERVICES</div>
+      <div class="section-head">
+        <h2>Beyond the classroom</h2>
+      </div>
+      <div class="services-list">
+        <div class="service-row">
+          <span class="idx">01</span>
+          <h3>One-on-one training</h3>
+          <p>Paced to your project or portfolio, in person in Coimbatore or remote — for individuals or small teams.</p>
+        </div>
+        <div class="service-row">
+          <span class="idx">02</span>
+          <h3>Institutional workshops</h3>
+          <p>Multi-day or semester-length programs for architecture schools, delivered on campus or online.</p>
+        </div>
+        <div class="service-row">
+          <span class="idx">03</span>
+          <h3>Visiting faculty</h3>
+          <p>Structured computational design modules for design schools looking to add Rhino and Grasshopper to their curriculum.</p>
+        </div>
+        <div class="service-row">
+          <span class="idx">04</span>
+          <h3>Computational design consulting</h3>
+          <p>Panel rationalization, facade scripting, and fabrication documentation for studios and contractors who need outsourced computational expertise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects" class="dark">
+    <div class="wrap">
+      <div class="eyebrow">TRACK RECORD</div>
+      <div class="section-head">
+        <h2>What we teach is what we build.</h2>
+      </div>
+      <p class="track-lede">YAFT Designs' founder leads design at VS-CRAFT Facades &amp; Roofing, where these exact workflows are used on live projects — which is why course content stays grounded in current production problems.</p>
+      <div class="track-grid">
+        <div class="track-card">
+          <span class="place">Hong Kong</span>
+          <h3>Yuen Long Stadium roof gutter panels</h3>
+          <p>Sheet metal unroll documentation for 39 panels, scripted end-to-end in Grasshopper.</p>
+        </div>
+        <div class="track-card">
+          <span class="place">India</span>
+          <h3>Vande Bharat cockpit facelift</h3>
+          <p>Design through FRP manufacture and 3D mold production, with INTO Designs.</p>
+        </div>
+        <div class="track-card">
+          <span class="place">Singapore / Australia / Oman</span>
+          <h3>Facade &amp; roofing documentation</h3>
+          <p>Panel rationalization and fabrication drawing pipelines across multiple international projects.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faculty">
+    <div class="wrap">
+      <div class="eyebrow">FACULTY</div>
+      <div class="section-head">
+        <h2>Founder &amp; lead instructor</h2>
+      </div>
+      <div class="faculty-wrap">
+        <img src="./profile.jpeg" class="faculty-photo-stand"/>
+        <div class="faculty-text">
+          <h3>Yokes Marapa</h3>
+          <div class="faculty-role">Founder, YAFT Designs — Head of Design, VS-CRAFT Facades &amp; Roofing</div>
+          <p>Splits time between training the next generation of computational designers and leading facade design on live international projects — work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
+          <p>Visiting faculty at VIT Vellore and ASADI College of Architecture, with prior workshops delivered at IIT Kharagpur alongside Prof. Gaurab Das Mahapatra.</p>
+          <div class="badge-row">
+            <span class="badge">ARTC — McNeel &amp; Associates</span>
+            <span class="badge">Visiting Faculty, VIT Vellore</span>
+            <span class="badge">Visiting Faculty, ASADI</span>
+            <span class="badge">IIT Kharagpur Workshops</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="eyebrow">NOTES &amp; CLARIFICATIONS</div>
+      <div class="section-head"><h2>Frequently asked</h2></div>
+
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q"><span>Do you sell Rhino software or licenses?</span><span class="plus">+</span></div>
+          <div class="faq-a"><p>No. YAFT Designs is a training and consulting business only. For licenses, go directly to McNeel at rhino3d.com.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Is training online or in person?</span><span class="plus">+</span></div>
+          <div class="faq-a"><p>Both. In-person sessions run from our Coimbatore base; remote sessions are available for individuals, teams, and institutions anywhere.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Who are the courses for?</span><span class="plus">+</span></div>
+          <div class="faq-a"><p>Architecture and design students, working professionals, and studio/contractor teams who need computational design skills.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q"><span>Can YAFT run a workshop at our institution?</span><span class="plus">+</span></div>
+          <div class="faq-a"><p>Yes, we've delivered workshops at IIT Kharagpur and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="eyebrow">CONTACT</div>
+      <div class="section-head"><h2>Start a course or project enquiry</h2></div>
+
+      <div class="contact-grid">
+        <form action="https://formspree.io/f/xlgkqwgl" method="POST">
+  
+  <div class="field">
+    <label>Name</label>
+    <input type="text" name="name" placeholder="Your name" required>
+  </div>
+  
+  <div class="field">
+    <label>Email</label>
+    <input type="email" name="email" placeholder="you@studio.com" required>
+  </div>
+  
+  <div class="field">
+    <label>Interested in</label>
+    <select name="interest">
+      <option>Rhino3D for Architecture</option>
+      <option>Grasshopper for Computational Design</option>
+      <option>Rhino.Inside.Revit</option>
+      <option>Wearables &amp; Product Design</option>
+      <option>Institutional workshop</option>
+      <option>Consulting project</option>
+    </select>
+  </div>
+  
+  <div class="field">
+    <label>Message</label>
+    <textarea name="message" rows="3" placeholder="Tell us about your goals or project" required></textarea>
+  </div>
+  
+  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;">Send Enquiry</button>
+</form>
+
+        <dl class="contact-info">
+          <dt>Studio</dt>
+          <dd>Coimbatore, Tamil Nadu, India</dd>
+          <dt>Email</dt>
+          <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+          <dt>Affiliated practice</dt>
+          <dd>VS-CRAFT Facades &amp; Roofing</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+
+    <div class="foot-bottom">
+      <div class="fcol">
+        <h4>YAFT Designs</h4>
+        <p>Computational design training<br>&amp; consulting<br>Coimbatore, Tamil Nadu, India</p>
+      </div>
+      <div class="fcol">
+        <h4>Courses</h4>
+        <p>Rhino3D for Architecture<br>Grasshopper<br>Rhino.Inside.Revit<br>Wearables &amp; Product Design</p>
+      </div>
+      <div class="fcol">
+        <h4>Company</h4>
+        <p>© 2026 YAFT Designs<br>All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+const container = document.getElementById('model-viewer');
+const canvas = document.getElementById('model-canvas');
+
+// Scene
+const scene = new THREE.Scene();
+
+// Camera (Setting generic bounds initially, they will update when the model loads)
+const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000000);
+camera.position.set(100, 100, 100);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false }); // Changed alpha to false
+renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor(0x000000, 1); // Set to true black, fully opaque
+
+// Lighting — Boosted to make the black pop!
+const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
+scene.add(ambientLight);
+
+const dirLight1 = new THREE.DirectionalLight(0xffffff, 3.0); // Increased intensity
+dirLight1.position.set(5000, 8000, 5000);
+scene.add(dirLight1);
+
+const dirLight2 = new THREE.DirectionalLight(0xffffff, 3.0); // Swapped to white light
+dirLight2.position.set(-5000, 3000, -5000);
+scene.add(dirLight2);
+
+// Grid helper
+// const gridHelper = new THREE.GridHelper(12000, 24, 0xE3DADA, 0xE3DADA);
+// gridHelper.material.opacity = 0.4;
+// gridHelper.material.transparent = true;
+// scene.add(gridHelper);
+
+// Orbit controls (Removed hardcoded min/max limits)
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 1.2;
+controls.enablePan = false;
+controls.maxPolarAngle = Math.PI / 1.8;
+
+
+// ==========================================
+// RAYCASTER (For Mouse Coordinates)
+// ==========================================
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const tooltip = document.getElementById('coord-tooltip');
+
+// Listen for the mouse moving over the 3D viewer
+container.addEventListener('mousemove', (event) => {
+  // 1. Get the mouse position relative to the container
+  const rect = container.getBoundingClientRect();
+  const clientX = event.clientX - rect.left;
+  const clientY = event.clientY - rect.top;
+
+  // 2. Convert mouse position to Three.js normalized coordinates (-1 to +1)
+  mouse.x = (clientX / rect.width) * 2 - 1;
+  mouse.y = -(clientY / rect.height) * 2 + 1;
+
+  // 3. Shoot the raycaster from the camera through the mouse
+  raycaster.setFromCamera(mouse, camera);
+
+  // 4. Check if the ray hit any meshes in the scene
+  const intersects = raycaster.intersectObjects(scene.children, true);
+  
+  // Filter out any hits on helpers (like the grid or lights)
+  const hit = intersects.find(i => i.object.isMesh);
+
+  if (hit) {
+    // If we hit a model, grab the exact X, Y, Z point
+    const p = hit.point;
+    
+    // Update the text inside the tooltip
+    tooltip.innerHTML = `
+      <span>X</span> ${p.x.toFixed(1)}<br>
+      <span>Y</span> ${p.y.toFixed(1)}<br>
+      <span>Z</span> ${p.z.toFixed(1)}
+    `;
+    
+    // Move the tooltip to follow the cursor (offset slightly so the cursor doesn't cover it)
+    tooltip.style.left = `${clientX + 15}px`;
+    tooltip.style.top = `${clientY + 15}px`;
+    tooltip.style.opacity = '1'; // Make it visible
+  } else {
+    // If looking at empty space, hide the tooltip
+    tooltip.style.opacity = '0';
+  }
+});
+
+// Hide the tooltip when the mouse leaves the box entirely
+container.addEventListener('mouseleave', () => {
+  tooltip.style.opacity = '0';
+});
+// Load OBJ model
+// Load OBJ model as a Point Cloud
+const loader = new OBJLoader();
+
+// loader.load('point1.obj', function(object) {
+
+//   // Create the material for the points
+//   const pointsMaterial = new THREE.PointsMaterial({
+//     color: 0xB11030,      // <-- CHANGE COLOR HERE (Currently your brand brass/red)
+//     size: 50,              // <-- ADJUST POINT SIZE HERE
+//     sizeAttenuation: true // Makes points look smaller when further away
+//   });
+
+//   const newPoints = [];
+
+//   // Look through the OBJ file for any 3D shapes
+//   object.traverse(function(child) {
+//     if (child.isMesh) {
+//       // Instead of making it a solid mesh, create a Points object from its vertices
+//       const points = new THREE.Points(child.geometry, pointsMaterial);
+//       newPoints.push(points);
+      
+//       // Hide the original solid mesh
+//       child.visible = false; 
+//     }
+//   });
+
+//   // Attach the new points to the main object
+//   newPoints.forEach(p => object.add(p));
+
+//   // Center the model
+//   const box = new THREE.Box3().setFromObject(object);
+//   const center = box.getCenter(new THREE.Vector3());
+//   const size = box.getSize(new THREE.Vector3());
+//   object.position.sub(center);
+
+//   // Dynamically set camera and control limits based on actual model size
+//   const maxDim = Math.max(size.x, size.y, size.z);
+  
+//   controls.minDistance = maxDim * 0.1;
+//   controls.maxDistance = maxDim * 10;
+  
+//   camera.position.set(maxDim * 1.5, maxDim * 0.8, maxDim * 1.5);
+//   controls.target.set(0, 0, 0);
+//   controls.update();
+
+//   // Scale grid to match
+//   gridHelper.scale.set(maxDim / 12000, 1, maxDim / 12000);
+//   gridHelper.position.y = -size.y / 2;
+
+//   scene.add(object);
+
+// }, undefined, function(error) {
+//   console.error('Error loading OBJ:', error);
+// });
+
+loader.load('point1.obj', function(object) {
+
+  // 1. Material for the base plane (Turcoise)
+  const sphereMaterial = new THREE.MeshPhongMaterial({
+    color: 0x40E0D0, 
+    specular: 0x444444,
+    shininess: 810,
+    side: THREE.DoubleSide, 
+  });
+
+  // 2. Material for the spheres (red)
+  const planeMaterial = new THREE.MeshPhongMaterial({
+    color: 0xB11030, 
+    specular: 0x444444,
+    shininess: 810,
+    side: THREE.DoubleSide, 
+  });
+
+const sphereMaterial2 = new THREE.MeshPhongMaterial({
+    color: 0x063970, // <-- Updated to the new deep blue
+    specular: 0x444444,
+    shininess: 30,
+    side: THREE.DoubleSide, 
+  });
+
+  // Array to hold all our separate 3D parts
+  const allMeshes = [];
+
+  // Look at every single piece of the model
+  object.traverse(function(child) {
+    if (child.isMesh) {
+      // Measure how wide/tall/deep this specific piece is
+      child.geometry.computeBoundingBox();
+      const box = child.geometry.boundingBox;
+      
+      const sizeX = box.max.x - box.min.x;
+      const sizeY = box.max.y - box.min.y;
+      const sizeZ = box.max.z - box.min.z;
+      
+      // Get its longest dimension
+      const maxDimension = Math.max(sizeX, sizeY, sizeZ);
+      
+      // Save it to our list so we can compare sizes later
+      allMeshes.push({
+        mesh: child,
+        size: maxDimension
+      });
+    }
+  });
+
+  // Sort our list from LARGEST to SMALLEST
+  allMeshes.sort((a, b) => b.size - a.size);
+
+  // Apply the materials based on size threshold
+  if (allMeshes.length > 0) {
+    // Find the size of the absolute largest piece in the file
+    const absoluteLargest = allMeshes[0].size;
+
+    for (let i = 0; i < allMeshes.length; i++) {
+      // THE FIX: If a piece is larger than 10% of the biggest object in the file,
+      // it is part of the base plane. Otherwise, it is a tiny sphere.
+      if (allMeshes[i].size > absoluteLargest * 0.9) {
+        allMeshes[i].mesh.material = sphereMaterial2;
+      } else if (allMeshes[i].size > absoluteLargest * 0.77) {
+        allMeshes[i].mesh.material = sphereMaterial;
+      }  else {
+        allMeshes[i].mesh.material = planeMaterial;
+      }
+    }
+  }
+
+  // Center the whole model on the screen
+  const box = new THREE.Box3().setFromObject(object);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  object.position.sub(center);
+
+  // Dynamically set camera and control limits
+  const maxDim = Math.max(size.x, size.y, size.z);
+  
+  controls.minDistance = maxDim * 0.1;
+  controls.maxDistance = maxDim * 10;
+  
+  camera.position.set(maxDim * 0.7, maxDim * 0.6, maxDim * 0.7);
+  controls.target.set(0, 0, 0);
+  controls.update();
+
+  scene.add(object);
+
+}, undefined, function(error) {
+  console.error('Error loading OBJ:', error);
+});
+
+
+canvas.addEventListener('mousedown', () => { canvas.style.cursor = 'grabbing'; });
+canvas.addEventListener('mouseup', () => { canvas.style.cursor = 'grab'; });
+
+// Stop auto-rotate on interaction, resume after idle
+let idleTimer;
+controls.addEventListener('start', () => {
+  controls.autoRotate = false;
+  clearTimeout(idleTimer);
+});
+controls.addEventListener('end', () => {
+  idleTimer = setTimeout(() => { controls.autoRotate = true; }, 3000);
+});
+
+// Resize handler
+const onResize = () => {
+  const w = container.clientWidth;
+  const h = container.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+};
+window.addEventListener('resize', onResize);
+
+// Animation loop
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+
+<script>
+  // mobile nav toggle
+  document.getElementById('navtoggle').addEventListener('click', function(){
+    document.getElementById('navlinks').classList.toggle('open');
+  });
+  document.querySelectorAll('.navlinks a').forEach(function(a){
+    a.addEventListener('click', function(){
+      document.getElementById('navlinks').classList.remove('open');
+    });
+  });
+
+  // faq accordion
+  document.querySelectorAll('.faq-item').forEach(function(item){
+    item.querySelector('.faq-q').addEventListener('click', function(){
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(function(i){ i.classList.remove('open'); });
+      if(!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
