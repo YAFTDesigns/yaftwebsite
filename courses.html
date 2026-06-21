@@ -157,15 +157,16 @@
   }
   .course-card h3{font-size:20px;margin-bottom:10px;line-height:1.2;}
   .course-card p.desc{color:var(--ink-soft);font-size:14.5px;flex-grow:1;margin-bottom:20px;}
-  .course-fee-row{
-    display:flex;justify-content:space-between;align-items:baseline;
-    border-top:1px solid var(--line);padding-top:14px;margin-bottom:16px;
+  .course-foot{
+    display:flex;justify-content:space-between;align-items:center;gap:14px;
+    border-top:1px solid var(--line);padding-top:16px;
   }
-  .course-fee-row .fee{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink);}
-  .course-fee-row .fee span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);font-weight:400;}
-  .course-foot{display:flex;justify-content:space-between;align-items:center;gap:14px;}
-  .syllabus-link{font-family:var(--mono);font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line);}
+  .syllabus-link{
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    border:none;border-bottom:1px solid var(--line);background:none;padding:0;cursor:pointer;
+  }
   .syllabus-link:hover{color:var(--blueprint);border-color:var(--blueprint);}
+  .syllabus-link .lock{margin-right:5px;}
   .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);white-space:nowrap;}
   .enquire:hover{color:var(--brass-dark);}
 
@@ -207,6 +208,51 @@
     transition:background .2s;
   }
   .btn-primary:hover{background:var(--brass-dark);}
+  .btn-primary:disabled{opacity:.6;cursor:default;}
+  .btn-ghost{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;color:var(--ink-soft);
+    padding:13px 20px;border:1px solid var(--line);background:none;cursor:pointer;
+  }
+  .btn-ghost:hover{color:var(--ink);border-color:var(--ink);}
+
+  /* ===== SYLLABUS GATE MODAL ===== */
+  .modal-overlay{
+    position:fixed;inset:0;z-index:200;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-backdrop{
+    position:absolute;inset:0;
+    background:rgba(10,10,10,.82);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .modal-box{
+    position:relative;z-index:2;max-width:440px;width:100%;
+    background:var(--paper-2);border:1px solid var(--line);
+    padding:34px 30px;box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal-close{
+    position:absolute;top:14px;right:14px;
+    width:30px;height:30px;background:none;border:none;
+    color:var(--ink-soft);font-family:var(--mono);font-size:16px;cursor:pointer;
+  }
+  .modal-close:hover{color:var(--brass);}
+  .modal-box h3{font-size:21px;margin:14px 0 8px;}
+  .modal-lede{color:var(--ink-soft);font-size:14px;margin-bottom:22px;}
+  .modal-course{
+    font-family:var(--mono);font-size:11px;color:var(--blueprint);
+    border:1px solid var(--blueprint);display:inline-block;padding:3px 9px;margin-bottom:16px;
+  }
+  .modal-error{
+    display:none;color:var(--brass-dark);font-family:var(--mono);font-size:12px;
+    margin:-6px 0 14px;
+  }
+  .modal-error.show{display:block;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:20px;}
+  .modal-status{
+    display:none;font-family:var(--mono);font-size:12px;color:var(--blueprint);margin-top:14px;
+  }
+  .modal-status.show{display:block;}
 
   /* ===== FOOTER ===== */
   footer{padding:48px 0 32px;}
@@ -272,7 +318,7 @@
     <div class="wrap">
       <div class="section-head">
         <h2>All courses</h2>
-        <p class="note">Fees shown are for batches run in India; inclusive of all taxes unless noted. Enquire for the next available start date.</p>
+        <p class="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once — share your email &amp; LinkedIn once to view all of them.</p>
       </div>
 
       <div class="course-grid">
@@ -287,12 +333,8 @@
             <div class="course-tool">Rhino3D</div>
             <h3>Rhino3D Training for Architecture</h3>
             <p class="desc">NURBS fundamentals through advanced freeform surfacing and SubD modeling — recreating real case studies like Zaha Hadid's Chanel Mobile Art Pavilion and MAD's Absolute Towers, ending in 3D-print-ready output.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹23,000 <span>group</span></span>
-              <span class="fee">₹25,000 <span>1:1</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/rhino-architecture.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/rhino-architecture.pdf" data-course="Rhino3D for Architecture">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Rhino3D for Architecture">Enquire →</a>
             </div>
           </div>
@@ -308,12 +350,8 @@
             <div class="course-tool">Grasshopper · Rhino3D</div>
             <h3>Grasshopper Training for Architecture</h3>
             <p class="desc">Parametric logic, data structures, and form-finding through Grasshopper's plugin ecosystem — Lunchbox, Ladybug climate analysis, Galapagos optimization, and Kangaroo physics — built around real panel and facade problems.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹25,000 <span>group</span></span>
-              <span class="fee">₹28,000 <span>1:1</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/grasshopper-architecture.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/grasshopper-architecture.pdf" data-course="Grasshopper for Computational Design">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Grasshopper for Computational Design">Enquire →</a>
             </div>
           </div>
@@ -329,12 +367,8 @@
             <div class="course-tool">Revit · Rhino.Inside.Revit</div>
             <h3>Revit Architecture + Rhino.Inside.Revit</h3>
             <p class="desc">A 10-module BIM workshop bridging Revit documentation with Rhino/Grasshopper computational geometry — for teams who need both design freedom and BIM compliance, from project setup through parametric family automation.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹45,000 <span>group</span></span>
-              <span class="fee">₹60,000 <span>1:1</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/revit-rhino-inside.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/revit-rhino-inside.pdf" data-course="Rhino.Inside.Revit">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Rhino.Inside.Revit">Enquire →</a>
             </div>
           </div>
@@ -350,11 +384,8 @@
             <div class="course-tool">Rhino3D · Grasshopper · Ladybug</div>
             <h3>Rhino3D for AEC &amp; Climate</h3>
             <p class="desc">A compact climate-responsive facade specialization — solar radiation analysis and orientation optimization with Ladybug, working toward kinetic, performance-driven facades in the spirit of Al Bahar Towers.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹20,000 <span>2-day total</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/rhino-aec-climate.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/rhino-aec-climate.pdf" data-course="Rhino3D for AEC & Climate">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Rhino3D for AEC & Climate">Enquire →</a>
             </div>
           </div>
@@ -370,12 +401,8 @@
             <div class="course-tool">Rhino3D · Grasshopper</div>
             <h3>Rhino3D for Wearables &amp; Footwear</h3>
             <p class="desc">Applying Rhino and Grasshopper to footwear, neckwear, and wristband geometry — Voronoi lattice infill for 3D-printed soles, surface continuity for fit, and prep for fabrication or printing.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹23,000 <span>group</span></span>
-              <span class="fee">₹25,000 <span>1:1</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/rhino-wearables-footwear.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/rhino-wearables-footwear.pdf" data-course="Wearables & Product Design">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Wearables & Product Design">Enquire →</a>
             </div>
           </div>
@@ -391,12 +418,8 @@
             <div class="course-tool">Rhino3D · Grasshopper</div>
             <h3>Rhinoceros for Industrial Design</h3>
             <p class="desc">CNC-aware product modeling — hybrid surface and solid workflows with Loft, SubD, and BlendSrf, then parametric Grasshopper automation for batch DXF export, perforated panels, and manufacture-ready part breakdown.</p>
-            <div class="course-fee-row">
-              <span class="fee">₹25,000 <span>group</span></span>
-              <span class="fee">₹28,000 <span>1:1</span></span>
-            </div>
             <div class="course-foot">
-              <a href="./assets/pdfs/rhino-industrial-design.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <button type="button" class="syllabus-link" data-pdf="./assets/pdfs/rhino-industrial-design.pdf" data-course="Industrial Design">View syllabus (PDF)</button>
               <a href="#contact" class="enquire" data-course="Industrial Design">Enquire →</a>
             </div>
           </div>
@@ -507,6 +530,35 @@
   </div>
 </footer>
 
+<div class="modal-overlay" id="syllabusModal">
+  <div class="modal-backdrop" id="syllabusBackdrop"></div>
+  <div class="modal-box">
+    <button class="modal-close" id="syllabusClose" aria-label="Close">✕</button>
+    <div class="eyebrow">UNLOCK SYLLABUS</div>
+    <h3>Get the full course syllabus</h3>
+    <span class="modal-course" id="syllabusCourseLabel"></span>
+    <p class="modal-lede">Share your email and LinkedIn profile — this unlocks every syllabus PDF on this page, no re-entry needed.</p>
+    <form id="syllabusForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" id="syllabusEmail" placeholder="you@studio.com" required>
+      </div>
+      <div class="field">
+        <label>LinkedIn profile</label>
+        <input type="url" name="linkedin" id="syllabusLinkedin" placeholder="https://linkedin.com/in/yourname" required>
+      </div>
+      <input type="hidden" name="course" id="syllabusCourseField">
+      <input type="hidden" name="_subject" value="Syllabus PDF request">
+      <p class="modal-error" id="syllabusError"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="syllabusCancel">Cancel</button>
+        <button type="submit" class="btn-primary" id="syllabusSubmit">Unlock &amp; view PDF</button>
+      </div>
+      <p class="modal-status" id="syllabusStatus">Unlocking…</p>
+    </form>
+  </div>
+</div>
+
 <script>
   // mobile nav toggle
   document.getElementById('navtoggle').addEventListener('click', function(){
@@ -527,6 +579,100 @@
       if(match) select.value = match.value;
     });
   });
+
+  // ===== SYLLABUS GATE: email + LinkedIn required before a PDF opens =====
+  (function(){
+    var STORAGE_KEY = 'yaftSyllabusAccess';
+    var modal = document.getElementById('syllabusModal');
+    var backdrop = document.getElementById('syllabusBackdrop');
+    var closeBtn = document.getElementById('syllabusClose');
+    var cancelBtn = document.getElementById('syllabusCancel');
+    var form = document.getElementById('syllabusForm');
+    var errorEl = document.getElementById('syllabusError');
+    var statusEl = document.getElementById('syllabusStatus');
+    var courseField = document.getElementById('syllabusCourseField');
+    var courseLabel = document.getElementById('syllabusCourseLabel');
+    var submitBtn = document.getElementById('syllabusSubmit');
+    var emailInput = document.getElementById('syllabusEmail');
+    var linkedinInput = document.getElementById('syllabusLinkedin');
+    var pendingPdf = null;
+
+    function isUnlocked(){
+      try { return !!localStorage.getItem(STORAGE_KEY); } catch(e){ return false; }
+    }
+    function markUnlocked(email, linkedin){
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ email: email, linkedin: linkedin, ts: Date.now() })); } catch(e){}
+    }
+
+    function openModal(pdfUrl, courseName){
+      pendingPdf = pdfUrl;
+      courseField.value = courseName || '';
+      courseLabel.textContent = courseName || '';
+      errorEl.classList.remove('show');
+      statusEl.classList.remove('show');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Unlock & view PDF';
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      emailInput.focus();
+    }
+    function closeModal(){
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      pendingPdf = null;
+    }
+
+    document.querySelectorAll('.syllabus-link[data-pdf]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var pdfUrl = btn.getAttribute('data-pdf');
+        var courseName = btn.getAttribute('data-course') || '';
+        if(isUnlocked()){
+          window.open(pdfUrl, '_blank');
+          return;
+        }
+        openModal(pdfUrl, courseName);
+      });
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email = emailInput.value.trim();
+      var linkedin = linkedinInput.value.trim();
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      var linkedinOk = /linkedin\.com\//i.test(linkedin);
+
+      if(!emailOk || !linkedinOk){
+        errorEl.textContent = !emailOk
+          ? 'Please enter a valid email address.'
+          : 'Please enter your LinkedIn profile URL (linkedin.com/in/...).';
+        errorEl.classList.add('show');
+        return;
+      }
+      errorEl.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      statusEl.classList.add('show');
+
+      var pdfUrl = pendingPdf;
+      fetch('https://formspree.io/f/xlgkqwgl', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: new FormData(form)
+      }).catch(function(){ /* lead capture is best-effort; still unlock below */ })
+        .then(function(){
+          markUnlocked(email, linkedin);
+          closeModal();
+          if(pdfUrl) window.open(pdfUrl, '_blank');
+        });
+    });
+  })();
 </script>
 
 </body>
