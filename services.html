@@ -349,6 +349,7 @@
     background:var(--line);border:1px solid var(--line);
   }
   .workshop-gallery.cols-4{grid-template-columns:repeat(4,1fr);}
+  .workshop-gallery.cols-3{grid-template-columns:repeat(3,1fr);}
   .workshop-photo-stand{
     background:var(--paper-2);aspect-ratio:4/3;
     display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;
@@ -425,7 +426,7 @@
   }
 
   @media (max-width:880px){
-    .workshop-gallery, .workshop-gallery.cols-4{grid-template-columns:repeat(2,1fr);}
+    .workshop-gallery, .workshop-gallery.cols-4, .workshop-gallery.cols-3{grid-template-columns:repeat(2,1fr);}
   }
   @media (max-width:880px){
     .hero-grid{grid-template-columns:1fr;}
@@ -570,12 +571,10 @@
           <h3>IIT Kharagpur</h3>
           <div class="workshop-role">Workshop — Rhino Modelling</div>
           <p class="desc">Hands-on Rhino modelling workshop delivered alongside Prof. Gaurab Das Mahapatra, covering NURBS fundamentals through architectural geometry.</p>
-          <div class="workshop-gallery" data-group="iitkgp" data-title="IIT Kharagpur" data-role="Workshop — Rhino Modelling">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery cols-3" data-group="iitkgp" data-title="IIT Kharagpur" data-role="Workshop — Rhino Modelling">
+            <div class="workshop-photo-stand" data-caption="Architecture and Regional Planning block, IIT Kharagpur"><img src="./assets/images/workshops/iitkgp-1.jpg" alt="IIT Kharagpur Architecture and Regional Planning block"></div>
+            <div class="workshop-photo-stand" data-caption="Workshop participants"><img src="./assets/images/workshops/iitkgp-2.jpg" alt="Participants of the Rhino workshop at IIT Kharagpur"></div>
+            <div class="workshop-photo-stand" data-caption="Students using Image Sampler in Grasshopper"><img src="./assets/images/workshops/iitkgp-3.jpg" alt="Students using Image Sampler in Grasshopper"></div>
           </div>
         </div>
 
