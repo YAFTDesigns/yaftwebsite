@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Courses — YAFT Designs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #0A0A0A;
+    --paper-2: #161616;
+    --ink: #FFFFFF;
+    --ink-soft: #A3A3A3;
+    --blueprint: #40E0D0;
+    --brass: #E63946;
+    --brass-dark: #FF5252;
+    --line: #2A2A2A;
+
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Source Serif 4', serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{max-width:100%;display:block;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--blueprint);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:18px;height:1px;
+    background:var(--blueprint);
+    display:inline-block;
+  }
+  h1,h2,h3,h4{font-family:var(--display);font-weight:600;letter-spacing:-.01em;color:var(--ink);}
+
+  /* ===== NAV ===== */
+  header{
+    position:sticky;top:0;z-index:40;
+    background:rgba(10, 10, 10, 0.85);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    max-width:1180px;margin:0 auto;padding:18px 32px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
+  .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
+  .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
+  .navlinks{display:flex;gap:28px;align-items:center;}
+  .navlinks a{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    color:var(--ink-soft);
+    border-bottom:1px solid transparent;
+    padding-bottom:2px;
+    transition:border-color .2s,color .2s;
+  }
+  .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
+  .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
+  .cta-btn{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    background:var(--brass-dark);color:var(--ink);
+    padding:10px 18px;border:1px solid var(--ink);
+    transition:background .2s,color .2s;
+    white-space:nowrap;
+  }
+  .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
+  .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
+  .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
+  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;}
+
+  /* ===== PAGE HERO ===== */
+  .page-hero{padding:56px 0 48px;border-bottom:1px solid var(--line);}
+  .page-hero h1{font-size:clamp(32px,4.6vw,50px);line-height:1.1;margin:18px 0 16px;max-width:760px;}
+  .page-hero p.lede{font-size:17px;color:var(--ink-soft);max-width:600px;margin-bottom:24px;}
+  .rating-badge{
+    display:inline-flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    border:1px solid var(--line);padding:10px 16px;
+  }
+  .rating-badge strong{color:var(--ink);}
+  .rating-badge .stars{color:var(--brass);}
+
+  /* ===== SECTION SHELL ===== */
+  section{padding:72px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px;gap:24px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(24px,3vw,34px);}
+  .section-head .note{font-family:var(--mono);font-size:12px;color:var(--ink-soft);max-width:300px;text-align:right;}
+
+  /* ===== COURSE CARDS ===== */
+  .course-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+  }
+  .course-card{
+    background:var(--paper);
+    display:flex;flex-direction:column;
+  }
+  .course-visual{
+    aspect-ratio:16/10;
+    position:relative;
+    background:var(--paper-2);
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:24px 24px;
+    display:flex;align-items:center;justify-content:center;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .course-visual .glyph{
+    font-family:var(--display);font-size:46px;font-weight:700;
+    color:var(--line);letter-spacing:-.02em;
+  }
+  .course-visual .level-badge{
+    position:absolute;top:14px;left:14px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;
+    border:1px solid var(--blueprint);color:var(--blueprint);
+    padding:3px 9px;background:rgba(10,10,10,.7);
+  }
+  .course-visual .duration-badge{
+    position:absolute;top:14px;right:14px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.05em;
+    border:1px solid var(--line);color:var(--ink-soft);
+    padding:3px 9px;background:rgba(10,10,10,.7);
+  }
+  .course-body{padding:26px 28px 28px;display:flex;flex-direction:column;flex-grow:1;}
+  .course-tool{
+    font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--ink-soft);margin-bottom:10px;
+  }
+  .course-card h3{font-size:20px;margin-bottom:10px;line-height:1.2;}
+  .course-card p.desc{color:var(--ink-soft);font-size:14.5px;flex-grow:1;margin-bottom:20px;}
+  .course-fee-row{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-top:1px solid var(--line);padding-top:14px;margin-bottom:16px;
+  }
+  .course-fee-row .fee{font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink);}
+  .course-fee-row .fee span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);font-weight:400;}
+  .course-foot{display:flex;justify-content:space-between;align-items:center;gap:14px;}
+  .syllabus-link{font-family:var(--mono);font-size:12px;color:var(--ink-soft);border-bottom:1px solid var(--line);}
+  .syllabus-link:hover{color:var(--blueprint);border-color:var(--blueprint);}
+  .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);white-space:nowrap;}
+  .enquire:hover{color:var(--brass-dark);}
+
+  .software-note{
+    margin-top:28px;padding:18px 22px;
+    border:1px dashed var(--line);
+    font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  }
+  .software-note a{color:var(--blueprint);border-bottom:1px solid var(--blueprint);}
+
+  /* ===== REQUIREMENTS ===== */
+  .req-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
+  .req-card{border-top:2px solid var(--line);padding-top:18px;}
+  .req-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
+  .req-card h3{font-size:18px;margin-bottom:8px;}
+  .req-card p{color:var(--ink-soft);font-size:14.5px;}
+
+  /* ===== CONTACT ===== */
+  .dark{background:var(--paper-2);color:var(--ink);border-bottom:1px solid var(--line);}
+  .dark .eyebrow{color:var(--blueprint);}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+    padding:8px 2px;font-family:var(--body);font-size:15px;color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brass);}
+  .field input::placeholder, .field textarea::placeholder { color: #555; }
+  .contact-info dt{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--blueprint);margin-top:22px;letter-spacing:.05em;}
+  .contact-info dd{font-size:16px;margin-top:4px;}
+  .contact-info a{border-bottom:1px solid var(--line);}
+  .contact-info a:hover{border-color:var(--brass);}
+  .btn-primary{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    background:var(--brass);color:#fff;padding:13px 24px;
+    border:1px solid var(--brass);
+    transition:background .2s;
+  }
+  .btn-primary:hover{background:var(--brass-dark);}
+
+  /* ===== FOOTER ===== */
+  footer{padding:48px 0 32px;}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .foot-bottom .fcol h4{font-family:var(--mono);font-size:11px;color:var(--ink);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
+  .foot-bottom .fcol p{line-height:1.7;}
+
+  @media (max-width:980px){
+    .course-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:880px){
+    .req-grid{grid-template-columns:1fr;gap:28px;}
+    .contact-grid{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+    .navtoggle{display:flex;}
+    .navlinks.open{
+      display:flex;position:absolute;top:100%;left:0;right:0;background:var(--paper);
+      flex-direction:column;padding:20px 32px;border-bottom:1px solid var(--line);gap:18px;
+    }
+    .rhino-logo{
+      width:32px;height:auto;border-radius:4px;position:absolute;
+      top:50%;transform:translate(-50%, -50%);
+    }
+  }
+  @media (max-width:640px){
+    .course-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="index.html#top" class="logo">
+      <span class="mark">YAFT</span>
+      <span class="sub">Designs</span>
+    </a>
+    <div class="navlinks" id="navlinks">
+      <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/">About</a>
+      <a href="courses.html" class="active">Courses</a>
+      <a href="services.html">Services</a>
+      <a href="https://www.instagram.com/yaft_designs/">Projects</a>
+      <a href="faculty.html">Faculty</a>
+      <a href="#contact" class="cta-btn">Enquire</a>
+      <img class="rhino-logo" src="./assets/logos/rhino_logo.jpeg"/>
+    </div>
+    <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  </nav>
+</header>
+
+<main id="top">
+
+  <section class="page-hero">
+    <div class="wrap">
+      <div class="eyebrow">COURSES</div>
+      <h1>Browse our live courses in Rhino3D, Grasshopper &amp; BIM.</h1>
+      <p class="lede">Hands-on, instructor-led training built around real production workflows — taught by a working computational designer, not a generic syllabus. Available in-person from Coimbatore or remote, as 1:1, group batch, or institutional format.</p>
+      <div class="rating-badge"><span class="stars">★★★★★</span> Authorized Rhino Training Center <strong>— recognized by McNeel &amp; Associates</strong></div>
+    </div>
+  </section>
+
+  <section id="courses">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>All courses</h2>
+        <p class="note">Fees shown are for batches run in India; inclusive of all taxes unless noted. Enquire for the next available start date.</p>
+      </div>
+
+      <div class="course-grid">
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Beginner → Inter</span>
+            <span class="duration-badge">30 hrs · 5 days</span>
+            <span class="glyph">R3D</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Rhino3D</div>
+            <h3>Rhino3D Training for Architecture</h3>
+            <p class="desc">NURBS fundamentals through advanced freeform surfacing and SubD modeling — recreating real case studies like Zaha Hadid's Chanel Mobile Art Pavilion and MAD's Absolute Towers, ending in 3D-print-ready output.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹23,000 <span>group</span></span>
+              <span class="fee">₹25,000 <span>1:1</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/rhino-architecture.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Rhino3D for Architecture">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Beginner → Inter</span>
+            <span class="duration-badge">36 hrs · 6 days</span>
+            <span class="glyph">GH</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Grasshopper · Rhino3D</div>
+            <h3>Grasshopper Training for Architecture</h3>
+            <p class="desc">Parametric logic, data structures, and form-finding through Grasshopper's plugin ecosystem — Lunchbox, Ladybug climate analysis, Galapagos optimization, and Kangaroo physics — built around real panel and facade problems.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹25,000 <span>group</span></span>
+              <span class="fee">₹28,000 <span>1:1</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/grasshopper-architecture.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Grasshopper for Computational Design">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Beginner → Adv</span>
+            <span class="duration-badge">60 hrs · 6 weeks</span>
+            <span class="glyph">RIR</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Revit · Rhino.Inside.Revit</div>
+            <h3>Revit Architecture + Rhino.Inside.Revit</h3>
+            <p class="desc">A 10-module BIM workshop bridging Revit documentation with Rhino/Grasshopper computational geometry — for teams who need both design freedom and BIM compliance, from project setup through parametric family automation.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹45,000 <span>group</span></span>
+              <span class="fee">₹60,000 <span>1:1</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/revit-rhino-inside.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Rhino.Inside.Revit">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Intermediate</span>
+            <span class="duration-badge">10–15 hrs · 2 days</span>
+            <span class="glyph">AEC</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Rhino3D · Grasshopper · Ladybug</div>
+            <h3>Rhino3D for AEC &amp; Climate</h3>
+            <p class="desc">A compact climate-responsive facade specialization — solar radiation analysis and orientation optimization with Ladybug, working toward kinetic, performance-driven facades in the spirit of Al Bahar Towers.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹20,000 <span>2-day total</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/rhino-aec-climate.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Rhino3D for AEC & Climate">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Intermediate</span>
+            <span class="duration-badge">30 hrs · 5 days</span>
+            <span class="glyph">WBL</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Rhino3D · Grasshopper</div>
+            <h3>Rhino3D for Wearables &amp; Footwear</h3>
+            <p class="desc">Applying Rhino and Grasshopper to footwear, neckwear, and wristband geometry — Voronoi lattice infill for 3D-printed soles, surface continuity for fit, and prep for fabrication or printing.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹23,000 <span>group</span></span>
+              <span class="fee">₹25,000 <span>1:1</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/rhino-wearables-footwear.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Wearables & Product Design">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-card">
+          <div class="course-visual">
+            <span class="level-badge">Beginner → Adv</span>
+            <span class="duration-badge">30 hrs · 5 days</span>
+            <span class="glyph">IND</span>
+          </div>
+          <div class="course-body">
+            <div class="course-tool">Rhino3D · Grasshopper</div>
+            <h3>Rhinoceros for Industrial Design</h3>
+            <p class="desc">CNC-aware product modeling — hybrid surface and solid workflows with Loft, SubD, and BlendSrf, then parametric Grasshopper automation for batch DXF export, perforated panels, and manufacture-ready part breakdown.</p>
+            <div class="course-fee-row">
+              <span class="fee">₹25,000 <span>group</span></span>
+              <span class="fee">₹28,000 <span>1:1</span></span>
+            </div>
+            <div class="course-foot">
+              <a href="./assets/pdfs/rhino-industrial-design.pdf" target="_blank" rel="noopener" class="syllabus-link">View syllabus (PDF)</a>
+              <a href="#contact" class="enquire" data-course="Industrial Design">Enquire →</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="software-note">
+        <span>YAFT Designs provides training and consulting only — we don't sell or resell Rhino licenses.</span>
+        <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="requirements" class="dark">
+    <div class="wrap">
+      <div class="eyebrow">BEFORE YOU ENROLL</div>
+      <div class="section-head">
+        <h2>What you'll need.</h2>
+      </div>
+      <div class="req-grid">
+        <div class="req-card">
+          <span class="num">REQ 01</span>
+          <h3>Windows laptop</h3>
+          <p>Rhino3D runs on Windows. Bring your own laptop, charger, mouse, and mouse pad — see McNeel's official system requirements at rhino3d.com.</p>
+        </div>
+        <div class="req-card">
+          <span class="num">REQ 02</span>
+          <h3>Format &amp; batch size</h3>
+          <p>Choose 1:1 personal training, a small group batch, or an institutional workshop — pricing and pacing adjust accordingly.</p>
+        </div>
+        <div class="req-card">
+          <span class="num">REQ 03</span>
+          <h3>Payment terms</h3>
+          <p>60% advance to confirm your seat, 40% on commencement. Group batches carry a student discount where noted — ask when you enquire.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="eyebrow">CONTACT</div>
+      <div class="section-head"><h2>Start a course enquiry</h2></div>
+
+      <div class="contact-grid">
+        <form action="https://formspree.io/f/xlgkqwgl" method="POST">
+
+  <div class="field">
+    <label>Name</label>
+    <input type="text" name="name" placeholder="Your name" required>
+  </div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" name="email" placeholder="you@studio.com" required>
+  </div>
+
+  <div class="field">
+    <label>Interested in</label>
+    <select name="interest" id="interestSelect">
+      <option>Rhino3D for Architecture</option>
+      <option>Grasshopper for Computational Design</option>
+      <option>Rhino.Inside.Revit</option>
+      <option>Rhino3D for AEC & Climate</option>
+      <option>Wearables & Product Design</option>
+      <option>Industrial Design</option>
+      <option>Institutional workshop</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Message</label>
+    <textarea name="message" rows="3" placeholder="Tell us about your goals, batch size, or preferred dates" required></textarea>
+  </div>
+
+  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;">Send Enquiry</button>
+</form>
+
+        <dl class="contact-info">
+          <dt>Studio</dt>
+          <dd>Coimbatore, Tamil Nadu, India</dd>
+          <dt>Email</dt>
+          <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bottom">
+      <div class="fcol">
+        <h4>YAFT Designs</h4>
+        <p>Computational design training<br>&amp; consulting<br>Coimbatore, Tamil Nadu, India</p>
+      </div>
+      <div class="fcol">
+        <h4>Courses</h4>
+        <p>Rhino3D for Architecture<br>Grasshopper<br>Rhino.Inside.Revit<br>AEC &amp; Climate<br>Wearables &amp; Footwear<br>Industrial Design</p>
+      </div>
+      <div class="fcol">
+        <h4>Company</h4>
+        <p>© 2026 YAFT Designs<br>All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile nav toggle
+  document.getElementById('navtoggle').addEventListener('click', function(){
+    document.getElementById('navlinks').classList.toggle('open');
+  });
+  document.querySelectorAll('.navlinks a').forEach(function(a){
+    a.addEventListener('click', function(){
+      document.getElementById('navlinks').classList.remove('open');
+    });
+  });
+
+  // pre-select the enquiry dropdown based on which course's "Enquire" link was clicked
+  document.querySelectorAll('.enquire[data-course]').forEach(function(a){
+    a.addEventListener('click', function(){
+      var select = document.getElementById('interestSelect');
+      var options = Array.prototype.slice.call(select.options);
+      var match = options.find(function(o){ return o.value === a.getAttribute('data-course'); });
+      if(match) select.value = match.value;
+    });
+  });
+</script>
+
+</body>
+</html>
