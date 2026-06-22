@@ -11,3 +11,8 @@
 .lede{color:var(--ink-soft);font-size:14px;margin-bottom:22px;}
 .error{color:var(--brass-dark);font-family:var(--mono);font-size:12px;margin-bottom:14px;}
 .success{color:var(--blueprint);font-family:var(--mono);font-size:12px;margin-bottom:14px;}
+.switchMode{
+  display:block;width:100%;text-align:center;margin-top:14px;
+  background:none;border:none;color:var(--ink-soft);font-size:13px;
+  text-decoration:underline;cursor:pointer;
+}
