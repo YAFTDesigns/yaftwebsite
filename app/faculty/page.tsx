@@ -3,10 +3,14 @@ import Image from 'next/image';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './faculty.module.css';
 
 export const metadata: Metadata = {
-  title: 'Faculty & Guest Mentors — YAFT Designs',
+  title: 'Yokes Marapa | Authorized Rhino Trainer India',
+  description:
+    'Yokes Marapa is an Authorized Rhino3D Trainer in India, visiting faculty at VIT and ASADI, specializing in computational design and Grasshopper.',
+  alternates: { canonical: '/faculty' },
 };
 
 const INTEREST_OPTIONS = [
@@ -39,14 +43,14 @@ export default function FacultyPage() {
               <h2>Founder &amp; lead instructor</h2>
             </div>
             <div className="faculty-wrap">
-              <Image src="/assets/images/profile.jpeg" alt="Yokes Marapa" className="faculty-photo-stand" width={480} height={600} />
+              <Image src={getSiteImageUrl('profile.jpeg')} alt="Yokes Marapa" className="faculty-photo-stand" width={480} height={600} />
               <div className="faculty-text">
                 <h3>Yokes Marapa</h3>
-                <div className="faculty-role">Founder, YAFT Designs — Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
-                <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects — work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
+                <div className="faculty-role">Founder, YAFT Designs. Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
+                <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
                 <p>Visiting faculty at VIT Vellore, with prior workshops delivered at IIT Kharagpur. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
                 <div className="badge-row">
-                  <span className="badge">ARTC — McNeel &amp; Associates</span>
+                  <span className="badge">ARTC: McNeel &amp; Associates</span>
                   <span className="badge">Visiting Faculty, VIT Vellore</span>
                   <span className="badge">IIT Kharagpur Workshops</span>
                 </div>
@@ -67,7 +71,7 @@ export default function FacultyPage() {
             <div className={styles.mentorGrid}>
               <div className={styles.mentorCard}>
                 <div className={styles.mentorPhotoStand}>
-                  <Image src="/assets/images/mentors/kavitha-mohanraj.jpg" alt="Kavitha Mohanraj" width={400} height={400} style={{ objectPosition: 'center 20%' }} />
+                  <Image src={getSiteImageUrl('mentors/kavitha-mohanraj.jpg')} alt="Kavitha Mohanraj" width={400} height={400} style={{ objectPosition: 'center 20%' }} />
                 </div>
                 <div className={styles.mentorCardBody}>
                   <span className={styles.mentorTag}>Guest Mentor</span>
@@ -80,7 +84,7 @@ export default function FacultyPage() {
 
               <div className={styles.mentorCard}>
                 <div className={styles.mentorPhotoStand}>
-                  <Image src="/assets/images/mentors/mohafiz-riyaz.jpg" alt="Mohafiz Riyaz" width={400} height={400} style={{ objectPosition: 'center 25%' }} />
+                  <Image src={getSiteImageUrl('mentors/mohafiz-riyaz.jpg')} alt="Mohafiz Riyaz" width={400} height={400} style={{ objectPosition: 'center 25%' }} />
                 </div>
                 <div className={styles.mentorCardBody}>
                   <span className={styles.mentorTag}>Guest Mentor</span>

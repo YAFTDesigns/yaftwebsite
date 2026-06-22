@@ -16,7 +16,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'A valid email and LinkedIn URL are required.' }, { status: 400 });
   }
 
-  const course = getCourseBySlug(slug);
+  let course;
+  try {
+    course = await getCourseBySlug(slug);
+  } catch (err) {
+    console.error('syllabus/access course lookup failed', err);
+    return NextResponse.json({ error: 'Could not look up course.' }, { status: 502 });
+  }
   if (!course) {
     return NextResponse.json({ error: 'Unknown course.' }, { status: 404 });
   }

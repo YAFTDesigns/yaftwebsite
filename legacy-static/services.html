@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Services & Workshops — YAFT Designs</title>
+<title>BIM Consulting & Computational Design Services | YAFT Designs</title>
+<meta name="description" content="Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="canonical" href="https://yaftdesigns.com/services.html">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -321,12 +323,9 @@
     box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
   }
   .coord-tooltip span { color: var(--blueprint); display: inline-block; width: 14px; margin-right: 4px; }
-  .rhino-logo{width: 32px; 
-    height: auto;
-    border-radius: 4px; 
-    position:absolute;right:30px}
+  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
 
-  /* ===== SERVICES PAGE — PAGE HERO (no 3D canvas) ===== */
+  /* ===== SERVICES PAGE: PAGE HERO (no 3D canvas) ===== */
   .page-hero{padding:56px 0 64px;border-bottom:1px solid var(--line);}
   .page-hero h1{font-size:clamp(32px,4.6vw,50px);line-height:1.1;margin:18px 0 16px;max-width:760px;}
   .page-hero p.lede{font-size:17px;color:var(--ink-soft);max-width:600px;}
@@ -349,6 +348,8 @@
     background:var(--line);border:1px solid var(--line);
   }
   .workshop-gallery.cols-4{grid-template-columns:repeat(4,1fr);}
+  .workshop-gallery.cols-3{grid-template-columns:repeat(3,1fr);}
+  .workshop-gallery.cols-1{grid-template-columns:1fr;max-width:420px;}
   .workshop-photo-stand{
     background:var(--paper-2);aspect-ratio:4/3;
     display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;
@@ -425,7 +426,7 @@
   }
 
   @media (max-width:880px){
-    .workshop-gallery, .workshop-gallery.cols-4{grid-template-columns:repeat(2,1fr);}
+    .workshop-gallery, .workshop-gallery.cols-4, .workshop-gallery.cols-3{grid-template-columns:repeat(2,1fr);}
   }
   @media (max-width:880px){
     .hero-grid{grid-template-columns:1fr;}
@@ -464,13 +465,13 @@
       <span class="sub">Designs</span>
     </a>
     <div class="navlinks" id="navlinks">
-      <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/">About</a>
       <a href="courses.html">Courses</a>
       <a href="#services">Services</a>
       <a href="https://www.instagram.com/yaft_designs/">Projects</a>
-      <a href="index.html#faculty">Faculty</a>
+      <a href="faculty.html">Faculty</a>
+      <a href="resources.html">Resources</a>
       <a href="#contact" class="cta-btn">Enquire</a>
-      <img class="rhino-logo"src="./assets/logos/rhino_logo.jpeg"/>
+      <a href="https://www.rhino3d.com/training/sites/1650/?coordinates=[78.476681,22.199166]&radius=2200429.497656352&place_type=country" target="_blank" rel="noopener"><img class="rhino-logo" src="./assets/logos/rhino_logo.jpeg" alt="Authorized Rhino Training Center"/></a>
     </div>
     <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
@@ -481,8 +482,8 @@
   <section class="page-hero">
     <div class="wrap">
       <div class="eyebrow">SERVICES</div>
-      <h1>Computational design execution — from parametric facade to fabrication-ready output.</h1>
-      <p class="lede">YAFT Designs works alongside studios, contractors, and institutions — covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
+      <h1>Computational design execution: from parametric facade to fabrication-ready output.</h1>
+      <p class="lede">YAFT Designs works alongside studios, contractors, and institutions, covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
     </div>
   </section>
 
@@ -497,7 +498,7 @@
         <div class="service-row">
           <span class="idx">01</span>
           <h3>Parametric facade fabrication</h3>
-          <p>Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper — built for fabrication, not just visualization.</p>
+          <p>Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper, built for fabrication, not just visualization.</p>
         </div>
         <div class="service-row">
           <span class="idx">02</span>
@@ -512,7 +513,7 @@
         <div class="service-row">
           <span class="idx">04</span>
           <h3>Corporate training for architectural firms</h3>
-          <p>Structured digital-tech upskilling for practicing studios — Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm's live project pipeline.</p>
+          <p>Structured digital-tech upskilling for practicing studios: Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm's live project pipeline.</p>
         </div>
       </div>
     </div>
@@ -534,14 +535,14 @@
             <span class="workshop-place">Trivandrum, Kerala</span>
           </div>
           <h3>CAT Trivandrum</h3>
-          <div class="workshop-role">Elective — Parametric Design</div>
+          <div class="workshop-role">Elective, Parametric Design</div>
           <p class="desc">Elective module on parametric design fundamentals, covering Grasshopper logic and computational workflows for architecture students.</p>
-          <div class="workshop-gallery" data-group="cat" data-title="CAT Trivandrum" data-role="Elective — Parametric Design">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery" data-group="cat" data-title="CAT Trivandrum" data-role="Elective, Parametric Design">
+            <div class="workshop-photo-stand" data-caption="College of Architecture, Trivandrum"><img src="./assets/images/workshops/cat-2.jpg" alt="CAT Trivandrum campus building"></div>
+            <div class="workshop-photo-stand" data-caption="Introduction to Rhino"><img src="./assets/images/workshops/cat-3.jpg" alt="Introduction to Rhino classroom session"></div>
+            <div class="workshop-photo-stand" data-caption="Workshop participants"><img src="./assets/images/workshops/cat-4.jpg" alt="Participants of the CAT workshop"></div>
+            <div class="workshop-photo-stand" data-caption="3D printing on fabric"><img src="./assets/images/workshops/cat-1.jpg" alt="3D printing on fabric"></div>
+            <div class="workshop-photo-stand" data-caption="Student-designed 3D printed wearables"><img src="./assets/images/workshops/cat-5.jpg" alt="Students' 3D printed wearable designs"></div>
           </div>
         </div>
 
@@ -551,14 +552,13 @@
             <span class="workshop-place">ASADI College of Architecture</span>
           </div>
           <h3>ASADI College of Architecture</h3>
-          <div class="workshop-role">Adjunct Faculty, M.Arch — Advanced Architecture of Emergent Tech</div>
+          <div class="workshop-role">Adjunct Faculty, M.Arch, Advanced Architecture of Emergent Tech</div>
           <p class="desc">M.Arch-level coursework on emergent technologies in architecture, structured around computational and fabrication-driven design methods.</p>
-          <div class="workshop-gallery" data-group="asadi" data-title="ASADI College of Architecture" data-role="Adjunct Faculty, M.Arch — Advanced Architecture of Emergent Tech">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery" data-group="asadi" data-title="ASADI College of Architecture" data-role="Adjunct Faculty, M.Arch, Advanced Architecture of Emergent Tech">
+            <div class="workshop-photo-stand" data-caption="ASADI campus, Kochi"><img src="./assets/images/workshops/asadi-2.jpg" alt="ASADI School of Architecture and Design Innovation campus"></div>
+            <div class="workshop-photo-stand" data-caption="Studio lounge and student models"><img src="./assets/images/workshops/asadi-3.jpg" alt="ASADI studio lounge with student models"></div>
+            <div class="workshop-photo-stand" data-caption="Incident radiation analysis using Ladybug"><img src="./assets/images/workshops/asadi-1.jpg" alt="Finding incident radiation using Ladybug in Grasshopper"></div>
+            <div class="workshop-photo-stand" data-caption="M.Arch student participants"><img src="./assets/images/workshops/asadi-4.jpg" alt="M.Arch student participants"></div>
           </div>
         </div>
 
@@ -568,14 +568,14 @@
             <span class="workshop-place">IIT Kharagpur</span>
           </div>
           <h3>IIT Kharagpur</h3>
-          <div class="workshop-role">Workshop — Rhino Modelling</div>
+          <div class="workshop-role">Workshop: Rhino Modelling</div>
           <p class="desc">Hands-on Rhino modelling workshop delivered alongside Prof. Gaurab Das Mahapatra, covering NURBS fundamentals through architectural geometry.</p>
-          <div class="workshop-gallery" data-group="iitkgp" data-title="IIT Kharagpur" data-role="Workshop — Rhino Modelling">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery" data-group="iitkgp" data-title="IIT Kharagpur" data-role="Workshop: Rhino Modelling">
+            <div class="workshop-photo-stand" data-caption="Architecture and Regional Planning block, IIT Kharagpur"><img src="./assets/images/workshops/iitkgp-1.jpg" alt="IIT Kharagpur Architecture and Regional Planning block"></div>
+            <div class="workshop-photo-stand" data-caption="Workshop participants"><img src="./assets/images/workshops/iitkgp-2.jpg" alt="Participants of the Rhino workshop at IIT Kharagpur"></div>
+            <div class="workshop-photo-stand" data-caption="Students using Image Sampler in Grasshopper"><img src="./assets/images/workshops/iitkgp-3.jpg" alt="Students using Image Sampler in Grasshopper"></div>
+            <div class="workshop-photo-stand" data-caption="Students practising SubD modelling"><img src="./assets/images/workshops/iitkgp-4.jpg" alt="Students practising SubD modelling"></div>
+            <div class="workshop-photo-stand" data-caption="End of day, Rhino workshop"><img src="./assets/images/workshops/iitkgp-5.jpg" alt="End of day group photo, Rhino workshop"></div>
           </div>
         </div>
 
@@ -584,15 +584,15 @@
             <span class="workshop-num">04</span>
             <span class="workshop-place">Indian Navy</span>
           </div>
-          <h3>Metal 3D Printing — Indian Navy Team</h3>
+          <h3>Metal 3D Printing: Indian Navy Team</h3>
           <div class="workshop-role">Specialized Training</div>
           <p class="desc">Focused training engagement on metal 3D printing workflows for an Indian Navy technical team.</p>
-          <div class="workshop-gallery" data-group="navy" data-title="Metal 3D Printing — Indian Navy Team" data-role="Specialized Training">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery" data-group="navy" data-title="Metal 3D Printing: Indian Navy Team" data-role="Specialized Training">
+            <div class="workshop-photo-stand" data-caption="Metal 3D printed lattice component"><img src="./assets/images/workshops/navy-1.jpg" alt="Metal 3D printed lattice component"></div>
+            <div class="workshop-photo-stand" data-caption="Display of printed and manufactured parts"><img src="./assets/images/workshops/navy-2.jpg" alt="Display table of 3D printed metal parts"></div>
+            <div class="workshop-photo-stand" data-caption="Metal 3D printed structural component"><img src="./assets/images/workshops/navy-3.jpg" alt="Metal 3D printed structural part"></div>
+            <div class="workshop-photo-stand" data-caption="Design team participants"><img src="./assets/images/workshops/navy-4.jpg" alt="Participants of the design team at the facility"></div>
+            <div class="workshop-photo-stand" data-caption="Design presentation session"><img src="./assets/images/workshops/navy-5.jpg" alt="Design presentation session"></div>
           </div>
         </div>
 
@@ -602,14 +602,14 @@
             <span class="workshop-place">VIT Vellore</span>
           </div>
           <h3>VIT Vellore</h3>
-          <div class="workshop-role">Present — Visiting Faculty, March — Digital Fabrications</div>
+          <div class="workshop-role">Present: Visiting Faculty, March, Digital Fabrications</div>
           <p class="desc">Ongoing visiting faculty role covering digital fabrication methods as part of the March curriculum track.</p>
-          <div class="workshop-gallery" data-group="vit" data-title="VIT Vellore" data-role="Present — Visiting Faculty, March — Digital Fabrications">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 5"><span class="ph-icon">▢</span><span class="ph-label">Photo 5</span></div>
+          <div class="workshop-gallery" data-group="vit" data-title="VIT Vellore" data-role="Present: Visiting Faculty, March, Digital Fabrications">
+            <div class="workshop-photo-stand" data-caption="Parametric workshop, 3rd year architecture"><img src="./assets/images/workshops/vit-1.jpg" alt="Parametric workshop for 3rd year architecture students"></div>
+            <div class="workshop-photo-stand" data-caption="Twisting towers, parametric study"><img src="./assets/images/workshops/vit-2.jpg" alt="Twisting towers parametric Grasshopper study"></div>
+            <div class="workshop-photo-stand" data-caption="Integrating Revit and metadata using Elefront"><img src="./assets/images/workshops/vit-3.jpg" alt="Integrating Revit and metadata using Elefront"></div>
+            <div class="workshop-photo-stand" data-caption="M.Arch student session"><img src="./assets/images/workshops/vit-4.jpg" alt="M.Arch student session"></div>
+            <div class="workshop-photo-stand" data-caption="Robotic fabrication using KUKA plugin"><img src="./assets/images/workshops/vit-5.jpg" alt="Robotic fabrication simulation using KUKA plugin in Grasshopper"></div>
           </div>
         </div>
 
@@ -619,13 +619,11 @@
             <span class="workshop-place">NIT Trichy</span>
           </div>
           <h3>NIT Trichy</h3>
-          <div class="workshop-role">Student-Organized — Climate Responsive Architecture using Ladybug</div>
+          <div class="workshop-role">Student-Organized: Climate Responsive Architecture using Ladybug</div>
           <p class="desc">Student-organized workshop on climate-responsive design methods using Ladybug Tools for environmental analysis and performance-driven form.</p>
-          <div class="workshop-gallery cols-4" data-group="nitt" data-title="NIT Trichy" data-role="Student-Organized — Climate Responsive Architecture using Ladybug">
-            <div class="workshop-photo-stand" data-caption="Photo 1"><span class="ph-icon">▢</span><span class="ph-label">Photo 1</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 2"><span class="ph-icon">▢</span><span class="ph-label">Photo 2</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 3"><span class="ph-icon">▢</span><span class="ph-label">Photo 3</span></div>
-            <div class="workshop-photo-stand" data-caption="Photo 4"><span class="ph-icon">▢</span><span class="ph-label">Photo 4</span></div>
+          <div class="workshop-gallery" data-group="nitt" data-title="NIT Trichy" data-role="Student-Organized: Climate Responsive Architecture using Ladybug">
+            <div class="workshop-photo-stand" data-caption="NIT Trichy campus"><img src="./assets/images/workshops/nitt-1.jpg" alt="NIT Trichy campus, Architecture department"></div>
+            <div class="workshop-photo-stand" data-caption="Workshop on finding daylight hours"><img src="./assets/images/workshops/nitt-2.jpg" alt="Workshop session on finding daylight hours"></div>
           </div>
         </div>
 
@@ -793,7 +791,7 @@
       imgEl.src = src || '';
       imgEl.alt = getCaption(stand);
       titleEl.textContent = currentMeta.title;
-      roleEl.textContent = getCaption(stand) + (currentMeta.role ? ' — ' + currentMeta.role : '');
+      roleEl.textContent = getCaption(stand) + (currentMeta.role ? ', ' + currentMeta.role : '');
       countEl.textContent = (currentIndex + 1) + ' / ' + currentGroup.length;
     }
 

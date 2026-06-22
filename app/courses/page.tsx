@@ -6,12 +6,18 @@ import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import SyllabusButton from '@/components/SyllabusButton';
 import SyllabusModal from '@/components/SyllabusModal';
-import { COURSES } from '@/lib/courses';
+import { getCourses } from '@/lib/courses';
 import styles from './courses.module.css';
 
 export const metadata: Metadata = {
-  title: 'Courses — YAFT Designs',
+  title: 'Rhino3D & Grasshopper Courses India | YAFT Designs',
+  description:
+    'Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.',
+  alternates: { canonical: '/courses' },
 };
+
+// Re-fetch from Supabase at most once every 5 minutes instead of only at build time.
+export const revalidate = 300;
 
 const INTEREST_OPTIONS = [
   'Rhino3D for Architecture',
@@ -23,7 +29,9 @@ const INTEREST_OPTIONS = [
   'Institutional workshop',
 ];
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCourses();
+
   return (
     <>
       <SiteHeader active="/courses" />
@@ -46,7 +54,7 @@ export default function CoursesPage() {
             </div>
 
             <div className={styles.courseGrid}>
-              {COURSES.map((course) => (
+              {courses.map((course) => (
                 <div className={styles.courseCard} key={course.slug}>
                   <div className={styles.courseVisual}>
                     <Image src={course.image} alt={course.alt} width={800} height={500} />

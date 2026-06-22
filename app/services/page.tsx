@@ -4,10 +4,14 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import WorkshopGallery from '@/components/WorkshopGallery';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
+import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
 export const metadata: Metadata = {
-  title: 'Services & Workshops — YAFT Designs',
+  title: 'BIM Consulting & Computational Design Services | YAFT Designs',
+  description:
+    'Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.',
+  alternates: { canonical: '/services' },
 };
 
 const INTEREST_OPTIONS = [
@@ -18,8 +22,8 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-function placeholderPhotos(count: number): { caption: string }[] {
-  return Array.from({ length: count }, (_, i) => ({ caption: `Photo ${i + 1}` }));
+function workshopPhotos(key: string, items: [file: number, caption: string][]): { caption: string; src: string }[] {
+  return items.map(([file, caption]) => ({ caption, src: getSiteImageUrl(`workshops/${key}-${file}.jpg`) }));
 }
 
 const WORKSHOPS: (WorkshopGroup & { place: string; num: string; cols?: 4 | 5 })[] = [
@@ -28,49 +32,80 @@ const WORKSHOPS: (WorkshopGroup & { place: string; num: string; cols?: 4 | 5 })[
     num: '01',
     place: 'Trivandrum, Kerala',
     title: 'CAT Trivandrum',
-    role: 'Elective — Parametric Design',
-    photos: placeholderPhotos(5),
+    role: 'Elective, Parametric Design',
+    photos: workshopPhotos('cat', [
+      [2, 'College of Architecture, Trivandrum'],
+      [3, 'Introduction to Rhino'],
+      [4, 'Workshop participants'],
+      [1, '3D printing on fabric'],
+      [5, 'Student-designed 3D printed wearables'],
+    ]),
   },
   {
     key: 'asadi',
     num: '02',
     place: 'ASADI College of Architecture',
     title: 'ASADI College of Architecture',
-    role: 'Adjunct Faculty, M.Arch — Advanced Architecture of Emergent Tech',
-    photos: placeholderPhotos(5),
+    role: 'Adjunct Faculty, M.Arch, Advanced Architecture of Emergent Tech',
+    photos: workshopPhotos('asadi', [
+      [2, 'ASADI campus, Kochi'],
+      [3, 'Studio lounge and student models'],
+      [1, 'Incident radiation analysis using Ladybug'],
+      [4, 'M.Arch student participants'],
+    ]),
   },
   {
     key: 'iitkgp',
     num: '03',
     place: 'IIT Kharagpur',
     title: 'IIT Kharagpur',
-    role: 'Workshop — Rhino Modelling',
-    photos: placeholderPhotos(5),
+    role: 'Workshop: Rhino Modelling',
+    photos: workshopPhotos('iitkgp', [
+      [1, 'Architecture and Regional Planning block, IIT Kharagpur'],
+      [2, 'Workshop participants'],
+      [3, 'Students using Image Sampler in Grasshopper'],
+      [4, 'Students practising SubD modelling'],
+      [5, 'End of day, Rhino workshop'],
+    ]),
   },
   {
     key: 'navy',
     num: '04',
     place: 'Indian Navy',
-    title: 'Metal 3D Printing — Indian Navy Team',
+    title: 'Metal 3D Printing: Indian Navy Team',
     role: 'Specialized Training',
-    photos: placeholderPhotos(5),
+    photos: workshopPhotos('navy', [
+      [1, 'Metal 3D printed lattice component'],
+      [2, 'Display of printed and manufactured parts'],
+      [3, 'Metal 3D printed structural component'],
+      [4, 'Design team participants'],
+      [5, 'Design presentation session'],
+    ]),
   },
   {
     key: 'vit',
     num: '05',
     place: 'VIT Vellore',
     title: 'VIT Vellore',
-    role: 'Present — Visiting Faculty, March — Digital Fabrications',
-    photos: placeholderPhotos(5),
+    role: 'Present: Visiting Faculty, March, Digital Fabrications',
+    photos: workshopPhotos('vit', [
+      [1, 'Parametric workshop, 3rd year architecture'],
+      [2, 'Twisting towers, parametric study'],
+      [3, 'Integrating Revit and metadata using Elefront'],
+      [4, 'M.Arch student session'],
+      [5, 'Robotic fabrication using KUKA plugin'],
+    ]),
   },
   {
     key: 'nitt',
     num: '06',
     place: 'NIT Trichy',
     title: 'NIT Trichy',
-    role: 'Student-Organized — Climate Responsive Architecture using Ladybug',
-    photos: placeholderPhotos(4),
-    cols: 4,
+    role: 'Student-Organized: Climate Responsive Architecture using Ladybug',
+    photos: workshopPhotos('nitt', [
+      [1, 'NIT Trichy campus'],
+      [2, 'Workshop on finding daylight hours'],
+    ]),
   },
 ];
 
@@ -92,8 +127,8 @@ export default function ServicesPage() {
         <section className="page-hero">
           <div className="wrap">
             <div className="eyebrow">SERVICES</div>
-            <h1>Computational design execution — from parametric facade to fabrication-ready output.</h1>
-            <p className="lede">YAFT Designs works alongside studios, contractors, and institutions — covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
+            <h1>Computational design execution: from parametric facade to fabrication-ready output.</h1>
+            <p className="lede">YAFT Designs works alongside studios, contractors, and institutions, covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
           </div>
         </section>
 
@@ -108,7 +143,7 @@ export default function ServicesPage() {
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>01</span>
                 <h3>Parametric facade fabrication</h3>
-                <p>Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper — built for fabrication, not just visualization.</p>
+                <p>Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper, built for fabrication, not just visualization.</p>
               </div>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>02</span>
@@ -123,7 +158,7 @@ export default function ServicesPage() {
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>04</span>
                 <h3>Corporate training for architectural firms</h3>
-                <p>Structured digital-tech upskilling for practicing studios — Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm&apos;s live project pipeline.</p>
+                <p>Structured digital-tech upskilling for practicing studios: Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm&apos;s live project pipeline.</p>
               </div>
             </div>
           </div>

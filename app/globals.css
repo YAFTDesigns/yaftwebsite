@@ -81,7 +81,7 @@ nav{
 .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
 .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
 .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
-.rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;}
+.rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
 
 /* ===== PAGE HERO (non-home pages) ===== */
 .page-hero{padding:56px 0 48px;border-bottom:1px solid var(--line);}
@@ -189,7 +189,7 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
 .badge{font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:6px 10px;color:var(--ink-soft);}
 .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
-.note-card{border-top:2px solid var(--line);padding-top:18px;}
+.note-card{padding-top:18px;}
 .note-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
 .note-card h3{font-size:19px;margin-bottom:8px;}
 .note-card p{color:var(--ink-soft);font-size:15px;}

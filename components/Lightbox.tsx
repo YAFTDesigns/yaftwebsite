@@ -68,7 +68,7 @@ export default function Lightbox({ groups }: { groups: WorkshopGroup[] }) {
         <div className={styles.side}>
           <div className="eyebrow">WORKSHOP</div>
           <h3>{group?.title}</h3>
-          <div className={styles.role}>{photo?.caption}{group?.role ? ` — ${group.role}` : ''}</div>
+          <div className={styles.role}>{photo?.caption}{group?.role ? `, ${group.role}` : ''}</div>
           <div className={styles.count}>{group ? `${index + 1} / ${group.photos.length}` : ''}</div>
         </div>
       </div>

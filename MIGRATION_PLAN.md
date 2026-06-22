@@ -181,3 +181,29 @@ Total for a usable, secured v1 (Phases 0–2): roughly half a day of focused wor
 4. Confirmation that it's fine to delete the public `assets/pdfs/*.pdf` files once Phase 2 lands (they'll exist only in private Storage afterward).
 
 Nothing above blocks starting Phase 0 right now — that part is pure code. I'll begin scaffolding the Next.js app and porting `courses.html` first, then `index.html`, `services.html`, `faculty.html`, and pause for you to create the Supabase project before Phase 1.
+
+## 9. Next manual steps (as of this update)
+
+Phase 0 and the Phase 1 code are both done. Two things only you can do are blocking it from actually working end to end:
+
+1. **Apply the migration.** Open the Supabase dashboard → SQL Editor for the `rjvadqwqgqouihuydlnu` project → paste in the contents of `supabase/migrations/0001_init.sql` → run it. This creates `courses`, `leads`, `syllabus_requests`, `enquiries`, `analytics_events`, `certificates`, `certificate_verifications` with RLS enabled.
+2. **Paste the service_role key into `.env`.** Dashboard → Project Settings → API → reveal the `service_role` secret → set `SUPABASE_SERVICE_ROLE_KEY` in `.env`. This key is server-only — it's read by `lib/supabase/admin.ts` and never shipped to the browser, but it must never be committed (`.env` is already gitignored).
+
+Until both are done, `/api/syllabus/access` degrades gracefully (PDFs are still public in Phase 1, so it just skips logging and serves the file). `/api/enquiries` does **not** degrade — without the service-role key, the contact form on every page will show "Could not save your enquiry" to real visitors, because Formspree was removed in favor of writing directly to the `enquiries` table. Don't consider this deployable until the key is in place and you've sent one test enquiry that shows up in the `enquiries` table.
+
+## 10. Phase 3 — Admin dashboard (done)
+
+`/admin` is now live, gated by Supabase Auth (email magic link, no password) plus an `ADMIN_EMAILS` allow-list checked in `middleware.ts` — anyone can request a magic link, but only emails in `ADMIN_EMAILS` get past the redirect. Pages:
+
+- `/admin` — lead/enquiry/syllabus-request counts
+- `/admin/leads` — every lead, by most recently active
+- `/admin/enquiries` — every contact-form submission
+- `/admin/analytics` — funnel counts (`page_view → syllabus_modal_open → syllabus_unlock → enquiry_submit`) and syllabus requests by course
+
+All four query Supabase directly with the service-role key (`lib/supabase/admin.ts`), so they bypass RLS — that's safe only because `middleware.ts` already enforced the allow-list before the request reaches the page.
+
+**Manual step required:** in the Supabase dashboard → Authentication → URL Configuration, add `http://localhost:3000/auth/callback` (dev) and `https://yaftdesigns.com/auth/callback` (prod) to the redirect allow-list, or `signInWithOtp` will fail to bounce back into the app after the magic link is clicked.
+
+## 11. Legacy site copied to `legacy-static/` (reference, not deployed)
+
+`legacy-static/` holds an updated static-HTML snapshot (SEO meta tags, GA placeholder, a new `/resources` page, real workshop photos, nav tweaks) that was edited in parallel with this Next.js app. Everything in it has now been ported into the Next.js pages — `legacy-static/` itself is not built or deployed and can be deleted once you've confirmed the Next.js site has everything you need.

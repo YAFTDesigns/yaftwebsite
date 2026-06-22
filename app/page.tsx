@@ -7,10 +7,44 @@ import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import FaqAccordion from '@/components/FaqAccordion';
 import Hero3D from '@/components/Hero3D';
+import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './home.module.css';
 
 export const metadata: Metadata = {
-  title: 'YAFT Designs — Computational Design Training & Consulting',
+  title: 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs',
+  description:
+    'Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.',
+  alternates: { canonical: '/' },
+};
+
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      name: 'YAFT Designs',
+      url: 'https://yaftdesigns.com',
+      description: 'Computational Design, Rhino3D Training, Grasshopper Training and BIM Consulting Services.',
+      founder: { '@type': 'Person', name: 'Yokes Marapa' },
+    },
+    {
+      '@type': 'Person',
+      name: 'Yokes Marapa',
+      jobTitle: 'Authorized Rhino Trainer | Computational Design Consultant',
+      worksFor: { '@type': 'Organization', name: 'YAFT Designs' },
+      url: 'https://yaftdesigns.com/faculty',
+      description: 'Authorized Rhino3D Trainer in India, Visiting Faculty, Computational Designer and BIM Consultant.',
+      knowsAbout: [
+        'Rhino3D',
+        'Grasshopper',
+        'Computational Design',
+        'Parametric Design',
+        'BIM Consulting',
+        'Digital Fabrication',
+        'Facade Design',
+      ],
+    },
+  ],
 };
 
 const INTEREST_OPTIONS = [
@@ -33,6 +67,11 @@ export default function HomePage() {
   return (
     <>
       <SiteHeader active="/" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
 
       <main id="top">
         <section
@@ -57,24 +96,16 @@ export default function HomePage() {
 
         <section id="about">
           <div className="wrap">
-            <div className="eyebrow">GENERAL NOTES</div>
-            <div className="section-head">
-              <h2>Trained on real production work, not theory alone.</h2>
-              <p className="note">YAFT Designs&apos; course content is shaped by what&apos;s actually being fabricated and installed on live facade and fabrication projects, not a generic syllabus.</p>
-            </div>
             <div className="notes-grid">
               <div className="note-card">
-                <span className="num">NOTE 01</span>
                 <h3>McNeel-recognized</h3>
                 <p>YAFT Designs is an Authorized Rhino Training Center (ARTC), recognized directly by McNeel &amp; Associates, the makers of Rhino.</p>
               </div>
               <div className="note-card">
-                <span className="num">NOTE 02</span>
                 <h3>Academic ties</h3>
-                <p>Visiting faculty roles at VIT Vellore and ASADI College of Architecture, plus workshops delivered at IIT Kharagpur.</p>
+                <p>Visiting faculty at VIT Vellore, with workshops delivered at IIT Kharagpur.</p>
               </div>
               <div className="note-card">
-                <span className="num">NOTE 03</span>
                 <h3>Fabrication-grade skills</h3>
                 <p>Curriculum draws from live facade panel rationalization, unrolling, and documentation work running across five countries.</p>
               </div>
@@ -157,7 +188,7 @@ export default function HomePage() {
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>01</span>
                 <h3>One-on-one training</h3>
-                <p>Paced to your project or portfolio, in person in Coimbatore or remote — for individuals or small teams.</p>
+                <p>Paced to your project or portfolio, in person in Coimbatore or remote, for individuals or small teams.</p>
               </div>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>02</span>
@@ -212,7 +243,7 @@ export default function HomePage() {
               <h2>Founder &amp; lead instructor</h2>
             </div>
             <div className="faculty-wrap">
-              <Image src="/assets/images/profile.jpeg" alt="Yokes Marapa" className="faculty-photo-stand" width={480} height={600} />
+              <Image src={getSiteImageUrl('profile.jpeg')} alt="Yokes Marapa" className="faculty-photo-stand" width={480} height={600} />
               <div className="faculty-text">
                 <h3>Yokes Marapa</h3>
                 <div className="faculty-role">Founder, YAFT Designs — Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
