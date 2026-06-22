@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminEmail } from './lib/admin';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
