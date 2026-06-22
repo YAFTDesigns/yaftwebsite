@@ -1,33 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
+import { signInWithPasswordAction } from './actions';
 import styles from './login.module.css';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
+  return (
+    <Suspense>
+      <AdminLoginForm />
+    </Suspense>
+  );
+}
+
+function AdminLoginForm() {
+  const searchParams = useSearchParams();
+  const redirectError = searchParams.get('error');
+
   const [mode, setMode] = useState<'password' | 'magic-link'>('password');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [error, setError] = useState('');
-
-  async function handlePasswordSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setStatus('sending');
-    setError('');
-
-    const supabase = getSupabaseBrowser();
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (error) {
-      setError(error.message);
-      setStatus('error');
-      return;
-    }
-    router.push('/admin');
-    router.refresh();
-  }
 
   async function handleMagicLinkSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,16 +42,42 @@ export default function AdminLoginPage() {
     }
   }
 
+  if (mode === 'password') {
+    return (
+      <main className={styles.wrap}>
+        <form className={styles.card} action={signInWithPasswordAction}>
+          <div className="eyebrow">ADMIN</div>
+          <h1>Sign in</h1>
+          <p className={styles.lede}>Sign in with your admin email and password.</p>
+
+          <div className="field">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="you@yaftdesigns.com" required />
+          </div>
+
+          <div className="field">
+            <label>Password</label>
+            <input type="password" name="password" required />
+          </div>
+
+          {redirectError && <p className={styles.error}>{redirectError}</p>}
+
+          <button type="submit" className="btn-primary">Sign in</button>
+
+          <button type="button" className={styles.switchMode} onClick={() => setMode('magic-link')}>
+            Use a magic link instead
+          </button>
+        </form>
+      </main>
+    );
+  }
+
   return (
     <main className={styles.wrap}>
-      <form className={styles.card} onSubmit={mode === 'password' ? handlePasswordSubmit : handleMagicLinkSubmit}>
+      <form className={styles.card} onSubmit={handleMagicLinkSubmit}>
         <div className="eyebrow">ADMIN</div>
         <h1>Sign in</h1>
-        <p className={styles.lede}>
-          {mode === 'password'
-            ? 'Sign in with your admin email and password.'
-            : "Enter your admin email — we'll send a magic link to sign in, no password needed."}
-        </p>
+        <p className={styles.lede}>Enter your admin email — we&apos;ll send a magic link to sign in, no password needed.</p>
 
         <div className="field">
           <label>Email</label>
@@ -71,38 +91,15 @@ export default function AdminLoginPage() {
           />
         </div>
 
-        {mode === 'password' && (
-          <div className="field">
-            <label>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={status === 'sending'}
-            />
-          </div>
-        )}
-
         {status === 'error' && <p className={styles.error}>{error}</p>}
         {status === 'sent' && <p className={styles.success}>Check your inbox for the sign-in link.</p>}
 
         <button type="submit" className="btn-primary" disabled={status === 'sending' || status === 'sent'}>
-          {status === 'sending'
-            ? mode === 'password' ? 'Signing in…' : 'Sending…'
-            : mode === 'password' ? 'Sign in' : 'Send magic link'}
+          {status === 'sending' ? 'Sending…' : 'Send magic link'}
         </button>
 
-        <button
-          type="button"
-          className={styles.switchMode}
-          onClick={() => {
-            setMode(mode === 'password' ? 'magic-link' : 'password');
-            setStatus('idle');
-            setError('');
-          }}
-        >
-          {mode === 'password' ? 'Use a magic link instead' : 'Use a password instead'}
+        <button type="button" className={styles.switchMode} onClick={() => setMode('password')}>
+          Use a password instead
         </button>
       </form>
     </main>
