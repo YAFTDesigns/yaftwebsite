@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import "./globals.css";
 
@@ -53,6 +54,7 @@ gtag('config', '${GA_MEASUREMENT_ID}');`}
         <AnalyticsTracker />
         {children}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
