@@ -52,7 +52,7 @@
 
   /* NAV */
   header{position:sticky;top:0;z-index:40;background:rgba(10,10,10,0.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);}
-  nav{max-width:1180px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+  nav{max-width:1180px;margin:0 auto;padding:18px 32px;display:flex;align-items:center;justify-content:space-between;position:relative;}
   .logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
   .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
   .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
@@ -64,6 +64,7 @@
   .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
   .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
   .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
+  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
 
   /* HERO */
   .hero{padding:72px 0 64px;border-bottom:1px solid var(--line);}
@@ -134,7 +135,7 @@
 
 <header>
   <nav>
-    <a href="index.html" class="logo">
+    <a href="index.html#top" class="logo">
       <span class="mark">YAFT</span>
       <span class="sub">Designs</span>
     </a>
@@ -145,9 +146,7 @@
       <a href="faculty.html">Faculty</a>
       <a href="resources.html">Resources</a>
       <a href="index.html#contact" class="cta-btn">Enquire</a>
-      <a href="https://www.rhino3d.com/training/sites/1650/?coordinates=[78.476681,22.199166]&radius=2200429.497656352&place_type=country" target="_blank" rel="noopener">
-        <img src="./assets/logos/rhino_logo.jpeg" alt="Authorized Rhino Training Center" style="width:32px;height:auto;border-radius:4px;">
-      </a>
+      <a href="https://www.rhino3d.com/training/sites/1650/?coordinates=[78.476681,22.199166]&radius=2200429.497656352&place_type=country" target="_blank" rel="noopener"><img class="rhino-logo" src="./assets/logos/rhino_logo.jpeg" alt="Authorized Rhino Training Center"/></a>
     </div>
     <button class="navtoggle" id="navtoggle" aria-label="Menu"><span></span><span></span><span></span></button>
   </nav>
