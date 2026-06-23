@@ -103,11 +103,12 @@
   nav{
     max-width:1180px;margin:0 auto;padding:18px 32px;
     display:flex;align-items:center;justify-content:space-between;
+    position:relative;
   }
-  .logo{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);}
+  .logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
   .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
   .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
-  .navlinks{display:flex;gap:28px;align-items:center;}
+  .navlinks{display:flex;gap:28px;align-items:center;padding-right:52px;}
   .navlinks a{
     font-family:var(--mono);font-size:13px;letter-spacing:.03em;
     color:var(--ink-soft);
@@ -285,8 +286,6 @@
   .faculty-text p{color:var(--ink-soft);margin-bottom:14px;}
   .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
   .badge{font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:6px 10px;color:var(--ink-soft);}
-  .profile-link{font-family:var(--mono);font-size:12.5px;color:var(--brass);border-bottom:1px solid var(--brass);display:inline-block;}
-  .profile-link:hover{color:var(--brass-dark);}
 
   /* ===== FAQ ===== */
   .faq-item{border-bottom:1px solid var(--line);padding:20px 0;}
@@ -452,16 +451,15 @@ gtag('config', 'G-XXXXXXXXXX');
   gtag('js', new Date());
   gtag('config', 'G-XDVDJC7X24');
 </script>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-192.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png">
-  <meta name="theme-color" content="#000000">
 </head>
 <body>
 
 <header>
   <nav>
-    <a href="#top" class="logo">YAFT Designs</a>
+    <a href="#top" class="logo">
+      <span class="mark">YAFT</span>
+      <span class="sub">Designs</span>
+    </a>
     <div class="navlinks" id="navlinks">
       <a href="courses.html">Courses</a>
       <a href="services.html">Services</a>
@@ -649,7 +647,7 @@ gtag('config', 'G-XXXXXXXXXX');
         <h2>Founder &amp; lead instructor</h2>
       </div>
       <div class="faculty-wrap">
-        <img src="./assets/images/profile.jpeg" alt="Yokes Marapa, Founder of YAFT Designs and Authorized Rhino Trainer" class="faculty-photo-stand"/>
+        <img src="./assets/images/profile.jpeg" class="faculty-photo-stand"/>
         <div class="faculty-text">
           <h3>Yokes Marapa</h3>
           <div class="faculty-role">Founder, YAFT Designs. Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
@@ -659,10 +657,6 @@ gtag('config', 'G-XXXXXXXXXX');
             <span class="badge">ARTC: McNeel &amp; Associates</span>
             <span class="badge">Visiting Faculty, VIT Vellore</span>
             <span class="badge">IIT Kharagpur Workshops</span>
-          </div>
-          <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:24px;">
-            <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/" target="_blank" rel="noopener" class="profile-link">LinkedIn →</a>
-            <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" class="profile-link">Rhino Trainer Listing →</a>
           </div>
         </div>
       </div>
