@@ -75,31 +75,20 @@
   nav{
     max-width:1180px;margin:0 auto;padding:18px 32px;
     display:flex;align-items:center;justify-content:space-between;
+    position:relative;
   }
   .logo{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);}
   .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
   .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
   .navlinks{display:flex;gap:28px;align-items:center;}
-  .navlinks a{
-    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
-    color:var(--ink-soft);
-    border-bottom:1px solid transparent;
-    padding-bottom:2px;
-    transition:border-color .2s,color .2s;
-  }
+  .navlinks a{font-family:var(--mono);font-size:13px;letter-spacing:.03em;color:var(--ink-soft);border-bottom:1px solid transparent;padding-bottom:2px;transition:border-color .2s,color .2s;}
   .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
-  .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
-  .cta-btn{
-    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
-    background:var(--brass-dark);color:var(--ink);
-    padding:10px 18px;border:1px solid var(--ink);
-    transition:background .2s,color .2s;
-    white-space:nowrap;
-  }
+  .navlinks a.active{color:var(--ink);border-color:var(--brass);}
+  .cta-btn{font-family:var(--mono);font-size:13px;letter-spacing:.03em;background:var(--brass-dark);color:var(--ink);padding:10px 18px;border:1px solid var(--ink);transition:background .2s,color .2s;white-space:nowrap;}
   .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
   .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
   .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
-  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;}
+  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
 
   /* ===== PAGE HERO ===== */
   .page-hero{padding:56px 0 48px;border-bottom:1px solid var(--line);}
