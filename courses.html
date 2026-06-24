@@ -387,10 +387,12 @@
     border-top:1px solid var(--line);padding-top:16px;
   }
   .syllabus-link{
-    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
-    border:none;border-bottom:1px solid var(--line);background:none;padding:0;cursor:pointer;
+    font-family:var(--mono);font-size:12px;color:var(--brass);
+    background:none;border:1px solid var(--brass);cursor:pointer;
+    padding:6px 12px;letter-spacing:.03em;
+    transition:background .2s,color .2s;
   }
-  .syllabus-link:hover{color:var(--blueprint);border-color:var(--blueprint);}
+  .syllabus-link:hover{background:var(--brass);color:#fff;}
   .syllabus-link .lock{margin-right:5px;}
   .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);white-space:nowrap;}
   .enquire:hover{color:var(--brass-dark);}
@@ -605,7 +607,7 @@
     <div class="wrap">
       <div class="section-head">
         <h2>All courses</h2>
-        <p class="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once: share your email &amp; LinkedIn once to view all of them.</p>
+        <p class="note">Batch fees and start dates are shared on enquiry. Share your email or LinkedIn to view any syllabus PDF on this page, no repeat entry needed.</p>
       </div>
 
       <div class="course-grid">
@@ -824,7 +826,7 @@
     <div class="eyebrow">UNLOCK SYLLABUS</div>
     <h3>Get the full course syllabus</h3>
     <span class="modal-course" id="syllabusCourseLabel"></span>
-    <p class="modal-lede">Share your email and LinkedIn profile. This unlocks every syllabus PDF on this page, no re-entry needed.</p>
+    <p class="modal-lede">Leave your email or LinkedIn, just one is enough, and the PDF opens straight away.</p>
     <form id="syllabusForm">
       <div class="field">
         <label>Email</label>
@@ -832,14 +834,14 @@
       </div>
       <div class="field">
         <label>LinkedIn profile</label>
-        <input type="url" name="linkedin" id="syllabusLinkedin" placeholder="https://linkedin.com/in/yourname" required>
+        <input type="url" name="linkedin" id="syllabusLinkedin" placeholder="linkedin.com/in/yourname (optional)">
       </div>
       <input type="hidden" name="course" id="syllabusCourseField">
       <input type="hidden" name="_subject" value="Syllabus PDF request">
       <p class="modal-error" id="syllabusError"></p>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" id="syllabusCancel">Cancel</button>
-        <button type="submit" class="btn-primary" id="syllabusSubmit">Unlock &amp; view PDF</button>
+        <button type="submit" class="btn-primary" id="syllabusSubmit">View syllabus PDF</button>
       </div>
       <p class="modal-status" id="syllabusStatus">Unlocking…</p>
     </form>
@@ -898,7 +900,7 @@
       errorEl.classList.remove('show');
       statusEl.classList.remove('show');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Unlock & view PDF';
+      submitBtn.textContent = 'View syllabus PDF';
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
       emailInput.focus();
@@ -933,18 +935,17 @@
       var email = emailInput.value.trim();
       var linkedin = linkedinInput.value.trim();
       var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      var linkedinOk = /linkedin\.com\//i.test(linkedin);
+      var linkedinOk = linkedin.length > 0 && /linkedin\.com\//i.test(linkedin);
+      var hasOne = emailOk || linkedinOk;
 
-      if(!emailOk || !linkedinOk){
-        errorEl.textContent = !emailOk
-          ? 'Please enter a valid email address.'
-          : 'Please enter your LinkedIn profile URL (linkedin.com/in/...).';
+      if(!hasOne){
+        errorEl.textContent = 'Please enter at least your email or LinkedIn profile URL.';
         errorEl.classList.add('show');
         return;
       }
       errorEl.classList.remove('show');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
+      submitBtn.textContent = 'Opening…';
       statusEl.classList.add('show');
 
       var pdfUrl = pendingPdf;
