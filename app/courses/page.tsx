@@ -41,8 +41,8 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <h1>Browse our live courses in Rhino3D, Grasshopper &amp; BIM.</h1>
-            <p className="lede">Hands-on, instructor-led training built around real production workflows — taught by a working computational designer, not a generic syllabus. Available in-person from Coimbatore or remote, as 1:1, group batch, or institutional format.</p>
-            <div className="rating-badge"><span className="stars">★★★★★</span> Authorized Rhino Training Center <strong>— recognized by McNeel &amp; Associates</strong></div>
+            <p className="lede">Hands-on, instructor-led training built around real production workflows, taught by a working computational designer, not a generic syllabus. Available in-person from Coimbatore or remote, as 1:1, group batch, or institutional format.</p>
+            <div className="rating-badge"><span className="stars">★★★★★</span> Authorized Rhino Training Center <strong>, recognized by McNeel &amp; Associates</strong></div>
           </div>
         </section>
 
@@ -50,7 +50,7 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="section-head">
               <h2>All courses</h2>
-              <p className="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once — share your email &amp; LinkedIn once to view all of them.</p>
+              <p className="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once, share your email &amp; LinkedIn once to view all of them.</p>
             </div>
 
             <div className={styles.courseGrid}>
@@ -75,7 +75,7 @@ export default async function CoursesPage() {
             </div>
 
             <div className="software-note">
-              <span>YAFT Designs provides training and consulting only — we don&apos;t sell or resell Rhino licenses.</span>
+              <span>YAFT Designs provides training and consulting only, we don&apos;t sell or resell Rhino licenses.</span>
               <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
             </div>
           </div>
@@ -91,17 +91,17 @@ export default async function CoursesPage() {
               <div className="req-card">
                 <span className="num">REQ 01</span>
                 <h3>Windows laptop</h3>
-                <p>Rhino3D runs on Windows. Bring your own laptop, charger, mouse, and mouse pad — see McNeel&apos;s official system requirements at rhino3d.com.</p>
+                <p>Rhino3D runs on Windows. Bring your own laptop, charger, mouse, and mouse pad, see McNeel&apos;s official system requirements at rhino3d.com.</p>
               </div>
               <div className="req-card">
                 <span className="num">REQ 02</span>
                 <h3>Format &amp; batch size</h3>
-                <p>Choose 1:1 personal training, a small group batch, or an institutional workshop — pricing and pacing adjust accordingly.</p>
+                <p>Choose 1:1 personal training, a small group batch, or an institutional workshop, pricing and pacing adjust accordingly.</p>
               </div>
               <div className="req-card">
                 <span className="num">REQ 03</span>
                 <h3>Payment terms</h3>
-                <p>60% advance to confirm your seat, 40% on commencement. Group batches carry a student discount where noted — ask when you enquire.</p>
+                <p>60% advance to confirm your seat, 40% on commencement. Group batches carry a student discount where noted, ask when you enquire.</p>
               </div>
             </div>
           </div>
