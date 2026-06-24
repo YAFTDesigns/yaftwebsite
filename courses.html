@@ -901,7 +901,7 @@
       </div>
       <div class="fcol">
         <h4>Company</h4>
-        <p>© 2026 YAFT Designs<br>All rights reserved</p>
+        <p>© 2026 YAFT Designs<br>All rights reserved<br><a href="/sitemap.xml" style="color:var(--ink-soft);font-family:var(--mono);font-size:11px;">Sitemap</a></p>
       </div>
     </div>
   </div>
@@ -931,7 +931,7 @@
         <button type="button" class="btn-ghost" id="syllabusCancel">Cancel</button>
         <button type="submit" class="btn-primary" id="syllabusSubmit">View syllabus PDF</button>
       </div>
-      <p class="modal-status" id="syllabusStatus">Unlocking…</p>
+      <p class="modal-status" id="syllabusStatus">Opening your PDF…</p>
     </form>
   </div>
 </div>
@@ -1041,12 +1041,11 @@
         method: 'POST',
         headers: { 'Accept': 'application/json' },
         body: new FormData(form)
-      }).catch(function(){ /* lead capture is best-effort; still unlock below */ })
-        .then(function(){
-          markUnlocked(email, linkedin);
-          closeModal();
-          if(pdfUrl) window.open(pdfUrl, '_blank');
-        });
+      }).finally(function(){
+        markUnlocked(email, linkedin);
+        closeModal();
+        if(pdfUrl) window.open(pdfUrl, '_blank');
+      });
     });
   })();
 </script>
