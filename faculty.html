@@ -625,7 +625,7 @@
     <textarea name="message" rows="3" placeholder="Tell us about your goals or project" required></textarea>
   </div>
   
-  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;">Send Enquiry</button>
+  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;" onclick="gtag('event','enquiry_click',{'event_category':'contact','event_label':window.location.pathname});">Send Enquiry</button>
 </form>
 
         <dl class="contact-info">
