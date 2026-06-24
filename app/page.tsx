@@ -84,12 +84,12 @@ export default function HomePage() {
           <div className="wrap" style={{ position: 'relative', zIndex: 10, pointerEvents: 'none', width: '100%' }}>
             <div style={{ maxWidth: 640, pointerEvents: 'auto' }}>
               <h1>Where computational design <em>is taught</em> by people who build with it.</h1>
-              <p className="lede">YAFT Designs trains architects, students, and design teams in Rhino3D, Grasshopper, and Rhino.Inside.Revit — workflows we use daily on live facade and fabrication projects, not just in a classroom.</p>
+              <p className="lede">YAFT Designs trains architects, students, and design teams in Rhino3D, Grasshopper, and Rhino.Inside.Revit, workflows we use daily on live facade and fabrication projects, not just in a classroom.</p>
               <div className="hero-actions">
                 <Link href="/courses" className="btn-primary">View Courses</Link>
                 <a href="#contact" className="btn-secondary">Talk to Us</a>
               </div>
-              <p className="credline"><strong>Authorized Rhino Training Center (ARTC)</strong> — recognized by McNeel &amp; Associates. We teach the tools; we don&apos;t sell software licenses.</p>
+              <p className="credline"><strong>Authorized Rhino Training Center (ARTC)</strong>, recognized by McNeel &amp; Associates. We teach the tools; we don&apos;t sell software licenses.</p>
             </div>
           </div>
         </section>
@@ -139,7 +139,7 @@ export default function HomePage() {
                   <h3>Grasshopper for Computational Design</h3>
                   <span className={styles.courseTag}>Intermediate</span>
                 </div>
-                <p>Parametric logic, data structures, and rationalization workflows — built around real panel and facade problems from live projects.</p>
+                <p>Parametric logic, data structures, and rationalization workflows, built around real panel and facade problems from live projects.</p>
                 <div className={styles.courseFoot}>
                   <span className={styles.fmt}>1:1 or cohort</span>
                   <EnquireLink course="Grasshopper for Computational Design" />
@@ -151,7 +151,7 @@ export default function HomePage() {
                   <h3>Rhino.Inside.Revit</h3>
                   <span className={styles.courseTag}>Advanced</span>
                 </div>
-                <p>Bridging parametric Rhino/Grasshopper workflows directly into Revit — for teams who need both design freedom and BIM compliance.</p>
+                <p>Bridging parametric Rhino/Grasshopper workflows directly into Revit, for teams who need both design freedom and BIM compliance.</p>
                 <div className={styles.courseFoot}>
                   <span className={styles.fmt}>1:1 or team</span>
                   <EnquireLink course="Rhino.Inside.Revit" />
@@ -163,7 +163,7 @@ export default function HomePage() {
                   <h3>Wearables &amp; Product Design</h3>
                   <span className={styles.courseTag}>All levels</span>
                 </div>
-                <p>Applying Rhino and Grasshopper to wearable and product geometry — fit, surface continuity, and prep for fabrication or 3D printing.</p>
+                <p>Applying Rhino and Grasshopper to wearable and product geometry, fit, surface continuity, and prep for fabrication or 3D printing.</p>
                 <div className={styles.courseFoot}>
                   <span className={styles.fmt}>1:1 or workshop</span>
                   <EnquireLink course="Wearables & Product Design" />
@@ -172,7 +172,7 @@ export default function HomePage() {
             </div>
 
             <div className="software-note">
-              <span>YAFT Designs provides training and consulting only — we don&apos;t sell or resell Rhino licenses.</span>
+              <span>YAFT Designs provides training and consulting only, we don&apos;t sell or resell Rhino licenses.</span>
               <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
             </div>
           </div>
@@ -246,11 +246,11 @@ export default function HomePage() {
               <Image src={getSiteImageUrl('profile.jpeg')} alt="Yokes Marapa" className="faculty-photo-stand" width={480} height={600} />
               <div className="faculty-text">
                 <h3>Yokes Marapa</h3>
-                <div className="faculty-role">Founder, YAFT Designs — Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
-                <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects — work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
+                <div className="faculty-role">Founder, YAFT Designs, Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
+                <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
                 <p>Visiting faculty at VIT Vellore, with prior workshops delivered at IIT Kharagpur. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
                 <div className="badge-row">
-                  <span className="badge">ARTC — McNeel &amp; Associates</span>
+                  <span className="badge">ARTC, McNeel &amp; Associates</span>
                   <span className="badge">Visiting Faculty, VIT Vellore</span>
                   <span className="badge">IIT Kharagpur Workshops</span>
                 </div>
