@@ -38,7 +38,7 @@ export default function ContactForm({ options }: ContactFormProps) {
   }
 
   if (status === 'sent') {
-    return <p className="modal-status show">Thanks — your enquiry has been sent. We&apos;ll be in touch shortly.</p>;
+    return <p className="modal-status show">Thanks, your enquiry has been sent. We&apos;ll be in touch shortly.</p>;
   }
 
   return (
@@ -68,7 +68,7 @@ export default function ContactForm({ options }: ContactFormProps) {
       </div>
 
       {status === 'error' && (
-        <p className="modal-error show">Something went wrong sending that — please try again, or email us directly.</p>
+        <p className="modal-error show">Something went wrong sending that, please try again, or email us directly.</p>
       )}
 
       <button type="submit" className="btn-primary" disabled={status === 'submitting'} style={{ border: 'none', cursor: 'pointer' }}>
