@@ -405,6 +405,71 @@
   .software-note a{color:var(--blueprint);border-bottom:1px solid var(--blueprint);}
 
   /* ===== REQUIREMENTS ===== */
+  /* ===== STUDENT WORK MARQUEE ===== */
+  .work-marquee-section{padding:56px 0;overflow:hidden;}
+  .work-track-wrap{
+    position:relative;overflow:hidden;padding:12px 0;
+  }
+  .work-track-wrap::before,
+  .work-track-wrap::after{
+    content:'';position:absolute;top:0;bottom:0;width:140px;z-index:2;pointer-events:none;
+  }
+  .work-track-wrap::before{left:0;background:linear-gradient(to right,var(--paper),transparent);}
+  .work-track-wrap::after{right:0;background:linear-gradient(to left,var(--paper),transparent);}
+  .work-track{
+    display:flex;gap:16px;
+    animation:workMarquee 60s linear infinite;
+    width:max-content;
+  }
+  .work-track:hover{animation-play-state:paused;}
+  .work-track.reverse{animation-direction:reverse;animation-duration:75s;}
+  @keyframes workMarquee{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  .work-card{
+    flex:0 0 260px;height:180px;
+    /* Liquid glass */
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(16px) saturate(1.5);
+    -webkit-backdrop-filter:blur(16px) saturate(1.5);
+    border:1px solid rgba(255,255,255,0.09);
+    box-shadow:
+      0 4px 20px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+    border-radius:4px;
+    overflow:hidden;
+    position:relative;
+    transition:box-shadow .3s,border-color .3s;
+  }
+  .work-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+    z-index:1;
+  }
+  .work-card:hover{
+    border-color:rgba(255,255,255,0.16);
+    box-shadow:0 8px 28px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .work-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+  .work-card:hover img{transform:scale(1.04);}
+  .work-label{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    padding:18px 14px 10px;
+    opacity:0;transition:opacity .3s;
+  }
+  .work-label span{
+    font-family:var(--mono);font-size:11px;color:#fff;letter-spacing:.04em;text-transform:uppercase;
+  }
+  .work-card:hover .work-label{opacity:1;}
+  .work-card-ph{
+    width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;
+  }
+  .work-card-ph .ph-icon{font-size:22px;color:var(--line);}
+
   .req-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
   .req-card{border-top:2px solid var(--line);padding-top:18px;}
   .req-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
@@ -718,6 +783,30 @@
       <div class="software-note">
         <span>YAFT Designs provides training and consulting only. We don't sell or resell Rhino licenses.</span>
         <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="work-marquee-section">
+    <div class="wrap">
+      <div class="eyebrow">STUDENT WORK</div>
+      <div class="section-head">
+        <h2>What gets built in the course.</h2>
+        <p class="note">Work produced by students during and after training.</p>
+      </div>
+    </div>
+
+    <!-- Row 1: left to right -->
+    <div class="work-track-wrap" style="margin-bottom:16px;">
+      <div class="work-track" id="workTrack1">
+        <div class="work-card"><img src="./assets/images/student-work/sw-01.jpg" alt="Parametric Shell Structure" loading="lazy"><div class="work-label"><span>Parametric Shell Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-02.jpg" alt="Contour Bench" loading="lazy"><div class="work-label"><span>Contour Bench</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-03.jpg" alt="Voronoi Facade Panel" loading="lazy"><div class="work-label"><span>Voronoi Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-04.jpg" alt="Curtain Wall, Revit" loading="lazy"><div class="work-label"><span>Curtain Wall, Revit</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-05.jpg" alt="Absolute Towers Recreation" loading="lazy"><div class="work-label"><span>Absolute Towers Recreation</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-06.jpg" alt="Acoustic Panel, 3D Printed" loading="lazy"><div class="work-label"><span>Acoustic Panel, 3D Printed</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-07.jpg" alt="Bambu Lab in Progress" loading="lazy"><div class="work-label"><span>Bambu Lab in Progress</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-15.jpg" alt="Parametric Wall Panel" loading="lazy"><div class="work-label"><span>Parametric Wall Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-16.jpg" alt="Contour Chair Render" loading="lazy"><div class="work-label"><span>Contour Chair Render</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-17.jpg" alt="Organic Facade Panel" loading="lazy"><div class="work-label"><span>Organic Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-01.jpg" alt="Parametric Shell Structure" loading="lazy"><div class="work-label"><span>Parametric Shell Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-02.jpg" alt="Contour Bench" loading="lazy"><div class="work-label"><span>Contour Bench</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-03.jpg" alt="Voronoi Facade Panel" loading="lazy"><div class="work-label"><span>Voronoi Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-04.jpg" alt="Curtain Wall, Revit" loading="lazy"><div class="work-label"><span>Curtain Wall, Revit</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-05.jpg" alt="Absolute Towers Recreation" loading="lazy"><div class="work-label"><span>Absolute Towers Recreation</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-06.jpg" alt="Acoustic Panel, 3D Printed" loading="lazy"><div class="work-label"><span>Acoustic Panel, 3D Printed</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-07.jpg" alt="Bambu Lab in Progress" loading="lazy"><div class="work-label"><span>Bambu Lab in Progress</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-15.jpg" alt="Parametric Wall Panel" loading="lazy"><div class="work-label"><span>Parametric Wall Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-16.jpg" alt="Contour Chair Render" loading="lazy"><div class="work-label"><span>Contour Chair Render</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-17.jpg" alt="Organic Facade Panel" loading="lazy"><div class="work-label"><span>Organic Facade Panel</span></div></div>
+      </div>
+    </div>
+
+    <!-- Row 2: right to left -->
+    <div class="work-track-wrap">
+      <div class="work-track reverse" id="workTrack2">
+        <div class="work-card"><img src="./assets/images/student-work/sw-08.jpg" alt="Flexible Lattice Textile" loading="lazy"><div class="work-label"><span>Flexible Lattice Textile</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-09.jpg" alt="Parametric Shoe" loading="lazy"><div class="work-label"><span>Parametric Shoe</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-10.jpg" alt="Voronoi Vessel" loading="lazy"><div class="work-label"><span>Voronoi Vessel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-11.jpg" alt="Parametric Collar, Unreal" loading="lazy"><div class="work-label"><span>Parametric Collar, Unreal</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-12.jpg" alt="Lattice Shoe Structure" loading="lazy"><div class="work-label"><span>Lattice Shoe Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-13.jpg" alt="Wearable Body Piece" loading="lazy"><div class="work-label"><span>Wearable Body Piece</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-14.jpg" alt="Parametric Wearable Harness" loading="lazy"><div class="work-label"><span>Parametric Wearable Harness</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-18.jpg" alt="Corrugated Facade Prototype" loading="lazy"><div class="work-label"><span>Corrugated Facade Prototype</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-19.jpg" alt="Laser-Cut Wood Contour" loading="lazy"><div class="work-label"><span>Laser-Cut Wood Contour</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-08.jpg" alt="Flexible Lattice Textile" loading="lazy"><div class="work-label"><span>Flexible Lattice Textile</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-09.jpg" alt="Parametric Shoe" loading="lazy"><div class="work-label"><span>Parametric Shoe</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-10.jpg" alt="Voronoi Vessel" loading="lazy"><div class="work-label"><span>Voronoi Vessel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-11.jpg" alt="Parametric Collar, Unreal" loading="lazy"><div class="work-label"><span>Parametric Collar, Unreal</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-12.jpg" alt="Lattice Shoe Structure" loading="lazy"><div class="work-label"><span>Lattice Shoe Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-13.jpg" alt="Wearable Body Piece" loading="lazy"><div class="work-label"><span>Wearable Body Piece</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-14.jpg" alt="Parametric Wearable Harness" loading="lazy"><div class="work-label"><span>Parametric Wearable Harness</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-18.jpg" alt="Corrugated Facade Prototype" loading="lazy"><div class="work-label"><span>Corrugated Facade Prototype</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-19.jpg" alt="Laser-Cut Wood Contour" loading="lazy"><div class="work-label"><span>Laser-Cut Wood Contour</span></div></div>
       </div>
     </div>
   </section>
