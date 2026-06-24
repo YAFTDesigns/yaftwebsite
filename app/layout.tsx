@@ -4,30 +4,29 @@ import { Analytics } from "@vercel/analytics/next";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import "./globals.css";
 
-const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: replace with your real GA4 Measurement ID
+const GA_MEASUREMENT_ID = "G-XDVDJC7X24";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://yaftdesigns.com"),
   title: {
-    default: "YAFT Designs — Computational Design Training & Consulting",
+    default: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     template: "%s | YAFT Designs",
   },
   description:
     "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
-  keywords: [
-    "Rhino3D Training India",
-    "Grasshopper Training India",
-    "Computational Design",
-    "BIM Consulting",
-    "Parametric Design",
-    "Rhino Authorized Trainer India",
-  ],
   authors: [{ name: "YAFT Designs" }],
   openGraph: {
-    title: "YAFT Designs",
-    description: "Rhino3D, Grasshopper, Computational Design & BIM Consulting",
+    title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
+    description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
     url: "https://yaftdesigns.com",
     type: "website",
+    images: [{ url: "https://yaftdesigns.com/assets/images/profile.jpeg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
+    description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
+    images: ["https://yaftdesigns.com/assets/images/profile.jpeg"],
   },
 };
 
