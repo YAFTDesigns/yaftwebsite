@@ -7,7 +7,7 @@ import { useState } from 'react';
 const NAV_LINKS = [
   { href: '/courses', label: 'Courses' },
   { href: '/services', label: 'Services' },
-  { href: 'https://www.instagram.com/yaft_designs/', label: 'Projects', external: true },
+  { href: '/projects', label: 'Projects', external: false },
   { href: '/faculty', label: 'Faculty' },
   { href: '/resources', label: 'Resources' },
 ];
