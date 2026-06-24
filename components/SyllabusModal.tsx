@@ -62,7 +62,7 @@ export default function SyllabusModal() {
     const fallbackUrl = pending?.pdf ?? '';
     const slug = pending?.slug ?? '';
     // Open synchronously within the click/submit's user-activation window, then
-    // redirect once the API responds — awaiting first risks popup blockers.
+    // redirect once the API responds, awaiting first risks popup blockers.
     const tab = window.open('', '_blank');
 
     const url = await requestSyllabusAccess(slug, { email: trimmedEmail, linkedin: trimmedLinkedin }, fallbackUrl);
@@ -83,7 +83,7 @@ export default function SyllabusModal() {
         <div className="eyebrow">UNLOCK SYLLABUS</div>
         <h3>Get the full course syllabus</h3>
         <span className="modal-course">{pending?.course ?? ''}</span>
-        <p className="modal-lede">Share your email and LinkedIn profile — this unlocks every syllabus PDF on this page, no re-entry needed.</p>
+        <p className="modal-lede">Share your email and LinkedIn profile, this unlocks every syllabus PDF on this page, no re-entry needed.</p>
         <form onSubmit={handleSubmit}>
           <div className="field">
             <label>Email</label>
