@@ -8,6 +8,7 @@ import SyllabusButton from '@/components/SyllabusButton';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
+import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import styles from './courses.module.css';
 
 const TITLE = 'Rhino3D & Grasshopper Courses India | YAFT Designs';
@@ -126,6 +127,7 @@ export default async function CoursesPage() {
         </section>
 
         <StudentWorkMarquee />
+        <TestimonialsMarquee />
 
         <section id="requirements" className="dark">
           <div className="wrap">
