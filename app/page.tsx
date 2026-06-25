@@ -239,23 +239,51 @@ export default function HomePage() {
             <div className={styles.servicesList}>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>01</span>
+                <span className={styles.serviceArrow}>↗</span>
                 <h3>One-on-one training</h3>
                 <p>Paced to your project or portfolio, in person in Coimbatore or remote, for individuals or small teams.</p>
+                <ul className={styles.serviceBullets}>
+                  <li>Rhino3D, Grasshopper, Rhino.Inside.Revit</li>
+                  <li>Sessions built around your live project</li>
+                  <li>Flexible pacing, 1:1 or small cohort</li>
+                  <li>Available online across India</li>
+                </ul>
               </div>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>02</span>
+                <span className={styles.serviceArrow}>↗</span>
                 <h3>Institutional workshops</h3>
                 <p>Multi-day or semester-length programs for architecture schools, delivered on campus or online.</p>
+                <ul className={styles.serviceBullets}>
+                  <li>Conducted at IIT Kharagpur, VIT, ASADI, NIT Trichy</li>
+                  <li>Parametric design, fabrication, climate analysis</li>
+                  <li>Customised to the institution&apos;s curriculum</li>
+                  <li>Certificates issued on completion</li>
+                </ul>
               </div>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>03</span>
+                <span className={styles.serviceArrow}>↗</span>
                 <h3>Visiting faculty</h3>
-                <p>Structured computational design modules for design schools looking to add Rhino and Grasshopper to their curriculum.</p>
+                <p>Structured computational design modules for schools looking to add Rhino and Grasshopper to their curriculum.</p>
+                <ul className={styles.serviceBullets}>
+                  <li>Currently at VIT Vellore and ASADI College</li>
+                  <li>Semester-length or elective module format</li>
+                  <li>M.Arch and B.Arch levels</li>
+                  <li>Open to new institutional partnerships</li>
+                </ul>
               </div>
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>04</span>
-                <h3>Computational design consulting</h3>
-                <p>Panel rationalization, facade scripting, and fabrication documentation for studios and contractors who need outsourced computational expertise.</p>
+                <span className={styles.serviceArrow}>↗</span>
+                <h3>Computational consulting</h3>
+                <p>Panel rationalization, facade scripting, and fabrication documentation for studios and contractors.</p>
+                <ul className={styles.serviceBullets}>
+                  <li>Double-curved surface rationalization</li>
+                  <li>Shop drawing automation via Grasshopper</li>
+                  <li>Rhino.Inside.Revit BIM integration</li>
+                  <li>Active on projects across 5 countries</li>
+                </ul>
               </div>
             </div>
           </div>
