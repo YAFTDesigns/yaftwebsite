@@ -6,6 +6,15 @@
 <title>Rhino3D & Grasshopper Courses India | YAFT Designs</title>
 <meta name="description" content="Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+  <meta property="og:title" content="Rhino3D & Grasshopper Courses India | YAFT Designs">
+  <meta property="og:description" content="Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.">
+  <meta property="og:url" content="https://yaftdesigns.com/courses.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://yaftdesigns.com/assets/images/profile.jpeg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Rhino3D & Grasshopper Courses India | YAFT Designs">
+  <meta name="twitter:description" content="Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.">
+  <meta name="twitter:image" content="https://yaftdesigns.com/assets/images/profile.jpeg">
 <link rel="canonical" href="https://yaftdesigns.com/courses.html">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -59,18 +68,19 @@
   /* ===== NAV ===== */
   header{
     position:sticky;top:0;z-index:40;
-    background:rgba(10, 10, 10, 0.85);
+    background:rgba(10, 10, 10, 0.85); /* Dark frosted glass */
     backdrop-filter:blur(6px);
     border-bottom:1px solid var(--line);
   }
   nav{
     max-width:1180px;margin:0 auto;padding:18px 32px;
     display:flex;align-items:center;justify-content:space-between;
+    position:relative;
   }
   .logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
   .logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
   .logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
-  .navlinks{display:flex;gap:28px;align-items:center;}
+  .navlinks{display:flex;gap:28px;align-items:center;padding-right:52px;}
   .navlinks a{
     font-family:var(--mono);font-size:13px;letter-spacing:.03em;
     color:var(--ink-soft);
@@ -79,7 +89,7 @@
     transition:border-color .2s,color .2s;
   }
   .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
-  .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
+  .navlinks .sheet-no{color:var(--blueprint);margin-right:4px;}
   .cta-btn{
     font-family:var(--mono);font-size:13px;letter-spacing:.03em;
     background:var(--brass-dark);color:var(--ink);
@@ -90,7 +100,220 @@
   .cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
   .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
   .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
-  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;}
+
+  /* ===== HERO / COVER SHEET ===== */
+  .hero{
+    padding:64px 0 80px;
+    border-bottom:1px solid var(--line);
+  }
+  .titleblock{
+    border:1px solid var(--line);
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    margin-bottom:48px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.04em;
+  }
+  .titleblock div{
+    padding:10px 14px;
+    border-right:1px solid var(--line);
+  }
+  .titleblock div:last-child{border-right:none;}
+  .titleblock .label{display:block;color:var(--blueprint);text-transform:uppercase;font-size:10px;margin-bottom:4px;}
+  .titleblock .val{color:var(--ink);font-weight:500;}
+
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.4fr .8fr;
+    gap:56px;
+    align-items:end;
+  }
+  .hero h1{
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.08;
+    margin-bottom:22px;
+  }
+  .hero h1 em{font-style:normal;color:var(--brass);}
+  .hero p.lede{
+    font-size:18px;
+    color:var(--ink-soft);
+    max-width:540px;
+    margin-bottom:30px;
+  }
+  .hero-actions{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;}
+  .btn-primary{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    background:var(--brass);color:#fff;padding:13px 24px;
+    border:1px solid var(--brass);
+    transition:background .2s;
+  }
+  .btn-primary:hover{background:var(--brass-dark);}
+  .btn-secondary{
+    font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+    color:var(--ink);padding:13px 24px;
+    border:1px solid var(--ink);
+    transition:all .2s;
+  }
+  .btn-secondary:hover{background:var(--ink);color:var(--paper);}
+  .credline{
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    border-top:1px solid var(--line);padding-top:14px;
+  }
+  .credline strong{color:var(--ink);}
+
+  .hero-aside{
+    border-left:1px solid var(--line);
+    padding-left:32px;
+  }
+  /* Overrides the inline white border on your viewer to a sleek dark grey */
+  #model-viewer { border-color: var(--line) !important; }
+  
+  .hero-aside .compass{
+    width:120px;height:120px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 0 22px auto;position:relative;
+  }
+  .hero-aside .compass::after{
+    content:"N";font-family:var(--mono);font-size:13px;color:var(--brass);
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  }
+  .hero-aside .compass::before{
+    content:"";width:1px;height:70px;background:var(--line);
+  }
+  .scalebar{font-family:var(--mono);font-size:10px;color:var(--ink-soft);text-align:right;letter-spacing:.05em;}
+  .scalebar .bar{height:4px;background:repeating-linear-gradient(90deg,var(--line) 0 10px, transparent 10px 20px);margin:6px 0 4px auto;width:120px;}
+
+  /* ===== SECTION SHELL ===== */
+  section{padding:84px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:44px;gap:24px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(26px,3.4vw,38px);}
+  .section-head .note{font-family:var(--mono);font-size:12px;color:var(--ink-soft);max-width:280px;text-align:right;}
+
+  /* ===== NOTES / CREDENTIALS ===== */
+  .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
+  .note-card{padding-top:18px;}
+  .note-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
+  .note-card h3{font-size:19px;margin-bottom:8px;}
+  .note-card p{color:var(--ink-soft);font-size:15px;}
+
+  /* ===== COURSES ===== */
+  .course-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  .course-card{
+    background:var(--paper);
+    padding:32px;
+    display:flex;flex-direction:column;
+    min-height:240px;
+  }
+  .course-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .course-tag{font-family:var(--mono);font-size:11px;color:var(--blueprint);border:1px solid var(--blueprint);padding:3px 8px;letter-spacing:.04em;}
+  .course-card h3{font-size:21px;margin-bottom:10px;}
+  .course-card p{color:var(--ink-soft);font-size:15px;flex-grow:1;margin-bottom:18px;}
+  .course-foot{display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--line);padding-top:14px;}
+  .course-foot .fmt{font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);}
+  .enquire:hover{color:var(--brass-dark);}
+
+  .software-note{
+    margin-top:28px;padding:18px 22px;
+    border:1px dashed var(--line);
+    font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  }
+  .software-note a{color:var(--blueprint);border-bottom:1px solid var(--blueprint);}
+
+  /* ===== SERVICES ===== */
+  .services-list{border-top:1px solid var(--line);}
+  .service-row{
+    display:grid;grid-template-columns:60px 1fr 1.3fr;gap:24px;
+    padding:26px 0;border-bottom:1px solid var(--line);align-items:start;
+  }
+  .service-row .idx{font-family:var(--mono);color:var(--brass);font-size:14px;}
+  .service-row h3{font-size:19px;}
+  .service-row p{color:var(--ink-soft);font-size:15px;}
+
+  /* ===== PROJECTS / TRACK RECORD ===== */
+  .dark{background:var(--paper-2);color:var(--ink);border-bottom:1px solid var(--line);}
+  .dark .eyebrow{color:var(--blueprint);}
+  .dark .eyebrow::before{background:var(--blueprint);}
+  .dark h2{color:var(--ink);}
+  .dark .hr{background:var(--line);}
+  .track-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:40px;}
+  .track-card{border-top:1px solid var(--line);padding-top:18px;}
+  .track-card .place{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;}
+  .track-card h3{color:var(--ink);font-size:18px;margin-bottom:8px;}
+  .track-card p{color:var(--ink-soft);font-size:14.5px;}
+  .track-lede{max-width:620px;color:var(--ink-soft);font-size:16px;margin-top:18px;}
+
+  /* ===== FACULTY ===== */
+  .faculty-wrap{display:grid;grid-template-columns:.9fr 1.4fr;gap:56px;}
+  .faculty-photo-stand{
+    border:1px solid var(--line);aspect-ratio:4/5;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+    background:var(--paper-2);text-align:center;padding:24px;
+  }
+  .faculty-text h3{font-size:24px;margin-bottom:6px;}
+  .faculty-role{font-family:var(--mono);font-size:13px;color:var(--blueprint);margin-bottom:18px;}
+  .faculty-text p{color:var(--ink-soft);margin-bottom:14px;}
+  .badge-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;}
+  .badge{font-family:var(--mono);font-size:11px;border:1px solid var(--line);padding:6px 10px;color:var(--ink-soft);}
+
+  /* ===== FAQ ===== */
+  .faq-item{border-bottom:1px solid var(--line);padding:20px 0;}
+  .faq-q{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:var(--display);font-weight:500;font-size:17px;}
+  .faq-q .plus{font-family:var(--mono);color:var(--brass);font-size:18px;transition:transform .25s;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .faq-item.open .faq-a{max-height:240px;}
+  .faq-a p{padding-top:12px;color:var(--ink-soft);max-width:620px;font-size:15px;}
+
+  /* ===== CONTACT ===== */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;}
+  .field{margin-bottom:18px;}
+  .field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
+    padding:8px 2px;font-family:var(--body);font-size:15px;color:var(--ink);
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brass);}
+  .field input::placeholder, .field textarea::placeholder { color: #555; }
+  .contact-info dt{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--blueprint);margin-top:22px;letter-spacing:.05em;}
+  .contact-info dd{font-size:16px;margin-top:4px;}
+  .contact-info a{border-bottom:1px solid var(--line);}
+  .contact-info a:hover{border-color:var(--brass);}
+
+  /* ===== FOOTER ===== */
+  footer{padding:48px 0 32px;}
+  .rev-table{
+    width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;margin-bottom:36px;
+  }
+  .rev-table th,.rev-table td{border:1px solid var(--line);padding:8px 12px;text-align:left;color:var(--ink-soft);}
+  .rev-table th{color:var(--ink);text-transform:uppercase;letter-spacing:.04em;}
+  .foot-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
+  .foot-bottom .fcol h4{font-family:var(--mono);font-size:11px;color:var(--ink);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
+  .foot-bottom .fcol p{line-height:1.7;}
+
+  /* ===== 3D COORDINATE TOOLTIP ===== */
+  .coord-tooltip {
+    position: absolute;
+    background: var(--paper-2); 
+    color: var(--ink);
+    padding: 8px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .05em;
+    border: 1px solid var(--line);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 10;
+    white-space: nowrap;
+    line-height: 1.4;
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.8);
+  }
+  .coord-tooltip span { color: var(--blueprint); display: inline-block; width: 14px; margin-right: 4px; }
+  .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
 
   /* ===== PAGE HERO ===== */
   .page-hero{padding:56px 0 48px;border-bottom:1px solid var(--line);}
@@ -166,6 +389,7 @@
   .syllabus-link{
     font-family:var(--mono);font-size:12px;color:var(--ink-soft);
     border:none;border-bottom:1px solid var(--line);background:none;padding:0;cursor:pointer;
+    transition:color .2s,border-color .2s;
   }
   .syllabus-link:hover{color:var(--blueprint);border-color:var(--blueprint);}
   .syllabus-link .lock{margin-right:5px;}
@@ -181,6 +405,71 @@
   .software-note a{color:var(--blueprint);border-bottom:1px solid var(--blueprint);}
 
   /* ===== REQUIREMENTS ===== */
+  /* ===== STUDENT WORK MARQUEE ===== */
+  .work-marquee-section{padding:56px 0;overflow:hidden;}
+  .work-track-wrap{
+    position:relative;overflow:hidden;padding:12px 0;
+  }
+  .work-track-wrap::before,
+  .work-track-wrap::after{
+    content:'';position:absolute;top:0;bottom:0;width:140px;z-index:2;pointer-events:none;
+  }
+  .work-track-wrap::before{left:0;background:linear-gradient(to right,var(--paper),transparent);}
+  .work-track-wrap::after{right:0;background:linear-gradient(to left,var(--paper),transparent);}
+  .work-track{
+    display:flex;gap:16px;
+    animation:workMarquee 60s linear infinite;
+    width:max-content;
+  }
+  .work-track:hover{animation-play-state:paused;}
+  .work-track.reverse{animation-direction:reverse;animation-duration:75s;}
+  @keyframes workMarquee{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+  .work-card{
+    flex:0 0 260px;height:180px;
+    /* Liquid glass */
+    background:rgba(255,255,255,0.04);
+    backdrop-filter:blur(16px) saturate(1.5);
+    -webkit-backdrop-filter:blur(16px) saturate(1.5);
+    border:1px solid rgba(255,255,255,0.09);
+    box-shadow:
+      0 4px 20px rgba(0,0,0,0.35),
+      inset 0 1px 0 rgba(255,255,255,0.07);
+    border-radius:4px;
+    overflow:hidden;
+    position:relative;
+    transition:box-shadow .3s,border-color .3s;
+  }
+  .work-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+    z-index:1;
+  }
+  .work-card:hover{
+    border-color:rgba(255,255,255,0.16);
+    box-shadow:0 8px 28px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  .work-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s;}
+  .work-card:hover img{transform:scale(1.04);}
+  .work-label{
+    position:absolute;bottom:0;left:0;right:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+    padding:18px 14px 10px;
+    opacity:0;transition:opacity .3s;
+  }
+  .work-label span{
+    font-family:var(--mono);font-size:11px;color:#fff;letter-spacing:.04em;text-transform:uppercase;
+  }
+  .work-card:hover .work-label{opacity:1;}
+  .work-card-ph{
+    width:100%;height:100%;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;
+  }
+  .work-card-ph .ph-icon{font-size:22px;color:var(--line);}
+
   .req-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
   .req-card{border-top:2px solid var(--line);padding-top:18px;}
   .req-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
@@ -275,14 +564,76 @@
       flex-direction:column;padding:20px 32px;border-bottom:1px solid var(--line);gap:18px;
     }
     .rhino-logo{
-      width:32px;height:auto;border-radius:4px;position:absolute;
-      top:50%;transform:translate(-50%, -50%);
-    }
+    width: 32px;
+    height: auto;
+    border-radius: 4px;
+    position: absolute;
+    /* left: 50%; */
+    top: 50%;
+    transform: translate(-50%, -50%);}
   }
   @media (max-width:640px){
     .course-grid{grid-template-columns:1fr;}
   }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Rhino3D and Grasshopper Courses by YAFT Designs",
+  "url": "https://yaftdesigns.com/courses.html",
+  "itemListElement": [
+    {
+      "@type": "Course",
+      "position": 1,
+      "name": "Rhino3D for Architecture",
+      "description": "NURBS fundamentals through freeform architectural geometry, documentation, and presentation-ready output.",
+      "provider": { "@type": "Organization", "name": "YAFT Designs", "url": "https://yaftdesigns.com" },
+      "educationalLevel": "Beginner to Intermediate",
+      "courseMode": ["onsite", "online"]
+    },
+    {
+      "@type": "Course",
+      "position": 2,
+      "name": "Grasshopper for Computational Design",
+      "description": "Parametric logic, data structures, and rationalization workflows built around real panel and facade problems.",
+      "provider": { "@type": "Organization", "name": "YAFT Designs", "url": "https://yaftdesigns.com" },
+      "educationalLevel": "Intermediate",
+      "courseMode": ["onsite", "online"]
+    },
+    {
+      "@type": "Course",
+      "position": 3,
+      "name": "Rhino.Inside.Revit",
+      "description": "Bridging parametric Rhino and Grasshopper workflows directly into Revit for BIM compliance.",
+      "provider": { "@type": "Organization", "name": "YAFT Designs", "url": "https://yaftdesigns.com" },
+      "educationalLevel": "Advanced",
+      "courseMode": ["onsite", "online"]
+    },
+    {
+      "@type": "Course",
+      "position": 4,
+      "name": "Wearables and Product Design",
+      "description": "Applying Rhino and Grasshopper to wearable and product geometry, prep for fabrication or 3D printing.",
+      "provider": { "@type": "Organization", "name": "YAFT Designs", "url": "https://yaftdesigns.com" },
+      "educationalLevel": "All levels",
+      "courseMode": ["onsite", "online"]
+    }
+  ]
+}
+</script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XDVDJC7X24"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XDVDJC7X24');
+</script>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-512.png">
+  <meta name="theme-color" content="#000000">
 </head>
 <body>
 
@@ -295,7 +646,7 @@
     <div class="navlinks" id="navlinks">
       <a href="courses.html" class="active">Courses</a>
       <a href="services.html">Services</a>
-      <a href="https://www.instagram.com/yaft_designs/">Projects</a>
+      <a href="projects.html">Projects</a>
       <a href="faculty.html">Faculty</a>
       <a href="resources.html">Resources</a>
       <a href="#contact" class="cta-btn">Enquire</a>
@@ -320,7 +671,7 @@
     <div class="wrap">
       <div class="section-head">
         <h2>All courses</h2>
-        <p class="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once: share your email &amp; LinkedIn once to view all of them.</p>
+        <p class="note">Batch fees and start dates are shared on enquiry. Share your email or LinkedIn to view any syllabus PDF on this page, no repeat entry needed.</p>
       </div>
 
       <div class="course-grid">
@@ -436,6 +787,30 @@
     </div>
   </section>
 
+  <section class="work-marquee-section">
+    <div class="wrap">
+      <div class="eyebrow">STUDENT WORK</div>
+      <div class="section-head">
+        <h2>What gets built in the course.</h2>
+        <p class="note">Work produced by students during and after training.</p>
+      </div>
+    </div>
+
+    <!-- Row 1: left to right -->
+    <div class="work-track-wrap" style="margin-bottom:16px;">
+      <div class="work-track" id="workTrack1">
+        <div class="work-card"><img src="./assets/images/student-work/sw-01.jpg" alt="Parametric Shell Structure" loading="lazy"><div class="work-label"><span>Parametric Shell Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-02.jpg" alt="Contour Bench" loading="lazy"><div class="work-label"><span>Contour Bench</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-03.jpg" alt="Voronoi Facade Panel" loading="lazy"><div class="work-label"><span>Voronoi Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-04.jpg" alt="Curtain Wall, Revit" loading="lazy"><div class="work-label"><span>Curtain Wall, Revit</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-05.jpg" alt="Absolute Towers Recreation" loading="lazy"><div class="work-label"><span>Absolute Towers Recreation</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-06.jpg" alt="Acoustic Panel, 3D Printed" loading="lazy"><div class="work-label"><span>Acoustic Panel, 3D Printed</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-07.jpg" alt="Bambu Lab in Progress" loading="lazy"><div class="work-label"><span>Bambu Lab in Progress</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-15.jpg" alt="Parametric Wall Panel" loading="lazy"><div class="work-label"><span>Parametric Wall Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-16.jpg" alt="Contour Chair Render" loading="lazy"><div class="work-label"><span>Contour Chair Render</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-17.jpg" alt="Organic Facade Panel" loading="lazy"><div class="work-label"><span>Organic Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-01.jpg" alt="Parametric Shell Structure" loading="lazy"><div class="work-label"><span>Parametric Shell Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-02.jpg" alt="Contour Bench" loading="lazy"><div class="work-label"><span>Contour Bench</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-03.jpg" alt="Voronoi Facade Panel" loading="lazy"><div class="work-label"><span>Voronoi Facade Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-04.jpg" alt="Curtain Wall, Revit" loading="lazy"><div class="work-label"><span>Curtain Wall, Revit</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-05.jpg" alt="Absolute Towers Recreation" loading="lazy"><div class="work-label"><span>Absolute Towers Recreation</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-06.jpg" alt="Acoustic Panel, 3D Printed" loading="lazy"><div class="work-label"><span>Acoustic Panel, 3D Printed</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-07.jpg" alt="Bambu Lab in Progress" loading="lazy"><div class="work-label"><span>Bambu Lab in Progress</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-15.jpg" alt="Parametric Wall Panel" loading="lazy"><div class="work-label"><span>Parametric Wall Panel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-16.jpg" alt="Contour Chair Render" loading="lazy"><div class="work-label"><span>Contour Chair Render</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-17.jpg" alt="Organic Facade Panel" loading="lazy"><div class="work-label"><span>Organic Facade Panel</span></div></div>
+      </div>
+    </div>
+
+    <!-- Row 2: right to left -->
+    <div class="work-track-wrap">
+      <div class="work-track reverse" id="workTrack2">
+        <div class="work-card"><img src="./assets/images/student-work/sw-08.jpg" alt="Flexible Lattice Textile" loading="lazy"><div class="work-label"><span>Flexible Lattice Textile</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-09.jpg" alt="Parametric Shoe" loading="lazy"><div class="work-label"><span>Parametric Shoe</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-10.jpg" alt="Voronoi Vessel" loading="lazy"><div class="work-label"><span>Voronoi Vessel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-11.jpg" alt="Parametric Collar, Unreal" loading="lazy"><div class="work-label"><span>Parametric Collar, Unreal</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-12.jpg" alt="Lattice Shoe Structure" loading="lazy"><div class="work-label"><span>Lattice Shoe Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-13.jpg" alt="Wearable Body Piece" loading="lazy"><div class="work-label"><span>Wearable Body Piece</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-14.jpg" alt="Parametric Wearable Harness" loading="lazy"><div class="work-label"><span>Parametric Wearable Harness</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-18.jpg" alt="Corrugated Facade Prototype" loading="lazy"><div class="work-label"><span>Corrugated Facade Prototype</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-19.jpg" alt="Laser-Cut Wood Contour" loading="lazy"><div class="work-label"><span>Laser-Cut Wood Contour</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-20.jpg" alt="Concrete 3D Printed Parametric Columns" loading="lazy"><div class="work-label"><span>Concrete 3D Printed Columns</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-08.jpg" alt="Flexible Lattice Textile" loading="lazy"><div class="work-label"><span>Flexible Lattice Textile</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-09.jpg" alt="Parametric Shoe" loading="lazy"><div class="work-label"><span>Parametric Shoe</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-10.jpg" alt="Voronoi Vessel" loading="lazy"><div class="work-label"><span>Voronoi Vessel</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-11.jpg" alt="Parametric Collar, Unreal" loading="lazy"><div class="work-label"><span>Parametric Collar, Unreal</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-12.jpg" alt="Lattice Shoe Structure" loading="lazy"><div class="work-label"><span>Lattice Shoe Structure</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-13.jpg" alt="Wearable Body Piece" loading="lazy"><div class="work-label"><span>Wearable Body Piece</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-14.jpg" alt="Parametric Wearable Harness" loading="lazy"><div class="work-label"><span>Parametric Wearable Harness</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-18.jpg" alt="Corrugated Facade Prototype" loading="lazy"><div class="work-label"><span>Corrugated Facade Prototype</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-19.jpg" alt="Laser-Cut Wood Contour" loading="lazy"><div class="work-label"><span>Laser-Cut Wood Contour</span></div></div><div class="work-card"><img src="./assets/images/student-work/sw-20.jpg" alt="Concrete 3D Printed Parametric Columns" loading="lazy"><div class="work-label"><span>Concrete 3D Printed Columns</span></div></div>
+      </div>
+    </div>
+  </section>
+
   <section id="requirements" class="dark">
     <div class="wrap">
       <div class="eyebrow">BEFORE YOU ENROLL</div>
@@ -498,7 +873,7 @@
     <textarea name="message" rows="3" placeholder="Tell us about your goals, batch size, or preferred dates" required></textarea>
   </div>
 
-  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;">Send Enquiry</button>
+  <button type="submit" class="btn-primary" style="border:none;cursor:pointer;" onclick="gtag('event','enquiry_click',{'event_category':'contact','event_label':window.location.pathname});">Send Enquiry</button>
 </form>
 
         <dl class="contact-info">
@@ -539,7 +914,7 @@
     <div class="eyebrow">UNLOCK SYLLABUS</div>
     <h3>Get the full course syllabus</h3>
     <span class="modal-course" id="syllabusCourseLabel"></span>
-    <p class="modal-lede">Share your email and LinkedIn profile. This unlocks every syllabus PDF on this page, no re-entry needed.</p>
+    <p class="modal-lede">Leave your email or LinkedIn, just one is enough, and the PDF opens straight away.</p>
     <form id="syllabusForm">
       <div class="field">
         <label>Email</label>
@@ -547,14 +922,14 @@
       </div>
       <div class="field">
         <label>LinkedIn profile</label>
-        <input type="url" name="linkedin" id="syllabusLinkedin" placeholder="https://linkedin.com/in/yourname" required>
+        <input type="url" name="linkedin" id="syllabusLinkedin" placeholder="linkedin.com/in/yourname (optional)">
       </div>
       <input type="hidden" name="course" id="syllabusCourseField">
       <input type="hidden" name="_subject" value="Syllabus PDF request">
       <p class="modal-error" id="syllabusError"></p>
       <div class="modal-actions">
         <button type="button" class="btn-ghost" id="syllabusCancel">Cancel</button>
-        <button type="submit" class="btn-primary" id="syllabusSubmit">Unlock &amp; view PDF</button>
+        <button type="submit" class="btn-primary" id="syllabusSubmit">View syllabus PDF</button>
       </div>
       <p class="modal-status" id="syllabusStatus">Unlocking…</p>
     </form>
@@ -613,7 +988,7 @@
       errorEl.classList.remove('show');
       statusEl.classList.remove('show');
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Unlock & view PDF';
+      submitBtn.textContent = 'View syllabus PDF';
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
       emailInput.focus();
@@ -648,21 +1023,21 @@
       var email = emailInput.value.trim();
       var linkedin = linkedinInput.value.trim();
       var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      var linkedinOk = /linkedin\.com\//i.test(linkedin);
+      var linkedinOk = linkedin.length > 0 && /linkedin\.com\//i.test(linkedin);
+      var hasOne = emailOk || linkedinOk;
 
-      if(!emailOk || !linkedinOk){
-        errorEl.textContent = !emailOk
-          ? 'Please enter a valid email address.'
-          : 'Please enter your LinkedIn profile URL (linkedin.com/in/...).';
+      if(!hasOne){
+        errorEl.textContent = 'Please enter at least your email or LinkedIn profile URL.';
         errorEl.classList.add('show');
         return;
       }
       errorEl.classList.remove('show');
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Submitting…';
+      submitBtn.textContent = 'Opening…';
       statusEl.classList.add('show');
 
       var pdfUrl = pendingPdf;
+      var courseName = document.getElementById('syllabusCourseName') ? document.getElementById('syllabusCourseName').textContent : '';
       fetch('https://formspree.io/f/xlgkqwgl', {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
@@ -671,9 +1046,39 @@
         .then(function(){
           markUnlocked(email, linkedin);
           closeModal();
+          // Fire GA event on successful syllabus unlock
+          if(typeof gtag !== 'undefined'){
+            gtag('event', 'syllabus_unlock', {
+              'event_category': 'lead',
+              'event_label': courseName || pdfUrl,
+              'course': courseName
+            });
+          }
           if(pdfUrl) window.open(pdfUrl, '_blank');
         });
     });
+  })();
+</script>
+
+<script>
+  // Shuffle student work marquee cards on every page load
+  (function(){
+    function shuffleMarquee(trackId) {
+      var track = document.getElementById(trackId);
+      if (!track) return;
+      var cards = Array.from(track.children);
+      var half = Math.floor(cards.length / 2);
+      var unique = cards.slice(0, half);
+      for (var i = unique.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = unique[i]; unique[i] = unique[j]; unique[j] = tmp;
+      }
+      track.innerHTML = '';
+      unique.forEach(function(c){ track.appendChild(c); });
+      unique.forEach(function(c){ track.appendChild(c.cloneNode(true)); });
+    }
+    shuffleMarquee('workTrack1');
+    shuffleMarquee('workTrack2');
   })();
 </script>
 
