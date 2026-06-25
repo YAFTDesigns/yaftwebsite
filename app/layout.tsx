@@ -15,6 +15,13 @@ export const metadata: Metadata = {
   description:
     "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
   authors: [{ name: "YAFT Designs" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: { url: "/favicon-512.png", sizes: "512x512", type: "image/png" },
+  },
   openGraph: {
     title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
