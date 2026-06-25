@@ -230,7 +230,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="services">
+        <section id="services" className={styles.servicesSection}>
           <div className="wrap">
             <div className="eyebrow">SERVICES</div>
             <div className="section-head">
