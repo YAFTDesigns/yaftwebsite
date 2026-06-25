@@ -232,9 +232,11 @@ export default function HomePage() {
 
         <section id="services" className={styles.servicesSection}>
           <div className="wrap">
-            <div className="eyebrow">SERVICES</div>
-            <div className="section-head">
-              <h2>Beyond the classroom</h2>
+            <div className={styles.servicesHead}>
+              <div className="eyebrow">SERVICES</div>
+              <div className="section-head">
+                <h2>Beyond the classroom</h2>
+              </div>
             </div>
             <div className={styles.servicesList}>
               <div className={styles.serviceRow}>
