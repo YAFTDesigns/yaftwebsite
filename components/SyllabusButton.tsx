@@ -26,7 +26,7 @@ export default function SyllabusButton({ pdf, course, slug }: { pdf: string; cou
 
   return (
     <button type="button" className="syllabus-link" onClick={handleClick}>
-      <span className="lock">🔒</span>View syllabus (PDF)
+      View syllabus (PDF)
     </button>
   );
 }
