@@ -1037,7 +1037,6 @@
       statusEl.classList.add('show');
 
       var pdfUrl = pendingPdf;
-      var courseName = document.getElementById('syllabusCourseName') ? document.getElementById('syllabusCourseName').textContent : '';
       fetch('https://formspree.io/f/xlgkqwgl', {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
@@ -1046,14 +1045,6 @@
         .then(function(){
           markUnlocked(email, linkedin);
           closeModal();
-          // Fire GA event on successful syllabus unlock
-          if(typeof gtag !== 'undefined'){
-            gtag('event', 'syllabus_unlock', {
-              'event_category': 'lead',
-              'event_label': courseName || pdfUrl,
-              'course': courseName
-            });
-          }
           if(pdfUrl) window.open(pdfUrl, '_blank');
         });
     });

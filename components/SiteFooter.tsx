@@ -13,7 +13,7 @@ export default function SiteFooter() {
           </div>
           <div className="fcol">
             <h4>Company</h4>
-            <p>© 2026 YAFT Designs<br />All rights reserved</p>
+            <p>© 2026 YAFT Designs<br />All rights reserved<br /><a href="/sitemap.xml" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Sitemap</a></p>
           </div>
         </div>
       </div>

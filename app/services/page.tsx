@@ -7,11 +7,39 @@ import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
+const TITLE = 'BIM Consulting & Computational Design Services | YAFT Designs';
+const DESCRIPTION =
+  'Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.';
+
 export const metadata: Metadata = {
-  title: 'BIM Consulting & Computational Design Services | YAFT Designs',
-  description:
-    'Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/services' },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: 'https://yaftdesigns.com/services',
+    type: 'website',
+    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+  },
+};
+
+const SERVICE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name: 'Computational Design and BIM Consulting',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
+  serviceType: ['Parametric Facade Design', 'BIM Consulting', 'Shop Drawing Automation', 'Corporate Training', 'Institutional Workshops'],
+  areaServed: ['India', 'Australia', 'Singapore', 'Hong Kong', 'Oman'],
+  url: 'https://yaftdesigns.com/services',
+  description:
+    'Computational design execution from parametric facade rationalization to fabrication-ready output, shop drawing automation, and structured training.',
 };
 
 const INTEREST_OPTIONS = [
@@ -122,6 +150,11 @@ export default function ServicesPage() {
   return (
     <>
       <SiteHeader active="/services" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICE_JSON_LD) }}
+      />
 
       <main id="top">
         <section className="page-hero">

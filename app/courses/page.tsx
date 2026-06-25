@@ -10,11 +10,27 @@ import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import styles from './courses.module.css';
 
+const TITLE = 'Rhino3D & Grasshopper Courses India | YAFT Designs';
+const DESCRIPTION =
+  'Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.';
+
 export const metadata: Metadata = {
-  title: 'Rhino3D & Grasshopper Courses India | YAFT Designs',
-  description:
-    'Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/courses' },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: 'https://yaftdesigns.com/courses',
+    type: 'website',
+    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+  },
 };
 
 // Re-fetch from Supabase at most once every 5 minutes instead of only at build time.

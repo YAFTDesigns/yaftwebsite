@@ -10,41 +10,79 @@ import Hero3D from '@/components/Hero3D';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './home.module.css';
 
+const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs';
+const DESCRIPTION =
+  'Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.';
+
 export const metadata: Metadata = {
-  title: 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs',
-  description:
-    'Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/' },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: 'https://yaftdesigns.com/',
+    type: 'website',
+    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+  },
 };
+
+const AREA_SERVED_CITIES = [
+  'Coimbatore', 'Chennai', 'Bangalore', 'Hyderabad', 'Mumbai', 'Pune',
+  'Delhi', 'Kolkata', 'Ahmedabad', 'Visakhapatnam', 'Kochi', 'Trichy',
+  'Madurai', 'Jaipur', 'Chandigarh',
+];
 
 const JSON_LD = {
   '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'Organization',
-      name: 'YAFT Designs',
-      url: 'https://yaftdesigns.com',
-      description: 'Computational Design, Rhino3D Training, Grasshopper Training and BIM Consulting Services.',
-      founder: { '@type': 'Person', name: 'Yokes Marapa' },
-    },
-    {
-      '@type': 'Person',
-      name: 'Yokes Marapa',
-      jobTitle: 'Authorized Rhino Trainer | Computational Design Consultant',
-      worksFor: { '@type': 'Organization', name: 'YAFT Designs' },
-      url: 'https://yaftdesigns.com/faculty',
-      description: 'Authorized Rhino3D Trainer in India, Visiting Faculty, Computational Designer and BIM Consultant.',
-      knowsAbout: [
-        'Rhino3D',
-        'Grasshopper',
-        'Computational Design',
-        'Parametric Design',
-        'BIM Consulting',
-        'Digital Fabrication',
-        'Facade Design',
-      ],
-    },
+  '@type': 'EducationalOrganization',
+  name: 'YAFT Designs',
+  alternateName: 'YAFT Designs Computational Design Training',
+  url: 'https://yaftdesigns.com',
+  logo: 'https://yaftdesigns.com/assets/logos/rhino_logo.jpeg',
+  description:
+    'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India and online.',
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Coimbatore',
+    addressRegion: 'Tamil Nadu',
+    addressCountry: 'IN',
+  },
+  areaServed: [
+    ...AREA_SERVED_CITIES.map((name) => ({ '@type': 'City', name })),
+    { '@type': 'Country', name: 'India' },
   ],
+  contactPoint: {
+    '@type': 'ContactPoint',
+    email: 'yaftdesigns@gmail.com',
+    contactType: 'customer support',
+    areaServed: 'IN',
+    availableLanguage: ['English', 'Tamil'],
+  },
+  sameAs: [
+    'https://www.linkedin.com/in/yokes-marapa-791b06216/',
+    'https://www.instagram.com/yaft_designs/',
+    'https://www.youtube.com/@yaftdesigns',
+    'https://www.rhino3d.com/training/sites/1650/',
+  ],
+  founder: {
+    '@type': 'Person',
+    name: 'Yokes Marapa',
+    jobTitle: 'Founder and Authorized Rhino Trainer',
+    url: 'https://www.linkedin.com/in/yokes-marapa-791b06216/',
+  },
+  hasCredential: {
+    '@type': 'EducationalOccupationalCredential',
+    name: 'Authorized Rhino Training Center (ARTC)',
+    credentialCategory: 'certification',
+    recognizedBy: { '@type': 'Organization', name: 'McNeel and Associates', url: 'https://www.rhino3d.com' },
+  },
 };
 
 const INTEREST_OPTIONS = [
@@ -131,8 +169,8 @@ export default function HomePage() {
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <div className="section-head">
-              <h2>Courses</h2>
-              <p className="note">One-on-one, small cohort, or institutional workshop format. Enquire for the next available batch.</p>
+              <h2>A selection of courses</h2>
+              <p className="note">6 courses available. <Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
             </div>
 
             <div className={styles.courseGrid}>

@@ -52,8 +52,8 @@ export default function SyllabusModal() {
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail);
     const linkedinOk = /linkedin\.com\//i.test(trimmedLinkedin);
 
-    if (!emailOk || !linkedinOk) {
-      setError(!emailOk ? 'Please enter a valid email address.' : 'Please enter your LinkedIn profile URL (linkedin.com/in/...).');
+    if (!emailOk && !linkedinOk) {
+      setError('Please enter at least your email or LinkedIn profile URL.');
       return;
     }
     setError('');
@@ -83,7 +83,7 @@ export default function SyllabusModal() {
         <div className="eyebrow">UNLOCK SYLLABUS</div>
         <h3>Get the full course syllabus</h3>
         <span className="modal-course">{pending?.course ?? ''}</span>
-        <p className="modal-lede">Share your email and LinkedIn profile, this unlocks every syllabus PDF on this page, no re-entry needed.</p>
+        <p className="modal-lede">Leave your email or LinkedIn, just one is enough, and the PDF opens straight away.</p>
         <form onSubmit={handleSubmit}>
           <div className="field">
             <label>Email</label>
@@ -91,7 +91,6 @@ export default function SyllabusModal() {
               ref={emailRef}
               type="email"
               placeholder="you@studio.com"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -101,7 +100,6 @@ export default function SyllabusModal() {
             <input
               type="url"
               placeholder="https://linkedin.com/in/yourname"
-              required
               value={linkedin}
               onChange={(e) => setLinkedin(e.target.value)}
             />
@@ -110,7 +108,7 @@ export default function SyllabusModal() {
           <div className="modal-actions">
             <button type="button" className="btn-ghost" onClick={close}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={submitting}>
-              {submitting ? 'Submitting…' : 'Unlock & view PDF'}
+              {submitting ? 'Opening…' : 'View syllabus PDF'}
             </button>
           </div>
         </form>

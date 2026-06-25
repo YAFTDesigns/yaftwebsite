@@ -8,13 +8,17 @@ const LINKEDIN_RE = /linkedin\.com\//i;
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
-  const email = typeof body?.email === 'string' ? body.email.trim() : '';
-  const linkedin = typeof body?.linkedin === 'string' ? body.linkedin.trim() : '';
+  const emailRaw = typeof body?.email === 'string' ? body.email.trim() : '';
+  const linkedinRaw = typeof body?.linkedin === 'string' ? body.linkedin.trim() : '';
   const slug = typeof body?.slug === 'string' ? body.slug : '';
 
-  if (!EMAIL_RE.test(email) || !LINKEDIN_RE.test(linkedin)) {
-    return NextResponse.json({ error: 'A valid email and LinkedIn URL are required.' }, { status: 400 });
+  const emailOk = EMAIL_RE.test(emailRaw);
+  const linkedinOk = LINKEDIN_RE.test(linkedinRaw);
+  if (!emailOk && !linkedinOk) {
+    return NextResponse.json({ error: 'An email or LinkedIn URL is required.' }, { status: 400 });
   }
+  const email = emailOk ? emailRaw : null;
+  const linkedin = linkedinOk ? linkedinRaw : null;
 
   let course;
   try {

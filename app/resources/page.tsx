@@ -5,10 +5,35 @@ import ContactForm from '@/components/ContactForm';
 import VideoGallery, { type VideoItem } from '@/components/VideoGallery';
 import styles from './resources.module.css';
 
+const TITLE = 'Rhino3D & Grasshopper Learning Resources | YAFT Designs';
+const DESCRIPTION = 'Free Rhino3D, Grasshopper and computational design resources, tutorials, guides and learning materials.';
+
 export const metadata: Metadata = {
-  title: 'Rhino3D & Grasshopper Learning Resources | YAFT Designs',
-  description: 'Free Rhino3D, Grasshopper and computational design resources, tutorials, guides and learning materials.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/resources' },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: 'https://yaftdesigns.com/resources',
+    type: 'website',
+    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+  },
+};
+
+const RESOURCES_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Rhino3D and Grasshopper Resources',
+  url: 'https://yaftdesigns.com/resources',
+  description: 'Video tutorials, walkthroughs and learning resources for Rhino3D, Grasshopper and computational design by YAFT Designs.',
+  publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
 };
 
 const INTEREST_OPTIONS = [
@@ -30,6 +55,11 @@ export default function ResourcesPage() {
   return (
     <>
       <SiteHeader active="/resources" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(RESOURCES_JSON_LD) }}
+      />
 
       <main id="top">
         <section className="page-hero">
