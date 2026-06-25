@@ -1051,5 +1051,27 @@
   })();
 </script>
 
+<script>
+  // Shuffle student work marquee cards on every page load
+  (function(){
+    function shuffleMarquee(trackId) {
+      var track = document.getElementById(trackId);
+      if (!track) return;
+      var cards = Array.from(track.children);
+      var half = Math.floor(cards.length / 2);
+      var unique = cards.slice(0, half);
+      for (var i = unique.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = unique[i]; unique[i] = unique[j]; unique[j] = tmp;
+      }
+      track.innerHTML = '';
+      unique.forEach(function(c){ track.appendChild(c); });
+      unique.forEach(function(c){ track.appendChild(c.cloneNode(true)); });
+    }
+    shuffleMarquee('workTrack1');
+    shuffleMarquee('workTrack2');
+  })();
+</script>
+
 </body>
 </html>
