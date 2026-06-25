@@ -136,3 +136,17 @@
   color: var(--blueprint);
   letter-spacing: 0.03em;
 }
+
+.liLink {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--blueprint);
+  border-bottom: 1px solid var(--blueprint);
+  margin-top: 4px;
+  display: inline-block;
+}
+
+.liLink:hover {
+  color: var(--brass);
+  border-color: var(--brass);
+}
