@@ -20,7 +20,7 @@ const TESTIMONIALS = [
   {
     quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me wherever I go next. Thank you for trusting me, guiding me, and always being approachable.',
     name: 'Sambram Raam',
-    title: 'Architecture Student',
+    title: 'BIM Lead, AAD Architects, Chennai',
     linkedin: 'https://www.linkedin.com/in/sambramraam',
     instagram: '',
   },
