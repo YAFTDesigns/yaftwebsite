@@ -302,10 +302,10 @@ export default function HomePage() {
             </div>
             <div className={styles.reelsGrid}>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb}>
+                <a href="https://www.instagram.com/reel/DFskbDUTFN2/" target="_blank" rel="noopener" className={styles.reelThumb}>
                   <Image src="/assets/images/reel-cat.jpg" alt="CAT Trivandrum workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
-                </div>
+                </a>
                 <div className={styles.reelMeta}>
                   <div className={styles.reelCollege}>CAT Trivandrum</div>
                   <div className={styles.reelTitle}>Parametric Design Workshop</div>
@@ -313,10 +313,10 @@ export default function HomePage() {
                 </div>
               </div>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb}>
+                <a href="https://www.instagram.com/reel/DVf0vL0oEbr/" target="_blank" rel="noopener" className={styles.reelThumb}>
                   <Image src="/assets/images/reel-srm.jpg" alt="SRM SEAD workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
-                </div>
+                </a>
                 <div className={styles.reelMeta}>
                   <div className={styles.reelCollege}>SRM SEAD Campus, Chennai</div>
                   <div className={styles.reelTitle}>Computational Design Workshop</div>
@@ -324,10 +324,10 @@ export default function HomePage() {
                 </div>
               </div>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb}>
+                <a href="https://www.instagram.com/reel/DVv4NHyDn0-/" target="_blank" rel="noopener" className={styles.reelThumb}>
                   <Image src="/assets/images/reel-vit.jpg" alt="VIT Vellore workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
-                </div>
+                </a>
                 <div className={styles.reelMeta}>
                   <div className={styles.reelCollege}>VIT Vellore</div>
                   <div className={styles.reelTitle}>Performative Plugins: Data Driven Simulations</div>
