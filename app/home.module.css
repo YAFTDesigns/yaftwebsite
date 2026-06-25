@@ -79,14 +79,14 @@
   border-color:rgba(255,255,255,0.16);
   box-shadow:0 8px 28px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.12);
 }
-.reelThumb{
+.reelThumb{position:relative;
   width:100%;aspect-ratio:9/16;
   background-size:cover;background-position:center;
   position:relative;display:flex;align-items:center;justify-content:center;
   transition:filter .3s;
 }
 .reelCard:hover .reelThumb{filter:brightness(1.1);}
-.reelPlay{
+.reelPlay{z-index:2;position:relative;
   width:52px;height:52px;border:2px solid var(--brass);border-radius:50%;
   display:flex;align-items:center;justify-content:center;
   background:rgba(0,0,0,0.5);
