@@ -302,7 +302,8 @@ export default function HomePage() {
             </div>
             <div className={styles.reelsGrid}>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb} style={{ backgroundImage: "url('/assets/images/reel-cat.jpg')" }}>
+                <div className={styles.reelThumb}>
+                  <Image src="/assets/images/reel-cat.jpg" alt="CAT Trivandrum workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
                 </div>
                 <div className={styles.reelMeta}>
@@ -312,7 +313,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb} style={{ backgroundImage: "url('/assets/images/reel-srm.jpg')" }}>
+                <div className={styles.reelThumb}>
+                  <Image src="/assets/images/reel-srm.jpg" alt="SRM SEAD workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
                 </div>
                 <div className={styles.reelMeta}>
@@ -322,7 +324,8 @@ export default function HomePage() {
                 </div>
               </div>
               <div className={styles.reelCard}>
-                <div className={styles.reelThumb} style={{ backgroundImage: "url('/assets/images/reel-vit.jpg')" }}>
+                <div className={styles.reelThumb}>
+                  <Image src="/assets/images/reel-vit.jpg" alt="VIT Vellore workshop" fill style={{ objectFit: 'cover' }} />
                   <div className={styles.reelPlay}><div className={styles.playTri}></div></div>
                 </div>
                 <div className={styles.reelMeta}>
