@@ -7,6 +7,7 @@ import EnquireLink from '@/components/EnquireLink';
 import SyllabusButton from '@/components/SyllabusButton';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
+import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import styles from './courses.module.css';
 
 export const metadata: Metadata = {
@@ -80,6 +81,8 @@ export default async function CoursesPage() {
             </div>
           </div>
         </section>
+
+        <StudentWorkMarquee />
 
         <section id="requirements" className="dark">
           <div className="wrap">
