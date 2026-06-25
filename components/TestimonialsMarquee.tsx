@@ -32,6 +32,13 @@ const TESTIMONIALS = [
     instagram: 'https://www.instagram.com/unravellingarchitecture',
   },
   {
+    quote: 'I cannot put into words how much I appreciated the time and effort given to us during the workshop at ASADI College. It made a real difference, and I will carry that experience forward in my design journey.',
+    name: 'Azmisha Jahan',
+    title: 'M.Arch Student, ASADI College of Architecture',
+    linkedin: '',
+    instagram: 'https://www.instagram.com/azmishajahan',
+  },
+  {
     quote: 'The Grasshopper course completely changed how I approach facade design. Yokes breaks down complex logic in a way that actually sticks.',
     name: 'Aditya Sharma',
     title: 'Architectural Designer, Mumbai',
