@@ -18,6 +18,20 @@ const TESTIMONIALS = [
     instagram: 'https://www.instagram.com/lok_hesh',
   },
   {
+    quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me wherever I go next. Thank you for trusting me, guiding me, and always being approachable.',
+    name: 'Sambram Raam',
+    title: 'Architecture Student',
+    linkedin: 'https://www.linkedin.com/in/sambramraam',
+    instagram: '',
+  },
+  {
+    quote: 'The course was well formatted for architects to design and work with Rhino. The time given for practising Rhino models during class hours was very beneficial. Yokes, as an instructor, was well-learned and a clear communicator. He was patient to clear doubts and handled classes based on how students understood the concepts.',
+    name: 'Ar. Gangotri',
+    title: 'Architect',
+    linkedin: '',
+    instagram: 'https://www.instagram.com/unravellingarchitecture',
+  },
+  {
     quote: 'The Grasshopper course completely changed how I approach facade design. Yokes breaks down complex logic in a way that actually sticks.',
     name: 'Aditya Sharma',
     title: 'Architectural Designer, Mumbai',
