@@ -6,14 +6,14 @@ const TESTIMONIALS = [
   {
     quote: 'I joined YAFT Designs for training in Rhino and Grasshopper, and the learning experience was truly fantastic. Sir is an exceptionally skilled and professional tutor with deep expertise in computational design. His teaching approach is clear, practical, and industry-oriented, which helped me gain confidence in both tools.',
     name: 'Harish Ragaventhra',
-    title: 'Graduate, Rajalakshmi School of Architecture',
+    title: 'Architect, Rajalakshmi School of Architecture',
     linkedin: 'https://www.linkedin.com/in/harish-ragaven-b3487636a',
     instagram: '',
   },
   {
     quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. The class was highly interactive, making the learning process engaging and effective. His patience and dedication stood out the most. He took the time to address all our doubts, ensuring each participant was on the same page.',
     name: 'Lokhesh',
-    title: 'Rhino Workshop Participant',
+    title: 'Architect',
     linkedin: '',
     instagram: 'https://www.instagram.com/lok_hesh',
   },
