@@ -8,54 +8,70 @@ const TESTIMONIALS = [
     name: 'Harish Ragaventhra',
     title: 'Graduate, Rajalakshmi School of Architecture',
     linkedin: 'https://www.linkedin.com/in/harish-ragaven-b3487636a',
+    instagram: '',
+  },
+  {
+    quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. The class was highly interactive, making the learning process engaging and effective. His patience and dedication stood out the most. He took the time to address all our doubts, ensuring each participant was on the same page.',
+    name: 'Lokhesh',
+    title: 'Rhino Workshop Participant',
+    linkedin: '',
+    instagram: 'https://www.instagram.com/lok_hesh',
   },
   {
     quote: 'The Grasshopper course completely changed how I approach facade design. Yokes breaks down complex logic in a way that actually sticks.',
     name: 'Aditya Sharma',
     title: 'Architectural Designer, Mumbai',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'I went from zero parametric knowledge to scripting my own panel rationalization workflow in 3 weeks. The course is incredibly practical.',
     name: 'Priya Nair',
     title: 'M.Arch Student, VIT Vellore',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'Rhino.Inside.Revit was the missing link in our BIM workflow. Yokes is one of the very few trainers in India who actually uses this in production.',
     name: 'Rahul Menon',
     title: 'BIM Coordinator, Bangalore',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'As a product designer, I was not sure if Rhino training was right for me. The Wearables course was exactly what I needed, real outputs from day one.',
     name: 'Sneha Krishnan',
     title: 'Product Designer, Chennai',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'The IIT Kharagpur workshop was a turning point. Being trained by a practicing facade engineer rather than a pure academic makes all the difference.',
     name: 'Karthik Subramaniam',
     title: 'Architecture Graduate, IIT Kharagpur',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'After the Ladybug and climate analysis workshop, I could justify my design decisions with actual data. That is not something you get in studio.',
     name: 'Meera Pillai',
     title: 'Architect, Hyderabad',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'Clear, structured, and grounded in real project workflows. I have done other Rhino courses online. This is genuinely different in how it is taught.',
     name: 'Vikram Anand',
     title: 'Facade Engineer, Delhi',
     linkedin: '',
+    instagram: '',
   },
   {
     quote: 'I landed my current job specifically because I could demonstrate Grasshopper skills in my portfolio. YAFT Designs made that possible.',
     name: 'Divya Ramesh',
     title: 'Computational Designer, Pune',
     linkedin: '',
+    instagram: '',
   },
 ];
 
@@ -88,6 +104,9 @@ export default function TestimonialsMarquee() {
                   <div className={styles.role}>{t.title}</div>
                   {t.linkedin && (
                     <a href={t.linkedin} target="_blank" rel="noopener" className={styles.liLink}>LinkedIn ↗</a>
+                  )}
+                  {!t.linkedin && t.instagram && (
+                    <a href={t.instagram} target="_blank" rel="noopener" className={styles.liLink}>Instagram ↗</a>
                   )}
                 </div>
               </div>
