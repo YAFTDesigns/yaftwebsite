@@ -39,6 +39,13 @@ const TESTIMONIALS = [
     instagram: 'https://www.instagram.com/azmishajahan',
   },
   {
+    quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice, which is rare to find in structured training programs.',
+    name: 'Ar. Chandrasekaran C',
+    title: 'Architecture Professor, VIT Vellore',
+    linkedin: 'https://www.linkedin.com/in/chandrasekaran-c-bb1b9128b/',
+    instagram: '',
+  },
+  {
     quote: 'The Grasshopper course completely changed how I approach facade design. Yokes breaks down complex logic in a way that actually sticks.',
     name: 'Aditya Sharma',
     title: 'Architectural Designer, Mumbai',
