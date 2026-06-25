@@ -252,7 +252,7 @@ export default function HomePage() {
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>02</span>
                 <span className={styles.serviceArrow}>↗</span>
-                <h3>Institutional workshops</h3>
+                <h3>Instructional and corporate training</h3>
                 <p>Multi-day or semester-length programs for architecture schools, delivered on campus or online.</p>
                 <ul className={styles.serviceBullets}>
                   <li>Conducted at IIT Kharagpur, VIT, ASADI, NIT Trichy</li>
@@ -264,7 +264,7 @@ export default function HomePage() {
               <div className={styles.serviceRow}>
                 <span className={styles.idx}>03</span>
                 <span className={styles.serviceArrow}>↗</span>
-                <h3>Visiting faculty</h3>
+                <h3>Expert mentorship</h3>
                 <p>Structured computational design modules for schools looking to add Rhino and Grasshopper to their curriculum.</p>
                 <ul className={styles.serviceBullets}>
                   <li>Currently at VIT Vellore and ASADI College</li>
