@@ -15,19 +15,47 @@
 .servicesSection{
   position:relative;
   background:
-    linear-gradient(rgba(10,10,10,0.88), rgba(10,10,10,0.88)),
+    linear-gradient(rgba(10,10,10,0.55), rgba(10,10,10,0.55)),
     url('/assets/images/stadium.jpg') center/cover no-repeat;
 }
-.servicesList{border-top:1px solid var(--line);border-left:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;}
+.servicesHead{
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(18px) saturate(1.5);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  border:1px solid rgba(255,255,255,0.08);
+  border-bottom:none;
+  padding:32px 36px 28px;
+  position:relative;
+}
+.servicesHead::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+}
+.servicesList{
+  border-top:1px solid rgba(255,255,255,0.1);
+  border-left:1px solid rgba(255,255,255,0.1);
+  display:grid;grid-template-columns:1fr 1fr;
+}
 .serviceRow{
   padding:40px 36px;
-  border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+  border-right:1px solid rgba(255,255,255,0.08);
+  border-bottom:1px solid rgba(255,255,255,0.08);
   position:relative;
-  transition:background .2s;
   display:flex;flex-direction:column;gap:0;
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(18px) saturate(1.5);
+  -webkit-backdrop-filter:blur(18px) saturate(1.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.07);
+  transition:background .2s,box-shadow .2s;
 }
-.serviceRow:hover{background:rgba(255,255,255,0.02);}
+.serviceRow::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
+}
+.serviceRow:hover{
+  background:rgba(255,255,255,0.08);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),0 8px 28px rgba(0,0,0,0.3);
+}
 .serviceRow .idx{font-family:var(--mono);color:var(--brass);font-size:11px;letter-spacing:.1em;margin-bottom:20px;display:block;}
 .serviceRow h3{font-size:20px;font-weight:700;color:var(--ink);margin-bottom:14px;letter-spacing:-.01em;}
 .serviceRow p{color:var(--ink-soft);font-size:14px;line-height:1.7;font-family:var(--mono);margin-bottom:20px;}
