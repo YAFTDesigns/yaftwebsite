@@ -33,9 +33,36 @@ const INTEREST_OPTIONS = [
 export default async function CoursesPage() {
   const courses = await getCourses();
 
+  const courseJsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': courses.map((course) => ({
+      '@type': 'Course',
+      name: course.title,
+      description: course.desc,
+      provider: {
+        '@type': 'Organization',
+        name: 'YAFT Designs',
+        sameAs: 'https://yaftdesigns.com',
+      },
+      hasCourseInstance: {
+        '@type': 'CourseInstance',
+        courseMode: ['onsite', 'online'],
+        location: {
+          '@type': 'Place',
+          name: 'Coimbatore, Tamil Nadu, India',
+        },
+      },
+    })),
+  };
+
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+      />
 
       <main id="top">
         <section className="page-hero">
