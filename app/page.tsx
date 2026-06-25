@@ -336,6 +336,10 @@ export default function HomePage() {
                   <span className="badge">Visiting Faculty, VIT Vellore</span>
                   <span className="badge">IIT Kharagpur Workshops</span>
                 </div>
+                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '24px' }}>
+                  <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/" target="_blank" rel="noopener" className="profile-link">LinkedIn →</a>
+                  <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" className="profile-link">Rhino Trainer Listing →</a>
+                </div>
               </div>
             </div>
           </div>
