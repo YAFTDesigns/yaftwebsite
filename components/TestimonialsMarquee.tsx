@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { createClient } from '@supabase/supabase-js';
 import styles from './TestimonialsMarquee.module.css';
 
@@ -16,6 +17,8 @@ const HARDCODED = [
     title: 'Architect, Rajalakshmi School of Architecture',
     linkedin: 'https://www.linkedin.com/in/harish-ragaven-b3487636a',
     instagram: '',
+    show_social: true,
+    photo_url: '',
   },
   {
     quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. His patience and dedication stood out the most.',
@@ -23,6 +26,8 @@ const HARDCODED = [
     title: 'Architect',
     linkedin: '',
     instagram: 'https://www.instagram.com/lok_hesh',
+    show_social: true,
+    photo_url: '',
   },
   {
     quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me.',
@@ -30,6 +35,8 @@ const HARDCODED = [
     title: 'BIM Lead, AAD Architects, Chennai',
     linkedin: 'https://www.linkedin.com/in/sambramraam',
     instagram: '',
+    show_social: true,
+    photo_url: '',
   },
   {
     quote: 'The course was well formatted for architects to design and work with Rhino. Yokes, as an instructor, was well-learned and a clear communicator.',
@@ -37,6 +44,8 @@ const HARDCODED = [
     title: 'Architect',
     linkedin: '',
     instagram: 'https://www.instagram.com/unravellingarchitecture',
+    show_social: true,
+    photo_url: '',
   },
   {
     quote: 'I cannot put into words how much I appreciated the time and effort given to us during the workshop at ASADI College.',
@@ -44,6 +53,8 @@ const HARDCODED = [
     title: 'M.Arch Student, ASADI College of Architecture',
     linkedin: '',
     instagram: 'https://www.instagram.com/azmishajahan',
+    show_social: true,
+    photo_url: '',
   },
   {
     quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice.',
@@ -51,6 +62,8 @@ const HARDCODED = [
     title: 'Architecture Professor, VIT Vellore',
     linkedin: 'https://www.linkedin.com/in/chandrasekaran-c-bb1b9128b/',
     instagram: '',
+    show_social: true,
+    photo_url: '',
   },
 ];
 
@@ -60,10 +73,23 @@ type Testimonial = {
   title: string;
   linkedin: string;
   instagram: string;
+  show_social: boolean;
+  photo_url: string;
 };
 
 function initials(name: string) {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+}
+
+function Avatar({ name, photo_url }: { name: string; photo_url: string }) {
+  if (photo_url) {
+    return (
+      <div className={styles.avatarWrap}>
+        <Image src={photo_url} alt={name} width={40} height={40} className={styles.avatarImg} />
+      </div>
+    );
+  }
+  return <div className={styles.avatar}>{initials(name)}</div>;
 }
 
 export default function TestimonialsMarquee() {
@@ -72,7 +98,7 @@ export default function TestimonialsMarquee() {
   useEffect(() => {
     supabase
       .from('testimonials')
-      .select('name, role, institution, quote, linkedin_url, instagram_url')
+      .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url')
       .eq('status', 'approved')
       .order('reviewed_at', { ascending: false })
       .then(({ data }) => {
@@ -83,8 +109,9 @@ export default function TestimonialsMarquee() {
             title: t.institution ? `${t.role}, ${t.institution}` : t.role,
             linkedin: t.linkedin_url || '',
             instagram: t.instagram_url || '',
+            show_social: t.show_social || false,
+            photo_url: t.photo_url || '',
           }));
-          // Merge: hardcoded first, then new approved ones
           setItems([...HARDCODED, ...fromDb]);
         }
       });
@@ -108,14 +135,15 @@ export default function TestimonialsMarquee() {
               <div className={styles.stars}>★★★★★</div>
               <p className={styles.quote}>{t.quote}</p>
               <div className={styles.person}>
-                <div className={styles.avatar}>{initials(t.name)}</div>
+                <Avatar name={t.name} photo_url={t.photo_url} />
                 <div>
                   <div className={styles.name}>{t.name}</div>
                   <div className={styles.role}>{t.title}</div>
-                  {t.linkedin && (
+                  <div className={styles.alumniBadge}>YAFT Designs Alumni</div>
+                  {t.show_social && t.linkedin && (
                     <a href={t.linkedin} target="_blank" rel="noopener" className={styles.liLink}>LinkedIn ↗</a>
                   )}
-                  {!t.linkedin && t.instagram && (
+                  {t.show_social && !t.linkedin && t.instagram && (
                     <a href={t.instagram} target="_blank" rel="noopener" className={styles.liLink}>Instagram ↗</a>
                   )}
                 </div>
