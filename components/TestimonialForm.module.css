@@ -63,6 +63,77 @@
   gap: 20px;
 }
 
+/* Photo upload */
+.photoRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.photoCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+  background: rgba(255,255,255,0.04);
+}
+
+.photoCircle:hover {
+  border-color: var(--brass);
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoInitials {
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--ink-soft);
+}
+
+.photoHint {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin: 0 0 6px;
+}
+
+.photoBtn {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.photoBtn:hover {
+  border-color: rgba(255,255,255,0.3);
+  color: var(--ink);
+}
+
+.photoNote {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin: 6px 0 0;
+  opacity: 0.6;
+}
+
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -88,9 +159,7 @@
   color: var(--ink-soft);
 }
 
-.req {
-  color: var(--crimson);
-}
+.req { color: var(--crimson); }
 
 .input {
   background: rgba(255,255,255,0.04);
@@ -110,14 +179,31 @@
   border-color: var(--blueprint);
 }
 
-.input option {
-  background: #1a1a1a;
-  color: var(--ink);
-}
-
 .textarea {
   resize: vertical;
   min-height: 100px;
+  line-height: 1.6;
+}
+
+/* Consent checkbox */
+.consentRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.checkbox {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: var(--crimson);
+  width: 14px;
+  height: 14px;
+}
+
+.consentText {
+  font-size: 13px;
+  color: var(--ink-soft);
   line-height: 1.6;
 }
 
