@@ -195,3 +195,26 @@
 }
 
 .rejectBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.deleteBtn {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: none;
+  border: 1px solid rgba(220, 50, 50, 0.3);
+  border-radius: 4px;
+  padding: 8px 16px;
+  color: #e55;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  margin-right: auto;
+}
+
+.deleteBtn:hover {
+  border-color: rgba(220, 50, 50, 0.6);
+  background: rgba(220, 50, 50, 0.08);
+}
+
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
