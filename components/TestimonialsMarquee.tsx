@@ -132,6 +132,7 @@ export default function TestimonialsMarquee() {
         <div className={styles.track}>
           {doubled.map((t, i) => (
             <div className={styles.card} key={i}>
+              <div className={styles.alumniBadge}>YAFT Designs Alumni</div>
               <div className={styles.stars}>★★★★★</div>
               <p className={styles.quote}>{t.quote}</p>
               <div className={styles.person}>
@@ -139,7 +140,6 @@ export default function TestimonialsMarquee() {
                 <div>
                   <div className={styles.name}>{t.name}</div>
                   <div className={styles.role}>{t.title}</div>
-                  <div className={styles.alumniBadge}>YAFT Designs Alumni</div>
                   {t.show_social && t.linkedin && (
                     <a href={t.linkedin} target="_blank" rel="noopener" className={styles.liLink}>LinkedIn ↗</a>
                   )}
