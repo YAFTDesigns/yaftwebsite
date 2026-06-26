@@ -57,6 +57,14 @@ export default function AdminTestimonialsPage() {
     load();
   }
 
+  async function deleteTestimonial(id: string) {
+    if (!confirm('Delete this testimonial permanently? This cannot be undone.')) return;
+    setActionId(id);
+    await supabase.from('testimonials').delete().eq('id', id);
+    setActionId(null);
+    load();
+  }
+
   const pending = items.filter(i => i.status === 'pending').length;
 
   return (
@@ -122,6 +130,13 @@ export default function AdminTestimonialsPage() {
               {filter === 'pending' && (
                 <div className={styles.actions}>
                   <button
+                    className={styles.deleteBtn}
+                    onClick={() => deleteTestimonial(t.id)}
+                    disabled={actionId === t.id}
+                  >
+                    Delete
+                  </button>
+                  <button
                     className={styles.rejectBtn}
                     onClick={() => updateStatus(t.id, 'rejected')}
                     disabled={actionId === t.id}
@@ -141,6 +156,13 @@ export default function AdminTestimonialsPage() {
               {filter === 'approved' && (
                 <div className={styles.actions}>
                   <button
+                    className={styles.deleteBtn}
+                    onClick={() => deleteTestimonial(t.id)}
+                    disabled={actionId === t.id}
+                  >
+                    Delete
+                  </button>
+                  <button
                     className={styles.rejectBtn}
                     onClick={() => updateStatus(t.id, 'rejected')}
                     disabled={actionId === t.id}
@@ -152,6 +174,13 @@ export default function AdminTestimonialsPage() {
 
               {filter === 'rejected' && (
                 <div className={styles.actions}>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => deleteTestimonial(t.id)}
+                    disabled={actionId === t.id}
+                  >
+                    Delete
+                  </button>
                   <button
                     className={styles.approveBtn}
                     onClick={() => updateStatus(t.id, 'approved')}
