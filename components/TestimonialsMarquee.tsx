@@ -1,86 +1,96 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import styles from './TestimonialsMarquee.module.css';
 
-const TESTIMONIALS = [
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const HARDCODED = [
   {
-    quote: 'I joined YAFT Designs for training in Rhino and Grasshopper, and the learning experience was truly fantastic. Sir is an exceptionally skilled and professional tutor with deep expertise in computational design. His teaching approach is clear, practical, and industry-oriented, which helped me gain confidence in both tools.',
+    quote: 'I joined YAFT Designs for training in Rhino and Grasshopper, and the learning experience was truly fantastic. Sir is an exceptionally skilled and professional tutor with deep expertise in computational design.',
     name: 'Harish Ragaventhra',
     title: 'Architect, Rajalakshmi School of Architecture',
     linkedin: 'https://www.linkedin.com/in/harish-ragaven-b3487636a',
     instagram: '',
   },
   {
-    quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. The class was highly interactive, making the learning process engaging and effective. His patience and dedication stood out the most. He took the time to address all our doubts, ensuring each participant was on the same page.',
+    quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. His patience and dedication stood out the most.',
     name: 'Lokhesh',
     title: 'Architect',
     linkedin: '',
     instagram: 'https://www.instagram.com/lok_hesh',
   },
   {
-    quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me wherever I go next. Thank you for trusting me, guiding me, and always being approachable.',
+    quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me.',
     name: 'Sambram Raam',
     title: 'BIM Lead, AAD Architects, Chennai',
     linkedin: 'https://www.linkedin.com/in/sambramraam',
     instagram: '',
   },
   {
-    quote: 'The course was well formatted for architects to design and work with Rhino. The time given for practising Rhino models during class hours was very beneficial. Yokes, as an instructor, was well-learned and a clear communicator. He was patient to clear doubts and handled classes based on how students understood the concepts.',
+    quote: 'The course was well formatted for architects to design and work with Rhino. Yokes, as an instructor, was well-learned and a clear communicator.',
     name: 'Ar. Gangotri',
     title: 'Architect',
     linkedin: '',
     instagram: 'https://www.instagram.com/unravellingarchitecture',
   },
   {
-    quote: 'I cannot put into words how much I appreciated the time and effort given to us during the workshop at ASADI College. It made a real difference, and I will carry that experience forward in my design journey.',
+    quote: 'I cannot put into words how much I appreciated the time and effort given to us during the workshop at ASADI College.',
     name: 'Azmisha Jahan',
     title: 'M.Arch Student, ASADI College of Architecture',
     linkedin: '',
     instagram: 'https://www.instagram.com/azmishajahan',
   },
   {
-    quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice, which is rare to find in structured training programs.',
+    quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice.',
     name: 'Ar. Chandrasekaran C',
     title: 'Architecture Professor, VIT Vellore',
     linkedin: 'https://www.linkedin.com/in/chandrasekaran-c-bb1b9128b/',
     instagram: '',
   },
-  {
-    quote: 'The Grasshopper course completely changed how I approach facade design. Yokes breaks down complex logic in a way that actually sticks.',
-    name: 'Aditya Sharma',
-    title: 'Architectural Designer, Mumbai',
-    linkedin: '',
-    instagram: '',
-  },
-  {
-    quote: 'Rhino.Inside.Revit was the missing link in our BIM workflow. Yokes is one of the very few trainers in India who actually uses this in production.',
-    name: 'Rahul Menon',
-    title: 'BIM Coordinator, Bangalore',
-    linkedin: '',
-    instagram: '',
-  },
-  {
-    quote: 'The IIT Kharagpur workshop was a turning point. Being trained by a practicing facade engineer rather than a pure academic makes all the difference.',
-    name: 'Karthik Subramaniam',
-    title: 'Architecture Graduate, IIT Kharagpur',
-    linkedin: '',
-    instagram: '',
-  },
-  {
-    quote: 'Clear, structured, and grounded in real project workflows. I have done other Rhino courses online. This is genuinely different in how it is taught.',
-    name: 'Vikram Anand',
-    title: 'Facade Engineer, Delhi',
-    linkedin: '',
-    instagram: '',
-  },
 ];
+
+type Testimonial = {
+  quote: string;
+  name: string;
+  title: string;
+  linkedin: string;
+  instagram: string;
+};
 
 function initials(name: string) {
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
 export default function TestimonialsMarquee() {
-  const doubled = [...TESTIMONIALS, ...TESTIMONIALS];
+  const [items, setItems] = useState<Testimonial[]>(HARDCODED);
+
+  useEffect(() => {
+    supabase
+      .from('testimonials')
+      .select('name, role, institution, quote, linkedin_url, instagram_url')
+      .eq('status', 'approved')
+      .order('reviewed_at', { ascending: false })
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          const fromDb: Testimonial[] = data.map((t: any) => ({
+            quote: t.quote,
+            name: t.name,
+            title: t.institution ? `${t.role}, ${t.institution}` : t.role,
+            linkedin: t.linkedin_url || '',
+            instagram: t.instagram_url || '',
+          }));
+          // Merge: hardcoded first, then new approved ones
+          setItems([...HARDCODED, ...fromDb]);
+        }
+      });
+  }, []);
+
+  const doubled = [...items, ...items];
 
   return (
     <section className={styles.section}>
