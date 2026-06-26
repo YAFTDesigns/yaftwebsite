@@ -52,6 +52,7 @@
 }
 
 .card {
+  position: relative;
   flex: 0 0 320px;
   background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(18px) saturate(1.6);
@@ -168,6 +169,9 @@
 }
 
 .alumniBadge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.08em;
@@ -175,8 +179,7 @@
   color: var(--brass);
   border: 1px solid var(--brass);
   border-radius: 3px;
-  padding: 2px 6px;
-  display: inline-block;
-  margin-top: 4px;
-  opacity: 0.8;
+  padding: 2px 7px;
+  opacity: 0.85;
+  white-space: nowrap;
 }
