@@ -1,0 +1,232 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.loading {
+  padding: 80px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.title {
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.sub {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.back {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.back:hover {
+  color: var(--ink);
+  border-color: var(--ink-soft);
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 600px) {
+  .statGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.stat {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 20px 16px;
+  background: rgba(255,255,255,0.02);
+}
+
+.statVal {
+  font-family: var(--mono);
+  font-size: 32px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.statLabel {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.panel {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 28px;
+  background: rgba(255,255,255,0.02);
+  margin-bottom: 20px;
+}
+
+.panelTitle {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 400;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+
+.panelNote {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 200px 1fr 32px;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .barRow { grid-template-columns: 120px 1fr 28px; }
+}
+
+.barLabel {
+  font-size: 13px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barTrack {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--brass);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+  min-width: 4px;
+}
+
+.barCount {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* Quote list */
+.quoteList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quoteCard {
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 6px;
+  padding: 18px 20px;
+  background: rgba(255,255,255,0.02);
+}
+
+.quoteMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quoteName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.quoteRole {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.quoteCourse {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--blueprint);
+  border: 1px solid var(--blueprint);
+  border-radius: 3px;
+  padding: 1px 6px;
+  opacity: 0.7;
+}
+
+.quoteBadge {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 3px;
+  padding: 2px 7px;
+  margin-left: auto;
+}
+
+.pending {
+  color: #f5a623;
+  border: 1px solid #f5a623;
+  opacity: 0.8;
+}
+
+.approved {
+  color: var(--brass);
+  border: 1px solid var(--brass);
+  opacity: 0.8;
+}
+
+.rejected {
+  color: var(--ink-soft);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+.quoteText {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 0;
+  font-style: italic;
+}
