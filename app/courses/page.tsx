@@ -12,7 +12,7 @@ import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
 import styles from './courses.module.css';
 
-const TITLE = 'Rhino3D & Grasshopper Courses India | YAFT Designs';
+const TITLE = 'Rhino3D & Grasshopper Courses India';
 const DESCRIPTION =
   'Professional Rhino3D and Grasshopper training for architecture, product design, facades and computational design. Online and offline training available.';
 
