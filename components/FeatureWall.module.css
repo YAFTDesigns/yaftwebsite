@@ -1,0 +1,202 @@
+/* FeatureWall.module.css */
+
+.wall {
+  padding: 80px 0 60px;
+}
+
+.heading {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(26px, 4vw, 40px);
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 32px;
+}
+
+/* tabs */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 36px;
+  gap: 0;
+}
+
+.tab {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover { color: var(--ink); }
+.tabActive { color: var(--ink) !important; border-bottom-color: var(--brass) !important; }
+
+/* student card track */
+.cardTrack {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scrollbar-width: none;
+}
+.cardTrack::-webkit-scrollbar { display: none; }
+
+.scard {
+  min-width: 200px;
+  max-width: 200px;
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.placeholder { border: 1px dashed #222; }
+
+.scardImg {
+  width: 100%;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-bottom: 1px solid #1e1e1e;
+}
+.scardImg img { width: 100%; height: 100%; object-fit: cover; }
+
+.phImg { flex-direction: column; gap: 8px; background: #0d0d0d; }
+.phPlus { font-size: 20px; opacity: 0.06; }
+.phText { font-family: var(--mono); font-size: 11px; color: #2a2a2a; text-align: center; padding: 0 12px; }
+.phIcon { font-size: 24px; opacity: 0.1; color: var(--ink); }
+
+.toolBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.rhino  { background: #1e1e1e; color: #aaa; }
+.grasshopper { background: #1a3310; color: #7ed957; }
+.rir    { background: #0f2340; color: #7baaf7; }
+
+.scardBody { padding: 12px 13px 14px; }
+.scardTitle { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 3px; line-height: 1.35; }
+.scardName  { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
+.scardDesc  { font-family: var(--mono); font-size: 11px; color: #444; line-height: 1.55; margin-bottom: 10px; }
+.scardFoot  { display: flex; align-items: center; gap: 6px; }
+.stag { font-family: var(--mono); font-size: 10px; color: #444; background: #161616; border: 1px solid #222; border-radius: 4px; padding: 2px 6px; }
+.slink { font-size: 11px; color: var(--brass); margin-left: auto; text-decoration: none; border-bottom: 1px solid var(--brass); }
+
+/* submit row */
+.submitRow {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.submitBtn {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--brass);
+  border: 1px solid var(--brass);
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+  display: inline-block;
+}
+.submitBtn:hover { background: var(--brass); color: #fff; }
+.submitNote { font-family: var(--mono); font-size: 11px; color: #444; }
+
+/* publications */
+.pubList { display: flex; flex-direction: column; gap: 14px; }
+
+.pubCard {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+}
+.pubAccent { width: 4px; flex-shrink: 0; background: var(--brass); }
+.pubInner  { padding: 18px 20px; flex: 1; display: flex; gap: 18px; align-items: flex-start; }
+.pubPhoto  { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; flex-shrink: 0; border: 1px solid #222; }
+.pubContent { flex: 1; }
+.pubMetaRow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.pubYear  { font-family: var(--mono); font-size: 10px; color: var(--brass); background: #1a0808; border: 1px solid #3a1010; border-radius: 4px; padding: 2px 7px; }
+.pubMag   { font-family: var(--mono); font-size: 10px; color: var(--ink-soft); }
+.pubTitle  { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px; line-height: 1.35; }
+.pubAuthor { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); margin-bottom: 8px; }
+.pubDesc   { font-family: var(--mono); font-size: 11px; color: #444; line-height: 1.6; margin-bottom: 12px; }
+.pubLink   { font-family: var(--mono); font-size: 11px; color: var(--brass); border-bottom: 1px solid var(--brass); text-decoration: none; }
+
+.pubPh {
+  background: #0d0d0d;
+  border: 1px dashed #1e1e1e;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+.pubPhYr   { font-family: var(--mono); font-size: 11px; color: #222; min-width: 32px; }
+.pubPhText { font-family: var(--mono); font-size: 11px; color: #333; line-height: 1.5; }
+
+/* partners */
+.partnerGrid {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.pcard {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 160px;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.pcard:hover { border-color: #333; }
+
+.pcardLogo {
+  width: 100%;
+  height: 88px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+}
+.pcardLogo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.pcardInitial { font-size: 28px; font-weight: 700; color: #ccc; }
+.pcardBody { padding: 10px 12px 14px; }
+.pcardName { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.pcardDesc { font-family: var(--mono); font-size: 10px; color: var(--ink-soft); line-height: 1.5; }
+
+@media (max-width: 640px) {
+  .tabs { overflow-x: auto; }
+  .tab  { white-space: nowrap; padding: 10px 14px; }
+}

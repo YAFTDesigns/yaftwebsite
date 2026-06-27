@@ -12,6 +12,8 @@ import CarouselDrag from '@/components/CarouselDrag';
 import CarouselProgress from '@/components/CarouselProgress';
 import ContourCanvas from '@/components/ContourCanvas';
 import CoursesHeroBlock from '@/components/CoursesHeroBlock';
+import FeatureWall from '@/components/FeatureWall';
+import { getStudentWork, getPublications, getPartners } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
 const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs';
@@ -115,7 +117,12 @@ const FAQ_JSON_LD = {
   })),
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [studentWork, publications, partners] = await Promise.all([
+    getStudentWork(),
+    getPublications(),
+    getPartners(),
+  ]);
   return (
     <>
       <SiteHeader active="/" />
@@ -341,6 +348,12 @@ export default function HomePage() {
                 <p>Panel rationalization and fabrication drawing pipelines across multiple international projects.</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section id="community">
+          <div className="wrap">
+            <FeatureWall studentWork={studentWork} publications={publications} partners={partners} />
           </div>
         </section>
 
