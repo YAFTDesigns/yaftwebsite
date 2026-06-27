@@ -74,7 +74,10 @@ export default function AdminTestimonialsPage() {
           <h1 className={styles.title}>Testimonials</h1>
           <p className={styles.sub}>Review and approve student submissions</p>
         </div>
-        <a href="/admin" className={styles.back}>← Back to admin</a>
+        <div style={{ display: "flex", gap: 16 }}>
+          <a href="/admin/testimonials/analytics" className={styles.back}>View analytics →</a>
+          <a href="/admin" className={styles.back}>← Back to admin</a>
+        </div>
       </div>
 
       <div className={styles.tabs}>
