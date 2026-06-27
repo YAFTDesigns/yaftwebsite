@@ -20,6 +20,7 @@
   position: relative;
   min-height: 2.6em;
   margin-bottom: 80px;
+  margin-top: -60px;
 }
 
 .headingWrap h2 {
