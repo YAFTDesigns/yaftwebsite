@@ -19,6 +19,7 @@ export default function CarouselDrag({ id }: { id: string }) {
       startX = e.pageX - track.getBoundingClientRect().left;
       scrollLeft = track.scrollLeft;
       track.style.cursor = 'grabbing';
+      cancelMomentum();
     };
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
@@ -34,34 +35,66 @@ export default function CarouselDrag({ id }: { id: string }) {
 
     /* ── Wheel → horizontal scroll (desktop) ── */
     const onWheel = (e: WheelEvent) => {
-      // only hijack when scroll is more horizontal than vertical,
-      // or when track can still scroll horizontally
       const atStart = track.scrollLeft === 0;
       const atEnd = track.scrollLeft >= track.scrollWidth - track.clientWidth - 2;
-      if ((atStart && e.deltaY < 0) || (atEnd && e.deltaY > 0)) return; // let page scroll
+      if ((atStart && e.deltaY < 0) || (atEnd && e.deltaY > 0)) return;
       e.preventDefault();
       track.scrollLeft += e.deltaY + e.deltaX;
     };
 
-    /* ── Touch (mobile) ── */
+    /* ── Touch with momentum (mobile) ── */
     let touchStartX = 0;
     let touchScrollLeft = 0;
     let touchDidMove = false;
+    let lastTouchX = 0;
+    let lastTouchTime = 0;
+    let velocity = 0;
+    let momentumRaf = 0;
+
+    function cancelMomentum() {
+      cancelAnimationFrame(momentumRaf);
+      velocity = 0;
+    }
+
+    function runMomentum() {
+      if (Math.abs(velocity) < 0.5) return;
+      track.scrollLeft += velocity;
+      velocity *= 0.92; // friction — higher = more glide
+      momentumRaf = requestAnimationFrame(runMomentum);
+    }
 
     const onTouchStart = (e: TouchEvent) => {
+      cancelMomentum();
       touchStartX = e.touches[0].clientX;
       touchScrollLeft = track.scrollLeft;
+      lastTouchX = touchStartX;
+      lastTouchTime = Date.now();
       touchDidMove = false;
+      velocity = 0;
     };
+
     const onTouchMove = (e: TouchEvent) => {
       const dx = touchStartX - e.touches[0].clientX;
-      if (Math.abs(dx) > 8) {
+      if (Math.abs(dx) > 6) {
         touchDidMove = true;
-        e.preventDefault(); // stop page scroll while swiping carousel
+        e.preventDefault();
         track.scrollLeft = touchScrollLeft + dx;
+
+        // track velocity
+        const now = Date.now();
+        const dt = now - lastTouchTime || 1;
+        velocity = (e.touches[0].clientX - lastTouchX) / dt * 16; // px per frame ~16ms
+        lastTouchX = e.touches[0].clientX;
+        lastTouchTime = now;
       }
     };
-    const onTouchEnd = () => { touchDidMove = false; };
+
+    const onTouchEnd = () => {
+      // flip velocity direction (scroll follows finger direction)
+      velocity = -velocity;
+      momentumRaf = requestAnimationFrame(runMomentum);
+      setTimeout(() => { touchDidMove = false; }, 50);
+    };
 
     /* ── Prevent link clicks on drag ── */
     track.querySelectorAll('a').forEach(a => {
@@ -79,6 +112,7 @@ export default function CarouselDrag({ id }: { id: string }) {
     track.addEventListener('touchend', onTouchEnd);
 
     return () => {
+      cancelMomentum();
       track.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
