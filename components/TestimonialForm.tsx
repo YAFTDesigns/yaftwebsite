@@ -228,11 +228,22 @@ export default function TestimonialForm() {
           <textarea
             className={`${styles.input} ${styles.textarea}`}
             value={form.quote}
-            onChange={e => set('quote', e.target.value)}
+            onChange={e => set('quote', e.target.value.slice(0, 250))}
             placeholder="Share what you learned and how the training helped you..."
             rows={4}
+            maxLength={250}
             required
           />
+          <div style={{
+            fontFamily: 'var(--mono)',
+            fontSize: 11,
+            color: form.quote.length > 220 ? 'var(--brass)' : 'var(--ink-soft)',
+            textAlign: 'right',
+            marginTop: 4,
+            opacity: form.quote.length === 0 ? 0.4 : 1,
+          }}>
+            {form.quote.length} / 250
+          </div>
         </div>
 
         {/* Social links */}
