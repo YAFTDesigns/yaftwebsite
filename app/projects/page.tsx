@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 
-const TITLE = 'Projects | YAFT Designs | Computational Design Portfolio';
+const TITLE = 'Projects | Computational Design Portfolio';
 const DESCRIPTION =
   'Computational design, facade engineering, BIM automation and digital fabrication projects by YAFT Designs. Case studies and live project work.';
 
