@@ -5,7 +5,7 @@ import ContactForm from '@/components/ContactForm';
 import VideoGallery, { type VideoItem } from '@/components/VideoGallery';
 import styles from './resources.module.css';
 
-const TITLE = 'Rhino3D & Grasshopper Learning Resources | YAFT Designs';
+const TITLE = 'Rhino3D & Grasshopper Learning Resources';
 const DESCRIPTION = 'Free Rhino3D, Grasshopper and computational design resources, tutorials, guides and learning materials.';
 
 export const metadata: Metadata = {
