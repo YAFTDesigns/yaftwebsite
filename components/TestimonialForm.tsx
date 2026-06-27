@@ -11,7 +11,7 @@ const supabase = createClient(
 
 export default function TestimonialForm() {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error' | 'capped'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -60,17 +60,6 @@ export default function TestimonialForm() {
     if (!form.name || !form.role || !form.quote) return;
     setStatus('submitting');
 
-    // Check if approved testimonials have reached the cap of 15
-    const { count } = await supabase
-      .from('testimonials')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'approved');
-
-    if ((count ?? 0) >= 15) {
-      setStatus('capped');
-      return;
-    }
-
     let photo_url: string | null = null;
     if (photoFile) {
       photo_url = await uploadPhoto(photoFile);
@@ -101,16 +90,6 @@ export default function TestimonialForm() {
       <button className={styles.trigger} onClick={() => setOpen(true)}>
         Share your experience
       </button>
-    </div>
-  );
-
-  if (status === 'capped') return (
-    <div className={styles.successBox}>
-      <div className={styles.successIcon}>✦</div>
-      <p className={styles.successTitle}>We are grateful.</p>
-      <p className={styles.successNote}>
-        Our testimonial wall is full for now. Thank you so much for wanting to share your experience, it means a lot to us.
-      </p>
     </div>
   );
 
