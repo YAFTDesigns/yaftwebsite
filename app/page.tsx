@@ -9,6 +9,7 @@ import FaqAccordion from '@/components/FaqAccordion';
 import Hero3D from '@/components/Hero3D';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import CarouselDrag from '@/components/CarouselDrag';
+import CarouselProgress from '@/components/CarouselProgress';
 import CoursesHeroBlock from '@/components/CoursesHeroBlock';
 import styles from './home.module.css';
 
@@ -248,6 +249,8 @@ export default function HomePage() {
 
             </div>
           </div>
+
+          <CarouselProgress trackId="courseTrack" />
 
           <div className={styles.carouselTagline}>
             <p className={styles.carouselTaglineSub}>Not tool tutorials. Structured masterclasses drawn from live facade, fabrication, and computational design projects across five countries. You leave with skills that land in your portfolio, your studio, and your next brief, not just your software menu.</p>
