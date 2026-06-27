@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export default function Hero3D() {
@@ -88,11 +88,10 @@ export default function Hero3D() {
     container.addEventListener('mousemove', onMouseMove);
     container.addEventListener('mouseleave', onMouseLeave);
 
-    const loader = new GLTFLoader();
+    const loader = new OBJLoader();
     loader.load(
-      '/point1.glb',
-      (gltf) => {
-        const object = gltf.scene;
+      '/point1.obj',
+      (object) => {
         const sphereMaterial = new THREE.MeshPhongMaterial({
           color: 0x40e0d0,
           specular: 0x444444,
