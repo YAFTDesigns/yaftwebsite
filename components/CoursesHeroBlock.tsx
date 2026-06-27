@@ -110,10 +110,7 @@ export default function CoursesHeroBlock() {
 
   return (
     <div className={styles.coursesHero}>
-      {/* contour canvas — section bg only */}
-      <div className={styles.canvasWrap}>
-        <canvas ref={canvasRef} className={styles.canvas} />
-      </div>
+
 
       <div className={styles.inner}>
         <div className="eyebrow">COURSES</div>
