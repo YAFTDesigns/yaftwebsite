@@ -18,6 +18,7 @@ type Submission = {
   quote: string;
   status: string;
   submitted_at: string;
+  rating: number;
 };
 
 type CourseStat = { name: string; count: number };
@@ -29,7 +30,7 @@ export default function TestimonialAnalyticsPage() {
   useEffect(() => {
     supabase
       .from('testimonials')
-      .select('id, name, role, institution, course_taken, quote, status, submitted_at')
+      .select('id, name, role, institution, course_taken, quote, status, submitted_at, rating')
       .order('submitted_at', { ascending: false })
       .then(({ data }) => {
         setAll(data || []);
@@ -42,6 +43,25 @@ export default function TestimonialAnalyticsPage() {
   const approved = all.filter(t => t.status === 'approved').length;
   const pending = all.filter(t => t.status === 'pending').length;
   const rejected = all.filter(t => t.status === 'rejected').length;
+
+  // Average rating overall
+  const rated = all.filter(t => t.rating > 0);
+  const avgRating = rated.length > 0
+    ? (rated.reduce((sum, t) => sum + t.rating, 0) / rated.length).toFixed(1)
+    : '—';
+
+  // Average rating per course
+  const courseRatings: Record<string, { total: number; count: number }> = {};
+  all.forEach(t => {
+    if (!t.rating) return;
+    const key = t.course_taken?.trim() || 'Not specified';
+    if (!courseRatings[key]) courseRatings[key] = { total: 0, count: 0 };
+    courseRatings[key].total += t.rating;
+    courseRatings[key].count += 1;
+  });
+  const courseRatingStats = Object.entries(courseRatings)
+    .map(([name, { total, count }]) => ({ name, avg: total / count, count }))
+    .sort((a, b) => b.avg - a.avg);
 
   // Course breakdown
   const courseCounts: Record<string, number> = {};
@@ -108,6 +128,10 @@ export default function TestimonialAnalyticsPage() {
           <div className={styles.statVal}>{rejected}</div>
           <div className={styles.statLabel}>Not published</div>
         </div>
+        <div className={styles.stat}>
+          <div className={styles.statVal} style={{ color: 'var(--brass)' }}>{avgRating}</div>
+          <div className={styles.statLabel}>Avg rating / 5</div>
+        </div>
       </div>
 
       {/* Course breakdown */}
@@ -129,6 +153,28 @@ export default function TestimonialAnalyticsPage() {
           ))}
         </div>
       </div>
+
+      {/* Average rating per course */}
+      {courseRatingStats.length > 0 && (
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Average rating per course or workshop</h2>
+          <p className={styles.panelNote}>Where students feel most satisfied. Lower scores show where to improve.</p>
+          <div className={styles.bars}>
+            {courseRatingStats.map(c => (
+              <div key={c.name} className={styles.barRow}>
+                <div className={styles.barLabel}>{c.name}</div>
+                <div className={styles.barTrack}>
+                  <div
+                    className={styles.barFill}
+                    style={{ width: `${(c.avg / 5) * 100}%`, background: c.avg >= 4 ? 'var(--brass)' : c.avg >= 3 ? '#f5a623' : '#e55' }}
+                  />
+                </div>
+                <div className={styles.barCount}>{c.avg.toFixed(1)} <span style={{ opacity: 0.5, fontSize: 10 }}>({c.count})</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Role breakdown */}
       <div className={styles.panel}>
@@ -183,6 +229,7 @@ export default function TestimonialAnalyticsPage() {
                 <span className={styles.quoteName}>{t.name}</span>
                 <span className={styles.quoteRole}>{t.role}{t.institution ? `, ${t.institution}` : ''}</span>
                 {t.course_taken && <span className={styles.quoteCourse}>{t.course_taken}</span>}
+                {t.rating > 0 && <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)' }}>{'★'.repeat(Math.floor(t.rating))}{t.rating % 1 ? '½' : ''} {t.rating.toFixed(1)}</span>}
                 <span className={`${styles.quoteBadge} ${styles[t.status]}`}>{t.status}</span>
               </div>
               <p className={styles.quoteText}>{t.quote}</p>
