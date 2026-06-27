@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 
-const TITLE = 'Projects | Computational Design Portfolio';
+const TITLE = 'Computational Design Projects | YAFT Designs Coimbatore';
 const DESCRIPTION =
-  'Computational design, facade engineering, BIM automation and digital fabrication projects by YAFT Designs. Case studies and live project work.';
+  'Facade engineering, BIM automation, and computational design projects by YAFT Designs. Live project work across India, Singapore, Hong Kong, Australia and Oman.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -15,13 +15,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/projects',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 

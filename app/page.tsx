@@ -117,6 +117,45 @@ const FAQ_JSON_LD = {
   })),
 };
 
+const LOCAL_BUSINESS_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'YAFT Designs',
+  description: 'Authorized Rhino Training Center offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training and computational design consulting.',
+  url: 'https://yaftdesigns.com',
+  telephone: '',
+  email: 'yaftdesigns@gmail.com',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Perundurai Industrial Park',
+    addressLocality: 'Coimbatore',
+    addressRegion: 'Tamil Nadu',
+    postalCode: '638052',
+    addressCountry: 'IN',
+  },
+  geo: {
+    '@type': 'GeoCoordinates',
+    latitude: 11.0168,
+    longitude: 76.9558,
+  },
+  openingHours: 'Mo-Sa 09:00-18:00',
+  priceRange: '₹₹',
+  currenciesAccepted: 'INR',
+  paymentAccepted: 'Cash, Credit Card, Bank Transfer',
+  areaServed: [
+    { '@type': 'Country', name: 'India' },
+    { '@type': 'City',    name: 'Coimbatore' },
+    { '@type': 'City',    name: 'Chennai' },
+    { '@type': 'City',    name: 'Bangalore' },
+  ],
+  sameAs: [
+    'https://www.linkedin.com/in/yokes-marapa-791b06216/',
+    'https://www.instagram.com/yaft_designs/',
+    'https://www.youtube.com/@yaftdesigns',
+    'https://www.rhino3d.com/training/sites/1650/',
+  ],
+};
+
 export default async function HomePage() {
   const [studentWork, publications, partners] = await Promise.all([
     getStudentWork(),
@@ -134,6 +173,10 @@ export default async function HomePage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FAQ_JSON_LD) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }}
       />
 
       <main id="top">
