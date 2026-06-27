@@ -78,6 +78,7 @@ type Testimonial = {
 };
 
 function initials(name: string) {
+  if (!name || name === 'Anonymous') return '?';
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
