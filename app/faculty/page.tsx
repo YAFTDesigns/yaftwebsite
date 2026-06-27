@@ -6,7 +6,7 @@ import ContactForm from '@/components/ContactForm';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './faculty.module.css';
 
-const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India | YAFT Designs';
+const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
   'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty at VIT Vellore, with workshops at IIT Kharagpur.';
 
