@@ -101,6 +101,7 @@ export default function TestimonialsMarquee() {
       .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url')
       .eq('status', 'approved')
       .order('reviewed_at', { ascending: false })
+      .limit(15)
       .then(({ data }) => {
         if (data && data.length > 0) {
           const fromDb: Testimonial[] = data.map((t: any) => ({
