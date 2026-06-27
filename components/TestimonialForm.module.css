@@ -296,3 +296,53 @@
   text-transform: none;
   opacity: 0.7;
 }
+
+/* Star rating input */
+.starsInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  user-select: none;
+}
+
+.starWrap {
+  position: relative;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.starHalf {
+  position: absolute;
+  top: 0;
+  font-size: 28px;
+  color: rgba(255,255,255,0.15);
+  transition: color 0.1s;
+  overflow: hidden;
+  line-height: 32px;
+}
+
+.starLeft {
+  left: 0;
+  width: 50%;
+  clip-path: inset(0 50% 0 0);
+}
+
+.starRight {
+  left: 0;
+  width: 100%;
+  clip-path: inset(0 0 0 50%);
+}
+
+.starActive {
+  color: var(--brass);
+}
+
+.ratingVal {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--brass);
+  margin-left: 8px;
+  min-width: 48px;
+}
