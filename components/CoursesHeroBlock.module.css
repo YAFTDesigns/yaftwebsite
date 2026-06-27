@@ -3,7 +3,7 @@
 .coursesHero {
   position: relative;
   overflow: hidden;
-  padding: 12px 0 48px;
+  padding: 0 0 48px;
   text-align: center;
 }
 
@@ -19,8 +19,8 @@
 .headingWrap {
   position: relative;
   min-height: 2.6em;
-  margin-bottom: 80px;
-  margin-top: -60px;
+  margin-bottom: 120px;
+  margin-top: 0;
 }
 
 .headingWrap h2 {
