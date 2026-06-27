@@ -20,13 +20,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/services',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -160,7 +160,7 @@ export default function ServicesPage() {
         <section className="page-hero">
           <div className="wrap">
             <div className="eyebrow">SERVICES</div>
-            <h1 style={{ fontFamily: 'var(--body)', fontWeight: 400, letterSpacing: '-0.01em' }}>Computational design execution: from parametric facade to fabrication-ready output.</h1>
+            <h1 style={{ fontFamily: 'var(--display)', fontWeight: 700, letterSpacing: '-0.02em' }}>Computational design execution: from parametric facade to fabrication-ready output.</h1>
             <p className="lede">YAFT Designs works alongside studios, contractors, and institutions, covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
           </div>
         </section>
