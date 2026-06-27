@@ -48,15 +48,6 @@ const HARDCODED = [
     photo_url: '',
   },
   {
-    quote: 'I cannot put into words how much I appreciated the time and effort given to us during the workshop at ASADI College.',
-    name: 'Azmisha Jahan',
-    title: 'M.Arch Student, ASADI College of Architecture',
-    linkedin: '',
-    instagram: 'https://www.instagram.com/azmishajahan',
-    show_social: true,
-    photo_url: '',
-  },
-  {
     quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice.',
     name: 'Ar. Chandrasekaran C',
     title: 'Architecture Professor, VIT Vellore',
