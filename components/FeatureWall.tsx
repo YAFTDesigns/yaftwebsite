@@ -231,7 +231,7 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
                   />
                 </div>
 
-                {field('Portfolio / LinkedIn URL', <input className={styles.input} value={workForm.portfolio_url} onChange={e => setWorkForm(f => ({...f, portfolio_url: e.target.value}))} placeholder="https://linkedin.com/in/..." />)}
+                {field('Portfolio, LinkedIn or Instagram URL', <input className={styles.input} value={workForm.portfolio_url} onChange={e => setWorkForm(f => ({...f, portfolio_url: e.target.value}))} placeholder="https://linkedin.com/in/ or instagram.com/..." />)}
 
                 <div className={styles.formDivider} />
 
