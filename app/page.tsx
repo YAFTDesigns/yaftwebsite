@@ -9,6 +9,7 @@ import FaqAccordion from '@/components/FaqAccordion';
 import Hero3D from '@/components/Hero3D';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import CarouselDrag from '@/components/CarouselDrag';
+import CoursesHeroBlock from '@/components/CoursesHeroBlock';
 import styles from './home.module.css';
 
 const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs';
@@ -167,29 +168,7 @@ export default function HomePage() {
         </section>
 
         <section id="courses">
-          <div className="wrap">
-            <div className="eyebrow">COURSES</div>
-            <div className="section-head">
-              <h2>Live Masterclasses in Computational Design</h2>
-              <p className="note"><Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
-            </div>
-            <div className={styles.softwareStrip}>
-              <div className={styles.softwareChip}>
-                <img src="/assets/logos/rhino-logo.png" alt="Rhino3D" className={styles.softwareLogo} />
-                <span className={styles.softwareName}>Rhino3D</span>
-              </div>
-              <span className={styles.softwareDot} aria-hidden="true">●</span>
-              <div className={styles.softwareChip}>
-                <img src="/assets/logos/grasshopper-logo.jpg" alt="Grasshopper" className={styles.softwareLogo} />
-                <span className={styles.softwareName}>Grasshopper</span>
-              </div>
-              <span className={styles.softwareDot} aria-hidden="true">●</span>
-              <div className={styles.softwareChip}>
-                <img src="/assets/logos/rhino-inside-revit-logo.png" alt="Rhino.Inside.Revit" className={styles.softwareLogo} />
-                <span className={styles.softwareName}>Rhino.Inside.Revit</span>
-              </div>
-            </div>
-          </div>
+          <CoursesHeroBlock />
 
           <div className={styles.carouselOuter}>
             <CarouselDrag id="courseTrack" />
