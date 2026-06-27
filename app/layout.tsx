@@ -27,13 +27,13 @@ export const metadata: Metadata = {
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
     url: "https://yaftdesigns.com",
     type: "website",
-    images: [{ url: "https://yaftdesigns.com/assets/images/profile.jpeg" }],
+    images: [{ url: "https://yaftdesigns.com/favicon-512.png", width: 512, height: 512, alt: "YAFT Designs" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
-    images: ["https://yaftdesigns.com/assets/images/profile.jpeg"],
+    images: ["https://yaftdesigns.com/favicon-512.png"],
   },
 };
 
