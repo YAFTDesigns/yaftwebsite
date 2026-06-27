@@ -248,6 +248,11 @@ export default function HomePage() {
 
             </div>
           </div>
+
+          <div className={styles.carouselTagline}>
+            <p>Not recorded. Not pre-packaged. Every session is live, every question gets answered.</p>
+            <p className={styles.carouselTaglineSub}>Built around real facade and fabrication projects running across five countries, so what you learn on Monday shows up in your portfolio by Friday. For B.Arch, M.Arch, and working designers ready to stop watching tutorials and start building things that get built.</p>
+          </div>
         </section>
 
         <section id="services" className={styles.servicesSection}>
