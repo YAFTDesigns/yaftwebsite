@@ -48,7 +48,7 @@ const TERMS = [
   },
   {
     title: '10. Certificates',
-    body: 'On successful completion of a paid course or workshop, YAFT Designs will issue a certificate of completion. These certificates confirm participation and completion of the program. They are informal and do not carry any statutory or regulatory credential.',
+    body: 'On successful completion of a paid course or workshop, YAFT Designs will issue a certificate of completion. Certificates are issued by YAFT Designs, an Authorized Rhino Training Center recognized by McNeel and Associates, the makers of Rhino3D. They are not formal academic qualifications but confirm completion of training delivered by a McNeel-recognized instructor and center.',
   },
   {
     title: '11. Privacy and Communications',
