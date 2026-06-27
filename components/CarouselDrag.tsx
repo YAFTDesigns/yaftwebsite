@@ -57,7 +57,7 @@ export default function CarouselDrag({ id }: { id: string }) {
     }
 
     function runMomentum() {
-      if (Math.abs(velocity) < 0.5) return;
+      if (!track || Math.abs(velocity) < 0.5) return;
       track.scrollLeft += velocity;
       velocity *= 0.92; // friction — higher = more glide
       momentumRaf = requestAnimationFrame(runMomentum);
