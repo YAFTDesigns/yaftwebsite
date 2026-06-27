@@ -250,7 +250,6 @@ export default function HomePage() {
           </div>
 
           <div className={styles.carouselTagline}>
-            <p>Essential skills for designers who mean business, built with industrial expertise.</p>
             <p className={styles.carouselTaglineSub}>Not tool tutorials. Structured masterclasses drawn from live facade, fabrication, and computational design projects across five countries. You leave with skills that land in your portfolio, your studio, and your next brief, not just your software menu.</p>
           </div>
         </section>
