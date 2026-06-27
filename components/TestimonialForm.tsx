@@ -14,6 +14,8 @@ export default function TestimonialForm() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
@@ -75,6 +77,7 @@ export default function TestimonialForm() {
       instagram_url: form.instagram_url,
       show_social: form.show_social,
       photo_url,
+      rating: rating || 5.0,
       status: 'pending',
     }]);
 
@@ -182,6 +185,40 @@ export default function TestimonialForm() {
               onChange={e => set('course_taken', e.target.value)}
               placeholder="IIT Kharagpur 2025 workshop, Grasshopper course..."
             />
+          </div>
+        </div>
+
+        {/* Star rating */}
+        <div className={styles.field}>
+          <label className={styles.label}>Your rating</label>
+          <div className={styles.starsInput}>
+            {[1, 2, 3, 4, 5].map(star => (
+              <span
+                key={star}
+                className={styles.starWrap}
+                onMouseLeave={() => setHoverRating(0)}
+              >
+                {/* Left half */}
+                <span
+                  className={`${styles.starHalf} ${styles.starLeft} ${(hoverRating || rating) >= star - 0.5 ? styles.starActive : ''}`}
+                  onMouseEnter={() => setHoverRating(star - 0.5)}
+                  onClick={() => setRating(star - 0.5)}
+                >
+                  ★
+                </span>
+                {/* Right half */}
+                <span
+                  className={`${styles.starHalf} ${styles.starRight} ${(hoverRating || rating) >= star ? styles.starActive : ''}`}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onClick={() => setRating(star)}
+                >
+                  ★
+                </span>
+              </span>
+            ))}
+            <span className={styles.ratingVal}>
+              {(hoverRating || rating) > 0 ? `${(hoverRating || rating).toFixed(1)} / 5` : ''}
+            </span>
           </div>
         </div>
 
