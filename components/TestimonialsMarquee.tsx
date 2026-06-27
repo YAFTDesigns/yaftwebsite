@@ -93,6 +93,19 @@ function renderStars(rating: number) {
   return <div style={{ fontSize: 16, letterSpacing: 2, marginBottom: 10 }}>{stars}</div>;
 }
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom<T>(arr: T[], n: number): T[] {
+  return shuffle(arr).slice(0, n);
+}
+
 function initials(name: string) {
   if (!name || name === 'Anonymous') return '?';
   return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -113,12 +126,15 @@ export default function TestimonialsMarquee() {
   const [items, setItems] = useState<Testimonial[]>(HARDCODED);
 
   useEffect(() => {
+    // Shuffle hardcoded on mount
+    setItems(shuffle(HARDCODED));
+
     supabase
       .from('testimonials')
       .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating')
       .eq('status', 'approved')
       .order('reviewed_at', { ascending: false })
-      .limit(15)
+      .limit(50) // fetch up to 50, then randomly pick 15
       .then(({ data }) => {
         if (data && data.length > 0) {
           const fromDb: Testimonial[] = data.map((t: any) => ({
@@ -131,7 +147,9 @@ export default function TestimonialsMarquee() {
             photo_url: t.photo_url || '',
             rating: t.rating || 5.0,
           }));
-          setItems([...HARDCODED, ...fromDb]);
+          // Merge all, shuffle, pick max 15
+          const merged = [...HARDCODED, ...fromDb];
+          setItems(pickRandom(merged, 15));
         }
       });
   }, []);
