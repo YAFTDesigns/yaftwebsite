@@ -69,7 +69,6 @@
 }
 
 .rirBox img {
-  filter: invert(1);
 }
 
 .rhinoBox:hover { transform: scale(1.12); box-shadow: 0 0 0 2px var(--brass); }
