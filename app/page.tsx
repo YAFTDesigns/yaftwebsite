@@ -351,12 +351,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        <section id="community">
-          <div className="wrap">
-            <FeatureWall studentWork={studentWork} publications={publications} partners={partners} />
-          </div>
-        </section>
-
         <section id="faculty">
           <div className="wrap">
             <div className="eyebrow">FACULTY</div>
