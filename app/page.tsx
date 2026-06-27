@@ -173,6 +173,13 @@ export default function HomePage() {
               <h2>Live Masterclasses in Computational Design</h2>
               <p className="note"><Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
             </div>
+            <div className={styles.softwareStrip}>
+              <span className={styles.softwareName}>Rhino3D</span>
+              <span className={styles.softwareDot} aria-hidden="true">●</span>
+              <span className={styles.softwareName}>Grasshopper</span>
+              <span className={styles.softwareDot} aria-hidden="true">●</span>
+              <span className={styles.softwareName}>Rhino.Inside.Revit</span>
+            </div>
           </div>
 
           <div className={styles.carouselOuter}>
