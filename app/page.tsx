@@ -26,13 +26,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -48,7 +48,7 @@ const JSON_LD = {
   name: 'YAFT Designs',
   alternateName: 'YAFT Designs Computational Design Training',
   url: 'https://yaftdesigns.com',
-  logo: 'https://yaftdesigns.com/assets/logos/rhino_logo.jpeg',
+  logo: 'https://yaftdesigns.com/assets/images/og-image.jpg',
   description:
     'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India and online.',
   address: {

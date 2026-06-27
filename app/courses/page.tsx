@@ -25,13 +25,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/courses',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -51,23 +51,41 @@ const INTEREST_OPTIONS = [
 export default async function CoursesPage() {
   const courses = await getCourses();
 
+  const FALLBACK_COURSES = [
+    { title: 'Rhino3D for Architecture', desc: 'Comprehensive Rhino3D training for architecture students and professionals.' },
+    { title: 'Grasshopper for Computational Design', desc: 'Parametric and computational design using Grasshopper.' },
+    { title: 'Rhino.Inside.Revit', desc: 'BIM integration using Rhino.Inside.Revit for facade and AEC workflows.' },
+    { title: 'Wearables & Product Design', desc: '3D modeling for wearables, footwear, and product design using Rhino3D.' },
+  ];
+
   const courseJsonLd = {
     '@context': 'https://schema.org',
-    '@graph': courses.map((course) => ({
+    '@graph': (courses.length ? courses : FALLBACK_COURSES).map((course) => ({
       '@type': 'Course',
       name: course.title,
       description: course.desc,
+      inLanguage: ['en', 'ta'],
+      educationalLevel: 'Beginner to Advanced',
       provider: {
         '@type': 'Organization',
         name: 'YAFT Designs',
         sameAs: 'https://yaftdesigns.com',
       },
+      offers: {
+        '@type': 'Offer',
+        category: 'Paid',
+        availability: 'https://schema.org/InStock',
+        url: 'https://yaftdesigns.com/courses',
+      },
       hasCourseInstance: {
         '@type': 'CourseInstance',
         courseMode: ['onsite', 'online'],
-        location: {
-          '@type': 'Place',
-          name: 'Coimbatore, Tamil Nadu, India',
+        location: { '@type': 'Place', name: 'Coimbatore, Tamil Nadu, India' },
+        inLanguage: 'en',
+        instructor: {
+          '@type': 'Person',
+          name: 'Yokes Marapa',
+          url: 'https://yaftdesigns.com/faculty',
         },
       },
     })),
