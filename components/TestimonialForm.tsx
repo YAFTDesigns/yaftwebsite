@@ -143,12 +143,12 @@ export default function TestimonialForm() {
         {/* Name + Role */}
         <div className={styles.row}>
           <div className={styles.field}>
-            <label className={styles.label}>Full name <span className={styles.optional}>(optional)</span></label>
+            <label className={styles.label}>Name</label>
             <input
               className={styles.input}
               value={form.name}
               onChange={e => set('name', e.target.value)}
-              placeholder="Leave blank to stay anonymous"
+              placeholder="Your name"
             />
           </div>
           <div className={styles.field}>
