@@ -174,11 +174,20 @@ export default function HomePage() {
               <p className="note"><Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
             </div>
             <div className={styles.softwareStrip}>
-              <span className={styles.softwareName}>Rhino3D</span>
+              <div className={styles.softwareChip}>
+                <img src="/assets/logos/rhino-logo.png" alt="Rhino3D" className={styles.softwareLogo} />
+                <span className={styles.softwareName}>Rhino3D</span>
+              </div>
               <span className={styles.softwareDot} aria-hidden="true">●</span>
-              <span className={styles.softwareName}>Grasshopper</span>
+              <div className={styles.softwareChip}>
+                <img src="/assets/logos/grasshopper-logo.jpg" alt="Grasshopper" className={styles.softwareLogo} />
+                <span className={styles.softwareName}>Grasshopper</span>
+              </div>
               <span className={styles.softwareDot} aria-hidden="true">●</span>
-              <span className={styles.softwareName}>Rhino.Inside.Revit</span>
+              <div className={styles.softwareChip}>
+                <img src="/assets/logos/rhino-inside-revit-logo.png" alt="Rhino.Inside.Revit" className={styles.softwareLogo} />
+                <span className={styles.softwareName}>Rhino.Inside.Revit</span>
+              </div>
             </div>
           </div>
 
