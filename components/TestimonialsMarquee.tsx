@@ -19,6 +19,7 @@ const HARDCODED = [
     instagram: '',
     show_social: true,
     photo_url: '',
+    rating: 5.0,
   },
   {
     quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. His patience and dedication stood out the most.',
@@ -28,6 +29,7 @@ const HARDCODED = [
     instagram: 'https://www.instagram.com/lok_hesh',
     show_social: true,
     photo_url: '',
+    rating: 5.0,
   },
   {
     quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me.',
@@ -37,6 +39,7 @@ const HARDCODED = [
     instagram: '',
     show_social: true,
     photo_url: '',
+    rating: 5.0,
   },
   {
     quote: 'The course was well formatted for architects to design and work with Rhino. Yokes, as an instructor, was well-learned and a clear communicator.',
@@ -46,6 +49,7 @@ const HARDCODED = [
     instagram: 'https://www.instagram.com/unravellingarchitecture',
     show_social: true,
     photo_url: '',
+    rating: 5.0,
   },
   {
     quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice.',
@@ -55,6 +59,7 @@ const HARDCODED = [
     instagram: '',
     show_social: true,
     photo_url: '',
+    rating: 5.0,
   },
 ];
 
@@ -66,7 +71,27 @@ type Testimonial = {
   instagram: string;
   show_social: boolean;
   photo_url: string;
+  rating: number;
 };
+
+function renderStars(rating: number) {
+  const stars = [];
+  for (let i = 1; i <= 5; i++) {
+    if (rating >= i) {
+      stars.push(<span key={i} style={{ color: 'var(--brass)' }}>★</span>);
+    } else if (rating >= i - 0.5) {
+      stars.push(
+        <span key={i} style={{ position: 'relative', display: 'inline-block' }}>
+          <span style={{ color: 'rgba(255,255,255,0.15)' }}>★</span>
+          <span style={{ position: 'absolute', left: 0, top: 0, width: '50%', overflow: 'hidden', color: 'var(--brass)' }}>★</span>
+        </span>
+      );
+    } else {
+      stars.push(<span key={i} style={{ color: 'rgba(255,255,255,0.15)' }}>★</span>);
+    }
+  }
+  return <div style={{ fontSize: 16, letterSpacing: 2, marginBottom: 10 }}>{stars}</div>;
+}
 
 function initials(name: string) {
   if (!name || name === 'Anonymous') return '?';
@@ -90,7 +115,7 @@ export default function TestimonialsMarquee() {
   useEffect(() => {
     supabase
       .from('testimonials')
-      .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url')
+      .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating')
       .eq('status', 'approved')
       .order('reviewed_at', { ascending: false })
       .limit(15)
@@ -104,6 +129,7 @@ export default function TestimonialsMarquee() {
             instagram: t.instagram_url || '',
             show_social: t.show_social || false,
             photo_url: t.photo_url || '',
+            rating: t.rating || 5.0,
           }));
           setItems([...HARDCODED, ...fromDb]);
         }
@@ -126,7 +152,7 @@ export default function TestimonialsMarquee() {
           {doubled.map((t, i) => (
             <div className={styles.card} key={i}>
               <div className={styles.alumniBadge}>YAFT Designs Alumni</div>
-              <div className={styles.stars}>★★★★★</div>
+              {renderStars(t.rating)}
               <p className={styles.quote}>{t.quote}</p>
               <div className={styles.person}>
                 <Avatar name={t.name} photo_url={t.photo_url} />
