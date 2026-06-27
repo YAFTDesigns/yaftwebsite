@@ -8,6 +8,7 @@ import EnquireLink from '@/components/EnquireLink';
 import FaqAccordion from '@/components/FaqAccordion';
 import Hero3D from '@/components/Hero3D';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
+import CarouselDrag from '@/components/CarouselDrag';
 import styles from './home.module.css';
 
 const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs';
@@ -169,60 +170,91 @@ export default function HomePage() {
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <div className="section-head">
-              <h2>A selection of courses</h2>
-              <p className="note">6 courses available. <Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
+              <h2>Live Masterclasses in Computational Design</h2>
+              <p className="note"><Link href="/courses" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>See the full list →</Link></p>
             </div>
+          </div>
 
-            <div className={styles.courseGrid}>
-              <div className={styles.courseCard}>
-                <div className={styles.courseTop}>
-                  <h3>Rhino3D for Architecture</h3>
-                  <span className={styles.courseTag}>Beginner→Inter</span>
-                </div>
-                <p>NURBS modeling fundamentals through to freeform architectural geometry, documentation, and presentation-ready output.</p>
-                <div className={styles.courseFoot}>
-                  <span className={styles.fmt}>1:1 or cohort</span>
-                  <EnquireLink course="Rhino3D for Architecture" />
-                </div>
-              </div>
+          <div className={styles.carouselOuter}>
+            <CarouselDrag id="courseTrack" />
+            <div className={styles.carouselTrack} id="courseTrack">
 
-              <div className={styles.courseCard}>
-                <div className={styles.courseTop}>
-                  <h3>Grasshopper for Computational Design</h3>
-                  <span className={styles.courseTag}>Intermediate</span>
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/rhino-architecture.jpg" alt="Rhino3D for Architecture" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>Beginner → Inter</span>
+                  <h3 className={styles.cardTitle}>Rhino3D for Architecture</h3>
+                  <span className={styles.cardCta}>Enquire</span>
                 </div>
-                <p>Parametric logic, data structures, and rationalization workflows, built around real panel and facade problems from live projects.</p>
-                <div className={styles.courseFoot}>
-                  <span className={styles.fmt}>1:1 or cohort</span>
-                  <EnquireLink course="Grasshopper for Computational Design" />
-                </div>
-              </div>
+              </Link>
 
-              <div className={styles.courseCard}>
-                <div className={styles.courseTop}>
-                  <h3>Rhino.Inside.Revit</h3>
-                  <span className={styles.courseTag}>Advanced</span>
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/grasshopper-architecture.jpg" alt="Grasshopper" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>Basic → Advanced</span>
+                  <h3 className={styles.cardTitle}>Grasshopper for Computational Design</h3>
+                  <span className={styles.cardCta}>Enquire</span>
                 </div>
-                <p>Bridging parametric Rhino/Grasshopper workflows directly into Revit, for teams who need both design freedom and BIM compliance.</p>
-                <div className={styles.courseFoot}>
-                  <span className={styles.fmt}>1:1 or team</span>
-                  <EnquireLink course="Rhino.Inside.Revit" />
-                </div>
-              </div>
+              </Link>
 
-              <div className={styles.courseCard}>
-                <div className={styles.courseTop}>
-                  <h3>Wearables &amp; Product Design</h3>
-                  <span className={styles.courseTag}>All levels</span>
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/revit-rhino-inside.jpg" alt="Rhino.Inside.Revit" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>Advanced</span>
+                  <h3 className={styles.cardTitle}>Rhino.Inside.Revit</h3>
+                  <span className={styles.cardCta}>Enquire</span>
                 </div>
-                <p>Applying Rhino and Grasshopper to wearable and product geometry, fit, surface continuity, and prep for fabrication or 3D printing.</p>
-                <div className={styles.courseFoot}>
-                  <span className={styles.fmt}>1:1 or workshop</span>
-                  <EnquireLink course="Wearables & Product Design" />
+              </Link>
+
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/rhino-aec-climate.jpg" alt="AEC & Climate Design" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>Intermediate</span>
+                  <h3 className={styles.cardTitle}>Rhino3D for AEC &amp; Climate Design</h3>
+                  <span className={styles.cardCta}>Enquire</span>
                 </div>
-              </div>
+              </Link>
+
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/rhino-wearables-footwear.jpg" alt="Wearables & Product Design" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>All levels</span>
+                  <h3 className={styles.cardTitle}>Wearables &amp; Product Design</h3>
+                  <span className={styles.cardCta}>Enquire</span>
+                </div>
+              </Link>
+
+              <Link href="/courses" className={styles.courseImgCard}>
+                <img src="/assets/images/courses/rhino-industrial-design.jpg" alt="Industrial Design" draggable="false" />
+                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                <div className={styles.glassOverlay}></div>
+                <div className={styles.cardGradient}></div>
+                <div className={styles.cardContent}>
+                  <span className={styles.cardTag}>All levels</span>
+                  <h3 className={styles.cardTitle}>Industrial Design</h3>
+                  <span className={styles.cardCta}>Enquire</span>
+                </div>
+              </Link>
+
             </div>
+          </div>
 
+          <div className="wrap">
             <div className="software-note">
               <span>YAFT Designs provides training and consulting only, we don&apos;t sell or resell Rhino licenses.</span>
               <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
