@@ -47,6 +47,11 @@ export default function AdminTestimonialsPage() {
 
   useEffect(() => { load(); }, [filter]);
 
+  useEffect(() => {
+    const interval = setInterval(() => { load(); }, 20000);
+    return () => clearInterval(interval);
+  }, [filter]);
+
   async function updateStatus(id: string, status: 'approved' | 'rejected') {
     setActionId(id);
     await supabase
