@@ -265,55 +265,52 @@ export default function HomePage() {
                 <h2>Beyond the classroom</h2>
               </div>
             </div>
-            <div className={styles.servicesList}>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>01</span>
-                <span className={styles.serviceArrow}>↗</span>
-                <h3>One-on-one training</h3>
-                <p>Paced to your project or portfolio, in person in Coimbatore or remote, for individuals or small teams.</p>
-                <ul className={styles.serviceBullets}>
+            <div className={styles.servicesGrid}>
+
+              <div className={styles.svcCard}>
+                <h3 className={styles.svcTitle} style={{ color: '#40E0D0' }}>One-on-One Training</h3>
+                <p className={styles.svcBody}>Paced to your project or portfolio, in person in Coimbatore or remote. Built around what you are actually working on, not a generic syllabus.</p>
+                <ul className={styles.svcList}>
                   <li>Rhino3D, Grasshopper, Rhino.Inside.Revit</li>
                   <li>Sessions built around your live project</li>
                   <li>Flexible pacing, 1:1 or small cohort</li>
                   <li>Available online across India</li>
                 </ul>
               </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>02</span>
-                <span className={styles.serviceArrow}>↗</span>
-                <h3>Instructional and corporate training</h3>
-                <p>Multi-day or semester-length programs for architecture schools, delivered on campus or online.</p>
-                <ul className={styles.serviceBullets}>
+
+              <div className={styles.svcCard}>
+                <h3 className={styles.svcTitle} style={{ color: '#E6A817' }}>Institutional &amp; Corporate Training</h3>
+                <p className={styles.svcBody}>Multi-day or semester-length programs for architecture schools and design firms, delivered on campus or online. Curriculum shaped to your context.</p>
+                <ul className={styles.svcList}>
                   <li>Conducted at IIT Kharagpur, VIT, ASADI, NIT Trichy</li>
                   <li>Parametric design, fabrication, climate analysis</li>
-                  <li>Customised to the institution&apos;s curriculum</li>
+                  <li>Customised to institution curriculum</li>
                   <li>Certificates issued on completion</li>
                 </ul>
               </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>03</span>
-                <span className={styles.serviceArrow}>↗</span>
-                <h3>Expert mentorship</h3>
-                <p>Structured computational design modules for schools looking to add Rhino and Grasshopper to their curriculum.</p>
-                <ul className={styles.serviceBullets}>
+
+              <div className={styles.svcCard}>
+                <h3 className={styles.svcTitle} style={{ color: '#A78BFA' }}>Expert Mentorship</h3>
+                <p className={styles.svcBody}>Embedded visiting faculty for schools adding Rhino and Grasshopper to their curriculum. Semester-length or elective module format at B.Arch and M.Arch levels.</p>
+                <ul className={styles.svcList}>
                   <li>Currently at VIT Vellore and ASADI College</li>
                   <li>Semester-length or elective module format</li>
                   <li>M.Arch and B.Arch levels</li>
                   <li>Open to new institutional partnerships</li>
                 </ul>
               </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>04</span>
-                <span className={styles.serviceArrow}>↗</span>
-                <h3>Computational consulting</h3>
-                <p>Panel rationalization, facade scripting, and fabrication documentation for studios and contractors.</p>
-                <ul className={styles.serviceBullets}>
+
+              <div className={styles.svcCard}>
+                <h3 className={styles.svcTitle} style={{ color: '#E63946' }}>Computational Consulting</h3>
+                <p className={styles.svcBody}>Panel rationalization, facade scripting, and fabrication documentation for studios and contractors. Active on projects across five countries.</p>
+                <ul className={styles.svcList}>
                   <li>Double-curved surface rationalization</li>
                   <li>Shop drawing automation via Grasshopper</li>
                   <li>Rhino.Inside.Revit BIM integration</li>
                   <li>Active on projects across 5 countries</li>
                 </ul>
               </div>
+
             </div>
           </div>
         </section>
