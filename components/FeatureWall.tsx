@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import type { StudentWork, Publication, Partner } from '@/lib/feature-wall';
 import styles from './FeatureWall.module.css';
@@ -12,13 +12,57 @@ const supabase = createClient(
 
 const TOOL_LABEL: Record<string, string> = { rhino: 'Rhino3D', grasshopper: 'Grasshopper', rir: 'RIR' };
 const PLACEHOLDERS = [1, 2, 3, 4];
+const DESC_MAX = 300;
+const IMG_MAX_MB = 2;
+const IMG_MAX_BYTES = IMG_MAX_MB * 1024 * 1024;
 
 type Props = { studentWork: StudentWork[]; publications: Publication[]; partners: Partner[]; };
-type WorkForm = { name: string; role: string; project_title: string; tool: string; category: string; description: string; portfolio_url: string; };
-type PubForm  = { author_name: string; author_role: string; title: string; magazine: string; pub_month: string; pub_year: string; description: string; article_url: string; };
+type WorkForm = {
+  name: string; role: string; project_title: string;
+  tool: string; category: string; description: string; portfolio_url: string;
+};
+type PubForm = {
+  author_name: string; author_role: string; title: string;
+  magazine: string; pub_month: string; pub_year: string;
+  description: string; article_url: string;
+};
 
 const EMPTY_WORK: WorkForm = { name: '', role: '', project_title: '', tool: 'rhino', category: '', description: '', portfolio_url: '' };
 const EMPTY_PUB:  PubForm  = { author_name: '', author_role: '', title: '', magazine: '', pub_month: '', pub_year: '', description: '', article_url: '' };
+
+function FileInput({ label, accept, maxMB, multiple, maxFiles, onChange }: {
+  label: string; accept: string; maxMB: number; multiple?: boolean; maxFiles?: number;
+  onChange: (files: File[]) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [names, setNames]   = useState<string[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  function handle(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = Array.from(e.target.files ?? []);
+    const errs: string[] = [];
+    const valid: File[] = [];
+    raw.slice(0, maxFiles ?? 1).forEach(f => {
+      if (f.size > maxMB * 1024 * 1024) errs.push(`${f.name} exceeds ${maxMB}MB`);
+      else valid.push(f);
+    });
+    setErrors(errs);
+    setNames(valid.map(f => f.name));
+    onChange(valid);
+  }
+
+  return (
+    <div>
+      <button type="button" className={styles.fileBtn} onClick={() => ref.current?.click()}>
+        {names.length ? `${names.length} file${names.length > 1 ? 's' : ''} selected` : label}
+      </button>
+      <input ref={ref} type="file" accept={accept} multiple={multiple} style={{ display: 'none' }} onChange={handle} />
+      {names.length > 0 && <p className={styles.fileNames}>{names.join(', ')}</p>}
+      {errors.map((e, i) => <p key={i} className={styles.fileError}>{e}</p>)}
+      <p className={styles.fileCap}>Max {maxMB}MB per file{maxFiles ? ` · up to ${maxFiles} images` : ''}</p>
+    </div>
+  );
+}
 
 export default function FeatureWall({ studentWork, publications, partners }: Props) {
   const [tab, setTab] = useState<'students' | 'publications' | 'partners'>('students');
@@ -26,15 +70,54 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
   const [showPubForm,  setShowPubForm]  = useState(false);
   const [workForm, setWorkForm] = useState<WorkForm>(EMPTY_WORK);
   const [pubForm,  setPubForm]  = useState<PubForm>(EMPTY_PUB);
+  const [profilePhoto,   setProfilePhoto]   = useState<File[]>([]);
+  const [projectImages,  setProjectImages]  = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [workDone,   setWorkDone]   = useState(false);
   const [pubDone,    setPubDone]    = useState(false);
+  const [workError,  setWorkError]  = useState('');
+
+  async function uploadFile(file: File, path: string): Promise<string | null> {
+    const ext = file.name.split('.').pop();
+    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error } = await supabase.storage.from('site-images').upload(`${path}/${name}`, file, { upsert: false });
+    if (error) return null;
+    return name;
+  }
 
   async function submitWork() {
-    if (!workForm.name || !workForm.project_title || !workForm.description) return;
+    setWorkError('');
+    if (!workForm.name || !workForm.project_title || !workForm.description) {
+      setWorkError('Please fill in all required fields.');
+      return;
+    }
+    if (workForm.description.length > DESC_MAX) {
+      setWorkError(`Description must be ${DESC_MAX} characters or less.`);
+      return;
+    }
     setSubmitting(true);
-    await supabase.from('student_work').insert([{ ...workForm, status: 'pending' }]);
+
+    // upload profile photo
+    let profile_photo_url: string | null = null;
+    if (profilePhoto[0]) profile_photo_url = await uploadFile(profilePhoto[0], 'student-work/photos');
+
+    // upload project images
+    const project_image_urls: string[] = [];
+    for (const img of projectImages.slice(0, 3)) {
+      const url = await uploadFile(img, 'student-work/images');
+      if (url) project_image_urls.push(url);
+    }
+
+    await supabase.from('student_work').insert([{
+      ...workForm,
+      status: 'pending',
+      profile_photo_url,
+      project_image_urls: project_image_urls.length ? project_image_urls : null,
+    }]);
+
     setWorkForm(EMPTY_WORK);
+    setProfilePhoto([]);
+    setProjectImages([]);
     setShowWorkForm(false);
     setWorkDone(true);
     setSubmitting(false);
@@ -44,7 +127,11 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
   async function submitPub() {
     if (!pubForm.author_name || !pubForm.title || !pubForm.description || !pubForm.pub_year) return;
     setSubmitting(true);
-    await supabase.from('publications').insert([{ ...pubForm, pub_year: parseInt(pubForm.pub_year), status: 'pending' }]);
+    await supabase.from('publications').insert([{
+      ...pubForm,
+      pub_year: parseInt(pubForm.pub_year),
+      status: 'pending',
+    }]);
     setPubForm(EMPTY_PUB);
     setShowPubForm(false);
     setPubDone(true);
@@ -52,12 +139,15 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
     setTimeout(() => setPubDone(false), 5000);
   }
 
-  const field = (label: string, node: React.ReactNode) => (
+  const field = (label: string, node: React.ReactNode, hint?: string) => (
     <div className={styles.formRow}>
       <label className={styles.formLabel}>{label}</label>
       {node}
+      {hint && <p className={styles.fieldHint}>{hint}</p>}
     </div>
   );
+
+  const descLeft = DESC_MAX - workForm.description.length;
 
   return (
     <div className={styles.wall}>
@@ -108,7 +198,9 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
               </div>
             ))}
           </div>
+
           {workDone && <p className={styles.successMsg}>Submitted! We'll review and feature it soon.</p>}
+
           {!showWorkForm
             ? <div className={styles.submitRow}>
                 <button className={styles.submitBtn} onClick={() => setShowWorkForm(true)}>Submit your work →</button>
@@ -116,16 +208,48 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
               </div>
             : <div className={styles.form}>
                 <p className={styles.formTitle}>Submit your project</p>
+
                 {field('Your name *', <input className={styles.input} value={workForm.name} onChange={e => setWorkForm(f => ({...f, name: e.target.value}))} placeholder="Arjun R." />)}
                 {field('Role / Institution *', <input className={styles.input} value={workForm.role} onChange={e => setWorkForm(f => ({...f, role: e.target.value}))} placeholder="M.Arch VIT" />)}
                 {field('Project title *', <input className={styles.input} value={workForm.project_title} onChange={e => setWorkForm(f => ({...f, project_title: e.target.value}))} placeholder="Parametric Facade Rationalization" />)}
-                {field('Tool used', <select className={styles.input} value={workForm.tool} onChange={e => setWorkForm(f => ({...f, tool: e.target.value}))}><option value="rhino">Rhino3D</option><option value="grasshopper">Grasshopper</option><option value="rir">Rhino.Inside.Revit</option></select>)}
+                {field('Tool used', <select className={styles.input} value={workForm.tool} onChange={e => setWorkForm(f => ({...f, tool: e.target.value}))}>
+                  <option value="rhino">Rhino3D</option>
+                  <option value="grasshopper">Grasshopper</option>
+                  <option value="rir">Rhino.Inside.Revit</option>
+                </select>)}
                 {field('Category', <input className={styles.input} value={workForm.category} onChange={e => setWorkForm(f => ({...f, category: e.target.value}))} placeholder="Facade, BIM, Fabrication..." />)}
-                {field('Description *', <textarea className={styles.input} rows={3} value={workForm.description} onChange={e => setWorkForm(f => ({...f, description: e.target.value}))} placeholder="What you built and how you used the tools." />)}
+
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>Description * <span className={descLeft < 50 ? styles.capWarn : styles.capOk}>{descLeft} left</span></label>
+                  <textarea
+                    className={styles.input}
+                    rows={3}
+                    maxLength={DESC_MAX}
+                    value={workForm.description}
+                    onChange={e => setWorkForm(f => ({...f, description: e.target.value}))}
+                    placeholder="What you built and how you used the tools."
+                  />
+                </div>
+
                 {field('Portfolio / LinkedIn URL', <input className={styles.input} value={workForm.portfolio_url} onChange={e => setWorkForm(f => ({...f, portfolio_url: e.target.value}))} placeholder="https://linkedin.com/in/..." />)}
+
+                <div className={styles.formDivider} />
+
+                {field('Profile photo (optional)',
+                  <FileInput label="Choose photo" accept="image/*" maxMB={IMG_MAX_MB} onChange={setProfilePhoto} />,
+                  'A headshot or professional photo. Max 2MB.'
+                )}
+
+                {field('Project images (optional · 2–3 recommended)',
+                  <FileInput label="Choose images" accept="image/*" maxMB={IMG_MAX_MB} multiple maxFiles={3} onChange={setProjectImages} />,
+                  'Screenshots, renders, or drawings showing your work. Max 2MB each.'
+                )}
+
+                {workError && <p className={styles.fileError}>{workError}</p>}
+
                 <div className={styles.formActions}>
-                  <button className={styles.submitBtn} onClick={submitWork} disabled={submitting}>{submitting ? 'Submitting…' : 'Submit →'}</button>
-                  <button className={styles.cancelBtn} onClick={() => setShowWorkForm(false)}>Cancel</button>
+                  <button className={styles.submitBtn} onClick={submitWork} disabled={submitting}>{submitting ? 'Uploading…' : 'Submit →'}</button>
+                  <button className={styles.cancelBtn} onClick={() => { setShowWorkForm(false); setWorkError(''); }}>Cancel</button>
                 </div>
               </div>
           }
@@ -157,7 +281,9 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
             <div className={styles.pubPh}><span className={styles.pubPhYr}>——</span><p className={styles.pubPhText}>Your paper, article, or thesis using Rhino or Grasshopper? Submit it here.</p></div>
             <div className={styles.pubPh}><span className={styles.pubPhYr}>——</span><p className={styles.pubPhText}>Research in computational design, BIM automation, or parametric fabrication welcome.</p></div>
           </div>
+
           {pubDone && <p className={styles.successMsg}>Submitted! We'll review and publish it soon.</p>}
+
           {!showPubForm
             ? <div className={styles.submitRow} style={{ marginTop: 20 }}>
                 <button className={styles.submitBtn} onClick={() => setShowPubForm(true)}>Submit a publication →</button>
