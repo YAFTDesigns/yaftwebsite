@@ -57,7 +57,7 @@ export default function TestimonialForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name || !form.role || !form.quote) return;
+    if (!form.role || !form.quote) return;
     setStatus('submitting');
 
     let photo_url: string | null = null;
@@ -66,7 +66,7 @@ export default function TestimonialForm() {
     }
 
     const { error } = await supabase.from('testimonials').insert([{
-      name: form.name,
+      name: form.name.trim() || 'Anonymous',
       role: form.role,
       institution: form.institution,
       course_taken: form.course_taken,
@@ -143,13 +143,12 @@ export default function TestimonialForm() {
         {/* Name + Role */}
         <div className={styles.row}>
           <div className={styles.field}>
-            <label className={styles.label}>Full name <span className={styles.req}>*</span></label>
+            <label className={styles.label}>Full name <span className={styles.optional}>(optional)</span></label>
             <input
               className={styles.input}
               value={form.name}
               onChange={e => set('name', e.target.value)}
-              placeholder="Ar. Priya Sharma"
-              required
+              placeholder="Leave blank to stay anonymous"
             />
           </div>
           <div className={styles.field}>
