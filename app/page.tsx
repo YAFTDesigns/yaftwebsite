@@ -253,13 +253,6 @@ export default function HomePage() {
 
             </div>
           </div>
-
-          <div className="wrap">
-            <div className="software-note">
-              <span>YAFT Designs provides training and consulting only, we don&apos;t sell or resell Rhino licenses.</span>
-              <span>Need the software? Get it directly from <a href="https://www.rhino3d.com" target="_blank" rel="noopener">McNeel, the makers of Rhino →</a></span>
-            </div>
-          </div>
         </section>
 
         <section id="services" className={styles.servicesSection}>
