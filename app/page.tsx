@@ -250,8 +250,8 @@ export default function HomePage() {
           </div>
 
           <div className={styles.carouselTagline}>
-            <p>Not recorded. Not pre-packaged. Every session is live, every question gets answered.</p>
-            <p className={styles.carouselTaglineSub}>Built around real facade and fabrication projects running across five countries, so what you learn on Monday shows up in your portfolio by Friday. For B.Arch, M.Arch, and working designers ready to stop watching tutorials and start building things that get built.</p>
+            <p>Essential skills for designers who mean business, built with industrial expertise.</p>
+            <p className={styles.carouselTaglineSub}>Not tool tutorials. Structured masterclasses drawn from live facade, fabrication, and computational design projects across five countries. You leave with skills that land in your portfolio, your studio, and your next brief, not just your software menu.</p>
           </div>
         </section>
 
