@@ -17,13 +17,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/resources',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -35,6 +35,37 @@ const RESOURCES_JSON_LD = {
   description: 'Video tutorials, walkthroughs and learning resources for Rhino3D, Grasshopper and computational design by YAFT Designs.',
   publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
 };
+
+const BOOKS = [
+  {
+    title: 'AAD Algorithms-Aided Design',
+    author: 'Arturo Tedeschi',
+    desc: 'The definitive Grasshopper textbook. Covers parametric strategies, data trees, and fabrication logic. Essential for anyone serious about computational design.',
+    tag: 'Grasshopper',
+    url: 'https://www.amazon.in/AAD-Algorithms-Aided-Design-Parametric-Grasshopper/dp/8895315308',
+  },
+  {
+    title: 'Advanced 3D Printing with Grasshopper',
+    author: 'Diego Pinochet',
+    desc: 'Clay and FDM workflows using Grasshopper for additive manufacturing. Highly practical — bridges parametric design and physical output.',
+    tag: 'Grasshopper · Fabrication',
+    url: 'https://www.amazon.in/Advanced-3D-Printing-Grasshopper%C2%AE-Clay/dp/B086Y7CLLC',
+  },
+  {
+    title: 'Essential Algorithms and Data Structures for Grasshopper',
+    author: 'Robert McNeel & Associates',
+    desc: 'Free primer on data structures, lists, trees, and algorithmic thinking in Grasshopper. Read this before anything else if you are new to parametric logic.',
+    tag: 'Grasshopper · Free',
+    url: 'https://www.food4rhino.com/en/resource/essential-algorithms-and-data-structures-grasshopper-2nd-edition',
+  },
+  {
+    title: 'Computational Design Thinking',
+    author: 'Achim Menges & Sean Ahlquist',
+    desc: 'AD Reader that frames computational design as a design discipline, not just a software skill. Theory-heavy but essential context for architecture students.',
+    tag: 'Theory · Architecture',
+    url: 'https://www.amazon.in/Computational-Design-Thinking-Computation-Reader/dp/0470665653',
+  },
+];
 
 const INTEREST_OPTIONS = [
   'Rhino3D for Architecture',
@@ -94,9 +125,18 @@ export default function ResourcesPage() {
               <p className="note">Books worth your time, on computational design and beyond.</p>
             </div>
             <div className={styles.bookGrid}>
-              <div className={styles.bookPlaceholder}>List coming soon</div>
-              <div className={styles.bookPlaceholder}>List coming soon</div>
-              <div className={styles.bookPlaceholder}>List coming soon</div>
+              {BOOKS.map((b, i) => (
+                <a key={i} href={b.url} target="_blank" rel="noopener" className={styles.bookCard}>
+                  <div className={styles.bookNum}>0{i + 1}</div>
+                  <div className={styles.bookBody}>
+                    <p className={styles.bookTitle}>{b.title}</p>
+                    <p className={styles.bookAuthor}>{b.author}</p>
+                    <p className={styles.bookDesc}>{b.desc}</p>
+                    <span className={styles.bookTag}>{b.tag}</span>
+                  </div>
+                  <span className={styles.bookArrow}>↗</span>
+                </a>
+              ))}
             </div>
           </div>
         </section>
