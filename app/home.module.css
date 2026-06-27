@@ -147,6 +147,7 @@
   position: relative;
   overflow: hidden;
   padding: 12px 0 28px;
+  z-index: 1;
 }
 
 .carouselOuter::before,
@@ -373,6 +374,8 @@
   margin: 48px auto 0;
   padding: 0 24px;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .carouselTagline p {

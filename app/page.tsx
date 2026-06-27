@@ -10,6 +10,7 @@ import Hero3D from '@/components/Hero3D';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import CarouselDrag from '@/components/CarouselDrag';
 import CarouselProgress from '@/components/CarouselProgress';
+import ContourCanvas from '@/components/ContourCanvas';
 import CoursesHeroBlock from '@/components/CoursesHeroBlock';
 import styles from './home.module.css';
 
@@ -168,7 +169,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="courses">
+        <section id="courses" style={{ position: 'relative', overflow: 'hidden' }}>
+          <ContourCanvas />
           <CoursesHeroBlock />
 
           <div className={styles.carouselOuter}>
