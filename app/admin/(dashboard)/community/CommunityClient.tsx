@@ -169,10 +169,10 @@ export default function AdminCommunityPage() {
       {/* section tabs */}
       <div className={styles.tabs}>
         <button className={`${styles.tab} ${section === 'student_work' ? styles.activeTab : ''}`} onClick={() => setSection('student_work')}>
-          Student Work {counts.sw_pending > 0 && <span className={styles.badge}>{counts.sw_pending}</span>}
+          Student Work
         </button>
         <button className={`${styles.tab} ${section === 'publications' ? styles.activeTab : ''}`} onClick={() => setSection('publications')}>
-          Publications {counts.pub_pending > 0 && <span className={styles.badge}>{counts.pub_pending}</span>}
+          Publications
         </button>
         <button className={`${styles.tab} ${section === 'partners' ? styles.activeTab : ''}`} onClick={() => setSection('partners')}>
           Partners
