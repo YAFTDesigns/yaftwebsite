@@ -7,7 +7,7 @@ import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
-const TITLE = 'BIM Consulting & Computational Design Services | YAFT Designs';
+const TITLE = 'BIM Consulting & Computational Design Services';
 const DESCRIPTION =
   'Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.';
 
@@ -160,7 +160,7 @@ export default function ServicesPage() {
         <section className="page-hero">
           <div className="wrap">
             <div className="eyebrow">SERVICES</div>
-            <h1>Computational design execution: from parametric facade to fabrication-ready output.</h1>
+            <h1 style={{ fontFamily: 'var(--body)', fontWeight: 400, letterSpacing: '-0.01em' }}>Computational design execution: from parametric facade to fabrication-ready output.</h1>
             <p className="lede">YAFT Designs works alongside studios, contractors, and institutions, covering live facade scripting, shop drawing automation, and structured training, drawn from work running across five countries.</p>
           </div>
         </section>
