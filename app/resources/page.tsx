@@ -43,6 +43,7 @@ const BOOKS = [
     desc: 'The definitive Grasshopper textbook. Covers parametric strategies, data trees, and fabrication logic. Essential for anyone serious about computational design.',
     tag: 'Grasshopper',
     url: 'https://www.amazon.in/AAD-Algorithms-Aided-Design-Parametric-Grasshopper/dp/8895315308',
+    cover: 'https://covers.openlibrary.org/b/isbn/9788895315300-L.jpg',
   },
   {
     title: 'Advanced 3D Printing with Grasshopper',
@@ -50,6 +51,7 @@ const BOOKS = [
     desc: 'Clay and FDM workflows using Grasshopper for additive manufacturing. Highly practical — bridges parametric design and physical output.',
     tag: 'Grasshopper · Fabrication',
     url: 'https://www.amazon.in/Advanced-3D-Printing-Grasshopper%C2%AE-Clay/dp/B086Y7CLLC',
+    cover: 'https://covers.openlibrary.org/b/isbn/B086Y7CLLC-L.jpg',
   },
   {
     title: 'Essential Algorithms and Data Structures for Grasshopper',
@@ -57,6 +59,7 @@ const BOOKS = [
     desc: 'Free primer on data structures, lists, trees, and algorithmic thinking in Grasshopper. Read this before anything else if you are new to parametric logic.',
     tag: 'Grasshopper · Free',
     url: 'https://www.food4rhino.com/en/resource/essential-algorithms-and-data-structures-grasshopper-2nd-edition',
+    cover: null,
   },
   {
     title: 'Computational Design Thinking',
@@ -64,6 +67,7 @@ const BOOKS = [
     desc: 'AD Reader that frames computational design as a design discipline, not just a software skill. Theory-heavy but essential context for architecture students.',
     tag: 'Theory · Architecture',
     url: 'https://www.amazon.in/Computational-Design-Thinking-Computation-Reader/dp/0470665653',
+    cover: 'https://covers.openlibrary.org/b/isbn/9780470665657-L.jpg',
   },
 ];
 
@@ -127,6 +131,12 @@ export default function ResourcesPage() {
             <div className={styles.bookGrid}>
               {BOOKS.map((b, i) => (
                 <a key={i} href={b.url} target="_blank" rel="noopener" className={styles.bookCard}>
+                  <div className={styles.bookCover}>
+                    {b.cover
+                      ? <img src={b.cover} alt={b.title} />
+                      : <div className={styles.bookCoverPh}><span>📖</span></div>
+                    }
+                  </div>
                   <div className={styles.bookNum}>0{i + 1}</div>
                   <div className={styles.bookBody}>
                     <p className={styles.bookTitle}>{b.title}</p>
