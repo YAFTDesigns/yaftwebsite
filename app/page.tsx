@@ -16,9 +16,9 @@ import FeatureWall from '@/components/FeatureWall';
 import { getStudentWork, getPublications, getPartners } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
-const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs';
+const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific | YAFT Designs';
 const DESCRIPTION =
-  'Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.';
+  'Authorized Rhino3D Training Center based in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, Indonesia, Philippines and Japan.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -43,17 +43,33 @@ const AREA_SERVED_CITIES = [
   'Coimbatore', 'Chennai', 'Bangalore', 'Hyderabad', 'Mumbai', 'Pune',
   'Delhi', 'Kolkata', 'Ahmedabad', 'Visakhapatnam', 'Kochi', 'Trichy',
   'Madurai', 'Jaipur', 'Chandigarh',
+  'Sydney', 'Melbourne', 'Brisbane', 'Perth',
+  'Singapore',
+  'Jakarta', 'Surabaya', 'Bali',
+  'Manila', 'Cebu',
+  'Tokyo', 'Osaka',
+  'Hong Kong', 'Kuala Lumpur', 'Dubai', 'Muscat',
+];
+
+const AREA_SERVED_COUNTRIES = [
+  'India', 'Australia', 'Singapore', 'Indonesia',
+  'Philippines', 'Japan', 'Hong Kong', 'Malaysia',
+  'Oman', 'United Arab Emirates',
 ];
 
 const JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'EducationalOrganization',
   name: 'YAFT Designs',
-  alternateName: 'YAFT Designs Computational Design Training',
+  alternateName: [
+    'YAFT Designs Computational Design Training',
+    'YAFT Designs Rhino Training',
+    'Authorized Rhino Training Center India',
+  ],
   url: 'https://yaftdesigns.com',
   logo: 'https://yaftdesigns.com/assets/images/og-image.jpg',
   description:
-    'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India and online.',
+    'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India, Australia, Singapore, Indonesia, Philippines, Japan and online worldwide.',
   address: {
     '@type': 'PostalAddress',
     addressLocality: 'Coimbatore',
@@ -62,13 +78,13 @@ const JSON_LD = {
   },
   areaServed: [
     ...AREA_SERVED_CITIES.map((name) => ({ '@type': 'City', name })),
-    { '@type': 'Country', name: 'India' },
+    ...AREA_SERVED_COUNTRIES.map((name) => ({ '@type': 'Country', name })),
   ],
   contactPoint: {
     '@type': 'ContactPoint',
     email: 'yaftdesigns@gmail.com',
     contactType: 'customer support',
-    areaServed: 'IN',
+    areaServed: ['IN', 'AU', 'SG', 'ID', 'PH', 'JP', 'HK', 'MY', 'OM', 'AE'],
     availableLanguage: ['English', 'Tamil'],
   },
   sameAs: [
@@ -102,9 +118,11 @@ const INTEREST_OPTIONS = [
 
 const FAQ_ITEMS = [
   { q: 'Do you sell Rhino software or licenses?', a: 'No. YAFT Designs is a training and consulting business only. For licenses, go directly to McNeel at rhino3d.com.' },
-  { q: 'Is training online or in person?', a: 'Both. In-person sessions run from our Coimbatore base; remote sessions are available for individuals, teams, and institutions anywhere.' },
-  { q: 'Who are the courses for?', a: 'Architecture and design students, working professionals, and studio/contractor teams who need computational design skills.' },
+  { q: 'Is training online or in person?', a: 'Both. In-person sessions run from our Coimbatore base; remote sessions are available for individuals, teams, and institutions anywhere in the world.' },
+  { q: 'Who are the courses for?', a: 'Architecture and design students, working professionals, and studio or contractor teams who need computational design skills.' },
   { q: 'Can YAFT run a workshop at our institution?', a: "Yes, we've delivered workshops at IIT Kharagpur and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size." },
+  { q: 'Do you train students outside India?', a: 'Yes. We offer live online training to students and professionals across Australia, Singapore, Indonesia, Philippines, Japan, Hong Kong, Malaysia and beyond. Time zones are accommodated on request.' },
+  { q: 'Can studios in Australia or Singapore hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across the Asia Pacific region.' },
 ];
 
 const FAQ_JSON_LD = {
@@ -144,9 +162,22 @@ const LOCAL_BUSINESS_JSON_LD = {
   paymentAccepted: 'Cash, Credit Card, Bank Transfer',
   areaServed: [
     { '@type': 'Country', name: 'India' },
-    { '@type': 'City',    name: 'Coimbatore' },
-    { '@type': 'City',    name: 'Chennai' },
-    { '@type': 'City',    name: 'Bangalore' },
+    { '@type': 'Country', name: 'Australia' },
+    { '@type': 'Country', name: 'Singapore' },
+    { '@type': 'Country', name: 'Indonesia' },
+    { '@type': 'Country', name: 'Philippines' },
+    { '@type': 'Country', name: 'Japan' },
+    { '@type': 'Country', name: 'Hong Kong' },
+    { '@type': 'Country', name: 'Malaysia' },
+    { '@type': 'Country', name: 'Oman' },
+    { '@type': 'City', name: 'Coimbatore' },
+    { '@type': 'City', name: 'Chennai' },
+    { '@type': 'City', name: 'Bangalore' },
+    { '@type': 'City', name: 'Sydney' },
+    { '@type': 'City', name: 'Singapore' },
+    { '@type': 'City', name: 'Jakarta' },
+    { '@type': 'City', name: 'Manila' },
+    { '@type': 'City', name: 'Tokyo' },
   ],
   sameAs: [
     'https://www.linkedin.com/in/yokes-marapa-791b06216/',

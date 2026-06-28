@@ -7,9 +7,9 @@ import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
-const TITLE = 'BIM Consulting & Computational Design Services';
+const TITLE = 'BIM Consulting & Computational Design Services | India, Australia, Singapore';
 const DESCRIPTION =
-  'Computational design, BIM consulting, parametric facades, digital fabrication, Rhino.Inside.Revit and advanced design workflows.';
+  'Computational design, BIM consulting, parametric facades and digital fabrication services. Active on projects across India, Australia, Singapore, Hong Kong and Oman.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -51,9 +51,20 @@ const SERVICE_JSON_LD = {
     { '@type': 'City',    name: 'Chennai' },
     { '@type': 'City',    name: 'Bangalore' },
     { '@type': 'City',    name: 'Mumbai' },
+    { '@type': 'City',    name: 'Sydney' },
+    { '@type': 'City',    name: 'Melbourne' },
+    { '@type': 'City',    name: 'Singapore' },
+    { '@type': 'City',    name: 'Jakarta' },
+    { '@type': 'City',    name: 'Manila' },
+    { '@type': 'City',    name: 'Tokyo' },
+    { '@type': 'City',    name: 'Hong Kong' },
+    { '@type': 'City',    name: 'Muscat' },
     { '@type': 'Country', name: 'India' },
     { '@type': 'Country', name: 'Australia' },
     { '@type': 'Country', name: 'Singapore' },
+    { '@type': 'Country', name: 'Indonesia' },
+    { '@type': 'Country', name: 'Philippines' },
+    { '@type': 'Country', name: 'Japan' },
     { '@type': 'Country', name: 'Hong Kong' },
     { '@type': 'Country', name: 'Oman' },
   ],
