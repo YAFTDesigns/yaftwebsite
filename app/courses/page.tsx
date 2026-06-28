@@ -12,9 +12,9 @@ import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
 import styles from './courses.module.css';
 
-const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacific';
+const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacific and Middle East';
 const DESCRIPTION =
-  'Professional Rhino3D and Grasshopper training for architects and designers. Live online masterclasses available across India, Australia, Singapore, Indonesia, Philippines and Japan.';
+  'Professional Rhino3D and Grasshopper training for architects and designers. Live online masterclasses available across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
 
 export const metadata: Metadata = {
   title: TITLE,

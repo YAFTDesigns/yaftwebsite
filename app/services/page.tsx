@@ -7,9 +7,9 @@ import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
-const TITLE = 'BIM Consulting & Computational Design Services | India, Australia, Singapore';
+const TITLE = 'BIM Consulting & Computational Design Services | India, Australia, Singapore, UAE';
 const DESCRIPTION =
-  'Computational design, BIM consulting, parametric facades and digital fabrication services. Active on projects across India, Australia, Singapore, Hong Kong and Oman.';
+  'Computational design, BIM consulting, parametric facades and digital fabrication services. Active on projects across India, Australia, Singapore, Hong Kong, UAE, Saudi Arabia, Qatar and Oman.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -67,6 +67,13 @@ const SERVICE_JSON_LD = {
     { '@type': 'Country', name: 'Japan' },
     { '@type': 'Country', name: 'Hong Kong' },
     { '@type': 'Country', name: 'Oman' },
+    { '@type': 'Country', name: 'United Arab Emirates' },
+    { '@type': 'Country', name: 'Saudi Arabia' },
+    { '@type': 'Country', name: 'Qatar' },
+    { '@type': 'City',    name: 'Dubai' },
+    { '@type': 'City',    name: 'Abu Dhabi' },
+    { '@type': 'City',    name: 'Riyadh' },
+    { '@type': 'City',    name: 'Doha' },
   ],
   url: 'https://yaftdesigns.com/services',
   description:

@@ -16,9 +16,9 @@ import FeatureWall from '@/components/FeatureWall';
 import { getStudentWork, getPublications, getPartners } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
-const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific | YAFT Designs';
+const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific and Middle East | YAFT Designs';
 const DESCRIPTION =
-  'Authorized Rhino3D Training Center based in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, Indonesia, Philippines and Japan.';
+  'Authorized Rhino3D Training Center based in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -48,13 +48,15 @@ const AREA_SERVED_CITIES = [
   'Jakarta', 'Surabaya', 'Bali',
   'Manila', 'Cebu',
   'Tokyo', 'Osaka',
-  'Hong Kong', 'Kuala Lumpur', 'Dubai', 'Muscat',
+  'Hong Kong', 'Kuala Lumpur',
+  'Dubai', 'Abu Dhabi', 'Sharjah',
+  'Muscat', 'Riyadh', 'Doha', 'Manama', 'Kuwait City',
 ];
 
 const AREA_SERVED_COUNTRIES = [
   'India', 'Australia', 'Singapore', 'Indonesia',
   'Philippines', 'Japan', 'Hong Kong', 'Malaysia',
-  'Oman', 'United Arab Emirates',
+  'Oman', 'United Arab Emirates', 'Saudi Arabia', 'Qatar', 'Bahrain', 'Kuwait',
 ];
 
 const JSON_LD = {
@@ -84,7 +86,7 @@ const JSON_LD = {
     '@type': 'ContactPoint',
     email: 'yaftdesigns@gmail.com',
     contactType: 'customer support',
-    areaServed: ['IN', 'AU', 'SG', 'ID', 'PH', 'JP', 'HK', 'MY', 'OM', 'AE'],
+    areaServed: ['IN', 'AU', 'SG', 'ID', 'PH', 'JP', 'HK', 'MY', 'OM', 'AE', 'SA', 'QA', 'BH', 'KW'],
     availableLanguage: ['English', 'Tamil'],
   },
   sameAs: [
@@ -122,7 +124,7 @@ const FAQ_ITEMS = [
   { q: 'Who are the courses for?', a: 'Architecture and design students, working professionals, and studio or contractor teams who need computational design skills.' },
   { q: 'Can YAFT run a workshop at our institution?', a: "Yes, we've delivered workshops at IIT Kharagpur and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size." },
   { q: 'Do you train students outside India?', a: 'Yes. We offer live online training to students and professionals across Australia, Singapore, Indonesia, Philippines, Japan, Hong Kong, Malaysia and beyond. Time zones are accommodated on request.' },
-  { q: 'Can studios in Australia or Singapore hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across the Asia Pacific region.' },
+  { q: 'Can studios in Australia, Singapore or the Middle East hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across Asia Pacific and Middle East and the Middle East including UAE, Saudi Arabia, Qatar and Oman.' },
 ];
 
 const FAQ_JSON_LD = {
@@ -170,6 +172,11 @@ const LOCAL_BUSINESS_JSON_LD = {
     { '@type': 'Country', name: 'Hong Kong' },
     { '@type': 'Country', name: 'Malaysia' },
     { '@type': 'Country', name: 'Oman' },
+    { '@type': 'Country', name: 'United Arab Emirates' },
+    { '@type': 'Country', name: 'Saudi Arabia' },
+    { '@type': 'Country', name: 'Qatar' },
+    { '@type': 'Country', name: 'Bahrain' },
+    { '@type': 'Country', name: 'Kuwait' },
     { '@type': 'City', name: 'Coimbatore' },
     { '@type': 'City', name: 'Chennai' },
     { '@type': 'City', name: 'Bangalore' },
