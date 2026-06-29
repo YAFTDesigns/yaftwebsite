@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
           message: message.replace(/\n/g, '<br>'),
         };
 
-        subject = renderTemplate(tmpl?.subject ?? 'Re: Your enquiry — YAFT Designs', vars);
+        subject = renderTemplate(tmpl?.subject ?? 'Re: Your enquiry - YAFT Designs', vars);
         const defaultHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Hi {{name}},</p>
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Thank you for your enquiry{{interest_line}}.</p>
