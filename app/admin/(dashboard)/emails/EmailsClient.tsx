@@ -28,6 +28,27 @@ type Template = {
   updated_at: string;
 };
 
+function LogCard({ l }: { l: Log }) {
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardTop}>
+        <div>
+          <p className={styles.cardName}>{l.to_name}</p>
+          <p className={styles.cardRole}>{l.to_email}</p>
+          <p className={styles.cardCourse}>{l.subject}</p>
+        </div>
+        <div className={styles.cardMeta}>
+          <p className={styles.cardDate}>{new Date(l.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+          <p style={{ fontSize: 11, fontFamily: 'var(--mono)', color: l.status === 'sent' ? '#4caf50' : '#e55', marginTop: 4 }}>
+            {l.status === 'sent' ? '✓ Sent' : '✗ Failed'}
+          </p>
+          {l.error && <p style={{ fontSize: 10, color: '#e55', marginTop: 4, maxWidth: 200 }}>{l.error}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminEmailsClient() {
   const [tab, setTab]           = useState<'logs' | 'templates'>('logs');
   const [logs, setLogs]         = useState<Log[]>([]);
@@ -96,26 +117,31 @@ export default function AdminEmailsClient() {
       {!loading && tab === 'logs' && (
         logs.length === 0
           ? <p className={styles.empty}>No emails sent yet.</p>
-          : <div className={styles.list}>
-              {logs.map(l => (
-                <div key={l.id} className={styles.card}>
-                  <div className={styles.cardTop}>
-                    <div>
-                      <p className={styles.cardName}>{l.to_name}</p>
-                      <p className={styles.cardRole}>{l.to_email}</p>
-                      <p className={styles.cardCourse}>{l.subject}</p>
-                    </div>
-                    <div className={styles.cardMeta}>
-                      <p className={styles.cardDate}>{new Date(l.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
-                      <p style={{ fontSize: 11, fontFamily: 'var(--mono)', color: l.status === 'sent' ? '#4caf50' : '#e55', marginTop: 4 }}>
-                        {l.status === 'sent' ? '✓ Sent' : '✗ Failed'}
-                      </p>
-                      {l.error && <p style={{ fontSize: 10, color: '#e55', marginTop: 4, maxWidth: 200 }}>{l.error}</p>}
-                    </div>
-                  </div>
+          : (() => {
+              const today = new Date().toDateString();
+              const todayLogs = logs.filter(l => new Date(l.created_at).toDateString() === today);
+              const prevLogs  = logs.filter(l => new Date(l.created_at).toDateString() !== today);
+              return (
+                <div>
+                  {todayLogs.length > 0 && (
+                    <>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 12 }}>Today — {todayLogs.length} email{todayLogs.length > 1 ? 's' : ''}</p>
+                      <div className={styles.list} style={{ marginBottom: 32 }}>
+                        {todayLogs.map(l => <LogCard key={l.id} l={l} />)}
+                      </div>
+                    </>
+                  )}
+                  {prevLogs.length > 0 && (
+                    <>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#555', letterSpacing: '.08em', textTransform: 'uppercase', marginBottom: 12 }}>Previous</p>
+                      <div className={styles.list}>
+                        {prevLogs.map(l => <LogCard key={l.id} l={l} />)}
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
-            </div>
+              );
+            })()
       )}
 
       {/* TEMPLATE EDITOR */}
