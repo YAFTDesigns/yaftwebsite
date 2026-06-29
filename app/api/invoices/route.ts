@@ -67,8 +67,18 @@ async function generatePDF(data: any): Promise<Buffer> {
        .strokeColor('#aaaaaa').lineWidth(0.5).stroke().restore();
 
     // Title
-    doc.font('Helvetica-Bold').fontSize(16).fillColor('#555555')
-       .text('TRAINING INVOICE', 0, 128, { align: 'center' });
+    const invoiceType = data.invoice_type || 'training';
+    const isTest = invoiceType === 'test';
+    const showHrs = invoiceType === 'training';
+    const titleMap: Record<string, string> = {
+      training:    'TRAINING INVOICE',
+      consultancy: 'INVOICE',
+      test:        'TEST INVOICE',
+    };
+    const invoiceTitle = titleMap[invoiceType] ?? 'INVOICE';
+
+    doc.font('Helvetica-Bold').fontSize(16).fillColor(isTest ? '#aaaaaa' : '#555555')
+       .text(invoiceTitle, 0, 128, { align: 'center' });
 
     // From block
     doc.font('Helvetica-Bold').fontSize(13).fillColor('#000000')
@@ -110,9 +120,12 @@ async function generatePDF(data: any): Promise<Buffer> {
 
     // Line items table
     const tableTop = 390;
-    const cols = [M, M+43, M+284, M+327, M+398];
-    const colW  = [43,  241,   43,    71,    76];
-    const headers = ['S Nos','Description','hr(s)','Quantity','Total Price (Rs)'];
+    // Table columns — hide hrs for consultancy/test
+    const cols   = showHrs ? [M, M+43, M+284, M+327, M+398] : [M, M+43, M+327, M+398];
+    const colW   = showHrs ? [43, 241, 43, 71, 76]           : [43, 284, 71, 76];
+    const headers = showHrs
+      ? ['S Nos','Description','hr(s)','Quantity','Total Price (Rs)']
+      : ['S Nos','Description','Quantity','Total Price (Rs)'];
 
     // Header row
     doc.rect(M, tableTop, W - 2*M, 18).fill('#f0f0f0').stroke('#000000');
@@ -130,10 +143,14 @@ async function generatePDF(data: any): Promise<Buffer> {
       doc.font('Helvetica').fontSize(8).fillColor('#000000');
       doc.text(String(idx+1), cols[0]+3, ry+5, { width: colW[0]-6, align: 'center' });
       doc.text(item.desc, cols[1]+3, ry+5, { width: colW[1]-6 });
-      doc.text(String(item.hrs), cols[2]+3, ry+5, { width: colW[2]-6, align: 'center' });
-      doc.text(item.qty.toFixed(2), cols[3]+3, ry+5, { width: colW[3]-6, align: 'center' });
-      doc.text(total.toLocaleString('en-IN', { minimumFractionDigits: 2 }),
-               cols[4]+3, ry+5, { width: colW[4]-6, align: 'right' });
+      if (showHrs) {
+        doc.text(String(item.hrs), cols[2]+3, ry+5, { width: colW[2]-6, align: 'center' });
+        doc.text(item.qty.toFixed(2), cols[3]+3, ry+5, { width: colW[3]-6, align: 'center' });
+        doc.text(total.toLocaleString('en-IN', { minimumFractionDigits: 2 }), cols[4]+3, ry+5, { width: colW[4]-6, align: 'right' });
+      } else {
+        doc.text(item.qty.toFixed(2), cols[2]+3, ry+5, { width: colW[2]-6, align: 'center' });
+        doc.text(total.toLocaleString('en-IN', { minimumFractionDigits: 2 }), cols[3]+3, ry+5, { width: colW[3]-6, align: 'right' });
+      }
       ry += 18;
     });
     // Empty rows
@@ -234,6 +251,16 @@ async function generatePDF(data: any): Promise<Buffer> {
           W/2 - 140, H/2 - 80, { width: 280 });
         doc.restore();
       } catch {}
+    }
+
+    // TEST watermark
+    if (isTest) {
+      doc.save();
+      doc.rotate(-45, { origin: [W/2, H/2] });
+      doc.opacity(0.07);
+      doc.font('Helvetica-Bold').fontSize(120).fillColor('#ff0000')
+         .text('TEST', 0, H/2 - 60, { align: 'center', width: W });
+      doc.restore();
     }
 
     doc.end();

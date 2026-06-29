@@ -92,7 +92,7 @@ export default function InvoicesClient() {
       const res = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, items, grand_total: grandTotal, advance, balance }),
+        body: JSON.stringify({ ...form, items, grand_total: grandTotal, advance, balance, invoice_type: invoiceType }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
@@ -101,6 +101,19 @@ export default function InvoicesClient() {
       setDone(true);
     } catch (e: any) { setFormError(e.message ?? 'Something went wrong'); }
     setSending(false);
+  }
+
+  const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'test'>('training');
+
+  function applyTestData() {
+    setForm({
+      invoice_no: autoInvNo, date: today,
+      client_name: 'Test Client', client_email: 'test@example.com',
+      client_type: 'individual', client_pan: 'TESTPAN001',
+      client_gst: '', client_company: '', client_state: 'Tamil Nadu',
+    });
+    setItems([{ desc: invoiceType === 'consultancy' ? 'Computational Design Consulting' : 'Rhino3D for Architecture', hrs: 10, qty: 1, rate: 5000 }]);
+    setAdvance(0);
   }
 
   const inp: React.CSSProperties = {
@@ -201,6 +214,26 @@ export default function InvoicesClient() {
       {/* ── CREATE INVOICE ── */}
       {tab === 'create' && (
         <>
+          {/* Invoice type selector */}
+          <div style={{ display:'flex', gap:10, marginBottom:24, flexWrap:'wrap' }}>
+            {([
+              ['training',    'Training Invoice',    'For courses and masterclasses'],
+              ['consultancy', 'Invoice',             'For consultancy and project work'],
+              ['test',        'Test Invoice',        'Prefills dummy data for preview'],
+            ] as const).map(([t, label, hint]) => (
+              <button key={t} onClick={() => { setInvoiceType(t); if (t==='test') applyTestData(); }} style={{
+                fontFamily:'var(--mono)', fontSize:12, padding:'10px 18px', borderRadius:8,
+                border:'1px solid', cursor:'pointer', textAlign:'left' as const,
+                borderColor: invoiceType===t ? 'var(--brass)' : '#2a2a2a',
+                background:  invoiceType===t ? '#1a0808' : '#0d0d0d',
+                color:       invoiceType===t ? 'var(--brass)' : '#666',
+              }}>
+                <span style={{ display:'block', fontWeight:600 }}>{label}</span>
+                <span style={{ fontSize:10, color: invoiceType===t ? '#aa4a4a' : '#333', marginTop:2, display:'block' }}>{hint}</span>
+              </button>
+            ))}
+          </div>
+
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24 }}>
             {/* LEFT */}
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
