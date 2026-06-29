@@ -14,6 +14,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin">Overview</Link>
             <Link href="/admin/leads">Leads</Link>
             <Link href="/admin/enquiries">Enquiries</Link>
+            <Link href="/admin/emails">Emails</Link>
             <Link href="/admin/testimonials">Testimonials</Link>
             <Link href="/admin/community">Community</Link>
             <Link href="/admin/analytics">Analytics</Link>

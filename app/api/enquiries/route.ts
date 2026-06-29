@@ -29,6 +29,13 @@ function makeEmail({ to, subject, html }: { to: string; subject: string; html: s
   return Buffer.from(lines.join('\n')).toString('base64url');
 }
 
+function renderTemplate(template: string, vars: Record<string, string>) {
+  return Object.entries(vars).reduce(
+    (t, [k, v]) => t.replaceAll(`{{${k}}}`, v),
+    template
+  );
+}
+
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const name     = typeof body?.name     === 'string' ? body.name.trim()     : '';
@@ -40,58 +47,65 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Name, a valid email, and a message are required.' }, { status: 400 });
   }
 
+  const supabase = getSupabaseAdmin();
+
   try {
-    const supabase = getSupabaseAdmin();
     const leadId = await upsertLead(supabase, { email, name, source: 'contact_form' });
 
-    const { error } = await supabase.from('enquiries').insert({
-      lead_id: leadId,
-      name,
-      email,
-      course_interest: interest || null,
-      message,
-    });
+    const { data: enquiryRow, error } = await supabase
+      .from('enquiries')
+      .insert({ lead_id: leadId, name, email, course_interest: interest || null, message })
+      .select('id')
+      .single();
     if (error) throw error;
 
-    // Send via Gmail API — appears in your Sent folder
+    const enquiryId = enquiryRow?.id ?? null;
+
+    // Send via Gmail API
     if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
+      let status = 'sent';
+      let errMsg = null;
+      let subject = '';
+
       try {
+        // Fetch template from DB
+        const { data: tmpl } = await supabase
+          .from('email_templates')
+          .select('subject, body_html')
+          .eq('key', 'enquiry_confirmation')
+          .single();
+
+        const vars = {
+          name,
+          interest: interest ? ` about ${interest}` : '',
+          interest_line: interest ? ` about <strong>${interest}</strong>` : '',
+          message: message.replace(/\n/g, '<br>'),
+        };
+
+        subject = renderTemplate(tmpl?.subject ?? 'Re: Your enquiry — YAFT Designs', vars);
+        const html = renderTemplate(tmpl?.body_html ?? '', vars);
+
         const gmail = await getGmailClient();
-
-        // Email to student — lands in your Sent, they can reply directly
-        const studentHtml = `
-<div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#111;">
-  <h2 style="margin-bottom:4px;">Thanks, ${name}.</h2>
-  <p style="color:#555;font-size:14px;line-height:1.7;margin-bottom:16px;">
-    We've received your enquiry${interest ? ` about <strong>${interest}</strong>` : ''} and will get back to you within 1–2 working days.
-  </p>
-  <p style="color:#555;font-size:14px;line-height:1.7;margin-bottom:20px;">
-    Feel free to reply to this email directly — it comes straight to us.
-  </p>
-  <div style="background:#f8f8f8;border-left:3px solid #E63946;padding:14px 18px;border-radius:0 6px 6px 0;margin-bottom:24px;">
-    <p style="margin:0;font-size:12px;color:#888;">Your message</p>
-    <p style="margin:8px 0 0;font-size:14px;color:#111;">${message.replace(/\n/g, '<br>')}</p>
-  </div>
-  <p style="color:#888;font-size:12px;">
-    YAFT Designs · Authorized Rhino Training Center · Coimbatore, India<br>
-    <a href="https://yaftdesigns.com" style="color:#E63946;">yaftdesigns.com</a>
-  </p>
-</div>`;
-
         await gmail.users.messages.send({
           userId: 'me',
-          requestBody: {
-            raw: makeEmail({
-              to: `${name} <${email}>`,
-              subject: `Re: Your enquiry${interest ? ` about ${interest}` : ''} — YAFT Designs`,
-              html: studentHtml,
-            }),
-          },
+          requestBody: { raw: makeEmail({ to: `${name} <${email}>`, subject, html }) },
         });
-      } catch (mailErr) {
-        // Don't fail the whole request if email fails
+      } catch (mailErr: any) {
+        status = 'failed';
+        errMsg = mailErr?.message ?? 'Unknown error';
         console.error('Gmail send failed:', mailErr);
       }
+
+      // Log the email
+      await supabase.from('email_logs').insert({
+        to_email: email,
+        to_name: name,
+        subject,
+        template: 'enquiry_confirmation',
+        status,
+        error: errMsg,
+        enquiry_id: enquiryId,
+      });
     }
 
     return NextResponse.json({ ok: true });
