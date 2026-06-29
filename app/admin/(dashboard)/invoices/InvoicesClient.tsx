@@ -43,7 +43,7 @@ export default function InvoicesClient() {
   const [advance, setAdvance] = useState(0);
   const [sending, setSending] = useState(false);
   const [done, setDone]       = useState(false);
-  const [error, setError]     = useState('');
+  const [formError, setFormError] = useState('');
   const [pdfUrl, setPdfUrl]   = useState('');
 
   const intra    = form.client_state.toLowerCase().includes('tamil');
@@ -60,6 +60,21 @@ export default function InvoicesClient() {
     setItems(prev => prev.map((it, idx) => idx===i ? {...it, [k]: k==='desc'?v:parseFloat(v)||0} : it));
   }
 
+  const [editInv, setEditInv]   = useState<Invoice | null>(null);
+  const [saving,  setSaving]    = useState(false);
+  const [saveMsg, setSaveMsg]   = useState('');
+
+  async function saveEdit() {
+    if (!editInv) return;
+    setSaving(true); setSaveMsg('');
+    const newBalance = editInv.total - editInv.advance;
+    await supabase.from('invoices').update({ advance: editInv.advance, balance: newBalance }).eq('id', editInv.id);
+    setEditInv({ ...editInv, balance: newBalance });
+    await loadInvoices();
+    setSaving(false); setSaveMsg('Saved');
+    setTimeout(() => setSaveMsg(''), 3000);
+  }
+
   async function loadInvoices() {
     const { data } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
     setInvoices(data ?? []);
@@ -68,7 +83,7 @@ export default function InvoicesClient() {
   useEffect(() => { if (tab==='sent') loadInvoices(); }, [tab]);
 
   async function generate() {
-    setError(''); setSending(true); setDone(false); setPdfUrl('');
+    setFormError(''); setSending(true); setDone(false); setPdfUrl('');
     try {
       const res = await fetch('/api/invoices', {
         method: 'POST',
@@ -80,7 +95,7 @@ export default function InvoicesClient() {
       const blob = new Blob([Buffer.from(json.pdf, 'base64')], { type: 'application/pdf' });
       setPdfUrl(URL.createObjectURL(blob));
       setDone(true);
-    } catch (e: any) { setError(e.message ?? 'Something went wrong'); }
+    } catch (e: any) { setFormError(e.message ?? 'Something went wrong'); }
     setSending(false);
   }
 
@@ -116,20 +131,64 @@ export default function InvoicesClient() {
           ? <p className={styles.empty}>No invoices sent yet.</p>
           : <div className={styles.list}>
               {invoices.map(inv => (
-                <div key={inv.id} className={styles.card}>
-                  <div className={styles.cardTop}>
-                    <div>
-                      <p className={styles.cardName}>{inv.client_name}</p>
-                      <p className={styles.cardRole}>{inv.client_email}</p>
-                      <p className={styles.cardCourse}>Invoice #{inv.invoice_no} · {inv.date} · {inv.client_state}</p>
+                <div key={inv.id}>
+                  <div className={styles.card}>
+                    <div className={styles.cardTop}>
+                      <div>
+                        <p className={styles.cardName}>{inv.client_name}</p>
+                        <p className={styles.cardRole}>{inv.client_email}</p>
+                        <p className={styles.cardCourse}>Invoice #{inv.invoice_no} · {inv.date} · {inv.client_state}</p>
+                      </div>
+                      <div className={styles.cardMeta} style={{ textAlign:'right' }}>
+                        <p className={styles.cardDate} style={{ fontWeight:700, fontSize:14, color:'#fff' }}>INR {fmt(inv.total)}</p>
+                        {inv.advance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#555', marginTop:3 }}>Advance: INR {fmt(inv.advance)}</p>}
+                        {inv.balance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#E63946', marginTop:2 }}>Balance: INR {fmt(inv.balance)}</p>}
+                        {inv.balance === 0 && inv.advance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#4caf50', marginTop:2 }}>Fully paid</p>}
+                        <p style={{ fontSize:10, fontFamily:'var(--mono)', color:'#4caf50', marginTop:4 }}>✓ Sent</p>
+                      </div>
                     </div>
-                    <div className={styles.cardMeta} style={{ textAlign:'right' }}>
-                      <p className={styles.cardDate} style={{ fontWeight:700, fontSize:14, color:'#fff' }}>INR {fmt(inv.total)}</p>
-                      {inv.advance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#555', marginTop:3 }}>Advance: INR {fmt(inv.advance)}</p>}
-                      {inv.balance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#E63946', marginTop:2 }}>Balance: INR {fmt(inv.balance)}</p>}
-                      <p style={{ fontSize:10, fontFamily:'var(--mono)', color:'#4caf50', marginTop:4 }}>✓ Sent</p>
+                    <div className={styles.actions}>
+                      <button
+                        className={styles.approveBtn}
+                        onClick={() => setEditInv(editInv?.id === inv.id ? null : { ...inv })}
+                      >
+                        {editInv?.id === inv.id ? 'Cancel' : 'Edit payment →'}
+                      </button>
                     </div>
                   </div>
+
+                  {/* Inline edit panel */}
+                  {editInv?.id === inv.id && (
+                    <div style={{ background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:10, padding:20, marginTop:-1, marginBottom:8 }}>
+                      <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Update payment</p>
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:16 }}>
+                        <div>
+                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Total (INR)</span>
+                          <input style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color:'#555', width:'100%' }} value={fmt(editInv.total)} readOnly />
+                        </div>
+                        <div>
+                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Advance Paid (INR)</span>
+                          <input
+                            style={{ background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:'100%' }}
+                            type="number"
+                            value={editInv.advance || ''}
+                            onChange={e => setEditInv({ ...editInv, advance: parseFloat(e.target.value) || 0 })}
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Balance Due (INR)</span>
+                          <input style={{ background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color: (editInv.total - editInv.advance) > 0 ? '#E63946' : '#4caf50', width:'100%' }} value={fmt(editInv.total - editInv.advance)} readOnly />
+                        </div>
+                      </div>
+                      <div style={{ display:'flex', gap:10, alignItems:'center' }}>
+                        <button onClick={saveEdit} disabled={saving} style={{ fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)', border:'none', padding:'9px 20px', borderRadius:6, cursor:'pointer', opacity:saving?0.6:1 }}>
+                          {saving ? 'Saving...' : 'Save changes'}
+                        </button>
+                        {saveMsg && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ {saveMsg}</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -256,7 +315,7 @@ export default function InvoicesClient() {
               }}>Download PDF</a>
             )}
             {done  && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ Invoice sent to {form.client_email}</p>}
-            {error && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>{error}</p>}
+            {formError && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>{formError}</p>}
           </div>
         </>
       )}
