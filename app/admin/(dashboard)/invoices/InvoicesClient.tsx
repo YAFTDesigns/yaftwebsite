@@ -32,10 +32,14 @@ function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigi
 export default function InvoicesClient() {
   const [tab, setTab] = useState<'create'|'sent'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const now = new Date();
+  const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
+  const [invoiceSeq, setInvoiceSeq] = useState('01');
+  const autoInvNo = `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
   const today = new Date().toLocaleDateString('en-GB');
 
   const [form, setForm] = useState({
-    invoice_no:'', date: today, client_name:'', client_email:'',
+    invoice_no: autoInvNo, date: today, client_name:'', client_email:'',
     client_type:'individual', client_pan:'', client_gst:'',
     client_company:'', client_state:'Tamil Nadu',
   });
@@ -202,7 +206,22 @@ export default function InvoicesClient() {
             <div style={{ display:'flex', flexDirection:'column', gap:14 }}>
               <p style={sectionTitle}>Invoice details</p>
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
-                <div><span style={lbl}>Invoice No *</span><input style={inp} value={form.invoice_no} onChange={e=>setF('invoice_no',e.target.value)} placeholder="001" /></div>
+                <div>
+                  <span style={lbl}>Invoice No (auto)</span>
+                  <div style={{ ...inp, color:'#555', display:'flex', alignItems:'center', gap:8 }}>
+                    <span style={{ color:'var(--brass)' }}>YAFT-{mmyyyy}-</span>
+                    <input
+                      style={{ background:'transparent', border:'none', outline:'none', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:40 }}
+                      value={invoiceSeq}
+                      onChange={e => {
+                        setInvoiceSeq(e.target.value.padStart(2,'0'));
+                        setF('invoice_no', `YAFT-${mmyyyy}-${e.target.value.padStart(2,'0')}`);
+                      }}
+                      maxLength={3}
+                    />
+                  </div>
+                  <p style={{ fontFamily:'var(--mono)', fontSize:10, color:'#444', marginTop:4 }}>{autoInvNo}</p>
+                </div>
                 <div><span style={lbl}>Date *</span><input style={inp} value={form.date} onChange={e=>setF('date',e.target.value)} /></div>
               </div>
 
