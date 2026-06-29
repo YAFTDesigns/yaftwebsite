@@ -222,6 +222,20 @@ async function generatePDF(data: any): Promise<Buffer> {
     doc.fillColor('#E63946')
        .text('yaftdesigns@gmail.com', 0, H - 38, { align: 'center' });
 
+    // PAID IN FULL stamp — only when balance is 0 and advance > 0
+    const advance = data.advance || 0;
+    const balance = data.balance ?? (grandTotal - advance);
+    if (balance <= 0 && advance > 0) {
+      try {
+        doc.save();
+        doc.rotate(-30, { origin: [W/2, H/2] });
+        doc.opacity(0.35);
+        doc.image('/home/claude/yaftwebsite/public/assets/images/paid-in-full.png',
+          W/2 - 140, H/2 - 80, { width: 280 });
+        doc.restore();
+      } catch {}
+    }
+
     doc.end();
   });
 }
