@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       <td style="padding:4px 0;color:#111;">Available for a minimum batch of 3. Reply to this email to avail.</td>
     </tr>
   </table>
-  <img src="https://yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" width="560" style="width:100%;max-width:560px;display:block;margin:0 0 20px;" />
+  <img src="https://yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 20px;" />
   <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Reply to this email to confirm your slot or ask any questions.</p>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">
