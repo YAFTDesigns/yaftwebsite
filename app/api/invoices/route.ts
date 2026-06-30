@@ -179,11 +179,11 @@ async function generatePDF(data: any): Promise<Buffer> {
       ry += 18;
     }
 
-    // GST calc — proforma invoices don't include GST
+    // GST calc — same logic for all invoice types including proforma
     const intra = data.client_state.toLowerCase().includes('tamil');
-    const cgst  = (!isProforma && intra) ? subtotal * 0.09 : 0;
-    const sgst  = (!isProforma && intra) ? subtotal * 0.09 : 0;
-    const igst  = (!isProforma && !intra) ? subtotal * 0.18 : 0;
+    const cgst  = intra ? subtotal * 0.09 : 0;
+    const sgst  = intra ? subtotal * 0.09 : 0;
+    const igst  = !intra ? subtotal * 0.18 : 0;
     const grandTotal = subtotal + cgst + sgst + igst;
 
     // Tax summary
