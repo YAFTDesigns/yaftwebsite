@@ -296,7 +296,14 @@ export async function POST(request: NextRequest) {
       balance:        data.balance || 0,
       status:         'sent',
     }).select('id').single();
-    if (error) console.error('Invoice save error:', error);
+
+    if (error) {
+      console.error('Invoice save error:', error);
+      return NextResponse.json(
+        { error: `Invoice was generated but could not be saved: ${error.message}. It was NOT recorded or emailed — please try again.` },
+        { status: 500 }
+      );
+    }
 
     // Send via Gmail with PDF attachment
     if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
