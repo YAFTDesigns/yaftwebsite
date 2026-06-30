@@ -70,6 +70,7 @@ export default function InvoicesClient() {
   const [editInv, setEditInv]   = useState<Invoice | null>(null);
   const [saving,  setSaving]    = useState(false);
   const [saveMsg, setSaveMsg]   = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function saveEdit() {
     if (!editInv) return;
@@ -80,6 +81,25 @@ export default function InvoicesClient() {
     await loadInvoices();
     setSaving(false); setSaveMsg('Saved');
     setTimeout(() => setSaveMsg(''), 3000);
+  }
+
+  async function deleteInvoice(id: string) {
+    if (!confirm('Delete this invoice permanently? This cannot be undone.')) return;
+    setDeletingId(id);
+    await supabase.from('invoices').delete().eq('id', id);
+    if (editInv?.id === id) setEditInv(null);
+    await loadInvoices();
+    setDeletingId(null);
+  }
+
+  async function deleteAllMatching(ids: string[]) {
+    if (ids.length === 0) return;
+    if (!confirm(`Delete all ${ids.length} matching invoice${ids.length > 1 ? 's' : ''} permanently? This cannot be undone.`)) return;
+    setDeletingId('bulk');
+    await supabase.from('invoices').delete().in('id', ids);
+    setEditInv(null);
+    await loadInvoices();
+    setDeletingId(null);
   }
 
   async function loadInvoices() {
@@ -176,7 +196,7 @@ export default function InvoicesClient() {
               </div>
 
               {/* search */}
-              <div style={{ marginBottom: 20 }}>
+              <div style={{ marginBottom: 12 }}>
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
@@ -187,6 +207,34 @@ export default function InvoicesClient() {
                   }}
                 />
               </div>
+
+              {(() => {
+                const q = searchQuery.trim().toLowerCase();
+                const filtered = q
+                  ? invoices.filter(inv =>
+                      inv.client_name.toLowerCase().includes(q) ||
+                      inv.client_email.toLowerCase().includes(q) ||
+                      inv.invoice_no.toLowerCase().includes(q)
+                    )
+                  : invoices;
+
+                return q ? (
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20 }}>
+                    <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888' }}>
+                      {filtered.length} invoice{filtered.length === 1 ? '' : 's'} match "{searchQuery}"
+                    </p>
+                    {filtered.length > 0 && (
+                      <button
+                        className={styles.deleteBtn}
+                        disabled={deletingId === 'bulk'}
+                        onClick={() => deleteAllMatching(filtered.map(i => i.id))}
+                      >
+                        {deletingId === 'bulk' ? 'Deleting...' : `Delete all ${filtered.length} matching →`}
+                      </button>
+                    )}
+                  </div>
+                ) : null;
+              })()}
 
               {(() => {
                 const q = searchQuery.trim().toLowerCase();
@@ -245,6 +293,13 @@ export default function InvoicesClient() {
                         onClick={() => setEditInv(editInv?.id === inv.id ? null : { ...inv })}
                       >
                         {editInv?.id === inv.id ? 'Cancel' : 'Edit payment →'}
+                      </button>
+                      <button
+                        className={styles.deleteBtn}
+                        disabled={deletingId === inv.id}
+                        onClick={() => deleteInvoice(inv.id)}
+                      >
+                        {deletingId === inv.id ? 'Deleting...' : 'Delete'}
                       </button>
                     </div>
                   </div>
