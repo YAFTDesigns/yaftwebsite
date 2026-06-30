@@ -59,9 +59,9 @@ export default function InvoicesClient() {
   const intra    = form.client_state.toLowerCase().includes('tamil');
   const intl     = ['australia','singapore','uae','oman','international'].includes(form.client_state.toLowerCase());
   const subtotal = items.reduce((s,i) => s + i.rate * i.qty, 0);
-  const cgst     = (invoiceType !== 'proforma' && intra) ? subtotal*0.09 : 0;
-  const sgst     = (invoiceType !== 'proforma' && intra) ? subtotal*0.09 : 0;
-  const igst     = (invoiceType !== 'proforma' && !intra && !intl) ? subtotal*0.18 : 0;
+  const cgst     = intra ? subtotal*0.09 : 0;
+  const sgst     = intra ? subtotal*0.09 : 0;
+  const igst     = (!intra && !intl) ? subtotal*0.18 : 0;
   const grandTotal = subtotal + cgst + sgst + igst;
   const balance    = grandTotal - advance;
 
