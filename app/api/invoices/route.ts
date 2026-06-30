@@ -53,6 +53,7 @@ async function generatePDF(data: any): Promise<Buffer> {
     const W = doc.page.width;
     const H = doc.page.height;
     const M = 57; // 20mm in points
+    console.log('[invoice-pdf] checkpoint: page setup', { W, H, M });
 
     // YAFT logo text
     doc.font('Helvetica-Bold').fontSize(20).fillColor('#000000')
@@ -64,7 +65,10 @@ async function generatePDF(data: any): Promise<Buffer> {
     try {
       doc.image(ART_BADGE_PATH,
         W - 160, 18, { width: 120, height: 90 });
-    } catch {}
+    } catch (e) {
+      console.error('[invoice-pdf] ART badge image failed:', e);
+    }
+    console.log('[invoice-pdf] checkpoint: header done');
 
     // Dotted divider
     doc.save().dash(2, { space: 3 }).moveTo(M, 115).lineTo(W - M, 115)
@@ -121,6 +125,7 @@ async function generatePDF(data: any): Promise<Buffer> {
     } else {
       doc.text(`PAN ID : ${data.client_pan}`, M, by);
     }
+    console.log('[invoice-pdf] checkpoint: bill-to done');
 
     // Line items table
     const tableTop = 390;
@@ -161,7 +166,8 @@ async function generatePDF(data: any): Promise<Buffer> {
     for (let e = 0; e < 4 - data.items.length; e++) {
       doc.rect(M, ry, W-2*M, 18).stroke('#aaaaaa');
       doc.font('Helvetica').fontSize(8).fillColor('#000000');
-      doc.text('-', cols[4]+3, ry+5, { width: colW[4]-6, align: 'right' });
+      const lastCol = showHrs ? 4 : 3;
+      doc.text('-', cols[lastCol]+3, ry+5, { width: colW[lastCol]-6, align: 'right' });
       ry += 18;
     }
 
