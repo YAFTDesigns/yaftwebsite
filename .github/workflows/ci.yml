@@ -22,23 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Runs the permanent test suite (lib/admin/safeQuery, the proxy
-      # authorization matrix, the Community API table allowlist, and
-      # isAdminEmail) — these exist specifically because of real bugs
-      # found in production: the /admin 500 crash, invoices silently
-      # not saving, and a security gap where new admin API routes
-      # were briefly reachable with zero authentication. This step is
-      # what stops those classes of bug from silently coming back.
       - name: Run tests
         run: npm test
 
-      # Note: the build does not require Supabase secrets to be
-      # configured in this repo — lib/supabase/public.ts and
-      # lib/supabase/admin.ts both fall back to hardcoded public/anon
-      # values if NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY
-      # aren't set in the environment (a fix from the same incident
-      # that broke the /services page build originally). If this step
-      # ever fails specifically on a Supabase-related error, that's a
-      # sign those fallbacks regressed, not a missing-secrets problem.
       - name: Build
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
