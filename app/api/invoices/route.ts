@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import path from 'path';
 
 const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
@@ -296,6 +297,10 @@ async function generatePDF(data: any): Promise<Buffer> {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const data = await request.json().catch(() => null);
   if (!data) return NextResponse.json({ error: 'Invalid data' }, { status: 400 });
 
@@ -394,4 +399,34 @@ export async function POST(request: NextRequest) {
     console.error('Invoice error:', err);
     return NextResponse.json({ error: 'Failed to generate invoice' }, { status: 500 });
   }
+}
+
+// DELETE /api/invoices  { id }
+// Permanently removes an invoice row. Intended only for invoices that
+// are already in Trash (deleted_at set) — the client-side confirm()
+// dialog warns this is unrecoverable. Uses the service-role key via
+// getSupabaseAdmin() so it works correctly regardless of what RLS
+// delete policy (if any) exists for the anon key, the same fix
+// pattern applied to Community, Emails, and Testimonials moderation.
+export async function DELETE(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await request.json().catch(() => null);
+  const id = body?.id;
+
+  if (typeof id !== 'string' || !id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from('invoices').delete().eq('id', id);
+
+  if (error) {
+    console.error('[invoices-api] permanent delete failed:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }

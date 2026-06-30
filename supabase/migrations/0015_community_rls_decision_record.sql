@@ -25,6 +25,12 @@
 -- correct and only access path. RLS stays fully locked (no policies
 -- needed beyond what's already enforced by going through the API).
 
--- No new public-facing policies needed for student_work, publications,
--- partners — their existing public select/insert policies were
--- already correct and are left untouched.
+-- UPDATE: this same fix was also applied to the `testimonials` table
+-- (no migration exists for it in this repo at all — its schema and
+-- RLS state predate the migrations folder and could not be verified
+-- from code) via app/api/admin/testimonials/route.ts, and to invoices'
+-- permanent-delete capability via the DELETE handler added to
+-- app/api/invoices/route.ts. Both required a direct route-level admin
+-- auth check (see lib/admin/requireAdmin.ts) rather than relying on
+-- the proxy, since /api/invoices does not live under /api/admin/ and
+-- is therefore not covered by the proxy's matcher.

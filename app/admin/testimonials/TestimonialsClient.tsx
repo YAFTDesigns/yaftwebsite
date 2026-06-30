@@ -1,13 +1,39 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from './testimonials.module.css';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const API = '/api/admin/testimonials';
+
+async function apiGet(status: string) {
+  const params = new URLSearchParams({ status });
+  const res = await fetch(`${API}?${params.toString()}`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiPatch(id: string, status: 'approved' | 'rejected') {
+  const res = await fetch(API, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, status }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
+
+async function apiDelete(id: string) {
+  const res = await fetch(API, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
 
 type Testimonial = {
   id: string;
@@ -34,20 +60,17 @@ export default function AdminTestimonialsPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState('');
 
   async function load() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase
-      .from('testimonials')
-      .select('*')
-      .eq('status', filter)
-      .order('submitted_at', { ascending: false });
+    const { data, error } = await apiGet(filter);
     if (error) {
       console.error('Failed to load testimonials:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setItems(data || []);
+    setItems(data);
     setLoading(false);
   }
 
@@ -60,10 +83,12 @@ export default function AdminTestimonialsPage() {
 
   async function updateStatus(id: string, status: 'approved' | 'rejected') {
     setActionId(id);
-    await supabase
-      .from('testimonials')
-      .update({ status, reviewed_at: new Date().toISOString() })
-      .eq('id', id);
+    setActionError('');
+    const { error } = await apiPatch(id, status);
+    if (error) {
+      console.error('Failed to update testimonial:', error);
+      setActionError(error);
+    }
     setActionId(null);
     load();
   }
@@ -71,7 +96,12 @@ export default function AdminTestimonialsPage() {
   async function deleteTestimonial(id: string) {
     if (!confirm('Delete this testimonial permanently? This cannot be undone.')) return;
     setActionId(id);
-    await supabase.from('testimonials').delete().eq('id', id);
+    setActionError('');
+    const { error } = await apiDelete(id);
+    if (error) {
+      console.error('Failed to delete testimonial:', error);
+      setActionError(error);
+    }
     setActionId(null);
     load();
   }
@@ -110,6 +140,14 @@ export default function AdminTestimonialsPage() {
         <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
           <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
             Could not load testimonials: {loadError}
+          </p>
+        </div>
+      )}
+
+      {actionError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Action failed: {actionError}
           </p>
         </div>
       )}

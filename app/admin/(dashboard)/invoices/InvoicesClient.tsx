@@ -126,10 +126,15 @@ export default function InvoicesClient() {
   async function permanentlyDeleteInvoice(id: string) {
     if (!confirm('Permanently delete this invoice? This CANNOT be undone — it will be gone forever, not recoverable from trash.')) return;
     setDeletingId(id);
-    const { error } = await supabase.from('invoices').delete().eq('id', id);
-    if (error) {
-      console.error('Failed to permanently delete invoice:', error);
-      alert(`Could not permanently delete: ${error.message}. This likely needs an RLS delete policy added in Supabase.`);
+    const res = await fetch('/api/invoices', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      console.error('Failed to permanently delete invoice:', json.error);
+      alert(`Could not permanently delete: ${json.error ?? 'Unknown error'}`);
     }
     await loadTrash();
     setDeletingId(null);
