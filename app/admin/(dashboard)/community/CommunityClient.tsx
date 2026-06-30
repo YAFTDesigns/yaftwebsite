@@ -1,14 +1,41 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const API = '/api/admin/community';
+
+async function apiGet(table: string, status?: string) {
+  const params = new URLSearchParams({ table });
+  if (status) params.set('status', status);
+  const res = await fetch(`${API}?${params.toString()}`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiPatch(table: string, id: string, updates: Record<string, any>) {
+  const res = await fetch(API, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ table, id, updates }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
+
+async function apiDelete(table: string, id: string) {
+  const res = await fetch(API, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ table, id }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
 
 type StudentWork = {
   id: string;
@@ -64,71 +91,61 @@ export default function AdminCommunityPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState('');
 
   async function loadCounts() {
     const [sw, pub, swApproved, swRejected, pubApproved, pubRejected] = await Promise.all([
-      supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'pending'),
-      supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'pending'),
-      supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'approved'),
-      supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'rejected'),
-      supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'approved'),
-      supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'rejected'),
+      apiGet('student_work', 'pending'),
+      apiGet('publications', 'pending'),
+      apiGet('student_work', 'approved'),
+      apiGet('student_work', 'rejected'),
+      apiGet('publications', 'approved'),
+      apiGet('publications', 'rejected'),
     ]);
-    setCounts({ sw_pending: sw.count ?? 0, pub_pending: pub.count ?? 0 });
+    setCounts({ sw_pending: sw.data.length, pub_pending: pub.data.length });
     setStatusBreakdown({
-      sw_approved: swApproved.count ?? 0,
-      sw_pending_all: sw.count ?? 0,
-      sw_rejected: swRejected.count ?? 0,
-      pub_approved: pubApproved.count ?? 0,
-      pub_pending_all: pub.count ?? 0,
-      pub_rejected: pubRejected.count ?? 0,
+      sw_approved: swApproved.data.length,
+      sw_pending_all: sw.data.length,
+      sw_rejected: swRejected.data.length,
+      pub_approved: pubApproved.data.length,
+      pub_pending_all: pub.data.length,
+      pub_rejected: pubRejected.data.length,
     });
   }
 
   async function loadStudentWork() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase
-      .from('student_work')
-      .select('*')
-      .eq('status', filter)
-      .order('created_at', { ascending: false });
+    const { data, error } = await apiGet('student_work', filter);
     if (error) {
       console.error('Failed to load student work:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setStudentWork(data || []);
+    setStudentWork(data);
     setLoading(false);
   }
 
   async function loadPublications() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase
-      .from('publications')
-      .select('*')
-      .eq('status', filter)
-      .order('created_at', { ascending: false });
+    const { data, error } = await apiGet('publications', filter);
     if (error) {
       console.error('Failed to load publications:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setPublications(data || []);
+    setPublications(data);
     setLoading(false);
   }
 
   async function loadPartners() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase
-      .from('partners')
-      .select('*')
-      .order('display_order');
+    const { data, error } = await apiGet('partners');
     if (error) {
       console.error('Failed to load partners:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setPartners(data || []);
+    setPartners(data);
     setLoading(false);
   }
 
@@ -140,8 +157,9 @@ export default function AdminCommunityPage() {
   }, [section, filter]);
 
   async function updateSW(id: string, status: 'approved' | 'rejected') {
-    setActionId(id);
-    await supabase.from('student_work').update({ status }).eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiPatch('student_work', id, { status });
+    if (error) { console.error('Failed to update student work:', error); setActionError(error); }
     await loadStudentWork();
     await loadCounts();
     setActionId(null);
@@ -149,16 +167,18 @@ export default function AdminCommunityPage() {
 
   async function deleteSW(id: string) {
     if (!confirm('Delete this submission permanently?')) return;
-    setActionId(id);
-    await supabase.from('student_work').delete().eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiDelete('student_work', id);
+    if (error) { console.error('Failed to delete student work:', error); setActionError(error); }
     await loadStudentWork();
     await loadCounts();
     setActionId(null);
   }
 
   async function updatePub(id: string, status: 'approved' | 'rejected') {
-    setActionId(id);
-    await supabase.from('publications').update({ status }).eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiPatch('publications', id, { status });
+    if (error) { console.error('Failed to update publication:', error); setActionError(error); }
     await loadPublications();
     await loadCounts();
     setActionId(null);
@@ -166,24 +186,27 @@ export default function AdminCommunityPage() {
 
   async function deletePub(id: string) {
     if (!confirm('Delete this publication permanently?')) return;
-    setActionId(id);
-    await supabase.from('publications').delete().eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiDelete('publications', id);
+    if (error) { console.error('Failed to delete publication:', error); setActionError(error); }
     await loadPublications();
     await loadCounts();
     setActionId(null);
   }
 
   async function togglePartner(id: string, active: boolean) {
-    setActionId(id);
-    await supabase.from('partners').update({ active: !active }).eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiPatch('partners', id, { active: !active });
+    if (error) { console.error('Failed to update partner:', error); setActionError(error); }
     await loadPartners();
     setActionId(null);
   }
 
   async function deletePartner(id: string) {
     if (!confirm('Delete this partner permanently?')) return;
-    setActionId(id);
-    await supabase.from('partners').delete().eq('id', id);
+    setActionId(id); setActionError('');
+    const { error } = await apiDelete('partners', id);
+    if (error) { console.error('Failed to delete partner:', error); setActionError(error); }
     await loadPartners();
     setActionId(null);
   }
@@ -253,6 +276,14 @@ export default function AdminCommunityPage() {
         <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
           <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
             Could not load data: {loadError}
+          </p>
+        </div>
+      )}
+
+      {actionError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Action failed: {actionError}
           </p>
         </div>
       )}

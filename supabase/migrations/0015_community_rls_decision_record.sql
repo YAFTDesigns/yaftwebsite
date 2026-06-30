@@ -1,0 +1,30 @@
+-- Audit finding: student_work, publications, and partners had public
+-- SELECT (approved/active only — correct, kept as-is) and public
+-- INSERT (for submissions — correct, kept as-is), but NO update or
+-- delete policy at all. This meant every Approve / Reject / Hide /
+-- Delete action in the Community admin page was silently failing,
+-- the same root cause class as the earlier invoices bug.
+--
+-- IMPORTANT: unlike invoices, this fix does NOT grant `using (true)`
+-- on SELECT/UPDATE/DELETE to the anon key. The Community admin page
+-- is a client component and can only ever use the public anon key —
+-- broadening these policies for "true" would mean ANY website visitor
+-- could read pending/rejected submissions or modify/delete rows
+-- directly via the Supabase JS client in their browser console, since
+-- the anon key is necessarily embedded in the public site's bundle.
+--
+-- Instead: admin moderation (approve/reject/delete/hide) now goes
+-- through server-side API routes using the service-role key (see
+-- app/api/admin/community/route.ts), which bypasses RLS safely and
+-- is never exposed to the browser. RLS here stays tight, matching
+-- what a logged-out visitor should actually be allowed to do.
+--
+-- email_logs / email_templates: same fix, no privacy concern there
+-- since neither table is ever read by the public-facing site at all
+-- — admin-only data, so service-role access via API routes is the
+-- correct and only access path. RLS stays fully locked (no policies
+-- needed beyond what's already enforced by going through the API).
+
+-- No new public-facing policies needed for student_work, publications,
+-- partners — their existing public select/insert policies were
+-- already correct and are left untouched.

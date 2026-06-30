@@ -1,14 +1,35 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const API = '/api/admin/emails';
+
+async function apiGetLogs() {
+  const res = await fetch(`${API}?type=logs`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiGetTemplates() {
+  const res = await fetch(`${API}?type=templates`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiSaveTemplate(id: string, subject: string, body_html: string) {
+  const res = await fetch(API, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, subject, body_html }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
 
 type Log = {
   id: string;
@@ -59,33 +80,30 @@ export default function AdminEmailsClient() {
   const [editing, setEditing]   = useState<Template | null>(null);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   async function loadLogs() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase
-      .from('email_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(100);
+    const { data, error } = await apiGetLogs();
     if (error) {
       console.error('Failed to load email logs:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setLogs(data ?? []);
+    setLogs(data);
     setLoading(false);
   }
 
   async function loadTemplates() {
     setLoading(true);
     setLoadError('');
-    const { data, error } = await supabase.from('email_templates').select('*').order('key');
+    const { data, error } = await apiGetTemplates();
     if (error) {
       console.error('Failed to load email templates:', error);
-      setLoadError(error.message);
+      setLoadError(error);
     }
-    setTemplates(data ?? []);
-    if (data && data.length > 0 && !editing) setEditing(data[0]);
+    setTemplates(data);
+    if (data.length > 0 && !editing) setEditing(data[0]);
     setLoading(false);
   }
 
@@ -97,9 +115,14 @@ export default function AdminEmailsClient() {
   async function saveTemplate() {
     if (!editing) return;
     setSaving(true);
-    await supabase.from('email_templates')
-      .update({ subject: editing.subject, body_html: editing.body_html, updated_at: new Date().toISOString() })
-      .eq('id', editing.id);
+    setSaveError('');
+    const { error } = await apiSaveTemplate(editing.id, editing.subject, editing.body_html);
+    if (error) {
+      console.error('Failed to save template:', error);
+      setSaveError(error);
+      setSaving(false);
+      return;
+    }
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
@@ -231,6 +254,7 @@ export default function AdminEmailsClient() {
                 {saving ? 'Saving…' : 'Save template'}
               </button>
               {saved && <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#4caf50' }}>✓ Saved</p>}
+              {saveError && <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#e55' }}>Could not save: {saveError}</p>}
               <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#444', marginLeft: 8 }}>
                 Last updated: {new Date(editing.updated_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
               </p>
