@@ -41,9 +41,7 @@ export default function InvoicesClient() {
   const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
   const [invoiceSeq, setInvoiceSeq] = useState('01');
   const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'proforma'|'test'>('training');
-  const autoInvNo = invoiceType === 'proforma'
-    ? `YAFT-PF-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`
-    : `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
+  const autoInvNo = `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
   const today = new Date().toLocaleDateString('en-GB');
 
   const [form, setForm] = useState({
