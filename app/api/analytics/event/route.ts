@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { rateLimit } from '@/lib/rateLimit';
 
 const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit']);
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { limit: 30, windowMs: 60000 });
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : '';
   const eventType = typeof body?.eventType === 'string' ? body.eventType : '';
