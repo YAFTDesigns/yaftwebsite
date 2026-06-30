@@ -464,9 +464,15 @@ export default function InvoicesClient() {
             {([
               ['training',    'Training Invoice',    'For courses and masterclasses'],
               ['consultancy', 'Invoice',             'For consultancy and project work'],
+              ['proforma',    'Proforma Invoice',    'Quote for student, no GST, PF- prefix'],
               ['test',        'Test Invoice',        'Prefills dummy data for preview'],
             ] as const).map(([t, label, hint]) => (
-              <button key={t} onClick={() => { setInvoiceType(t); if (t==='test') applyTestData(); }} style={{
+              <button key={t} onClick={() => {
+                setInvoiceType(t);
+                if (t === 'proforma') setF('invoice_no', `YAFT-PF-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`);
+                else if (t !== 'test') setF('invoice_no', `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`);
+                if (t === 'test') applyTestData();
+              }} style={{
                 fontFamily:'var(--mono)', fontSize:12, padding:'10px 18px', borderRadius:8,
                 border:'1px solid', cursor:'pointer', textAlign:'left' as const,
                 borderColor: invoiceType===t ? 'var(--brass)' : '#2a2a2a',
