@@ -19,13 +19,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://yaftdesigns.com/faculty',
     type: 'profile',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/profile.jpeg' }],
+    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/profile.jpeg'],
+    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -35,7 +35,7 @@ const PERSON_JSON_LD = {
   name: 'Yokes Marapa',
   jobTitle: 'Founder and Authorized Rhino Trainer',
   url: 'https://yaftdesigns.com/faculty',
-  image: 'https://yaftdesigns.com/assets/images/profile.jpeg',
+  image: 'https://yaftdesigns.com/assets/images/og-image.jpg',
   worksFor: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
   knowsAbout: ['Rhino3D', 'Grasshopper', 'Rhino.Inside.Revit', 'Computational Design', 'Parametric Design', 'BIM', 'Digital Fabrication'],
   credential: [

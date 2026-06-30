@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import path from 'path';
+
+const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
+const PAID_STAMP_PATH = path.join(process.cwd(), 'public', 'assets', 'images', 'paid-in-full.png');
 
 const YAFT_EMAIL = 'yaftdesigns@gmail.com';
 
@@ -58,7 +62,7 @@ async function generatePDF(data: any): Promise<Buffer> {
 
     // ART badge
     try {
-      doc.image('/home/claude/yaftwebsite/public/assets/logos/art-badge.png',
+      doc.image(ART_BADGE_PATH,
         W - 160, 18, { width: 120, height: 90 });
     } catch {}
 
@@ -247,7 +251,7 @@ async function generatePDF(data: any): Promise<Buffer> {
         doc.save();
         doc.rotate(-30, { origin: [W/2, H/2] });
         doc.opacity(0.35);
-        doc.image('/home/claude/yaftwebsite/public/assets/images/paid-in-full.png',
+        doc.image(PAID_STAMP_PATH,
           W/2 - 140, H/2 - 80, { width: 280 });
         doc.restore();
       } catch {}
