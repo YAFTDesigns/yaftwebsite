@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-
-const ALLOWED_TABLES = ['student_work', 'publications', 'partners'] as const;
-type Table = (typeof ALLOWED_TABLES)[number];
-
-function isAllowedTable(table: unknown): table is Table {
-  return typeof table === 'string' && (ALLOWED_TABLES as readonly string[]).includes(table);
-}
+import { isCommunityTable } from '@/lib/admin/communityTables';
 
 // GET /api/admin/community?table=student_work&status=pending
 // GET /api/admin/community?table=partners (no status filter — returns all)
@@ -15,7 +9,7 @@ export async function GET(request: NextRequest) {
   const table = searchParams.get('table');
   const status = searchParams.get('status');
 
-  if (!isAllowedTable(table)) {
+  if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
   }
 
@@ -45,7 +39,7 @@ export async function PATCH(request: NextRequest) {
   const id = body?.id;
   const updates = body?.updates;
 
-  if (!isAllowedTable(table)) {
+  if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
   }
   if (typeof id !== 'string' || !id) {
@@ -72,7 +66,7 @@ export async function DELETE(request: NextRequest) {
   const table = body?.table;
   const id = body?.id;
 
-  if (!isAllowedTable(table)) {
+  if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
   }
   if (typeof id !== 'string' || !id) {
@@ -97,7 +91,7 @@ export async function POST(request: NextRequest) {
   const table = body?.table;
   const insert = body?.insert;
 
-  if (!isAllowedTable(table)) {
+  if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
   }
   if (!insert || typeof insert !== 'object') {
