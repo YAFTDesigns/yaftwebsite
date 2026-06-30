@@ -32,15 +32,21 @@ export default function AdminTestimonialsPage() {
   const [items, setItems] = useState<Testimonial[]>([]);
   const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>('pending');
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase
+    setLoadError('');
+    const { data, error } = await supabase
       .from('testimonials')
       .select('*')
       .eq('status', filter)
       .order('submitted_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load testimonials:', error);
+      setLoadError(error.message);
+    }
     setItems(data || []);
     setLoading(false);
   }
@@ -99,6 +105,14 @@ export default function AdminTestimonialsPage() {
           </button>
         ))}
       </div>
+
+      {loadError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Could not load testimonials: {loadError}
+          </p>
+        </div>
+      )}
 
       {loading ? (
         <div className={styles.empty}>Loading...</div>

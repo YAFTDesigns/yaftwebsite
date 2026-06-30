@@ -62,6 +62,7 @@ export default function AdminCommunityPage() {
     pub_approved: 0, pub_pending_all: 0, pub_rejected: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
 
   async function loadCounts() {
@@ -86,32 +87,47 @@ export default function AdminCommunityPage() {
 
   async function loadStudentWork() {
     setLoading(true);
-    const { data } = await supabase
+    setLoadError('');
+    const { data, error } = await supabase
       .from('student_work')
       .select('*')
       .eq('status', filter)
       .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load student work:', error);
+      setLoadError(error.message);
+    }
     setStudentWork(data || []);
     setLoading(false);
   }
 
   async function loadPublications() {
     setLoading(true);
-    const { data } = await supabase
+    setLoadError('');
+    const { data, error } = await supabase
       .from('publications')
       .select('*')
       .eq('status', filter)
       .order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load publications:', error);
+      setLoadError(error.message);
+    }
     setPublications(data || []);
     setLoading(false);
   }
 
   async function loadPartners() {
     setLoading(true);
-    const { data } = await supabase
+    setLoadError('');
+    const { data, error } = await supabase
       .from('partners')
       .select('*')
       .order('display_order');
+    if (error) {
+      console.error('Failed to load partners:', error);
+      setLoadError(error.message);
+    }
     setPartners(data || []);
     setLoading(false);
   }
@@ -230,6 +246,14 @@ export default function AdminCommunityPage() {
               {s.charAt(0).toUpperCase() + s.slice(1)}
             </button>
           ))}
+        </div>
+      )}
+
+      {loadError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Could not load data: {loadError}
+          </p>
         </div>
       )}
 

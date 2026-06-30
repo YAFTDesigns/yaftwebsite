@@ -55,24 +55,35 @@ export default function AdminEmailsClient() {
   const [logs, setLogs]         = useState<Log[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading]   = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [editing, setEditing]   = useState<Template | null>(null);
   const [saving, setSaving]     = useState(false);
   const [saved, setSaved]       = useState(false);
 
   async function loadLogs() {
     setLoading(true);
-    const { data } = await supabase
+    setLoadError('');
+    const { data, error } = await supabase
       .from('email_logs')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100);
+    if (error) {
+      console.error('Failed to load email logs:', error);
+      setLoadError(error.message);
+    }
     setLogs(data ?? []);
     setLoading(false);
   }
 
   async function loadTemplates() {
     setLoading(true);
-    const { data } = await supabase.from('email_templates').select('*').order('key');
+    setLoadError('');
+    const { data, error } = await supabase.from('email_templates').select('*').order('key');
+    if (error) {
+      console.error('Failed to load email templates:', error);
+      setLoadError(error.message);
+    }
     setTemplates(data ?? []);
     if (data && data.length > 0 && !editing) setEditing(data[0]);
     setLoading(false);
@@ -111,6 +122,14 @@ export default function AdminEmailsClient() {
           Templates
         </button>
       </div>
+
+      {loadError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Could not load data: {loadError}
+          </p>
+        </div>
+      )}
 
       {loading && <p className={styles.empty}>Loading…</p>}
 

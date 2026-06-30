@@ -26,13 +26,18 @@ type CourseStat = { name: string; count: number };
 export default function TestimonialAnalyticsPage() {
   const [all, setAll] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
     supabase
       .from('testimonials')
       .select('id, name, role, institution, course_taken, quote, status, submitted_at, rating')
       .order('submitted_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to load testimonial analytics:', error);
+          setLoadError(error.message);
+        }
         setAll(data || []);
         setLoading(false);
       });
@@ -109,6 +114,14 @@ export default function TestimonialAnalyticsPage() {
         </div>
         <a href="/admin/testimonials" className={styles.back}>← All testimonials</a>
       </div>
+
+      {loadError && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Could not load full analytics data: {loadError}. Figures below may be incomplete.
+          </p>
+        </div>
+      )}
 
       {/* Summary */}
       <div className={styles.statGrid}>
