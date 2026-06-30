@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { google } from 'googleapis';
+import { rateLimit } from '@/lib/rateLimit';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const YAFT_EMAIL = 'yaftdesigns@gmail.com';
@@ -37,6 +38,8 @@ function renderTemplate(template: string, vars: Record<string, string>) {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const name     = typeof body?.name     === 'string' ? body.name.trim()     : '';
   const email    = typeof body?.email    === 'string' ? body.email.trim()    : '';
