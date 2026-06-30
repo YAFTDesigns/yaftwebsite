@@ -260,16 +260,23 @@ async function generatePDF(data: any): Promise<Buffer> {
 
     // TEST watermark — text-align:'center' combined with a large font size
     // while a rotation transform is active can make pdfkit produce NaN
-    // internally, so the text is centered manually instead via
-    // widthOfString() rather than relying on the align option here.
+    // internally. Centering is done with a fixed width approximation
+    // instead of widthOfString(), since widthOfString() depends on
+    // pdfkit's AFM font-metric files being loaded from disk at runtime
+    // (via fs.readFileSync relative to the package's own directory) —
+    // a pattern that can silently fail to bundle correctly in Vercel's
+    // serverless function tracing, since it isn't a standard
+    // require()/import() the bundler can statically detect.
     if (isTest) {
       try {
         doc.save();
         doc.rotate(-45, { origin: [W / 2, H / 2] });
         doc.opacity(0.07);
         doc.font('Helvetica-Bold').fontSize(120).fillColor('#ff0000');
-        const testWidth = doc.widthOfString('TEST');
-        doc.text('TEST', W / 2 - testWidth / 2, H / 2 - 60);
+        // 'TEST' at 120pt Helvetica-Bold is roughly 290pt wide —
+        // measured empirically rather than computed at runtime.
+        const approxTextWidth = 290;
+        doc.text('TEST', W / 2 - approxTextWidth / 2, H / 2 - 60);
         doc.restore();
       } catch (watermarkErr) {
         console.error('Test watermark failed to render:', watermarkErr);
