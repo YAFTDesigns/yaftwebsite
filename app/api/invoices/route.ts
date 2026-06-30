@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import path from 'path';
+import { rateLimit } from '@/lib/rateLimit';
 
 const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
 const PAID_STAMP_PATH = path.join(process.cwd(), 'public', 'assets', 'images', 'paid-in-full.png');
@@ -297,6 +298,8 @@ async function generatePDF(data: any): Promise<Buffer> {
 }
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
+  if (limited) return limited;
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
