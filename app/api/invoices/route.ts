@@ -249,22 +249,31 @@ async function generatePDF(data: any): Promise<Buffer> {
     if (balance <= 0 && advance > 0) {
       try {
         doc.save();
-        doc.rotate(-30, { origin: [W/2, H/2] });
+        doc.rotate(-30, { origin: [W / 2, H / 2] });
         doc.opacity(0.35);
-        doc.image(PAID_STAMP_PATH,
-          W/2 - 140, H/2 - 80, { width: 280 });
+        doc.image(PAID_STAMP_PATH, W / 2 - 140, H / 2 - 80, { width: 280 });
         doc.restore();
-      } catch {}
+      } catch (stampErr) {
+        console.error('Paid-in-full stamp failed to render:', stampErr);
+      }
     }
 
-    // TEST watermark
+    // TEST watermark — text-align:'center' combined with a large font size
+    // while a rotation transform is active can make pdfkit produce NaN
+    // internally, so the text is centered manually instead via
+    // widthOfString() rather than relying on the align option here.
     if (isTest) {
-      doc.save();
-      doc.rotate(-45, { origin: [W/2, H/2] });
-      doc.opacity(0.07);
-      doc.font('Helvetica-Bold').fontSize(120).fillColor('#ff0000')
-         .text('TEST', 0, H/2 - 60, { align: 'center', width: W });
-      doc.restore();
+      try {
+        doc.save();
+        doc.rotate(-45, { origin: [W / 2, H / 2] });
+        doc.opacity(0.07);
+        doc.font('Helvetica-Bold').fontSize(120).fillColor('#ff0000');
+        const testWidth = doc.widthOfString('TEST');
+        doc.text('TEST', W / 2 - testWidth / 2, H / 2 - 60);
+        doc.restore();
+      } catch (watermarkErr) {
+        console.error('Test watermark failed to render:', watermarkErr);
+      }
     }
 
     doc.end();
