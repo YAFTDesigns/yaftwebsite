@@ -40,7 +40,9 @@ export default function InvoicesClient() {
   const now = new Date();
   const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
   const [invoiceSeq, setInvoiceSeq] = useState('01');
-  const autoInvNo = `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
+  const autoInvNo = invoiceType === 'proforma'
+    ? `YAFT-PF-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`
+    : `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
   const today = new Date().toLocaleDateString('en-GB');
 
   const [form, setForm] = useState({
@@ -58,9 +60,9 @@ export default function InvoicesClient() {
   const intra    = form.client_state.toLowerCase().includes('tamil');
   const intl     = ['australia','singapore','uae','oman','international'].includes(form.client_state.toLowerCase());
   const subtotal = items.reduce((s,i) => s + i.rate * i.qty, 0);
-  const cgst     = intra ? subtotal*0.09 : 0;
-  const sgst     = intra ? subtotal*0.09 : 0;
-  const igst     = (!intra && !intl) ? subtotal*0.18 : 0;
+  const cgst     = (invoiceType !== 'proforma' && intra) ? subtotal*0.09 : 0;
+  const sgst     = (invoiceType !== 'proforma' && intra) ? subtotal*0.09 : 0;
+  const igst     = (invoiceType !== 'proforma' && !intra && !intl) ? subtotal*0.18 : 0;
   const grandTotal = subtotal + cgst + sgst + igst;
   const balance    = grandTotal - advance;
 
@@ -196,7 +198,7 @@ export default function InvoicesClient() {
     setSending(false);
   }
 
-  const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'test'>('training');
+  const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'proforma'|'test'>('training');
 
   function applyTestData() {
     setForm({
@@ -226,7 +228,7 @@ export default function InvoicesClient() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Invoices</h1>
-          <p className={styles.sub}>Generate, send and track training invoices.</p>
+          <p className={styles.sub}>Generate, send and track invoices and proforma quotes.</p>
         </div>
       </div>
 
@@ -342,7 +344,7 @@ export default function InvoicesClient() {
                       <div>
                         <p className={styles.cardName}>{inv.client_name}</p>
                         <p className={styles.cardRole}>{inv.client_email}</p>
-                        <p className={styles.cardCourse}>Invoice #{inv.invoice_no} · {inv.date} · {inv.client_state}</p>
+                        <p className={styles.cardCourse}>{inv.invoice_no.includes('PF') ? 'Proforma' : 'Invoice'} #{inv.invoice_no} · {inv.date} · {inv.client_state}</p>
                       </div>
                       <div className={styles.cardMeta} style={{ textAlign:'right' }}>
                         <p className={styles.cardDate} style={{ fontWeight:700, fontSize:14, color:'#fff' }}>INR {fmt(inv.total)}</p>
@@ -487,7 +489,7 @@ export default function InvoicesClient() {
                 <div>
                   <span style={lbl}>Invoice No (auto)</span>
                   <div style={{ ...inp, color:'#555', display:'flex', alignItems:'center', gap:8 }}>
-                    <span style={{ color:'var(--brass)' }}>YAFT-{mmyyyy}-</span>
+                    <span style={{ color:'var(--brass)' }}>{invoiceType === 'proforma' ? `YAFT-PF-${mmyyyy}-` : `YAFT-${mmyyyy}-`}</span>
                     <input
                       style={{ background:'transparent', border:'none', outline:'none', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:40 }}
                       value={invoiceSeq}
@@ -603,7 +605,7 @@ export default function InvoicesClient() {
             <button onClick={generate} disabled={sending} style={{
               fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)',
               border:'none', padding:'11px 24px', borderRadius:6, cursor:'pointer', opacity:sending?0.6:1,
-            }}>{sending ? 'Generating...' : 'Generate & Send PDF →'}</button>
+            }}>{sending ? 'Generating...' : invoiceType === 'proforma' ? 'Generate & Send Proforma →' : 'Generate & Send PDF →'}</button>
 
             {pdfUrl && (
               <a href={pdfUrl} download={`YAFT_Invoice_${form.invoice_no}.pdf`} style={{
@@ -611,7 +613,7 @@ export default function InvoicesClient() {
                 border:'1px solid var(--brass)', padding:'10px 20px', borderRadius:6, textDecoration:'none',
               }}>Download PDF</a>
             )}
-            {done  && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ Invoice sent to {form.client_email}</p>}
+            {done  && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ {invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} sent to {form.client_email}</p>}
             {formError && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>{formError}</p>}
           </div>
         </>
