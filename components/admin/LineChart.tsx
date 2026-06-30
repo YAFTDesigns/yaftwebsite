@@ -6,13 +6,16 @@ export default function LineChart({
   points,
   color = 'var(--brass)',
   height = 120,
-  formatValue = (v: number) => String(v),
+  currencyPrefix = '',
 }: {
   points: LinePoint[];
   color?: string;
   height?: number;
-  formatValue?: (v: number) => string;
+  currencyPrefix?: string;
 }) {
+  const formatValue = (v: number) =>
+    currencyPrefix ? `${currencyPrefix}${v.toLocaleString('en-IN')}` : String(v);
+
   const width = 600;
   const pad = 24;
   const max = Math.max(1, ...points.map((p) => p.value));

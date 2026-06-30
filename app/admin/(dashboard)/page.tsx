@@ -272,7 +272,7 @@ export default async function AdminOverviewPage() {
           <h2 className={styles.panelTitle}>Revenue trend — last 6 months</h2>
           <LineChart
             points={counts.monthlyRevenue}
-            formatValue={(v) => `₹${fmt(v)}`}
+            currencyPrefix="₹"
           />
         </div>
         <div className={styles.panel}>
