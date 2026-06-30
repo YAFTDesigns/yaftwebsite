@@ -28,6 +28,12 @@ function sixMonthsAgoStart() {
   return new Date(d.getFullYear(), d.getMonth() - 5, 1).toISOString();
 }
 
+// NOTE: This duplicates the logic in lib/admin/safeQuery.ts, which was
+// extracted afterward as the shared utility for other admin pages
+// (Leads, Enquiries, Analytics). Left as its own local implementation
+// here deliberately rather than refactored, since this exact version
+// is the one currently verified working in production for the Overview
+// dashboard — changing it carries real risk for no functional gain.
 // Wraps a Supabase query so a missing table / RLS error / network blip
 // degrades to an empty result instead of crashing the whole dashboard.
 async function safe<T>(promise: PromiseLike<{ data: T | null; count?: number | null; error?: any }>, fallback: T) {

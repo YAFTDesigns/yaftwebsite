@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { safeQuery } from '@/lib/admin/safeQuery';
 import BarChart from '@/components/admin/BarChart';
 import styles from '../admin.module.css';
 
@@ -22,20 +23,28 @@ async function getAnalytics() {
   const supabase = getSupabaseAdmin();
 
   const [eventsRes, courseRes] = await Promise.all([
-    supabase.from('analytics_events').select('event_type').limit(20000),
-    supabase.from('syllabus_requests').select('course_slug').limit(20000),
+    safeQuery<{ event_type: string }[]>(
+      supabase.from('analytics_events').select('event_type').limit(20000),
+      [],
+      'analytics events'
+    ),
+    safeQuery<{ course_slug: string }[]>(
+      supabase.from('syllabus_requests').select('course_slug').limit(20000),
+      [],
+      'syllabus requests'
+    ),
   ]);
-  if (eventsRes.error) throw eventsRes.error;
-  if (courseRes.error) throw courseRes.error;
 
   const byEventType = countBy((eventsRes.data ?? []).map((r) => ({ value: r.event_type as string })));
   const byCourse = countBy((courseRes.data ?? []).map((r) => ({ value: r.course_slug as string })));
 
-  return { byEventType, byCourse };
+  const errors = [eventsRes.error, courseRes.error].filter(Boolean) as string[];
+
+  return { byEventType, byCourse, error: errors.length > 0 ? errors.join('; ') : null };
 }
 
 export default async function AdminAnalyticsPage() {
-  const { byEventType, byCourse } = await getAnalytics();
+  const { byEventType, byCourse, error } = await getAnalytics();
 
   const funnelItems = FUNNEL_STEPS.map((step) => ({ label: FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
   const topCourses = Object.entries(byCourse)
@@ -45,6 +54,14 @@ export default async function AdminAnalyticsPage() {
   return (
     <>
       <h1 className={styles.sectionTitle}>Analytics</h1>
+
+      {error && (
+        <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>
+            Some analytics data could not be loaded: {error}
+          </p>
+        </div>
+      )}
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>FUNNEL</div>
       <div className={styles.panel}>
