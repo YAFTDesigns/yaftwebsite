@@ -83,12 +83,20 @@ async function generatePDF(data: any): Promise<Buffer> {
     const titleMap: Record<string, string> = {
       training:    'TRAINING INVOICE',
       consultancy: 'INVOICE',
+      proforma:    'PROFORMA INVOICE',
       test:        'TEST INVOICE',
     };
     const invoiceTitle = titleMap[invoiceType] ?? 'INVOICE';
+    const isProforma = invoiceType === 'proforma';
 
-    doc.font('Helvetica-Bold').fontSize(16).fillColor(isTest ? '#aaaaaa' : '#555555')
+    doc.font('Helvetica-Bold').fontSize(16).fillColor(isTest ? '#aaaaaa' : isProforma ? '#7a4000' : '#555555')
        .text(invoiceTitle, 0, 128, { align: 'center' });
+
+    // Proforma disclaimer
+    if (isProforma) {
+      doc.font('Helvetica-Oblique').fontSize(8).fillColor('#aaaaaa')
+         .text('This is a proforma invoice and is not a tax document. Subject to change upon final confirmation.', 0, 148, { align: 'center' });
+    }
 
     // From block
     doc.font('Helvetica-Bold').fontSize(13).fillColor('#000000')
@@ -171,11 +179,11 @@ async function generatePDF(data: any): Promise<Buffer> {
       ry += 18;
     }
 
-    // GST calc
+    // GST calc — proforma invoices don't include GST
     const intra = data.client_state.toLowerCase().includes('tamil');
-    const cgst  = intra ? subtotal * 0.09 : 0;
-    const sgst  = intra ? subtotal * 0.09 : 0;
-    const igst  = !intra ? subtotal * 0.18 : 0;
+    const cgst  = (!isProforma && intra) ? subtotal * 0.09 : 0;
+    const sgst  = (!isProforma && intra) ? subtotal * 0.09 : 0;
+    const igst  = (!isProforma && !intra) ? subtotal * 0.18 : 0;
     const grandTotal = subtotal + cgst + sgst + igst;
 
     // Tax summary
@@ -342,14 +350,17 @@ export async function POST(request: NextRequest) {
       const gmail = await getGmailClient();
       const boundary = 'yaft_invoice_boundary';
       const altBound = 'yaft_alt_boundary';
-      const subject  = `Invoice ${data.invoice_no} - YAFT Designs Training`;
+      const isProformaEmail = data.invoice_type === 'proforma';
+      const subject  = isProformaEmail
+        ? `Proforma Invoice ${data.invoice_no} - YAFT Designs`
+        : `Invoice ${data.invoice_no} - YAFT Designs Training`;
       const fmt = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2 });
       const advance = data.advance || 0;
       const balance = data.balance || 0;
 
       const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${data.client_name},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Please find attached your invoice for YAFT Designs training. Thank you for training with us.</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${isProformaEmail ? 'Please find attached your proforma invoice from YAFT Designs. This is for your reference and is not a tax document.' : 'Please find attached your invoice for YAFT Designs training. Thank you for training with us.'}</p>
   <table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:24px;">
     <tr style="background:#f8f8f8;"><td style="padding:8px 12px;color:#888;">Invoice No</td><td style="padding:8px 12px;font-weight:600;">${data.invoice_no}</td></tr>
     <tr><td style="padding:8px 12px;color:#888;">Date</td><td style="padding:8px 12px;">${data.date}</td></tr>
@@ -385,7 +396,7 @@ export async function POST(request: NextRequest) {
         `--${boundary}`,
         `Content-Type: application/pdf`,
         `Content-Transfer-Encoding: base64`,
-        `Content-Disposition: attachment; filename="YAFT_Invoice_${data.invoice_no}.pdf"`,
+        `Content-Disposition: attachment; filename="${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${data.invoice_no}.pdf"`,
         ``,
         pdfBase64,
         `--${boundary}--`,
