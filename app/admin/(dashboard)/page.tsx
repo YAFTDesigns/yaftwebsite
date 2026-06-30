@@ -28,6 +28,22 @@ function sixMonthsAgoStart() {
   return new Date(d.getFullYear(), d.getMonth() - 5, 1).toISOString();
 }
 
+// Wraps a Supabase query so a missing table / RLS error / network blip
+// degrades to an empty result instead of crashing the whole dashboard.
+async function safe<T>(promise: PromiseLike<{ data: T | null; count?: number | null; error?: any }>, fallback: T) {
+  try {
+    const res = await promise;
+    if (res.error) {
+      console.error('Admin overview query failed:', res.error.message ?? res.error);
+      return { data: fallback, count: 0 };
+    }
+    return { data: res.data ?? fallback, count: res.count ?? 0 };
+  } catch (err) {
+    console.error('Admin overview query threw:', err);
+    return { data: fallback, count: 0 };
+  }
+}
+
 async function getCounts() {
   const supabase = getSupabaseAdmin();
   const weekStart = startOfWeek();
@@ -41,24 +57,24 @@ async function getCounts() {
     recentEnquiries, recentInvoices, failedEmails,
     sixMonthInvoices,
   ] = await Promise.all([
-    supabase.from('leads').select('id', { count: 'exact', head: true }),
-    supabase.from('enquiries').select('id', { count: 'exact', head: true }),
-    supabase.from('syllabus_requests').select('id', { count: 'exact', head: true }),
-    supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'syllabus_unlock'),
+    safe(supabase.from('leads').select('id', { count: 'exact', head: true }), null),
+    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
+    safe(supabase.from('syllabus_requests').select('id', { count: 'exact', head: true }), null),
+    safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'syllabus_unlock'), null),
     Promise.all(
       SOURCES.map((source) =>
-        supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source)
+        safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source), null)
       )
     ),
-    supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart),
-    supabase.from('invoices').select('total, advance, balance').gte('created_at', monthStart),
-    supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5),
-    supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').order('created_at', { ascending: false }).limit(5),
-    supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
-    supabase.from('invoices').select('total, created_at').gte('created_at', sixMoStart),
+    safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
+    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
+    safe(supabase.from('invoices').select('total, advance, balance').gte('created_at', monthStart), []),
+    safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
+    safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
+    safe(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
+    safe(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').order('created_at', { ascending: false }).limit(5), []),
+    safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'), null),
+    safe(supabase.from('invoices').select('total, created_at').gte('created_at', sixMoStart), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
