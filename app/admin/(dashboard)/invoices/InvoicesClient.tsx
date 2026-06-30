@@ -40,6 +40,7 @@ export default function InvoicesClient() {
   const now = new Date();
   const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
   const [invoiceSeq, setInvoiceSeq] = useState('01');
+  const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'proforma'|'test'>('training');
   const autoInvNo = invoiceType === 'proforma'
     ? `YAFT-PF-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`
     : `YAFT-${mmyyyy}-${invoiceSeq.padStart(2,'0')}`;
@@ -198,7 +199,6 @@ export default function InvoicesClient() {
     setSending(false);
   }
 
-  const [invoiceType, setInvoiceType] = useState<'training'|'consultancy'|'proforma'|'test'>('training');
 
   function applyTestData() {
     setForm({
