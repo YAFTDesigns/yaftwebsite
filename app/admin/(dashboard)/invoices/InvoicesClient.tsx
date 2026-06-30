@@ -34,6 +34,7 @@ export default function InvoicesClient() {
   const [tab, setTab] = useState<'create'|'sent'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loadError, setLoadError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const now = new Date();
   const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
   const [invoiceSeq, setInvoiceSeq] = useState('01');
@@ -173,8 +174,55 @@ export default function InvoicesClient() {
                   ]}
                 />
               </div>
-              <div className={styles.list}>
-              {invoices.map(inv => (
+
+              {/* search */}
+              <div style={{ marginBottom: 20 }}>
+                <input
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search by client name, email, or invoice number..."
+                  style={{
+                    background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:8,
+                    padding:'10px 14px', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:'100%',
+                  }}
+                />
+              </div>
+
+              {(() => {
+                const q = searchQuery.trim().toLowerCase();
+                const filtered = q
+                  ? invoices.filter(inv =>
+                      inv.client_name.toLowerCase().includes(q) ||
+                      inv.client_email.toLowerCase().includes(q) ||
+                      inv.invoice_no.toLowerCase().includes(q)
+                    )
+                  : invoices;
+
+                if (filtered.length === 0) {
+                  return <p className={styles.empty}>No invoices match "{searchQuery}".</p>;
+                }
+
+                // group by month/year based on created_at
+                const groups = new Map<string, Invoice[]>();
+                filtered.forEach(inv => {
+                  const d = new Date(inv.created_at);
+                  const key = d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+                  if (!groups.has(key)) groups.set(key, []);
+                  groups.get(key)!.push(inv);
+                });
+
+                return Array.from(groups.entries()).map(([monthLabel, monthInvoices]) => {
+                  const monthTotal = monthInvoices.reduce((s, i) => s + i.total, 0);
+                  return (
+                    <div key={monthLabel} style={{ marginBottom: 28 }}>
+                      <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom: 12 }}>
+                        <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase' }}>
+                          {monthLabel} <span style={{ color:'#555', textTransform:'none', letterSpacing:'normal' }}>({monthInvoices.length})</span>
+                        </p>
+                        <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888' }}>INR {fmt(monthTotal)}</p>
+                      </div>
+                      <div className={styles.list}>
+                        {monthInvoices.map(inv => (
                 <div key={inv.id}>
                   <div className={styles.card}>
                     <div className={styles.cardTop}>
@@ -234,8 +282,12 @@ export default function InvoicesClient() {
                     </div>
                   )}
                 </div>
-              ))}
-              </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </>
       )}
 
