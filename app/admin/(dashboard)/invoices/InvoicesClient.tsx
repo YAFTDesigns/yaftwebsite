@@ -460,7 +460,7 @@ export default function InvoicesClient() {
       {tab === 'create' && (
         <>
           {/* Invoice type selector */}
-          <div style={{ display:'flex', gap:10, marginBottom:24, flexWrap:'wrap' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:10, marginBottom:24 }}>
             {([
               ['training',    'Training Invoice',    'For courses and masterclasses'],
               ['consultancy', 'Invoice',             'For consultancy and project work'],
