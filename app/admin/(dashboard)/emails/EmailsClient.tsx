@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
+import PieChart from '@/components/admin/PieChart';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -112,6 +113,19 @@ export default function AdminEmailsClient() {
       </div>
 
       {loading && <p className={styles.empty}>Loading…</p>}
+
+      {!loading && tab === 'logs' && logs.length > 0 && (
+        <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Delivery status</p>
+          <PieChart
+            size={120}
+            slices={[
+              { label: 'Sent', value: logs.filter(l => l.status === 'sent').length, color: '#4caf50' },
+              { label: 'Failed', value: logs.filter(l => l.status === 'failed').length, color: '#e55' },
+            ]}
+          />
+        </div>
+      )}
 
       {/* EMAIL LOGS */}
       {!loading && tab === 'logs' && (

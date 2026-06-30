@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
+import PieChart from '@/components/admin/PieChart';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -56,15 +57,31 @@ export default function AdminCommunityPage() {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [counts, setCounts] = useState({ sw_pending: 0, pub_pending: 0 });
+  const [statusBreakdown, setStatusBreakdown] = useState({
+    sw_approved: 0, sw_pending_all: 0, sw_rejected: 0,
+    pub_approved: 0, pub_pending_all: 0, pub_rejected: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
 
   async function loadCounts() {
-    const [sw, pub] = await Promise.all([
+    const [sw, pub, swApproved, swRejected, pubApproved, pubRejected] = await Promise.all([
       supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'pending'),
       supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'pending'),
+      supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'approved'),
+      supabase.from('student_work').select('id', { count: 'exact' }).eq('status', 'rejected'),
+      supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'approved'),
+      supabase.from('publications').select('id', { count: 'exact' }).eq('status', 'rejected'),
     ]);
     setCounts({ sw_pending: sw.count ?? 0, pub_pending: pub.count ?? 0 });
+    setStatusBreakdown({
+      sw_approved: swApproved.count ?? 0,
+      sw_pending_all: sw.count ?? 0,
+      sw_rejected: swRejected.count ?? 0,
+      pub_approved: pubApproved.count ?? 0,
+      pub_pending_all: pub.count ?? 0,
+      pub_rejected: pubRejected.count ?? 0,
+    });
   }
 
   async function loadStudentWork() {
@@ -163,6 +180,32 @@ export default function AdminCommunityPage() {
         <div>
           <h1 className={styles.title}>Community</h1>
           <p className={styles.sub}>Manage student work submissions, publications, and partners.</p>
+        </div>
+      </div>
+
+      {/* moderation status overview */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+        <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Student work status</p>
+          <PieChart
+            size={120}
+            slices={[
+              { label: 'Approved', value: statusBreakdown.sw_approved, color: '#4caf50' },
+              { label: 'Pending', value: statusBreakdown.sw_pending_all, color: 'var(--brass)' },
+              { label: 'Rejected', value: statusBreakdown.sw_rejected, color: '#555' },
+            ]}
+          />
+        </div>
+        <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20 }}>
+          <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Publications status</p>
+          <PieChart
+            size={120}
+            slices={[
+              { label: 'Approved', value: statusBreakdown.pub_approved, color: '#4caf50' },
+              { label: 'Pending', value: statusBreakdown.pub_pending_all, color: 'var(--brass)' },
+              { label: 'Rejected', value: statusBreakdown.pub_rejected, color: '#555' },
+            ]}
+          />
         </div>
       </div>
 

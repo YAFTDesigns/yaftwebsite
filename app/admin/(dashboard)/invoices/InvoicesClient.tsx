@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
+import PieChart from '@/components/admin/PieChart';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -146,7 +147,19 @@ export default function InvoicesClient() {
       {tab === 'sent' && (
         invoices.length === 0
           ? <p className={styles.empty}>No invoices sent yet.</p>
-          : <div className={styles.list}>
+          : <>
+              <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
+                <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Payment status</p>
+                <PieChart
+                  size={120}
+                  slices={[
+                    { label: 'Fully paid', value: invoices.filter(i => i.balance === 0 && i.advance > 0).length, color: '#4caf50' },
+                    { label: 'Outstanding', value: invoices.filter(i => i.balance > 0).length, color: '#E63946' },
+                    { label: 'No payment yet', value: invoices.filter(i => i.advance === 0).length, color: '#555' },
+                  ]}
+                />
+              </div>
+              <div className={styles.list}>
               {invoices.map(inv => (
                 <div key={inv.id}>
                   <div className={styles.card}>
@@ -208,7 +221,8 @@ export default function InvoicesClient() {
                   )}
                 </div>
               ))}
-            </div>
+              </div>
+            </>
       )}
 
       {/* ── CREATE INVOICE ── */}

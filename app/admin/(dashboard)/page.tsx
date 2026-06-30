@@ -1,10 +1,13 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import BarChart from '@/components/admin/BarChart';
+import PieChart from '@/components/admin/PieChart';
+import LineChart from '@/components/admin/LineChart';
 import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
 const SOURCES = ['syllabus_gate', 'contact_form'] as const;
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function startOfMonth() {
   const d = new Date();
@@ -20,16 +23,23 @@ function startOfWeek() {
   return monday.toISOString();
 }
 
+function sixMonthsAgoStart() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() - 5, 1).toISOString();
+}
+
 async function getCounts() {
   const supabase = getSupabaseAdmin();
   const weekStart = startOfWeek();
   const monthStart = startOfMonth();
+  const sixMoStart = sixMonthsAgoStart();
 
   const [
     leads, enquiries, syllabusRequests, unlocks, leadsBySource,
     pendingTestimonials, enquiriesThisWeek,
     invoicesThisMonth, pendingStudentWork, pendingPublications,
     recentEnquiries, recentInvoices, failedEmails,
+    sixMonthInvoices,
   ] = await Promise.all([
     supabase.from('leads').select('id', { count: 'exact', head: true }),
     supabase.from('enquiries').select('id', { count: 'exact', head: true }),
@@ -48,11 +58,33 @@ async function getCounts() {
     supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5),
     supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').order('created_at', { ascending: false }).limit(5),
     supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
+    supabase.from('invoices').select('total, created_at').gte('created_at', sixMoStart),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
   const revenueThisMonth = invoiceRows.reduce((sum, r) => sum + (r.total ?? 0), 0);
   const outstandingBalance = invoiceRows.reduce((sum, r) => sum + (r.balance ?? 0), 0);
+
+  // Build 6-month revenue trend
+  const now = new Date();
+  const monthlyTotals: { label: string; value: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = MONTH_LABELS[d.getMonth()];
+    const sum = (sixMonthInvoices.data ?? [])
+      .filter((r: any) => {
+        const rd = new Date(r.created_at);
+        return rd.getFullYear() === d.getFullYear() && rd.getMonth() === d.getMonth();
+      })
+      .reduce((s: number, r: any) => s + (r.total ?? 0), 0);
+    monthlyTotals.push({ label, value: sum });
+  }
+
+  // Enquiry source breakdown for pie chart
+  const enquirySourceSlices = [
+    { label: 'Syllabus gate', value: leadsBySource[0].count ?? 0, color: 'var(--blueprint)' },
+    { label: 'Contact form', value: leadsBySource[1].count ?? 0, color: 'var(--brass)' },
+  ];
 
   return {
     leads: leads.count ?? 0,
@@ -61,6 +93,8 @@ async function getCounts() {
     syllabusRequests: syllabusRequests.count ?? 0,
     unlocks: unlocks.count ?? 0,
     leadsBySource: SOURCES.map((source, i) => ({ label: source, value: leadsBySource[i].count ?? 0 })),
+    enquirySourceSlices,
+    monthlyRevenue: monthlyTotals,
     pendingTestimonials: pendingTestimonials.count ?? 0,
     invoicesThisMonth: invoiceRows.length,
     revenueThisMonth,
@@ -214,6 +248,20 @@ export default async function AdminOverviewPage() {
               </div>
           }
           <a href="/admin/invoices" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textDecoration: 'none', display: 'inline-block', marginTop: 14 }}>View all →</a>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 24, marginBottom: 48 }}>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Revenue trend — last 6 months</h2>
+          <LineChart
+            points={counts.monthlyRevenue}
+            formatValue={(v) => `₹${fmt(v)}`}
+          />
+        </div>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Leads by source</h2>
+          <PieChart slices={counts.enquirySourceSlices} size={140} />
         </div>
       </div>
 
