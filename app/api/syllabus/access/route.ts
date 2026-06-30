@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { getCourseBySlug } from '@/lib/courses';
+import { rateLimit } from '@/lib/rateLimit';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LINKEDIN_RE = /linkedin\.com\//i;
 
 export async function POST(request: NextRequest) {
+  const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
+  if (limited) return limited;
   const body = await request.json().catch(() => null);
   const emailRaw = typeof body?.email === 'string' ? body.email.trim() : '';
   const linkedinRaw = typeof body?.linkedin === 'string' ? body.linkedin.trim() : '';
