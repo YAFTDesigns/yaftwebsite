@@ -15,6 +15,7 @@ type Invoice = {
   id: string; created_at: string; invoice_no: string; date: string;
   client_name: string; client_email: string; client_state: string;
   total: number; advance: number; balance: number; status: string;
+  deleted_at: string | null;
 };
 
 const COURSES = [
@@ -31,8 +32,9 @@ const STATES = [
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function InvoicesClient() {
-  const [tab, setTab] = useState<'create'|'sent'>('create');
+  const [tab, setTab] = useState<'create'|'sent'|'trash'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>([]);
   const [loadError, setLoadError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const now = new Date();
@@ -84,9 +86,13 @@ export default function InvoicesClient() {
   }
 
   async function deleteInvoice(id: string) {
-    if (!confirm('Delete this invoice permanently? This cannot be undone.')) return;
+    if (!confirm('Move this invoice to trash? You can restore it later from the Trash tab.')) return;
     setDeletingId(id);
-    await supabase.from('invoices').delete().eq('id', id);
+    const { error } = await supabase.from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+    if (error) {
+      console.error('Failed to delete invoice:', error);
+      alert(`Could not delete invoice: ${error.message}`);
+    }
     if (editInv?.id === id) setEditInv(null);
     await loadInvoices();
     setDeletingId(null);
@@ -94,16 +100,47 @@ export default function InvoicesClient() {
 
   async function deleteAllMatching(ids: string[]) {
     if (ids.length === 0) return;
-    if (!confirm(`Delete all ${ids.length} matching invoice${ids.length > 1 ? 's' : ''} permanently? This cannot be undone.`)) return;
+    if (!confirm(`Move all ${ids.length} matching invoice${ids.length > 1 ? 's' : ''} to trash? You can restore them later from the Trash tab.`)) return;
     setDeletingId('bulk');
-    await supabase.from('invoices').delete().in('id', ids);
+    const { error } = await supabase.from('invoices').update({ deleted_at: new Date().toISOString() }).in('id', ids);
+    if (error) {
+      console.error('Failed to delete invoices:', error);
+      alert(`Could not delete invoices: ${error.message}`);
+    }
     setEditInv(null);
     await loadInvoices();
     setDeletingId(null);
   }
 
+  async function restoreInvoice(id: string) {
+    setDeletingId(id);
+    const { error } = await supabase.from('invoices').update({ deleted_at: null }).eq('id', id);
+    if (error) {
+      console.error('Failed to restore invoice:', error);
+      alert(`Could not restore invoice: ${error.message}`);
+    }
+    await loadTrash();
+    setDeletingId(null);
+  }
+
+  async function permanentlyDeleteInvoice(id: string) {
+    if (!confirm('Permanently delete this invoice? This CANNOT be undone — it will be gone forever, not recoverable from trash.')) return;
+    setDeletingId(id);
+    const { error } = await supabase.from('invoices').delete().eq('id', id);
+    if (error) {
+      console.error('Failed to permanently delete invoice:', error);
+      alert(`Could not permanently delete: ${error.message}. This likely needs an RLS delete policy added in Supabase.`);
+    }
+    await loadTrash();
+    setDeletingId(null);
+  }
+
   async function loadInvoices() {
-    const { data, error } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false });
     if (error) {
       console.error('Failed to load invoices:', error);
       setLoadError(error.message);
@@ -113,7 +150,29 @@ export default function InvoicesClient() {
     setInvoices(data ?? []);
   }
 
-  useEffect(() => { if (tab==='sent') loadInvoices(); }, [tab]);
+  async function loadTrash() {
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .not('deleted_at', 'is', null)
+      .order('deleted_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load trash:', error);
+      setLoadError(error.message);
+    } else {
+      setLoadError('');
+    }
+    setTrashedInvoices(data ?? []);
+  }
+
+  useEffect(() => {
+    if (tab === 'sent') loadInvoices();
+    if (tab === 'trash') loadTrash();
+  }, [tab]);
+
+  // Load trash count on mount too, so the tab badge is accurate
+  // before the user ever visits the Trash tab themselves.
+  useEffect(() => { loadTrash(); }, []);
 
   async function generate() {
     setFormError(''); setSending(true); setDone(false); setPdfUrl('');
@@ -169,6 +228,7 @@ export default function InvoicesClient() {
       <div className={styles.tabs} style={{ marginBottom: 28 }}>
         <button className={`${styles.tab} ${tab==='create'?styles.activeTab:''}`} onClick={() => setTab('create')}>Create Invoice</button>
         <button className={`${styles.tab} ${tab==='sent'?styles.activeTab:''}`} onClick={() => setTab('sent')}>Sent Invoices</button>
+        <button className={`${styles.tab} ${tab==='trash'?styles.activeTab:''}`} onClick={() => setTab('trash')}>Trash{trashedInvoices.length > 0 ? ` (${trashedInvoices.length})` : ''}</button>
       </div>
 
       {/* ── SENT INVOICES ── */}
@@ -344,6 +404,51 @@ export default function InvoicesClient() {
                 });
               })()}
             </>
+      )}
+
+      {/* ── TRASH ── */}
+      {tab === 'trash' && (
+        trashedInvoices.length === 0
+          ? <p className={styles.empty}>Trash is empty.</p>
+          : <div className={styles.list}>
+              {trashedInvoices.map(inv => (
+                <div key={inv.id} className={styles.card}>
+                  <div className={styles.cardTop}>
+                    <div>
+                      <p className={styles.cardName}>{inv.client_name}</p>
+                      <p className={styles.cardRole}>{inv.client_email}</p>
+                      <p className={styles.cardCourse}>
+                        Invoice #{inv.invoice_no} · {inv.date} · {inv.client_state}
+                      </p>
+                      {inv.deleted_at && (
+                        <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#666', marginTop:6 }}>
+                          Deleted {new Date(inv.deleted_at).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' })}
+                        </p>
+                      )}
+                    </div>
+                    <div className={styles.cardMeta} style={{ textAlign:'right' }}>
+                      <p className={styles.cardDate} style={{ fontWeight:700, fontSize:14, color:'#888' }}>INR {fmt(inv.total)}</p>
+                    </div>
+                  </div>
+                  <div className={styles.actions}>
+                    <button
+                      className={styles.approveBtn}
+                      disabled={deletingId === inv.id}
+                      onClick={() => restoreInvoice(inv.id)}
+                    >
+                      {deletingId === inv.id ? 'Restoring...' : 'Restore →'}
+                    </button>
+                    <button
+                      className={styles.deleteBtn}
+                      disabled={deletingId === inv.id}
+                      onClick={() => permanentlyDeleteInvoice(inv.id)}
+                    >
+                      Delete forever
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
       )}
 
       {/* ── CREATE INVOICE ── */}
