@@ -33,6 +33,7 @@ function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigi
 export default function InvoicesClient() {
   const [tab, setTab] = useState<'create'|'sent'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [loadError, setLoadError] = useState('');
   const now = new Date();
   const mmyyyy = String(now.getMonth()+1).padStart(2,'0') + String(now.getFullYear());
   const [invoiceSeq, setInvoiceSeq] = useState('01');
@@ -81,7 +82,13 @@ export default function InvoicesClient() {
   }
 
   async function loadInvoices() {
-    const { data } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('invoices').select('*').order('created_at', { ascending: false });
+    if (error) {
+      console.error('Failed to load invoices:', error);
+      setLoadError(error.message);
+    } else {
+      setLoadError('');
+    }
     setInvoices(data ?? []);
   }
 
@@ -146,7 +153,14 @@ export default function InvoicesClient() {
       {/* ── SENT INVOICES ── */}
       {tab === 'sent' && (
         invoices.length === 0
-          ? <p className={styles.empty}>No invoices sent yet.</p>
+          ? <div>
+              <p className={styles.empty}>{loadError ? 'Could not load invoices.' : 'No invoices sent yet.'}</p>
+              {loadError && (
+                <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55', marginTop:8 }}>
+                  Error: {loadError}
+                </p>
+              )}
+            </div>
           : <>
               <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
                 <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Payment status</p>
