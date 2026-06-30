@@ -102,11 +102,9 @@ async function generatePDF(data: any): Promise<Buffer> {
     let fy = 178;
     fromLines.forEach(line => { doc.text(line, M, fy); fy += 14; });
 
-    // Date / No boxes
+    // Date / No
     doc.font('Helvetica-Bold').fontSize(9).fillColor('#000000');
     doc.text('DATE', 369, 162).text('No #', 369, 176);
-    doc.rect(420, 159, 119, 17).stroke();
-    doc.rect(420, 173, 119, 17).stroke();
     doc.font('Helvetica').fontSize(9);
     doc.text(data.date, 425, 162).text(data.invoice_no, 425, 176);
 
@@ -197,15 +195,19 @@ async function generatePDF(data: any): Promise<Buffer> {
     doc.font('Helvetica-Bold').fontSize(9);
     doc.text('TOTAL (INR)', tx, ty2);
     doc.text(`INR ${fmt(grandTotal)}`, 0, ty2, { align: 'right', width: W - M });
-    doc.rect(tx - 5, ty2 - 3, W - tx - M + 5, 17).stroke();
     ty2 += 24;
 
     doc.font('Helvetica').fontSize(8).fillColor('#000000');
     doc.text('ADVANCE PAID', tx, ty2);
     doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
+       .text(fmt(data.advance || 0), tx + 84, ty2, { width: 109, align: 'right' });
     ty2 += 22;
+    doc.font('Helvetica').fontSize(8).fillColor('#000000');
     doc.text('BALANCE AMOUNT', tx, ty2);
     doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
+    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
+       .text(fmt(data.balance ?? (grandTotal - (data.advance || 0))), tx + 84, ty2, { width: 109, align: 'right' });
     ty2 += 18;
 
     // Amount in words
