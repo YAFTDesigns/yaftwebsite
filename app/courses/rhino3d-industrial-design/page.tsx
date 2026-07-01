@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
 
 export default function Rhino3DIndustrialDesign() {
   return (
-    <main className={s.wrap}>
+    <>
+      <SiteHeader active="/courses" />
+      <main className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>
       <h1 className={s.headline}>Rhino3D for Industrial Design</h1>
       <p className={s.subtitle}>Re-Imagining Parametric Design Workshop</p>
@@ -87,5 +91,7 @@ export default function Rhino3DIndustrialDesign() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+      <SiteFooter />
+    </>
   );
 }
