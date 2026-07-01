@@ -5,6 +5,8 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import SyllabusButton from '@/components/SyllabusButton';
+import CourseGateButton from '@/components/CourseGateButton';
+import CourseGateModal from '@/components/CourseGateModal';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
@@ -139,17 +141,14 @@ export default async function CoursesPage() {
                     <div className={styles.courseTool}>{course.tool}</div>
                     <h3>{course.title}</h3>
                     <p className={styles.desc}>{course.desc}</p>
-                    <div className={styles.courseFoot}>
-                      <SyllabusButton pdf={course.pdf} course={course.title} slug={course.slug} />
-                      <EnquireLink course={course.title} />
-                    </div>
                     {COURSE_DETAIL_PAGES[course.slug] && (
-                      <div style={{ marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-                        <Link href={COURSE_DETAIL_PAGES[course.slug]} style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--blueprint)', letterSpacing: '0.06em', textDecoration: 'none' }}>
-                          VIEW FULL COURSE &amp; SYLLABUS →
-                        </Link>
+                      <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--line)' }}>
+                        <CourseGateButton href={COURSE_DETAIL_PAGES[course.slug]} course={course.title} slug={course.slug} />
                       </div>
                     )}
+                    <div className={styles.courseFoot}>
+                      <EnquireLink course={course.title} />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -212,6 +211,7 @@ export default async function CoursesPage() {
       </main>
 
       <SiteFooter />
+      <CourseGateModal />
       <SyllabusModal />
     </>
   );
