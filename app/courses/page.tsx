@@ -51,11 +51,11 @@ const INTEREST_OPTIONS = [
 
 
 const COURSE_DETAIL_PAGES: Record<string, string> = {
-  'rhino3d-architecture':       '/courses/rhino3d-architecture',
+  'rhino-architecture':         '/courses/rhino3d-architecture',
   'grasshopper-architecture':   '/courses/grasshopper-architecture',
   'revit-rhino-inside':         '/courses/revit-rhino-inside',
-  'rhino3d-aec-climate':        '/courses/rhino3d-aec-climate',
-  'rhino3d-industrial-design':  '/courses/rhino3d-industrial-design',
+  'rhino-aec-climate':          '/courses/rhino3d-aec-climate',
+  'rhino-industrial-design':    '/courses/rhino3d-industrial-design',
 };
 
 export default async function CoursesPage() {
