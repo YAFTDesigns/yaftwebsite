@@ -1,0 +1,50 @@
+.wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+.tag { display: inline-block; background: transparent; color: var(--blueprint); border: 1px solid var(--blueprint); border-radius: 4px; font-size: 11px; padding: 3px 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; font-family: var(--mono); }
+.headline { font-size: clamp(26px, 4vw, 36px); font-weight: 500; color: var(--ink); line-height: 1.25; margin: 14px 0 6px; }
+.subtitle { font-size: 14px; color: var(--blueprint); font-style: italic; margin-bottom: 12px; }
+.desc { font-size: 15px; color: var(--ink-soft); line-height: 1.75; margin-bottom: 22px; max-width: 680px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; background: var(--paper-2); border: 0.5px solid var(--line); border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--ink-soft); font-family: var(--mono); }
+.ctaBar { background: var(--paper-2); border: 0.5px solid var(--line); border-radius: 12px; padding: 24px 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 48px; }
+.priceMain { font-size: 24px; font-weight: 500; color: var(--ink); }
+.priceSub { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
+.priceUsd { font-size: 12px; color: var(--ink-soft); font-family: var(--mono); margin-top: 2px; }
+.ctaBtns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btnPrimary { background: var(--blueprint); color: #fff; border: none; border-radius: 6px; padding: 11px 26px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+.btnOutline { background: transparent; color: var(--blueprint); border: 1px solid var(--blueprint); border-radius: 6px; padding: 11px 26px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+.divider { border: none; border-top: 0.5px solid var(--line); margin: 36px 0; }
+.sectionLabel { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--blueprint); font-weight: 500; font-family: var(--mono); margin-bottom: 16px; }
+.outcomesGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; margin-bottom: 4px; }
+.outcomeItem { display: flex; gap: 10px; align-items: flex-start; }
+.outcomeItem span { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+.check { color: var(--blueprint); font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+.dayCard { background: var(--paper-2); border: 0.5px solid var(--line); border-radius: 10px; padding: 18px 20px; margin-bottom: 10px; }
+.dayHeader { display: flex; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+.dayNum { font-size: 10px; font-weight: 500; color: var(--blueprint); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; font-family: var(--mono); }
+.dayTitle { font-size: 14px; font-weight: 500; color: var(--ink); }
+.dayItem { font-size: 13px; color: var(--ink-soft); padding: 5px 0; border-bottom: 0.5px solid var(--line); display: flex; align-items: center; gap: 8px; }
+.dayItem:last-child { border-bottom: none; }
+.dayItem::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--blueprint); flex-shrink: 0; }
+.feeBox { background: var(--paper-2); border: 0.5px solid var(--line); border-radius: 10px; padding: 16px 20px; }
+.feeRow { display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 0.5px solid var(--line); font-size: 14px; }
+.feeRow:last-child { border-bottom: none; }
+.feeLabel { color: var(--ink-soft); }
+.feeNote { font-size: 11px; color: var(--ink-soft); margin-top: 2px; font-family: var(--mono); }
+.feeAmt { font-weight: 500; color: var(--ink); text-align: right; }
+.feeUsd { font-size: 11px; color: var(--ink-soft); font-family: var(--mono); }
+.payNote { border-left: 2px solid var(--blueprint); padding: 10px 14px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-top: 12px; }
+.reqItem { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+.instructorCard { background: var(--paper-2); border: 0.5px solid var(--line); border-radius: 10px; padding: 20px; display: flex; gap: 16px; align-items: flex-start; }
+.avatar { width: 50px; height: 50px; border-radius: 50%; background: rgba(193,18,31,0.1); border: 2px solid rgba(193,18,31,0.3); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 500; color: var(--blueprint); flex-shrink: 0; }
+.instructorName { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.instructorRole { font-size: 12px; color: var(--blueprint); margin-bottom: 8px; font-family: var(--mono); }
+.instructorBio { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.faqItem { border-bottom: 0.5px solid var(--line); padding: 16px 0; }
+.faqQ { font-size: 14px; font-weight: 500; color: var(--ink); margin-bottom: 8px; }
+.faqA { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+.ctaBottom { text-align: center; padding-top: 8px; }
+.ctaBottomText { font-size: 13px; color: var(--ink-soft); margin-bottom: 16px; }
+@media (max-width: 640px) {
+  .outcomesGrid { grid-template-columns: 1fr; }
+  .ctaBar { flex-direction: column; align-items: flex-start; }
+}
