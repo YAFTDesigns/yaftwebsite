@@ -11,12 +11,12 @@ export type CourseGateDetail = { href: string; course: string; slug: string };
 
 export default function CourseGateModal() {
   const router = useRouter();
-  const [open, setOpen]           = useState(false);
-  const [visible, setVisible]     = useState(false);
-  const [pending, setPending]     = useState<CourseGateDetail | null>(null);
-  const [email, setEmail]         = useState('');
-  const [linkedin, setLinkedin]   = useState('');
-  const [error, setError]         = useState('');
+  const [open, setOpen]             = useState(false);
+  const [visible, setVisible]       = useState(false);
+  const [pending, setPending]       = useState<CourseGateDetail | null>(null);
+  const [email, setEmail]           = useState('');
+  const [linkedin, setLinkedin]     = useState('');
+  const [error, setError]           = useState('');
   const [submitting, setSubmitting] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +51,7 @@ export default function CourseGateModal() {
 
   function close() {
     setVisible(false);
-    setTimeout(() => { setOpen(false); setPending(null); }, 350);
+    setTimeout(() => { setOpen(false); setPending(null); }, 300);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -60,9 +60,8 @@ export default function CourseGateModal() {
     const trimLinkedin = linkedin.trim();
     const emailOk    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimEmail);
     const linkedinOk = /linkedin\.com\//i.test(trimLinkedin);
-
     if (!emailOk && !linkedinOk) {
-      setError('Please enter at least your email or LinkedIn profile URL.');
+      setError('Enter at least your email or LinkedIn profile URL.');
       return;
     }
     setError('');
@@ -79,109 +78,95 @@ export default function CourseGateModal() {
     <div style={{
       position: 'fixed', inset: 0, zIndex: 9000,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      transition: 'opacity 0.35s ease',
+      transition: 'opacity 0.3s ease',
       opacity: visible ? 1 : 0,
     }}>
-      {/* Blur backdrop */}
-      <div
-        onClick={close}
-        style={{
-          position: 'absolute', inset: 0,
-          backdropFilter: 'blur(14px)',
-          WebkitBackdropFilter: 'blur(14px)',
-          background: 'rgba(6,6,6,0.55)',
-        }}
-      />
+      {/* Dark backdrop */}
+      <div onClick={close} style={{
+        position: 'absolute', inset: 0,
+        background: 'rgba(0,0,0,0.88)',
+      }} />
 
-      {/* Liquid glass box */}
+      {/* Dark panel with crimson top border */}
       <div style={{
         position: 'relative', zIndex: 1,
-        width: '100%', maxWidth: 460,
+        width: '100%', maxWidth: 440,
         margin: '0 16px',
-        borderRadius: 20,
-        background: 'rgba(255,255,255,0.06)',
-        border: '1px solid rgba(255,255,255,0.14)',
-        backdropFilter: 'blur(32px) saturate(1.6)',
-        WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
-        boxShadow: '0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.12)',
-        padding: '36px 32px 32px',
-        transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.97)',
-        transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+        background: '#0a0a0a',
+        border: '1px solid rgba(193,18,31,0.45)',
+        borderTop: '2px solid #C1121F',
+        borderRadius: 2,
+        padding: '28px 28px 24px',
+        transform: visible ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'transform 0.3s ease',
       }}>
-        <button
-          onClick={close}
-          aria-label="Close"
-          style={{
-            position: 'absolute', top: 16, right: 16,
-            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '50%', width: 32, height: 32,
-            color: 'rgba(255,255,255,0.7)', cursor: 'pointer', fontSize: 14,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >✕</button>
+        <button onClick={close} aria-label="Close" style={{
+          position: 'absolute', top: 14, right: 14,
+          background: 'transparent', border: '1px solid #222',
+          color: '#555', cursor: 'pointer', fontSize: 12,
+          width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: 2,
+        }}>✕</button>
 
-        <div style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--blueprint)', marginBottom: 10, textTransform: 'uppercase' }}>
-          UNLOCK COURSE
-        </div>
-        <h3 style={{ fontSize: 20, fontWeight: 500, color: '#fff', marginBottom: 6, lineHeight: 1.3 }}>
-          View the full course and syllabus
-        </h3>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 6 }}>
-          {pending?.course ?? ''}
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.16em', color: '#C1121F', textTransform: 'uppercase', marginBottom: 12 }}>
+          Unlock course
         </p>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 16, fontWeight: 500, color: '#fff', marginBottom: 4, lineHeight: 1.3 }}>
+          {pending?.course ?? ''}
+        </h3>
+        <p style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 18 }}>
           Leave your email or LinkedIn, just one is enough, and you will be taken straight to the course page.
         </p>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6, fontFamily: 'var(--mono)', letterSpacing: '0.06em' }}>EMAIL</label>
-            <input
-              ref={emailRef}
-              type="email"
-              placeholder="you@studio.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff', fontSize: 14, outline: 'none',
-                fontFamily: 'var(--sans)',
-              }}
-            />
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', display: 'block', marginBottom: 6, fontFamily: 'var(--mono)', letterSpacing: '0.06em' }}>LINKEDIN PROFILE</label>
-            <input
-              type="url"
-              placeholder="https://linkedin.com/in/yourname"
-              value={linkedin}
-              onChange={e => setLinkedin(e.target.value)}
-              style={{
-                width: '100%', padding: '10px 14px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff', fontSize: 14, outline: 'none',
-                fontFamily: 'var(--sans)',
-              }}
-            />
-          </div>
-          {error && <p style={{ fontSize: 12, color: '#ff6b6b', marginBottom: 14 }}>{error}</p>}
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button type="button" onClick={close} style={{
-              background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: 8, padding: '10px 20px', color: 'rgba(255,255,255,0.5)',
-              fontSize: 13, cursor: 'pointer',
-            }}>Cancel</button>
-            <button type="submit" disabled={submitting} style={{
-              background: 'var(--blueprint)', border: 'none',
-              borderRadius: 8, padding: '10px 24px', color: '#fff',
-              fontSize: 13, fontWeight: 500, cursor: 'pointer',
-              opacity: submitting ? 0.7 : 1,
-            }}>
-              {submitting ? 'Opening…' : 'View course →'}
-            </button>
-          </div>
-        </form>
+        <div style={{ borderTop: '1px solid #1a1a1a', paddingTop: 18 }}>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.1em', color: '#555', textTransform: 'uppercase', marginBottom: 5 }}>Email</label>
+              <input
+                ref={emailRef}
+                type="email"
+                placeholder="you@studio.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                style={{
+                  width: '100%', background: '#111', border: '1px solid #2a2a2a',
+                  borderRadius: 2, padding: '9px 11px', color: '#aaa',
+                  fontSize: 13, outline: 'none', fontFamily: 'var(--sans)',
+                }}
+              />
+            </div>
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.1em', color: '#555', textTransform: 'uppercase', marginBottom: 5 }}>LinkedIn profile</label>
+              <input
+                type="url"
+                placeholder="linkedin.com/in/yourname"
+                value={linkedin}
+                onChange={e => setLinkedin(e.target.value)}
+                style={{
+                  width: '100%', background: '#111', border: '1px solid #2a2a2a',
+                  borderRadius: 2, padding: '9px 11px', color: '#aaa',
+                  fontSize: 13, outline: 'none', fontFamily: 'var(--sans)',
+                }}
+              />
+            </div>
+            {error && <p style={{ fontSize: 11, color: '#C1121F', marginBottom: 12, fontFamily: 'var(--mono)' }}>{error}</p>}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button type="button" onClick={close} style={{
+                background: 'transparent', border: '1px solid #2a2a2a',
+                color: '#555', padding: '8px 16px', fontSize: 12,
+                cursor: 'pointer', borderRadius: 2,
+              }}>Cancel</button>
+              <button type="submit" disabled={submitting} style={{
+                background: '#C1121F', border: 'none',
+                color: '#fff', padding: '8px 20px', fontSize: 12,
+                fontWeight: 500, cursor: 'pointer', borderRadius: 2,
+                opacity: submitting ? 0.7 : 1,
+              }}>
+                {submitting ? 'Opening...' : 'View course →'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
