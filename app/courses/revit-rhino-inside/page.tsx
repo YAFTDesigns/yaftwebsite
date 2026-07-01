@@ -28,7 +28,7 @@ export default function RevitRhinoInside() {
         </div>
         <div className={s.ctaBtns}>
           <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
-          <a href="/syllabus/revit-rhino-inside.pdf" className={s.btnPrimary}>Download syllabus</a>
+          <a href="https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/syllabus/Revit_Architecture_Rhino_Insider.pdf" className={s.btnPrimary}>Download syllabus</a>
         </div>
       </div>
 
