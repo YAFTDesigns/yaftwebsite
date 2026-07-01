@@ -28,7 +28,7 @@ export default function Rhino3DArchitecture() {
         </div>
         <div className={s.ctaBtns}>
           <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
-          <a href="/syllabus/rhino3d-architecture.pdf" className={s.btnPrimary}>Download syllabus</a>
+          <a href="https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/syllabus/Rhino_3D_Training_for_Architecture.pdf" className={s.btnPrimary}>Download syllabus</a>
         </div>
       </div>
 
