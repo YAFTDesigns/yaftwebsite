@@ -1,13 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from './TestimonialForm.module.css';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export default function TestimonialForm() {
   const [open, setOpen] = useState(false);
@@ -46,42 +40,25 @@ export default function TestimonialForm() {
     reader.readAsDataURL(file);
   }
 
-  async function uploadPhoto(file: File): Promise<string | null> {
-    const ext = file.name.split('.').pop();
-    const path = `testimonials/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage
-      .from('public-assets')
-      .upload(path, file, { cacheControl: '3600', upsert: false });
-    if (error) return null;
-    const { data } = supabase.storage.from('public-assets').getPublicUrl(path);
-    return data.publicUrl;
-  }
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.role || !form.quote) return;
     setStatus('submitting');
 
-    let photo_url: string | null = null;
-    if (photoFile) {
-      photo_url = await uploadPhoto(photoFile);
-    }
+    const fd = new FormData();
+    fd.append('name', form.name);
+    fd.append('role', form.role);
+    fd.append('institution', form.institution);
+    fd.append('course_taken', form.course_taken);
+    fd.append('quote', form.quote);
+    fd.append('linkedin_url', form.linkedin_url);
+    fd.append('instagram_url', form.instagram_url);
+    fd.append('show_social', String(form.show_social));
+    fd.append('rating', String(rating || 5.0));
+    if (photoFile) fd.append('photo', photoFile);
 
-    const { error } = await supabase.from('testimonials').insert([{
-      name: form.name.trim() || 'Anonymous',
-      role: form.role,
-      institution: form.institution,
-      course_taken: form.course_taken,
-      quote: form.quote,
-      linkedin_url: form.linkedin_url,
-      instagram_url: form.instagram_url,
-      show_social: form.show_social,
-      photo_url,
-      rating: rating || 5.0,
-      status: 'pending',
-    }]);
-
-    setStatus(error ? 'error' : 'success');
+    const res = await fetch('/api/testimonials', { method: 'POST', body: fd });
+    setStatus(res.ok ? 'success' : 'error');
   }
 
   function initials(name: string) {

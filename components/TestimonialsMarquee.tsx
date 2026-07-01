@@ -2,66 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { createClient } from '@supabase/supabase-js';
 import styles from './TestimonialsMarquee.module.css';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-const HARDCODED = [
-  {
-    quote: 'I joined YAFT Designs for training in Rhino and Grasshopper, and the learning experience was truly fantastic. Sir is an exceptionally skilled and professional tutor with deep expertise in computational design.',
-    name: 'Harish Ragaventhra',
-    title: 'Architect, Rajalakshmi School of Architecture',
-    linkedin: 'https://www.linkedin.com/in/harish-ragaven-b3487636a',
-    instagram: '',
-    show_social: true,
-    photo_url: '',
-    rating: 5.0,
-  },
-  {
-    quote: 'I recently attended the Rhino software class conducted by Ar. Yokes from YAFT Designs, and I was thoroughly impressed. His patience and dedication stood out the most.',
-    name: 'Lokhesh',
-    title: 'Architect',
-    linkedin: '',
-    instagram: 'https://www.instagram.com/lok_hesh',
-    show_social: true,
-    photo_url: '',
-    rating: 5.0,
-  },
-  {
-    quote: 'You have been my first point of contact whenever I was stuck, had questions, or needed guidance. I have learned a lot working with you, and those lessons will stay with me.',
-    name: 'Sambram Raam',
-    title: 'BIM Lead, AAD Architects, Chennai',
-    linkedin: 'https://www.linkedin.com/in/sambramraam',
-    instagram: '',
-    show_social: true,
-    photo_url: '',
-    rating: 5.0,
-  },
-  {
-    quote: 'The course was well formatted for architects to design and work with Rhino. Yokes, as an instructor, was well-learned and a clear communicator.',
-    name: 'Ar. Gangotri',
-    title: 'Architect',
-    linkedin: '',
-    instagram: 'https://www.instagram.com/unravellingarchitecture',
-    show_social: true,
-    photo_url: '',
-    rating: 5.0,
-  },
-  {
-    quote: 'The training approach at YAFT Designs is genuinely industry-oriented. Students are exposed to real computational workflows that directly translate to professional practice.',
-    name: 'Ar. Chandrasekaran C',
-    title: 'Architecture Professor, VIT Vellore',
-    linkedin: 'https://www.linkedin.com/in/chandrasekaran-c-bb1b9128b/',
-    instagram: '',
-    show_social: true,
-    photo_url: '',
-    rating: 5.0,
-  },
-];
 
 type Testimonial = {
   quote: string;
@@ -123,18 +64,12 @@ function Avatar({ name, photo_url }: { name: string; photo_url: string }) {
 }
 
 export default function TestimonialsMarquee() {
-  const [items, setItems] = useState<Testimonial[]>(HARDCODED);
+  const [items, setItems] = useState<Testimonial[]>([]);
 
   useEffect(() => {
-    // Shuffle hardcoded on mount
-    setItems(shuffle(HARDCODED));
-
-    supabase
-      .from('testimonials')
-      .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating')
-      .eq('status', 'approved')
-      .order('reviewed_at', { ascending: false })
-      .limit(50) // fetch up to 50, then randomly pick 15
+    const controller = new AbortController();
+    fetch('/api/testimonials', { signal: controller.signal })
+      .then(r => r.json())
       .then(({ data }) => {
         if (data && data.length > 0) {
           const fromDb: Testimonial[] = data.map((t: any) => ({
@@ -147,11 +82,11 @@ export default function TestimonialsMarquee() {
             photo_url: t.photo_url || '',
             rating: t.rating || 5.0,
           }));
-          // Merge all, shuffle, pick max 15
-          const merged = [...HARDCODED, ...fromDb];
-          setItems(pickRandom(merged, 15));
+          setItems(pickRandom(fromDb, 15));
         }
-      });
+      })
+      .catch(err => { if (err.name !== 'AbortError') console.error(err); });
+    return () => controller.abort();
   }, []);
 
   const doubled = [...items, ...items];

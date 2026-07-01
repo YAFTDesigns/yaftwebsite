@@ -1,14 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type Invoice = {
@@ -75,25 +69,33 @@ export default function InvoicesClient() {
   const [saveMsg, setSaveMsg]   = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  async function patchInvoice(body: object) {
+    const res = await fetch('/api/admin/invoices', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    return res.json().catch(() => ({}));
+  }
+
   async function saveEdit() {
     if (!editInv) return;
     setSaving(true); setSaveMsg('');
-    const newBalance = editInv.total - editInv.advance;
-    await supabase.from('invoices').update({ advance: editInv.advance, balance: newBalance }).eq('id', editInv.id);
-    setEditInv({ ...editInv, balance: newBalance });
-    await loadInvoices();
-    setSaving(false); setSaveMsg('Saved');
-    setTimeout(() => setSaveMsg(''), 3000);
+    const json = await patchInvoice({ action: 'update_payment', id: editInv.id, advance: editInv.advance });
+    if (json.ok) {
+      setEditInv({ ...editInv, balance: json.balance });
+      await loadInvoices();
+      setSaveMsg('Saved');
+      setTimeout(() => setSaveMsg(''), 3000);
+    }
+    setSaving(false);
   }
 
   async function deleteInvoice(id: string) {
     if (!confirm('Move this invoice to trash? You can restore it later from the Trash tab.')) return;
     setDeletingId(id);
-    const { error } = await supabase.from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id);
-    if (error) {
-      console.error('Failed to delete invoice:', error);
-      alert(`Could not delete invoice: ${error.message}`);
-    }
+    const json = await patchInvoice({ action: 'soft_delete', id });
+    if (json.error) alert(`Could not delete invoice: ${json.error}`);
     if (editInv?.id === id) setEditInv(null);
     await loadInvoices();
     setDeletingId(null);
@@ -103,11 +105,8 @@ export default function InvoicesClient() {
     if (ids.length === 0) return;
     if (!confirm(`Move all ${ids.length} matching invoice${ids.length > 1 ? 's' : ''} to trash? You can restore them later from the Trash tab.`)) return;
     setDeletingId('bulk');
-    const { error } = await supabase.from('invoices').update({ deleted_at: new Date().toISOString() }).in('id', ids);
-    if (error) {
-      console.error('Failed to delete invoices:', error);
-      alert(`Could not delete invoices: ${error.message}`);
-    }
+    const json = await patchInvoice({ action: 'bulk_soft_delete', ids });
+    if (json.error) alert(`Could not delete invoices: ${json.error}`);
     setEditInv(null);
     await loadInvoices();
     setDeletingId(null);
@@ -115,11 +114,8 @@ export default function InvoicesClient() {
 
   async function restoreInvoice(id: string) {
     setDeletingId(id);
-    const { error } = await supabase.from('invoices').update({ deleted_at: null }).eq('id', id);
-    if (error) {
-      console.error('Failed to restore invoice:', error);
-      alert(`Could not restore invoice: ${error.message}`);
-    }
+    const json = await patchInvoice({ action: 'restore', id });
+    if (json.error) alert(`Could not restore invoice: ${json.error}`);
     await loadTrash();
     setDeletingId(null);
   }
@@ -142,33 +138,25 @@ export default function InvoicesClient() {
   }
 
   async function loadInvoices() {
-    const { data, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false });
-    if (error) {
-      console.error('Failed to load invoices:', error);
-      setLoadError(error.message);
+    const res = await fetch('/api/admin/invoices');
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setLoadError(json.error ?? 'Failed to load invoices');
     } else {
       setLoadError('');
+      setInvoices(json.data ?? []);
     }
-    setInvoices(data ?? []);
   }
 
   async function loadTrash() {
-    const { data, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .not('deleted_at', 'is', null)
-      .order('deleted_at', { ascending: false });
-    if (error) {
-      console.error('Failed to load trash:', error);
-      setLoadError(error.message);
+    const res = await fetch('/api/admin/invoices?trash=true');
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setLoadError(json.error ?? 'Failed to load trash');
     } else {
       setLoadError('');
+      setTrashedInvoices(json.data ?? []);
     }
-    setTrashedInvoices(data ?? []);
   }
 
   useEffect(() => {

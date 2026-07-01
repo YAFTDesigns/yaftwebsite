@@ -1,14 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import type { StudentWork, Publication, Partner } from '@/lib/feature-wall';
 import styles from './FeatureWall.module.css';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const TOOL_LABEL: Record<string, string> = { rhino: 'Rhino3D', grasshopper: 'Grasshopper', rir: 'RIR' };
 const PLACEHOLDERS = [1, 2, 3, 4];
@@ -77,14 +71,6 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
   const [pubDone,    setPubDone]    = useState(false);
   const [workError,  setWorkError]  = useState('');
 
-  async function uploadFile(file: File, path: string): Promise<string | null> {
-    const ext = file.name.split('.').pop();
-    const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error } = await supabase.storage.from('site-images').upload(`${path}/${name}`, file, { upsert: false });
-    if (error) return null;
-    return name;
-  }
-
   async function submitWork() {
     setWorkError('');
     if (!workForm.name || !workForm.project_title || !workForm.description) {
@@ -97,23 +83,18 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
     }
     setSubmitting(true);
 
-    // upload profile photo
-    let profile_photo_url: string | null = null;
-    if (profilePhoto[0]) profile_photo_url = await uploadFile(profilePhoto[0], 'student-work/photos');
+    const fd = new FormData();
+    Object.entries(workForm).forEach(([k, v]) => fd.append(k, v));
+    if (profilePhoto[0]) fd.append('profile_photo', profilePhoto[0]);
+    projectImages.slice(0, 3).forEach((img, i) => fd.append(`project_image_${i}`, img));
 
-    // upload project images
-    const project_image_urls: string[] = [];
-    for (const img of projectImages.slice(0, 3)) {
-      const url = await uploadFile(img, 'student-work/images');
-      if (url) project_image_urls.push(url);
+    const res = await fetch('/api/community/student-work', { method: 'POST', body: fd });
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}));
+      setWorkError(json.error ?? 'Submission failed. Please try again.');
+      setSubmitting(false);
+      return;
     }
-
-    await supabase.from('student_work').insert([{
-      ...workForm,
-      status: 'pending',
-      profile_photo_url,
-      project_image_urls: project_image_urls.length ? project_image_urls : null,
-    }]);
 
     setWorkForm(EMPTY_WORK);
     setProfilePhoto([]);
@@ -127,16 +108,18 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
   async function submitPub() {
     if (!pubForm.author_name || !pubForm.title || !pubForm.description || !pubForm.pub_year) return;
     setSubmitting(true);
-    await supabase.from('publications').insert([{
-      ...pubForm,
-      pub_year: parseInt(pubForm.pub_year),
-      status: 'pending',
-    }]);
-    setPubForm(EMPTY_PUB);
-    setShowPubForm(false);
-    setPubDone(true);
+    const res = await fetch('/api/community/publications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pubForm),
+    });
+    if (res.ok) {
+      setPubForm(EMPTY_PUB);
+      setShowPubForm(false);
+      setPubDone(true);
+      setTimeout(() => setPubDone(false), 5000);
+    }
     setSubmitting(false);
-    setTimeout(() => setPubDone(false), 5000);
   }
 
   const field = (label: string, node: React.ReactNode, hint?: string) => (

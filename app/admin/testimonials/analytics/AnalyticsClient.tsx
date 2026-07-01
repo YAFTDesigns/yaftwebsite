@@ -1,13 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import styles from './analytics.module.css';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 type Submission = {
   id: string;
@@ -29,16 +23,18 @@ export default function TestimonialAnalyticsPage() {
   const [loadError, setLoadError] = useState('');
 
   useEffect(() => {
-    supabase
-      .from('testimonials')
-      .select('id, name, role, institution, course_taken, quote, status, submitted_at, rating')
-      .order('submitted_at', { ascending: false })
+    fetch('/api/admin/testimonials')
+      .then(r => r.json())
       .then(({ data, error }) => {
         if (error) {
           console.error('Failed to load testimonial analytics:', error);
-          setLoadError(error.message);
+          setLoadError(error);
         }
         setAll(data || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        setLoadError(err.message);
         setLoading(false);
       });
   }, []);

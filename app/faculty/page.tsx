@@ -64,7 +64,11 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-export default function FacultyPage() {
+const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+
+export default async function FacultyPage() {
+  const { data } = await fetch(`${base}/api/mentors`, { cache: 'no-store' }).then(r => r.json());
+  const mentors: { name: string; role: string; bio: string; photo_key: string | null; linkedin_url: string | null }[] = data ?? [];
   return (
     <>
       <SiteHeader active="/faculty" />
@@ -152,31 +156,24 @@ export default function FacultyPage() {
             </div>
 
             <div className={styles.mentorGrid}>
-              <div className={styles.mentorCard}>
-                <div className={styles.mentorPhotoStand}>
-                  <Image src={getSiteImageUrl('mentors/kavitha-mohanraj.jpg')} alt="Kavitha Mohanraj" width={400} height={400} style={{ objectPosition: 'center 20%' }} />
+              {mentors.map(m => (
+                <div key={m.name} className={styles.mentorCard}>
+                  <div className={styles.mentorPhotoStand}>
+                    {m.photo_key && (
+                      <Image src={getSiteImageUrl(m.photo_key)} alt={m.name} width={400} height={400} />
+                    )}
+                  </div>
+                  <div className={styles.mentorCardBody}>
+                    <span className={styles.mentorTag}>Guest Mentor</span>
+                    <h3>{m.name}</h3>
+                    <div className={styles.mentorRole}>{m.role}</div>
+                    <p>{m.bio}</p>
+                    {m.linkedin_url && (
+                      <a href={m.linkedin_url} target="_blank" rel="noopener" className={styles.mentorLink}>LinkedIn →</a>
+                    )}
+                  </div>
                 </div>
-                <div className={styles.mentorCardBody}>
-                  <span className={styles.mentorTag}>Guest Mentor</span>
-                  <h3>Mrs. Kavitha Mohanraj</h3>
-                  <div className={styles.mentorRole}>Co-Founder, INTO Designs</div>
-                  <p>Collaborated on the Vande Bharat cockpit facelift, from design through FRP manufacture and 3D mold production.</p>
-                  <a href="https://www.linkedin.com/in/kavithamohanraj/" target="_blank" rel="noopener" className={styles.mentorLink}>LinkedIn →</a>
-                </div>
-              </div>
-
-              <div className={styles.mentorCard}>
-                <div className={styles.mentorPhotoStand}>
-                  <Image src={getSiteImageUrl('mentors/mohafiz-riyaz.jpg')} alt="Mohafiz Riyaz" width={400} height={400} style={{ objectPosition: 'center 25%' }} />
-                </div>
-                <div className={styles.mentorCardBody}>
-                  <span className={styles.mentorTag}>Guest Mentor</span>
-                  <h3>Mr. Mohafiz Riyaz</h3>
-                  <div className={styles.mentorRole}>Professor, VIT Vellore</div>
-                  <p>Collaborates on architecture education content, covering computational design methods and their place in the design curriculum.</p>
-                  <a href="https://www.linkedin.com/in/mohafiz-riyaz-b2836915b/" target="_blank" rel="noopener" className={styles.mentorLink}>LinkedIn →</a>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>

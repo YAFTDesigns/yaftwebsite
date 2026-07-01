@@ -88,103 +88,22 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-function workshopPhotos(key: string, items: [file: number, caption: string][]): { caption: string; src: string }[] {
-  return items.map(([file, caption]) => ({ caption, src: getSiteImageUrl(`workshops/${key}-${file}.jpg`) }));
-}
+const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
-const WORKSHOPS: (WorkshopGroup & { place: string; num: string; cols?: 4 | 5 })[] = [
-  {
-    key: 'cat',
-    num: '01',
-    place: 'Trivandrum, Kerala',
-    title: 'CAT Trivandrum',
-    role: 'Elective, Parametric Design',
-    photos: workshopPhotos('cat', [
-      [2, 'College of Architecture, Trivandrum'],
-      [3, 'Introduction to Rhino'],
-      [4, 'Workshop participants'],
-      [1, '3D printing on fabric'],
-      [5, 'Student-designed 3D printed wearables'],
-    ]),
-  },
-  {
-    key: 'asadi',
-    num: '02',
-    place: 'ASADI College of Architecture',
-    title: 'ASADI College of Architecture',
-    role: 'Adjunct Faculty, M.Arch, Advanced Architecture of Emergent Tech',
-    photos: workshopPhotos('asadi', [
-      [2, 'ASADI campus, Kochi'],
-      [3, 'Studio lounge and student models'],
-      [1, 'Incident radiation analysis using Ladybug'],
-      [4, 'M.Arch student participants'],
-    ]),
-  },
-  {
-    key: 'iitkgp',
-    num: '03',
-    place: 'IIT Kharagpur',
-    title: 'IIT Kharagpur',
-    role: 'Workshop: Rhino Modelling',
-    photos: workshopPhotos('iitkgp', [
-      [1, 'Architecture and Regional Planning block, IIT Kharagpur'],
-      [2, 'Workshop participants'],
-      [3, 'Students using Image Sampler in Grasshopper'],
-      [4, 'Students practising SubD modelling'],
-      [5, 'End of day, Rhino workshop'],
-    ]),
-  },
-  {
-    key: 'navy',
-    num: '04',
-    place: 'Indian Navy',
-    title: 'Metal 3D Printing: Indian Navy Team',
-    role: 'Specialized Training',
-    photos: workshopPhotos('navy', [
-      [1, 'Metal 3D printed lattice component'],
-      [2, 'Display of printed and manufactured parts'],
-      [3, 'Metal 3D printed structural component'],
-      [4, 'Design team participants'],
-      [5, 'Design presentation session'],
-    ]),
-  },
-  {
-    key: 'vit',
-    num: '05',
-    place: 'VIT Vellore',
-    title: 'VIT Vellore',
-    role: 'Present: Visiting Faculty, March, Digital Fabrications',
-    photos: workshopPhotos('vit', [
-      [1, 'Parametric workshop, 3rd year architecture'],
-      [2, 'Twisting towers, parametric study'],
-      [3, 'Integrating Revit and metadata using Elefront'],
-      [4, 'M.Arch student session'],
-      [5, 'Robotic fabrication using KUKA plugin'],
-    ]),
-  },
-  {
-    key: 'nitt',
-    num: '06',
-    place: 'NIT Trichy',
-    title: 'NIT Trichy',
-    role: 'Student-Organized: Climate Responsive Architecture using Ladybug',
-    photos: workshopPhotos('nitt', [
-      [1, 'NIT Trichy campus'],
-      [2, 'Workshop on finding daylight hours'],
-    ]),
-  },
-];
-
-const WORKSHOP_DESCRIPTIONS: Record<string, string> = {
-  cat: 'Elective module on parametric design fundamentals, covering Grasshopper logic and computational workflows for architecture students.',
-  asadi: 'M.Arch-level coursework on emergent technologies in architecture, structured around computational and fabrication-driven design methods.',
-  iitkgp: 'Hands-on Rhino modelling workshop delivered alongside Prof. Gaurab Das Mahapatra, covering NURBS fundamentals through architectural geometry.',
-  navy: 'Focused training engagement on metal 3D printing workflows for an Indian Navy technical team.',
-  vit: 'Ongoing visiting faculty role covering digital fabrication methods as part of the March curriculum track.',
-  nitt: 'Student-organized workshop on climate-responsive design methods using Ladybug Tools for environmental analysis and performance-driven form.',
-};
-
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const { data } = await fetch(`${base}/api/workshops`, { cache: 'no-store' }).then(r => r.json());
+  const workshops: (WorkshopGroup & { place: string; num: string; description: string })[] = ((data ?? []) as { key: string; num: string; place: string; title: string; role: string; description: string; photos: { filename: string; caption: string }[] }[]).map(w => ({
+    key: w.key,
+    num: w.num,
+    place: w.place,
+    title: w.title,
+    role: w.role,
+    description: w.description,
+    photos: (w.photos as { filename: string; caption: string }[]).map(p => ({
+      caption: p.caption,
+      src: getSiteImageUrl(`workshops/${p.filename}`),
+    })),
+  }));
   return (
     <>
       <SiteHeader active="/services" />
@@ -244,7 +163,7 @@ export default function ServicesPage() {
             </div>
 
             <div className={styles.workshopList}>
-              {WORKSHOPS.map((w) => (
+              {workshops.map((w) => (
                 <div className={styles.workshopRow} key={w.key}>
                   <div className={styles.workshopMeta}>
                     <span className={styles.workshopNum}>{w.num}</span>
@@ -252,8 +171,8 @@ export default function ServicesPage() {
                   </div>
                   <h3>{w.title}</h3>
                   <div className={styles.workshopRole}>{w.role}</div>
-                  <p className={styles.desc}>{WORKSHOP_DESCRIPTIONS[w.key]}</p>
-                  <WorkshopGallery group={w} cols={w.cols} />
+                  <p className={styles.desc}>{w.description}</p>
+                  <WorkshopGallery group={w} />
                 </div>
               ))}
             </div>
@@ -280,7 +199,7 @@ export default function ServicesPage() {
       </main>
 
       <SiteFooter />
-      <Lightbox groups={WORKSHOPS} />
+      <Lightbox groups={workshops} />
     </>
   );
 }

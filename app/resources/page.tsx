@@ -36,41 +36,6 @@ const RESOURCES_JSON_LD = {
   publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
 };
 
-const BOOKS = [
-  {
-    title: 'AAD Algorithms-Aided Design',
-    author: 'Arturo Tedeschi',
-    desc: 'The definitive Grasshopper textbook. Covers parametric strategies, data trees, and fabrication logic. Essential for anyone serious about computational design.',
-    tag: 'Grasshopper',
-    url: 'https://www.amazon.in/AAD-Algorithms-Aided-Design-Parametric-Grasshopper/dp/8895315308',
-    cover: 'https://covers.openlibrary.org/b/isbn/9788895315300-L.jpg',
-  },
-  {
-    title: 'Advanced 3D Printing with Grasshopper',
-    author: 'Diego Pinochet',
-    desc: 'Clay and FDM workflows using Grasshopper for additive manufacturing. Highly practical — bridges parametric design and physical output.',
-    tag: 'Grasshopper · Fabrication',
-    url: 'https://www.amazon.in/Advanced-3D-Printing-Grasshopper%C2%AE-Clay/dp/B086Y7CLLC',
-    cover: 'https://covers.openlibrary.org/b/isbn/B086Y7CLLC-L.jpg',
-  },
-  {
-    title: 'Essential Algorithms and Data Structures for Grasshopper',
-    author: 'Robert McNeel & Associates',
-    desc: 'Free primer on data structures, lists, trees, and algorithmic thinking in Grasshopper. Read this before anything else if you are new to parametric logic.',
-    tag: 'Grasshopper · Free',
-    url: 'https://www.food4rhino.com/en/resource/essential-algorithms-and-data-structures-grasshopper-2nd-edition',
-    cover: null,
-  },
-  {
-    title: 'Computational Design Thinking',
-    author: 'Achim Menges & Sean Ahlquist',
-    desc: 'AD Reader that frames computational design as a design discipline, not just a software skill. Theory-heavy but essential context for architecture students.',
-    tag: 'Theory · Architecture',
-    url: 'https://www.amazon.in/Computational-Design-Thinking-Computation-Reader/dp/0470665653',
-    cover: 'https://covers.openlibrary.org/b/isbn/9780470665657-L.jpg',
-  },
-];
-
 const INTEREST_OPTIONS = [
   'Rhino3D for Architecture',
   'Grasshopper for Computational Design',
@@ -79,14 +44,15 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-const VIDEOS: VideoItem[] = [
-  { id: 'BC7ScSC-pP0', title: 'RHINO 8 Clipping Sections: Dynamic Sections, New Features', meta: 'YAFT Designs' },
-  { id: 'EY6WA3geQcc', title: 'Ladybug Steps for Installation: Rhino & Grasshopper', meta: 'YAFT Designs' },
-  { id: 'nspaJbQ1BIg', title: 'YAFT Designs Short', meta: 'Shorts' },
-  { id: 'rvuW5sQZoLM', title: 'YAFT Designs Short', meta: 'Shorts' },
-];
+const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
 
-export default function ResourcesPage() {
+export default async function ResourcesPage() {
+  const [booksRes, videosRes] = await Promise.all([
+    fetch(`${base}/api/books`, { cache: 'no-store' }).then(r => r.json()),
+    fetch(`${base}/api/videos`, { cache: 'no-store' }).then(r => r.json()),
+  ]);
+  const books: { title: string; author: string; description: string; tag: string; url: string; cover_url: string | null }[] = booksRes.data ?? [];
+  const videos: VideoItem[] = (videosRes.data ?? []).map((v: { youtube_id: string; title: string; channel: string }) => ({ id: v.youtube_id, title: v.title, meta: v.channel }));
   return (
     <>
       <SiteHeader active="/resources" />
@@ -117,7 +83,7 @@ export default function ResourcesPage() {
               </p>
             </div>
 
-            <VideoGallery videos={VIDEOS} />
+            <VideoGallery videos={videos} />
           </div>
         </section>
 
@@ -129,11 +95,11 @@ export default function ResourcesPage() {
               <p className="note">Books worth your time, on computational design and beyond.</p>
             </div>
             <div className={styles.bookGrid}>
-              {BOOKS.map((b, i) => (
+              {books.map((b, i) => (
                 <a key={i} href={b.url} target="_blank" rel="noopener" className={styles.bookCard}>
                   <div className={styles.bookCover}>
-                    {b.cover
-                      ? <img src={b.cover} alt={b.title} />
+                    {b.cover_url
+                      ? <img src={b.cover_url} alt={b.title} />
                       : <div className={styles.bookCoverPh}><span>📖</span></div>
                     }
                   </div>
@@ -141,7 +107,7 @@ export default function ResourcesPage() {
                   <div className={styles.bookBody}>
                     <p className={styles.bookTitle}>{b.title}</p>
                     <p className={styles.bookAuthor}>{b.author}</p>
-                    <p className={styles.bookDesc}>{b.desc}</p>
+                    <p className={styles.bookDesc}>{b.description}</p>
                     <span className={styles.bookTag}>{b.tag}</span>
                   </div>
                   <span className={styles.bookArrow}>↗</span>
