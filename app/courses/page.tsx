@@ -4,7 +4,6 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
-import SyllabusButton from '@/components/SyllabusButton';
 import CourseGateButton from '@/components/CourseGateButton';
 import CourseGateModal from '@/components/CourseGateModal';
 import SyllabusModal from '@/components/SyllabusModal';
@@ -12,7 +11,6 @@ import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
-import Link from 'next/link';
 import styles from './courses.module.css';
 
 const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacific and Middle East';
