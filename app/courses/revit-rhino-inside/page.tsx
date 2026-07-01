@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
 
 export default function RevitRhinoInside() {
   return (
-    <main className={s.wrap}>
+    <>
+      <SiteHeader active="/courses" />
+      <main className={s.wrap}>
       <span className={s.tag}>BIM + Computational Design</span>
       <h1 className={s.headline}>Revit Architecture + Rhino.Inside</h1>
       <p className={s.subtitle}>Re-Imagining BIM Design Workshop</p>
@@ -89,5 +93,7 @@ export default function RevitRhinoInside() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+      <SiteFooter />
+    </>
   );
 }
