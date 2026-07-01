@@ -25,9 +25,10 @@ export default function Rhino3DAEC() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>INR 10,000 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>(6 hrs, 3+3 sessions)</span></div>
+          <div className={s.priceMain}>$120 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group / individual</span></div>
+          <div className={s.priceSub}>INR 10,000 · 6 hrs (3+3 sessions)</div>
           <div className={s.priceSub}>Institutions: contact for custom pricing</div>
-          <div className={s.priceUsd}>approx. $120 (USD)</div>
+          <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
           <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
