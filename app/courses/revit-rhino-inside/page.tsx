@@ -26,9 +26,13 @@ export default function RevitRhinoInside() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>INR 40,000 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}> + GST group</span></div>
-          <div className={s.priceSub}>INR 50,000 + GST for personal training</div>
-          <div className={s.priceUsd}>approx. $480 group / $600 personal (USD)</div>
+          <div className={s.priceMain}>$480 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group</span></div>
+          <div className={s.priceSub}>INR 40,000 + GST</div>
+          <div style={{marginTop:10,paddingTop:10,borderTop:'0.5px solid var(--line)'}}>
+            <div className={s.priceMain}>$600 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
+            <div className={s.priceSub}>INR 50,000 + GST</div>
+          </div>
+          <div className={s.priceUsd}>approx. rates · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
           <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
