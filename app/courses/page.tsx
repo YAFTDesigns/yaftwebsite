@@ -10,6 +10,7 @@ import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
+import Link from 'next/link';
 import styles from './courses.module.css';
 
 const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacific and Middle East';
@@ -47,6 +48,15 @@ const INTEREST_OPTIONS = [
   'Industrial Design',
   'Institutional workshop',
 ];
+
+
+const COURSE_DETAIL_PAGES: Record<string, string> = {
+  'rhino3d-architecture':       '/courses/rhino3d-architecture',
+  'grasshopper-architecture':   '/courses/grasshopper-architecture',
+  'revit-rhino-inside':         '/courses/revit-rhino-inside',
+  'rhino3d-aec-climate':        '/courses/rhino3d-aec-climate',
+  'rhino3d-industrial-design':  '/courses/rhino3d-industrial-design',
+};
 
 export default async function CoursesPage() {
   const courses = await getCourses();
@@ -133,6 +143,13 @@ export default async function CoursesPage() {
                       <SyllabusButton pdf={course.pdf} course={course.title} slug={course.slug} />
                       <EnquireLink course={course.title} />
                     </div>
+                    {COURSE_DETAIL_PAGES[course.slug] && (
+                      <div style={{ marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+                        <Link href={COURSE_DETAIL_PAGES[course.slug]} style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--blueprint)', letterSpacing: '0.06em', textDecoration: 'none' }}>
+                          VIEW FULL COURSE &amp; SYLLABUS →
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
