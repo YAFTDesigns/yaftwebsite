@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     show_social: formData.get('show_social') === 'true',
     photo_url,
     rating: parseFloat(formData.get('rating') as string) || 5.0,
+    source: (formData.get('source') as string | null)?.trim() || null,
     status: 'pending',
   }]);
 
