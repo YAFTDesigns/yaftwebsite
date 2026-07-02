@@ -4,6 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import path from 'path';
 import { rateLimit } from '@/lib/rateLimit';
+import { pushInvoiceToQueue } from '@/lib/queue';
 
 const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
 const PAID_STAMP_PATH = path.join(process.cwd(), 'public', 'assets', 'images', 'paid-in-full.png');
@@ -338,11 +339,29 @@ export async function POST(request: NextRequest) {
     }).select('id').single();
 
     if (error) {
-      console.error('Invoice save error:', error);
-      return NextResponse.json(
-        { error: `Invoice was generated but could not be saved: ${error.message}. It was NOT recorded or emailed — please try again.` },
-        { status: 500 }
-      );
+      console.error('Invoice save error — queueing for retry:', error);
+      // Queue for retry when Supabase recovers — continue to send email
+      try {
+        await pushInvoiceToQueue({
+          invoice_no:   data.invoice_no,
+          date:         data.date,
+          client_name:  data.client_name,
+          client_email: data.client_email,
+          client_type:  data.client_type,
+          client_pan:   data.client_pan || null,
+          client_gst:   data.client_gst || null,
+          client_state: data.client_state,
+          items:        data.items,
+          total:        data.grand_total,
+          advance:      data.advance || 0,
+          balance:      data.balance || 0,
+          invoice_type: data.invoice_type || 'training',
+          queuedAt:     new Date().toISOString(),
+        });
+      } catch (qErr) {
+        console.error('Invoice queue also failed:', qErr);
+      }
+      // Don't return error — continue to send email below
     }
 
     // Send via Gmail with PDF attachment
