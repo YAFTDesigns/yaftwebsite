@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import styles from './TestimonialForm.module.css';
 
-export default function TestimonialForm() {
+export default function TestimonialForm({ source }: { source?: string }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -55,6 +55,7 @@ export default function TestimonialForm() {
     fd.append('instagram_url', form.instagram_url);
     fd.append('show_social', String(form.show_social));
     fd.append('rating', String(rating || 5.0));
+    if (source) fd.append('source', source);
     if (photoFile) fd.append('photo', photoFile);
 
     const res = await fetch('/api/testimonials', { method: 'POST', body: fd });
