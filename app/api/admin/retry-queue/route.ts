@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   for (const enq of enquiries) {
     try {
       // Try saving to Supabase
-      const leadId = await upsertLead(supabase, enq.name, enq.email, enq.interest ?? '');
+      const leadId = await upsertLead(supabase, { email: enq.email, name: enq.name, source: 'contact_form' });
 
       const { data, error } = await supabase
         .from('enquiries')
