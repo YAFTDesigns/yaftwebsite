@@ -47,3 +47,42 @@ export async function getQueueLength(): Promise<number> {
   const res = await redis(['LLEN', QUEUE_KEY]);
   return res.result ?? 0;
 }
+
+// ── Invoice queue ────────────────────────────────────────────────────
+const INVOICE_QUEUE_KEY = 'yaft:invoice_queue';
+
+export type QueuedInvoice = {
+  invoice_no:   string;
+  date:         string;
+  client_name:  string;
+  client_email: string;
+  client_type:  string;
+  client_pan:   string | null;
+  client_gst:   string | null;
+  client_state: string;
+  items:        unknown;
+  total:        number;
+  advance:      number;
+  balance:      number;
+  invoice_type: string;
+  queuedAt:     string;
+};
+
+export async function pushInvoiceToQueue(invoice: QueuedInvoice): Promise<void> {
+  await redis(['RPUSH', INVOICE_QUEUE_KEY, JSON.stringify(invoice)]);
+}
+
+export async function popInvoicesFromQueue(count = 10): Promise<QueuedInvoice[]> {
+  const results: QueuedInvoice[] = [];
+  for (let i = 0; i < count; i++) {
+    const res = await redis(['LPOP', INVOICE_QUEUE_KEY]);
+    if (!res.result) break;
+    try { results.push(JSON.parse(res.result)); } catch { /* skip */ }
+  }
+  return results;
+}
+
+export async function getInvoiceQueueLength(): Promise<number> {
+  const res = await redis(['LLEN', INVOICE_QUEUE_KEY]);
+  return res.result ?? 0;
+}
