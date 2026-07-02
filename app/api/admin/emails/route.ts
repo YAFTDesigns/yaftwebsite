@@ -10,11 +10,16 @@ export async function GET(request: NextRequest) {
   const supabase = getSupabaseAdmin();
 
   if (type === 'logs') {
-    const { data, error } = await supabase
+    const search = searchParams.get('search')?.trim() ?? '';
+    let query = supabase
       .from('email_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(100);
+      .limit(200);
+    if (search) {
+      query = query.or(`to_email.ilike.%${search}%,to_name.ilike.%${search}%,subject.ilike.%${search}%,template.ilike.%${search}%`);
+    }
+    const { data, error } = await query;
     if (error) {
       console.error('[emails-api] GET logs failed:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
