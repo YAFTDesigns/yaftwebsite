@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { google } from 'googleapis';
 import { rateLimit } from '@/lib/rateLimit';
+import { pushEnquiryToQueue } from '@/lib/queue';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const YAFT_EMAIL = 'yaftdesigns@gmail.com';
