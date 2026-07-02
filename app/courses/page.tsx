@@ -6,7 +6,6 @@ import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import CourseGateButton from '@/components/CourseGateButton';
 import CourseGateModal from '@/components/CourseGateModal';
-import TestimonialForm from '@/components/TestimonialForm';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
