@@ -30,3 +30,8 @@ jobs:
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Trigger Vercel Deploy
+        if: success() && github.ref == 'refs/heads/develop'
+        run: |
+          curl -X POST "${{ secrets.VERCEL_DEPLOY_HOOK }}"
