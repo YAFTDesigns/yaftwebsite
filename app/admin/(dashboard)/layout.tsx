@@ -15,6 +15,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/leads">Leads</Link>
             <Link href="/admin/enquiries">Enquiries</Link>
             <Link href="/admin/invoices">Invoices</Link>
+            <Link href="/admin/inbox" className={styles.navLink}>Inbox</Link>
             <Link href="/admin/emails">Emails</Link>
             <Link href="/admin/testimonials">Testimonials</Link>
             <Link href="/admin/community">Community</Link>
