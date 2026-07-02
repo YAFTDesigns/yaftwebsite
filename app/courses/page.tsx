@@ -161,7 +161,6 @@ export default async function CoursesPage() {
 
         <StudentWorkMarquee />
         <TestimonialsMarquee />
-        <TestimonialForm />
 
         <section id="requirements" className="dark">
           <div className="wrap">
