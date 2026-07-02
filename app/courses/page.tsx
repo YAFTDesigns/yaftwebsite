@@ -161,6 +161,21 @@ export default async function CoursesPage() {
 
         <StudentWorkMarquee />
         <TestimonialsMarquee />
+      <section style={{
+        maxWidth: 860, margin: '0 auto', padding: '64px 24px 80px',
+        borderTop: '0.5px solid var(--line)',
+      }}>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--blueprint)', marginBottom: 10 }}>
+          Student experiences
+        </p>
+        <h2 style={{ fontSize: 24, fontWeight: 500, color: 'var(--ink)', marginBottom: 8 }}>
+          Trained with us?
+        </h2>
+        <p style={{ fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.7, marginBottom: 28, maxWidth: 560 }}>
+          Share what you learned and how the training helped you. Your words help others make the right decision.
+        </p>
+        <TestimonialForm source="share_experience" />
+      </section>
 
         <section id="requirements" className="dark">
           <div className="wrap">
@@ -207,21 +222,6 @@ export default async function CoursesPage() {
         </section>
       </main>
 
-      <section style={{
-        maxWidth: 860, margin: '0 auto', padding: '64px 24px 80px',
-        borderTop: '0.5px solid var(--line)',
-      }}>
-        <p style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--blueprint)', marginBottom: 10 }}>
-          Student experiences
-        </p>
-        <h2 style={{ fontSize: 24, fontWeight: 500, color: 'var(--ink)', marginBottom: 8 }}>
-          Trained with us?
-        </h2>
-        <p style={{ fontSize: 15, color: 'var(--ink-soft)', lineHeight: 1.7, marginBottom: 28, maxWidth: 560 }}>
-          Share what you learned and how the training helped you. Your words help others make the right decision.
-        </p>
-        <TestimonialForm source="share_experience" />
-      </section>
       <SiteFooter />
       <CourseGateModal />
       <SyllabusModal />
