@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import SiteStatus from '@/components/admin/SiteStatus';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
