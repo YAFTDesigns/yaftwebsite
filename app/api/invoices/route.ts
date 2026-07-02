@@ -406,6 +406,20 @@ export async function POST(request: NextRequest) {
         userId: 'me',
         requestBody: { raw: Buffer.from(raw).toString('base64url') },
       });
+
+      // Log to email_logs
+      try {
+        await supabase.from('email_logs').insert({
+          to_email: data.client_email,
+          to_name:  data.client_name,
+          subject,
+          template: isProformaEmail ? 'proforma_invoice' : 'invoice',
+          status:   'sent',
+          error:    null,
+        });
+      } catch (logErr) {
+        console.error('[invoice] email_logs insert failed:', logErr);
+      }
     }
 
     return NextResponse.json({ ok: true, pdf: pdfBase64 });
