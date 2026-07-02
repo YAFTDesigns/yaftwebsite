@@ -207,7 +207,6 @@ export default async function CoursesPage() {
         </section>
       </main>
 
-      <SiteFooter />
       <section style={{
         maxWidth: 860, margin: '0 auto', padding: '64px 24px 80px',
         borderTop: '0.5px solid var(--line)',
@@ -223,6 +222,7 @@ export default async function CoursesPage() {
         </p>
         <TestimonialForm source="share_experience" />
       </section>
+      <SiteFooter />
       <CourseGateModal />
       <SyllabusModal />
     </>
