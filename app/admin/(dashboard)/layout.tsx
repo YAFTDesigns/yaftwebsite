@@ -1,8 +1,13 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/SignOutButton';
+import { getNavCounts } from '@/lib/admin/getNavCounts';
 import styles from './admin.module.css';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export const dynamic = 'force-dynamic';
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const counts = await getNavCounts();
+
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
@@ -16,9 +21,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/enquiries">Enquiries</Link>
             <Link href="/admin/invoices">Invoices</Link>
             <Link href="/admin/inbox" className={styles.navLink}>Inbox</Link>
-            <Link href="/admin/emails">Emails</Link>
-            <Link href="/admin/testimonials">Testimonials</Link>
-            <Link href="/admin/community">Community</Link>
+            <span className={styles.navItem}>
+              <Link href="/admin/emails">Emails</Link>
+              {counts.failedEmails > 0 && (
+                <span className={styles.badge}>{counts.failedEmails > 9 ? '9+' : counts.failedEmails}</span>
+              )}
+            </span>
+            <span className={styles.navItem}>
+              <Link href="/admin/testimonials">Testimonials</Link>
+              {counts.pendingTestimonials > 0 && (
+                <span className={styles.badge}>{counts.pendingTestimonials > 9 ? '9+' : counts.pendingTestimonials}</span>
+              )}
+            </span>
+            <span className={styles.navItem}>
+              <Link href="/admin/community">Community</Link>
+              {counts.pendingApprovals > 0 && (
+                <span className={styles.badge}>{counts.pendingApprovals > 9 ? '9+' : counts.pendingApprovals}</span>
+              )}
+            </span>
             <Link href="/admin/analytics">Analytics</Link>
           </nav>
           <SignOutButton />
