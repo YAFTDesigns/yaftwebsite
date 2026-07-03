@@ -12,6 +12,17 @@
   border-bottom:1px solid transparent;padding-bottom:2px;
 }
 .nav a:hover{color:var(--ink);border-color:var(--brass);}
+.navItem{position:relative;display:inline-flex;align-items:center;}
+.badge{
+  position:absolute;top:-9px;right:-13px;
+  min-width:16px;height:16px;padding:0 4px;
+  background:#e53935;color:#fff;
+  border-radius:999px;
+  font-family:var(--mono);font-size:10px;font-weight:600;line-height:16px;
+  text-align:center;
+  box-shadow:0 0 0 2px var(--paper);
+  pointer-events:none;
+}
 .main{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
 
 .statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:48px;}
