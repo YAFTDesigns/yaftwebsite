@@ -34,13 +34,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
-      - name: Sync develop to main (force)
-        if: success() && github.ref == 'refs/heads/develop'
-        run: |
-          git config user.email "ci@yaftdesigns.com"
-          git config user.name "YAFT CI"
-          git push https://x-access-token:${{ secrets.GH_PAT }}@github.com/YAFTDesigns/yaftwebsite.git HEAD:main --force
-
       - name: Trigger Vercel Deploy
         if: success() && github.ref == 'refs/heads/develop'
         run: |
