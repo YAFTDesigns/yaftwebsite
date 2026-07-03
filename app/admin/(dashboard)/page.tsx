@@ -151,6 +151,7 @@ export default async function AdminOverviewPage() {
   return (
     <>
       <h1 className={styles.sectionTitle}>Overview</h1>
+      <SiteStatus />
 
       {/* Needs attention — only shows if something is pending */}
       {(pendingTotal > 0 || counts.failedEmails > 0) && (
