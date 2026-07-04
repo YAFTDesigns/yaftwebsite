@@ -488,8 +488,10 @@ export default function InvoicesClient() {
                       style={{ background:'transparent', border:'none', outline:'none', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:40 }}
                       value={invoiceSeq}
                       onChange={e => {
-                        setInvoiceSeq(e.target.value.padStart(2,'0'));
-                        setF('invoice_no', `YAFT-${mmyyyy}-${e.target.value.padStart(2,'0')}`);
+                        const digitsOnly = e.target.value.replace(/\D/g, '').slice(0, 3);
+                        setInvoiceSeq(digitsOnly);
+                        const padded = digitsOnly.padStart(2, '0');
+                        setF('invoice_no', invoiceType === 'proforma' ? `YAFT-PF-${mmyyyy}-${padded}` : `YAFT-${mmyyyy}-${padded}`);
                       }}
                       maxLength={3}
                     />
