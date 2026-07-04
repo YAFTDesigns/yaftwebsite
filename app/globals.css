@@ -317,9 +317,9 @@ footer{padding:48px 0 32px;}
 .nav-dropdown { position: relative; }
 
 .nav-drop-btn {
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: 0.03em;
+  font-family: var(--display);
+  font-size: 14px;
+  letter-spacing: 0.01em;
   color: var(--ink-soft);
   background: none;
   border: none;
