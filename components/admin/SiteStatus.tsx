@@ -10,10 +10,13 @@ type PageResult = {
   ms: number;
 };
 
+type Queues = { enquiry: number; invoice: number };
+
 export default function SiteStatus() {
   const [results, setResults]     = useState<PageResult[]>([]);
   const [allUp, setAllUp]         = useState<boolean | null>(null);
   const [checkedAt, setCheckedAt] = useState<string | null>(null);
+  const [queues, setQueues]       = useState<Queues>({ enquiry: 0, invoice: 0 });
   const [loading, setLoading]     = useState(true);
 
   const check = useCallback(async () => {
@@ -24,6 +27,7 @@ export default function SiteStatus() {
       setResults(json.results);
       setAllUp(json.allUp);
       setCheckedAt(json.checkedAt);
+      setQueues(json.queues ?? { enquiry: 0, invoice: 0 });
     } catch {
       setAllUp(false);
     } finally {
@@ -37,8 +41,15 @@ export default function SiteStatus() {
     return () => clearInterval(interval);
   }, [check]);
 
-  const overallColor = loading ? '#666' : allUp ? '#4caf50' : '#e53935';
-  const overallLabel = loading ? 'Checking...' : allUp ? 'All systems operational' : 'Degraded — some pages down';
+  const hasQueueBacklog = queues.enquiry > 0 || queues.invoice > 0;
+  const overallColor = loading ? '#666' : !allUp ? '#e53935' : hasQueueBacklog ? '#e5a935' : '#4caf50';
+  const overallLabel = loading
+    ? 'Checking...'
+    : !allUp
+      ? 'Degraded — some pages down'
+      : hasQueueBacklog
+        ? 'Pages up — items queued for retry'
+        : 'All systems operational';
 
   return (
     <div style={{
@@ -104,6 +115,26 @@ export default function SiteStatus() {
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {!loading && (queues.enquiry > 0 || queues.invoice > 0) && (
+        <div style={{
+          marginTop: 12, paddingTop: 12, borderTop: '1px solid #2a2a2a',
+          display: 'flex', flexWrap: 'wrap', gap: '6px 16px', alignItems: 'center',
+        }}>
+          <span style={{
+            width: 6, height: 6, borderRadius: '50%',
+            background: '#e5a935', display: 'inline-block', flexShrink: 0,
+          }} />
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#e5a935', letterSpacing: '0.04em' }}>
+            {queues.invoice > 0 && `${queues.invoice} invoice${queues.invoice > 1 ? 's' : ''} queued for retry`}
+            {queues.invoice > 0 && queues.enquiry > 0 && ' · '}
+            {queues.enquiry > 0 && `${queues.enquiry} enquir${queues.enquiry > 1 ? 'ies' : 'y'} queued for retry`}
+          </span>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#555' }}>
+            (auto-retries daily at 2am — a repeat failure sends an email alert)
+          </span>
         </div>
       )}
     </div>
