@@ -17,8 +17,25 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ data: data ?? [] });
 }
 
+const TAMIL_NADU = 'tamil nadu';
+const INTL_STATES = ['australia', 'singapore', 'uae', 'oman', 'international'];
+
+function computeTotal(items: { desc: string; hrs: number; qty: number; rate: number }[], clientState: string) {
+  const subtotal = items.reduce((s, i) => s + (i.rate || 0) * (i.qty || 0), 0);
+  const state = (clientState || '').toLowerCase();
+  const intra = state.includes(TAMIL_NADU);
+  const intl  = INTL_STATES.includes(state);
+  const cgst  = intra ? subtotal * 0.09 : 0;
+  const sgst  = intra ? subtotal * 0.09 : 0;
+  const igst  = (!intra && !intl) ? subtotal * 0.18 : 0;
+  return subtotal + cgst + sgst + igst;
+}
+
 // PATCH /api/admin/invoices
 // { action: 'update_payment', id, advance }
+// { action: 'update_details', id, client_name, client_email, client_type,
+//   client_company, client_pan, client_gst, client_state, client_address,
+//   client_phone, items, advance }
 // { action: 'soft_delete',    id }
 // { action: 'bulk_soft_delete', ids }
 // { action: 'restore',        id }
@@ -42,6 +59,38 @@ export async function PATCH(request: NextRequest) {
     const { error } = await supabase.from('invoices').update({ advance, balance }).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true, balance });
+  }
+
+  if (body.action === 'update_details') {
+    const { id, items, client_state, advance } = body;
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    if (!Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'At least one line item is required' }, { status: 400 });
+    }
+    if (!client_state) return NextResponse.json({ error: 'Missing client_state' }, { status: 400 });
+
+    const total = computeTotal(items, client_state);
+    const advanceNum = typeof advance === 'number' ? advance : 0;
+    const balance = total - advanceNum;
+
+    const { data: updated, error } = await supabase.from('invoices').update({
+      client_name:    body.client_name,
+      client_email:   body.client_email,
+      client_type:    body.client_type,
+      client_company: body.client_company || null,
+      client_pan:     body.client_pan || null,
+      client_gst:     body.client_gst || null,
+      client_state,
+      client_address: body.client_address || null,
+      client_phone:   body.client_phone || null,
+      items,
+      total,
+      advance: advanceNum,
+      balance,
+    }).eq('id', id).select('*').single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, invoice: updated });
   }
 
   if (body.action === 'soft_delete') {

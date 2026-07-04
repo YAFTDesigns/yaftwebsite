@@ -66,6 +66,7 @@ export async function POST(request: Request) {
         client_name:  inv.client_name,
         client_email: inv.client_email,
         client_type:  inv.client_type,
+        client_company: inv.client_company,
         client_pan:   inv.client_pan,
         client_gst:   inv.client_gst,
         client_state: inv.client_state,
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
         total:        inv.total,
         advance:      inv.advance,
         balance:      inv.balance,
+        invoice_type: inv.invoice_type,
         status:       'sent',
       });
       if (error) throw error;

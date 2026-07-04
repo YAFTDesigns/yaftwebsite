@@ -8,6 +8,10 @@ type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type Invoice = {
   id: string; created_at: string; invoice_no: string; date: string;
   client_name: string; client_email: string; client_state: string;
+  client_type: string; client_company: string | null;
+  client_pan: string | null; client_gst: string | null;
+  client_address: string | null; client_phone: string | null;
+  items: Item[]; invoice_type: string;
   total: number; advance: number; balance: number; status: string;
   deleted_at: string | null;
 };
@@ -79,17 +83,57 @@ export default function InvoicesClient() {
     return res.json().catch(() => ({}));
   }
 
+  const [resending, setResending] = useState(false);
+
   async function saveEdit() {
-    if (!editInv) return;
+    if (!editInv) return false;
     setSaving(true); setSaveMsg('');
-    const json = await patchInvoice({ action: 'update_payment', id: editInv.id, advance: editInv.advance });
+    const json = await patchInvoice({
+      action: 'update_details',
+      id: editInv.id,
+      client_name: editInv.client_name,
+      client_email: editInv.client_email,
+      client_type: editInv.client_type,
+      client_company: editInv.client_company,
+      client_pan: editInv.client_pan,
+      client_gst: editInv.client_gst,
+      client_state: editInv.client_state,
+      client_address: editInv.client_address,
+      client_phone: editInv.client_phone,
+      items: editInv.items,
+      advance: editInv.advance,
+    });
+    setSaving(false);
     if (json.ok) {
-      setEditInv({ ...editInv, balance: json.balance });
+      setEditInv(json.invoice);
       await loadInvoices();
       setSaveMsg('Saved');
       setTimeout(() => setSaveMsg(''), 3000);
+      return true;
     }
-    setSaving(false);
+    setSaveMsg('');
+    alert(`Could not save: ${json.error ?? 'Unknown error'}`);
+    return false;
+  }
+
+  async function saveAndResend() {
+    const ok = await saveEdit();
+    if (!ok || !editInv) return;
+    setResending(true);
+    try {
+      const res = await fetch('/api/admin/invoices/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: editInv.id }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? 'Resend failed');
+      setSaveMsg('Saved & resent to client');
+      setTimeout(() => setSaveMsg(''), 4000);
+    } catch (e: any) {
+      alert(`Saved, but resend failed: ${e.message ?? 'Unknown error'}`);
+    }
+    setResending(false);
   }
 
   async function deleteInvoice(id: string) {
@@ -347,7 +391,7 @@ export default function InvoicesClient() {
                         className={styles.approveBtn}
                         onClick={() => setEditInv(editInv?.id === inv.id ? null : { ...inv })}
                       >
-                        {editInv?.id === inv.id ? 'Cancel' : 'Edit payment →'}
+                        {editInv?.id === inv.id ? 'Cancel' : 'Edit invoice →'}
                       </button>
                       <button
                         className={styles.deleteBtn}
@@ -360,37 +404,102 @@ export default function InvoicesClient() {
                   </div>
 
                   {/* Inline edit panel */}
-                  {editInv?.id === inv.id && (
+                  {editInv?.id === inv.id && (() => {
+                    const eIntra = (editInv.client_state || '').toLowerCase().includes('tamil');
+                    const eIntl  = ['australia','singapore','uae','oman','international'].includes((editInv.client_state || '').toLowerCase());
+                    const eSubtotal = editInv.items.reduce((s, i) => s + i.rate * i.qty, 0);
+                    const eCgst = eIntra ? eSubtotal * 0.09 : 0;
+                    const eSgst = eIntra ? eSubtotal * 0.09 : 0;
+                    const eIgst = (!eIntra && !eIntl) ? eSubtotal * 0.18 : 0;
+                    const eTotal = eSubtotal + eCgst + eSgst + eIgst;
+                    const eBalance = eTotal - (editInv.advance || 0);
+
+                    function setEditField<K extends keyof Invoice>(k: K, v: Invoice[K]) {
+                      setEditInv(prev => prev ? { ...prev, [k]: v } : prev);
+                    }
+                    function setEditItem(i: number, k: keyof Item, v: string) {
+                      setEditInv(prev => {
+                        if (!prev) return prev;
+                        const items = prev.items.map((it, idx) => idx === i ? { ...it, [k]: k === 'desc' ? v : (parseFloat(v) || 0) } : it);
+                        return { ...prev, items };
+                      });
+                    }
+
+                    return (
                     <div style={{ background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:10, padding:20, marginTop:-1, marginBottom:8 }}>
-                      <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Update payment</p>
+                      <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Edit invoice</p>
+
+                      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
+                        <div><span style={lbl}>Client Name</span><input style={inp} value={editInv.client_name} onChange={e=>setEditField('client_name', e.target.value)} /></div>
+                        <div><span style={lbl}>Email</span><input style={inp} value={editInv.client_email} onChange={e=>setEditField('client_email', e.target.value)} /></div>
+                        {editInv.client_type === 'company' && (
+                          <>
+                            <div><span style={lbl}>Company Name</span><input style={inp} value={editInv.client_company ?? ''} onChange={e=>setEditField('client_company', e.target.value)} /></div>
+                            <div><span style={lbl}>GST Number</span><input style={inp} value={editInv.client_gst ?? ''} onChange={e=>setEditField('client_gst', e.target.value)} /></div>
+                          </>
+                        )}
+                        {editInv.client_type !== 'company' && (
+                          <div><span style={lbl}>PAN ID</span><input style={inp} value={editInv.client_pan ?? ''} onChange={e=>setEditField('client_pan', e.target.value)} /></div>
+                        )}
+                        <div>
+                          <span style={lbl}>State / Country (for GST)</span>
+                          <select style={inp} value={editInv.client_state} onChange={e=>setEditField('client_state', e.target.value)}>
+                            {STATES.map(s => <option key={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div><span style={lbl}>Address</span><textarea style={{ ...inp, minHeight:48 }} value={editInv.client_address ?? ''} onChange={e=>setEditField('client_address', e.target.value)} /></div>
+                        <div><span style={lbl}>Phone</span><input style={inp} value={editInv.client_phone ?? ''} onChange={e=>setEditField('client_phone', e.target.value)} /></div>
+                      </div>
+
+                      <p style={{ ...sectionTitle, marginBottom:10 }}>Line items</p>
+                      {editInv.items.map((item, i) => (
+                        <div key={i} style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:8, padding:12, marginBottom:8 }}>
+                          <div style={{ display:'flex', justifyContent:'space-between', marginBottom:8 }}>
+                            <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#555' }}>Item {i+1}</span>
+                            {editInv.items.length > 1 && (
+                              <button onClick={() => setEditInv(prev => prev ? { ...prev, items: prev.items.filter((_, idx) => idx !== i) } : prev)} style={{ fontFamily:'var(--mono)', fontSize:11, color:'#e55', background:'none', border:'none', cursor:'pointer' }}>Remove</button>
+                            )}
+                          </div>
+                          <input style={{ ...inp, marginBottom:8 }} value={item.desc} onChange={e=>setEditItem(i,'desc',e.target.value)} placeholder="Description" />
+                          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+                            <div><span style={lbl}>Hours</span><input style={inp} type="number" value={item.hrs} onChange={e=>setEditItem(i,'hrs',e.target.value)} /></div>
+                            <div><span style={lbl}>Qty</span><input style={inp} type="number" value={item.qty} step="0.5" onChange={e=>setEditItem(i,'qty',e.target.value)} /></div>
+                            <div><span style={lbl}>Rate (INR)</span><input style={inp} type="number" value={item.rate} onChange={e=>setEditItem(i,'rate',e.target.value)} /></div>
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => setEditInv(prev => prev ? { ...prev, items: [...prev.items, { desc:'', hrs:0, qty:1, rate:0 }] } : prev)}
+                        style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888', border:'1px dashed #2a2a2a', borderRadius:6, padding:'7px', background:'none', cursor:'pointer', width:'100%', marginBottom:16 }}
+                      >+ Add item</button>
+
                       <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:16 }}>
                         <div>
-                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Total (INR)</span>
-                          <input style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color:'#555', width:'100%' }} value={fmt(editInv.total)} readOnly />
+                          <span style={lbl}>Total (INR)</span>
+                          <input style={{ ...inp, color:'#555' }} value={fmt(eTotal)} readOnly />
                         </div>
                         <div>
-                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Advance Paid (INR)</span>
-                          <input
-                            style={{ background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:'100%' }}
-                            type="number"
-                            value={editInv.advance || ''}
-                            onChange={e => setEditInv({ ...editInv, advance: parseFloat(e.target.value) || 0 })}
-                            placeholder="0"
-                          />
+                          <span style={lbl}>Advance Paid (INR)</span>
+                          <input style={inp} type="number" value={editInv.advance || ''} onChange={e => setEditField('advance', parseFloat(e.target.value) || 0)} placeholder="0" />
                         </div>
                         <div>
-                          <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', marginBottom:5, display:'block' }}>Balance Due (INR)</span>
-                          <input style={{ background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:6, padding:'8px 12px', fontFamily:'var(--mono)', fontSize:13, color: (editInv.total - editInv.advance) > 0 ? '#E63946' : '#4caf50', width:'100%' }} value={fmt(editInv.total - editInv.advance)} readOnly />
+                          <span style={lbl}>Balance Due (INR)</span>
+                          <input style={{ ...inp, color: eBalance > 0 ? '#E63946' : '#4caf50' }} value={fmt(eBalance)} readOnly />
                         </div>
                       </div>
-                      <div style={{ display:'flex', gap:10, alignItems:'center' }}>
-                        <button onClick={saveEdit} disabled={saving} style={{ fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)', border:'none', padding:'9px 20px', borderRadius:6, cursor:'pointer', opacity:saving?0.6:1 }}>
+
+                      <div style={{ display:'flex', gap:10, alignItems:'center', flexWrap:'wrap' }}>
+                        <button onClick={saveEdit} disabled={saving || resending} style={{ fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'#333', border:'none', padding:'9px 20px', borderRadius:6, cursor:'pointer', opacity:(saving||resending)?0.6:1 }}>
                           {saving ? 'Saving...' : 'Save changes'}
+                        </button>
+                        <button onClick={saveAndResend} disabled={saving || resending} style={{ fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)', border:'none', padding:'9px 20px', borderRadius:6, cursor:'pointer', opacity:(saving||resending)?0.6:1 }}>
+                          {resending ? 'Resending...' : 'Save & resend PDF to client →'}
                         </button>
                         {saveMsg && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ {saveMsg}</p>}
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
                         ))}
                       </div>

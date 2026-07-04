@@ -57,6 +57,7 @@ export type QueuedInvoice = {
   client_name:  string;
   client_email: string;
   client_type:  string;
+  client_company: string | null;
   client_pan:   string | null;
   client_gst:   string | null;
   client_state: string;
