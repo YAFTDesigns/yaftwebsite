@@ -1,6 +1,18 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import ProjectsGrid, { type PortfolioProject } from '@/components/ProjectsGrid';
+import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { getSiteImageUrl } from '@/lib/supabase/storage';
+
+const CATEGORY_LABELS: Record<string, string> = {
+  facade: 'Facade Engineering',
+  'bim-automation': 'BIM Automation',
+  'computational-design': 'Computational Design',
+  wearables: 'Wearables',
+  product: 'Product Design',
+};
 
 const TITLE = 'Computational Design Projects | YAFT Designs Coimbatore';
 const DESCRIPTION =
@@ -35,7 +47,57 @@ const PROJECTS_JSON_LD = {
   isPartOf: { '@type': 'WebSite', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
 };
 
-export default function ProjectsPage() {
+type ProjectRow = {
+  slug: string;
+  title: string;
+  category: string;
+  location: string;
+  client_or_collab: string | null;
+  year: number | null;
+  summary: string;
+  description: string;
+  cover_image_path: string | null;
+  gallery: { filename: string; caption: string }[];
+  featured: boolean;
+};
+
+export default async function ProjectsPage() {
+  const { data } = await getSupabaseAdmin()
+    .from('portfolio_projects')
+    .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
+    .eq('active', true)
+    .order('display_order');
+
+  const rows = (data as ProjectRow[] | null) ?? [];
+
+  const gridProjects: PortfolioProject[] = rows.map(p => ({
+    slug: p.slug,
+    title: p.title,
+    category: p.category,
+    location: p.location,
+    clientOrCollab: p.client_or_collab,
+    year: p.year,
+    summary: p.summary,
+    coverSrc: p.cover_image_path ? getSiteImageUrl(`projects/${p.cover_image_path}`) : undefined,
+    featured: p.featured,
+  }));
+
+  const lightboxGroups: WorkshopGroup[] = rows.map(p => {
+    const galleryPhotos = (p.gallery ?? []).map(g => ({
+      caption: g.caption,
+      src: getSiteImageUrl(`projects/${g.filename}`),
+    }));
+    const photos = galleryPhotos.length > 0
+      ? galleryPhotos
+      : [{ caption: p.description, src: p.cover_image_path ? getSiteImageUrl(`projects/${p.cover_image_path}`) : undefined }];
+    return {
+      key: p.slug,
+      title: p.title,
+      role: `${CATEGORY_LABELS[p.category] ?? p.category} · ${p.location}${p.client_or_collab ? ` · ${p.client_or_collab}` : ''}`,
+      photos,
+    };
+  });
+
   return (
     <>
       <SiteHeader active="/projects" />
@@ -60,6 +122,17 @@ export default function ProjectsPage() {
           </div>
         </section>
 
+        <section id="portfolio">
+          <div className="wrap">
+            <div className="eyebrow">CASE STUDIES</div>
+            <div className="section-head">
+              <h2>Selected work</h2>
+              <p className="note">Facade engineering, BIM automation, computational design and product work across five countries.</p>
+            </div>
+            <ProjectsGrid projects={gridProjects} />
+          </div>
+        </section>
+
         <section className="insta-section">
           <div className="wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40, flexWrap: 'wrap', width: '100%' }}>
             <div className="insta-left">
@@ -81,6 +154,8 @@ export default function ProjectsPage() {
           </div>
         </section>
       </main>
+
+      <Lightbox groups={lightboxGroups} />
 
       <SiteFooter />
     </>
