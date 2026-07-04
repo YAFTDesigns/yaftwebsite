@@ -42,6 +42,7 @@ export default function InvoicesClient() {
     invoice_no: autoInvNo, date: today, client_name:'', client_email:'',
     client_type:'individual', client_pan:'', client_gst:'',
     client_company:'', client_state:'Tamil Nadu',
+    client_address:'', client_phone:'',
   });
   const [items, setItems] = useState<Item[]>([{ desc:'', hrs:0, qty:1, rate:0 }]);
   const [advance, setAdvance] = useState(0);
@@ -192,6 +193,7 @@ export default function InvoicesClient() {
       client_name: 'Test Client', client_email: 'test@example.com',
       client_type: 'individual', client_pan: 'TESTPAN001',
       client_gst: '', client_company: '', client_state: 'Tamil Nadu',
+      client_address: '123 Test Street, Coimbatore, Tamil Nadu - 641001', client_phone: '+91 90000 00000',
     });
     setItems([{ desc: invoiceType === 'consultancy' ? 'Computational Design Consulting' : 'Rhino3D for Architecture', hrs: 10, qty: 1, rate: 5000 }]);
     setAdvance(0);
@@ -517,6 +519,9 @@ export default function InvoicesClient() {
                 <div><span style={lbl}>Company Name</span><input style={inp} value={form.client_company} onChange={e=>setF('client_company',e.target.value)} placeholder="Company Pvt Ltd" /></div>
                 <div><span style={lbl}>GST Number</span><input style={inp} value={form.client_gst} onChange={e=>setF('client_gst',e.target.value)} placeholder="29XXXXX1234X1ZX" /></div>
               </>}
+
+              <div><span style={lbl}>Address</span><textarea style={{ ...inp, minHeight:56 }} value={form.client_address} onChange={e=>setF('client_address',e.target.value)} placeholder="Street, City, State, PIN" /></div>
+              <div><span style={lbl}>Phone Number</span><input style={inp} value={form.client_phone} onChange={e=>setF('client_phone',e.target.value)} placeholder="+91 98765 43210" /></div>
 
               {form.client_type==='individual' && (
                 <div><span style={lbl}>PAN ID</span><input style={inp} value={form.client_pan} onChange={e=>setF('client_pan',e.target.value)} placeholder="ABCDE1234F" /></div>

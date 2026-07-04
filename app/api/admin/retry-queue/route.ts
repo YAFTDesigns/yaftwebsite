@@ -65,6 +65,8 @@ export async function POST(request: Request) {
         client_pan:   inv.client_pan,
         client_gst:   inv.client_gst,
         client_state: inv.client_state,
+        client_address: inv.client_address,
+        client_phone:   inv.client_phone,
         items:        inv.items,
         total:        inv.total,
         advance:      inv.advance,

@@ -128,6 +128,14 @@ async function generatePDF(data: any): Promise<Buffer> {
     if (data.client_type === 'company' && data.client_company) {
       doc.text(data.client_company, M, by); by += 16;
     }
+    if (data.client_address) {
+      String(data.client_address).split('\n').forEach((line: string) => {
+        doc.text(line, M, by, { width: 260 }); by += 16;
+      });
+    }
+    if (data.client_phone) {
+      doc.text(`Phone : ${data.client_phone}`, M, by); by += 16;
+    }
     doc.text(`Email : ${data.client_email}`, M, by); by += 16;
     if (data.client_type === 'company') {
       doc.text(`GST No : ${data.client_gst}`, M, by);
@@ -137,7 +145,7 @@ async function generatePDF(data: any): Promise<Buffer> {
     console.log('[invoice-pdf] checkpoint: bill-to done');
 
     // Line items table
-    const tableTop = 390;
+    const tableTop = Math.max(390, by + 14);
     // Table columns — hide hrs for consultancy/test
     const cols   = showHrs ? [M, M+43, M+284, M+327, M+398] : [M, M+43, M+327, M+398];
     const colW   = showHrs ? [43, 241, 43, 71, 76]           : [43, 284, 71, 76];
@@ -331,6 +339,8 @@ export async function POST(request: NextRequest) {
       client_pan:     data.client_pan || null,
       client_gst:     data.client_gst || null,
       client_state:   data.client_state,
+      client_address: data.client_address || null,
+      client_phone:   data.client_phone || null,
       items:          data.items,
       total:          data.grand_total,
       advance:        data.advance || 0,
@@ -351,6 +361,8 @@ export async function POST(request: NextRequest) {
           client_pan:   data.client_pan || null,
           client_gst:   data.client_gst || null,
           client_state: data.client_state,
+          client_address: data.client_address || null,
+          client_phone:   data.client_phone || null,
           items:        data.items,
           total:        data.grand_total,
           advance:      data.advance || 0,
