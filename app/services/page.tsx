@@ -4,6 +4,7 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import WorkshopGallery from '@/components/WorkshopGallery';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './services.module.css';
 
@@ -88,11 +89,10 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-
 export default async function ServicesPage() {
-  const { data } = await fetch(`${base}/api/workshops`, { cache: 'no-store' }).then(r => r.json());
-  const workshops: (WorkshopGroup & { place: string; num: string; description: string })[] = ((data ?? []) as { key: string; num: string; place: string; title: string; role: string; description: string; photos: { filename: string; caption: string }[] }[]).map(w => ({
+  const { data } = await getSupabaseAdmin()
+    .from('workshops').select('key, num, place, title, role, description, photos').eq('active', true).order('display_order');
+  const workshops: (WorkshopGroup & { place: string; num: string; description: string })[] = (data ?? []).map(w => ({
     key: w.key,
     num: w.num,
     place: w.place,

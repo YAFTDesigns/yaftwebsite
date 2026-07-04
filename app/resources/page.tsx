@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import VideoGallery, { type VideoItem } from '@/components/VideoGallery';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import styles from './resources.module.css';
 
 const TITLE = 'Rhino3D & Grasshopper Learning Resources';
@@ -44,15 +45,14 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-
 export default async function ResourcesPage() {
-  const [booksRes, videosRes] = await Promise.all([
-    fetch(`${base}/api/books`, { cache: 'no-store' }).then(r => r.json()),
-    fetch(`${base}/api/videos`, { cache: 'no-store' }).then(r => r.json()),
+  const supabase = getSupabaseAdmin();
+  const [{ data: booksData }, { data: videosData }] = await Promise.all([
+    supabase.from('books').select('title, author, description, tag, url, cover_url').eq('active', true).order('display_order'),
+    supabase.from('videos').select('youtube_id, title, channel').eq('active', true).order('display_order'),
   ]);
-  const books: { title: string; author: string; description: string; tag: string; url: string; cover_url: string | null }[] = booksRes.data ?? [];
-  const videos: VideoItem[] = (videosRes.data ?? []).map((v: { youtube_id: string; title: string; channel: string }) => ({ id: v.youtube_id, title: v.title, meta: v.channel }));
+  const books = booksData ?? [];
+  const videos: VideoItem[] = (videosData ?? []).map(v => ({ id: v.youtube_id, title: v.title, meta: v.channel }));
   return (
     <>
       <SiteHeader active="/resources" />

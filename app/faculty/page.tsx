@@ -3,6 +3,7 @@ import Image from 'next/image';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './faculty.module.css';
 
@@ -64,11 +65,10 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
-const base = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
-
 export default async function FacultyPage() {
-  const { data } = await fetch(`${base}/api/mentors`, { cache: 'no-store' }).then(r => r.json());
-  const mentors: { name: string; role: string; bio: string; photo_key: string | null; linkedin_url: string | null }[] = data ?? [];
+  const { data } = await getSupabaseAdmin()
+    .from('mentors').select('name, role, bio, photo_key, linkedin_url').eq('type', 'guest').eq('active', true).order('display_order');
+  const mentors = data ?? [];
   return (
     <>
       <SiteHeader active="/faculty" />
