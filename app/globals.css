@@ -31,7 +31,7 @@ img{max-width:100%;display:block;}
 .eyebrow{
   font-family:var(--mono);
   font-size:12px;
-  letter-spacing:.12em;
+  letter-spacing:.16em;
   text-transform:uppercase;
   color:var(--blueprint);
   display:flex;
@@ -40,7 +40,7 @@ img{max-width:100%;display:block;}
 }
 .eyebrow::before{
   content:"";
-  width:18px;height:1px;
+  width:20px;height:1px;
   background:var(--blueprint);
   display:inline-block;
 }
@@ -55,15 +55,15 @@ header{
   border-bottom:1px solid var(--line);
 }
 nav{
-  max-width:1180px;margin:0 auto;padding:18px 32px;
+  max-width:1180px;margin:0 auto;padding:22px 40px;
   display:flex;align-items:center;justify-content:space-between;
 }
-.logo{display:flex;align-items:baseline;gap:8px;font-family:var(--display);}
-.logo .mark{font-size:22px;font-weight:700;letter-spacing:.01em;}
-.logo .sub{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;}
-.navlinks{display:flex;gap:28px;align-items:center;}
+.logo{display:flex;align-items:baseline;gap:6px;font-family:var(--display);}
+.logo .mark{font-size:20px;font-weight:800;letter-spacing:.02em;}
+.logo .sub{font-family:var(--display);font-weight:400;font-size:.8em;letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase;}
+.navlinks{display:flex;gap:26px;align-items:center;}
 .navlinks a{
-  font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+  font-family:var(--display);font-size:14px;letter-spacing:.01em;
   color:var(--ink-soft);
   border-bottom:1px solid transparent;
   padding-bottom:2px;
@@ -85,8 +85,8 @@ nav{
 
 /* ===== PAGE HERO (non-home pages) ===== */
 .page-hero{padding:56px 0 48px;border-bottom:1px solid var(--line);}
-.page-hero h1{font-size:clamp(32px,4.6vw,50px);line-height:1.1;margin:18px 0 16px;max-width:760px;}
-.page-hero p.lede{font-size:17px;color:var(--ink-soft);max-width:600px;margin-bottom:24px;}
+.page-hero h1{font-family:var(--display);font-size:clamp(32px,4.6vw,56px);line-height:1.08;margin:20px 0 16px;max-width:800px;}
+.page-hero p.lede{font-family:var(--display);font-weight:400;font-size:17px;line-height:1.6;color:var(--ink-soft);max-width:600px;margin-bottom:24px;}
 .rating-badge{
   display:inline-flex;align-items:center;gap:10px;
   font-family:var(--mono);font-size:12px;color:var(--ink-soft);
@@ -114,7 +114,9 @@ nav{
 }
 .hero h1 em{font-style:normal;color:var(--brass);}
 .hero p.lede{
+  font-family:var(--display);font-weight:400;
   font-size:18px;
+  line-height:1.6;
   color:var(--ink-soft);
   max-width:540px;
   margin-bottom:30px;
