@@ -16,15 +16,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/resources',
+    url: 'https://www.yaftdesigns.com/resources',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -32,9 +32,9 @@ const RESOURCES_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: 'Rhino3D and Grasshopper Resources',
-  url: 'https://yaftdesigns.com/resources',
+  url: 'https://www.yaftdesigns.com/resources',
   description: 'Video tutorials, walkthroughs and learning resources for Rhino3D, Grasshopper and computational design by YAFT Designs.',
-  publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
+  publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
 };
 
 const INTEREST_OPTIONS = [

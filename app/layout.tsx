@@ -7,7 +7,7 @@ import "./globals.css";
 const GA_MEASUREMENT_ID = "G-XDVDJC7X24";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://yaftdesigns.com"),
+  metadataBase: new URL("https://www.yaftdesigns.com"),
   title: {
     default: "Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific and Middle East | YAFT Designs",
     template: "%s | YAFT Designs",
@@ -25,15 +25,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
-    url: "https://yaftdesigns.com",
+    url: "https://www.yaftdesigns.com",
     type: "website",
-    images: [{ url: "https://yaftdesigns.com/assets/images/og-image.jpg", width: 1200, height: 630, alt: "YAFT Designs — Authorized Rhino Training Center India" }],
+    images: [{ url: "https://www.yaftdesigns.com/assets/images/og-image.jpg", width: 1200, height: 630, alt: "YAFT Designs — Authorized Rhino Training Center India" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
-    images: ["https://yaftdesigns.com/assets/images/og-image.jpg"],
+    images: ["https://www.yaftdesigns.com/assets/images/og-image.jpg"],
   },
 };
 

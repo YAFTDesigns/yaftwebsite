@@ -6,7 +6,7 @@ import styles from './terms.module.css';
 export const metadata: Metadata = {
   title: 'Terms and Conditions | YAFT Designs',
   description: 'Terms and conditions for training, workshops, and consulting services offered by YAFT Designs.',
-  alternates: { canonical: 'https://yaftdesigns.com/terms' },
+  alternates: { canonical: 'https://www.yaftdesigns.com/terms' },
 };
 
 const TERMS = [

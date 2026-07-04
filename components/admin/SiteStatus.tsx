@@ -88,7 +88,7 @@ export default function SiteStatus() {
                 display: 'inline-block', flexShrink: 0,
               }} />
               <a
-                href={`https://yaftdesigns.com${r.path}`}
+                href={`https://www.yaftdesigns.com${r.path}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

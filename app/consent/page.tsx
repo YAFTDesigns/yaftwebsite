@@ -6,7 +6,7 @@ import styles from '../terms/terms.module.css';
 export const metadata: Metadata = {
   title: 'Consent Policy | YAFT Designs',
   description: 'Consent policy for online sessions, recordings, photography, and code of conduct at YAFT Designs.',
-  alternates: { canonical: 'https://yaftdesigns.com/consent' },
+  alternates: { canonical: 'https://www.yaftdesigns.com/consent' },
 };
 
 const CLAUSES = [

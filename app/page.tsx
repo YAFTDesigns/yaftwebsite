@@ -27,15 +27,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/',
+    url: 'https://www.yaftdesigns.com/',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -68,8 +68,8 @@ const JSON_LD = {
     'YAFT Designs Rhino Training',
     'Authorized Rhino Training Center India',
   ],
-  url: 'https://yaftdesigns.com',
-  logo: 'https://yaftdesigns.com/assets/images/og-image.jpg',
+  url: 'https://www.yaftdesigns.com',
+  logo: 'https://www.yaftdesigns.com/assets/images/og-image.jpg',
   description:
     'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India, Australia, Singapore, Indonesia, Philippines, Japan and online worldwide.',
   address: {
@@ -142,7 +142,7 @@ const LOCAL_BUSINESS_JSON_LD = {
   '@type': 'LocalBusiness',
   name: 'YAFT Designs',
   description: 'Authorized Rhino Training Center offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training and computational design consulting.',
-  url: 'https://yaftdesigns.com',
+  url: 'https://www.yaftdesigns.com',
   telephone: '',
   email: 'yaftdesigns@gmail.com',
   address: {

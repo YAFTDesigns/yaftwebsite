@@ -387,17 +387,17 @@ export async function POST(request: NextRequest) {
     ${advance > 0 ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(advance)}</td></tr>` : ''}
     ${balance > 0 ? `<tr style="background:#fff3f3;"><td style="padding:8px 12px;color:#888;">Balance Due</td><td style="padding:8px 12px;font-weight:600;color:#E63946;">INR ${fmt(balance)}</td></tr>` : ''}
   </table>
-  <img src="https://yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
+  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
   <p style="font-size:13px;font-weight:600;color:#111;margin:0 0 8px;">Share your experience</p>
   <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">If the training has been useful, we'd love a quick testimonial. It helps other students and professionals find us.</p>
-  <a href="https://yaftdesigns.com/#contact" style="display:inline-block;background:#E63946;color:#fff;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:20px;">Leave a testimonial →</a>
+  <a href="https://www.yaftdesigns.com/#contact" style="display:inline-block;background:#E63946;color:#fff;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:20px;">Leave a testimonial →</a>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
   <p style="font-size:13px;font-weight:600;color:#111;margin:0 0 8px;">Feature your work on yaftdesigns.com</p>
   <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">Once your project is done, submit it to our <strong>YAFT Community Works</strong> wall — a public portfolio space where students and collaborators showcase what they've built. Your card includes your project, tools used, and a link to your portfolio or LinkedIn.</p>
-  <a href="https://yaftdesigns.com/projects/community" style="display:inline-block;border:1px solid #E63946;color:#E63946;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:24px;">Submit your project →</a>
+  <a href="https://www.yaftdesigns.com/projects/community" style="display:inline-block;border:1px solid #E63946;color:#E63946;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:24px;">Submit your project →</a>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
-  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs · Authorized Rhino Training Center · Coimbatore, India<br><a href="https://yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
+  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs · Authorized Rhino Training Center · Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
 </div>`;
 
       const raw = [

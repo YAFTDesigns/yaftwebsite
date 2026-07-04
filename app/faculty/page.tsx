@@ -18,15 +18,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/faculty',
+    url: 'https://www.yaftdesigns.com/faculty',
     type: 'profile',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -35,9 +35,9 @@ const PERSON_JSON_LD = {
   '@type': 'Person',
   name: 'Yokes Marapa',
   jobTitle: 'Founder and Authorized Rhino Trainer',
-  url: 'https://yaftdesigns.com/faculty',
-  image: 'https://yaftdesigns.com/assets/images/og-image.jpg',
-  worksFor: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/faculty',
+  image: 'https://www.yaftdesigns.com/assets/images/og-image.jpg',
+  worksFor: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
   knowsAbout: ['Rhino3D', 'Grasshopper', 'Rhino.Inside.Revit', 'Computational Design', 'Parametric Design', 'BIM', 'Digital Fabrication'],
   credential: [
     {

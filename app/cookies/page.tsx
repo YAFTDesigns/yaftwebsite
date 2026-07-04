@@ -6,7 +6,7 @@ import styles from '../terms/terms.module.css';
 export const metadata: Metadata = {
   title: 'Cookies Policy | YAFT Designs',
   description: 'How YAFT Designs uses cookies on yaftdesigns.com.',
-  alternates: { canonical: 'https://yaftdesigns.com/cookies' },
+  alternates: { canonical: 'https://www.yaftdesigns.com/cookies' },
 };
 
 const CLAUSES = [

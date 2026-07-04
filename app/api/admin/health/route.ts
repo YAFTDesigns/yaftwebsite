@@ -12,7 +12,7 @@ const PAGES = [
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://yaftdesigns.com';
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.yaftdesigns.com';
 
   const results = await Promise.all(
     PAGES.map(async (page) => {

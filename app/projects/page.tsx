@@ -13,15 +13,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/projects',
+    url: 'https://www.yaftdesigns.com/projects',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -30,9 +30,9 @@ const PROJECTS_JSON_LD = {
   '@type': 'CollectionPage',
   name: 'Projects | YAFT Designs',
   description: DESCRIPTION,
-  url: 'https://yaftdesigns.com/projects',
-  creator: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
-  isPartOf: { '@type': 'WebSite', name: 'YAFT Designs', url: 'https://yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/projects',
+  creator: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
+  isPartOf: { '@type': 'WebSite', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
 };
 
 export default function ProjectsPage() {

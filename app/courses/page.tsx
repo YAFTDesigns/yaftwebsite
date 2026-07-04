@@ -24,15 +24,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/courses',
+    url: 'https://www.yaftdesigns.com/courses',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -79,13 +79,13 @@ export default async function CoursesPage() {
       provider: {
         '@type': 'Organization',
         name: 'YAFT Designs',
-        sameAs: 'https://yaftdesigns.com',
+        sameAs: 'https://www.yaftdesigns.com',
       },
       offers: {
         '@type': 'Offer',
         category: 'Paid',
         availability: 'https://schema.org/InStock',
-        url: 'https://yaftdesigns.com/courses',
+        url: 'https://www.yaftdesigns.com/courses',
       },
       hasCourseInstance: {
         '@type': 'CourseInstance',
@@ -95,7 +95,7 @@ export default async function CoursesPage() {
         instructor: {
           '@type': 'Person',
           name: 'Yokes Marapa',
-          url: 'https://yaftdesigns.com/faculty',
+          url: 'https://www.yaftdesigns.com/faculty',
         },
       },
     })),

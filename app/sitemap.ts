@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-const BASE = 'https://yaftdesigns.com';
+const BASE = 'https://www.yaftdesigns.com';
 const NOW = new Date().toISOString();
 
 export default function sitemap(): MetadataRoute.Sitemap {

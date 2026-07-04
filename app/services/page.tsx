@@ -19,15 +19,15 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: 'https://yaftdesigns.com/services',
+    url: 'https://www.yaftdesigns.com/services',
     type: 'website',
-    images: [{ url: 'https://yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://yaftdesigns.com/assets/images/og-image.jpg'],
+    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
   },
 };
 
@@ -38,7 +38,7 @@ const SERVICE_JSON_LD = {
   provider: {
     '@type': 'Organization',
     name: 'YAFT Designs',
-    url: 'https://yaftdesigns.com',
+    url: 'https://www.yaftdesigns.com',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Coimbatore',
@@ -76,7 +76,7 @@ const SERVICE_JSON_LD = {
     { '@type': 'City',    name: 'Riyadh' },
     { '@type': 'City',    name: 'Doha' },
   ],
-  url: 'https://yaftdesigns.com/services',
+  url: 'https://www.yaftdesigns.com/services',
   description:
     'Computational design execution from parametric facade rationalization to fabrication-ready output, shop drawing automation, and structured training.',
 };
