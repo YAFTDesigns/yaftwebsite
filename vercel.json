@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/admin/retry-queue",
+      "path": "/api/cron/retry-queue",
       "schedule": "0 2 * * *"
     }
   ]

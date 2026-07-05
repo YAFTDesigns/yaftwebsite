@@ -1,24 +1,26 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
-  popEnquiriesFromQueue, pushEnquiryToQueue, getQueueLength,
-  popInvoicesFromQueue,  pushInvoiceToQueue,  getInvoiceQueueLength,
+  popEnquiriesFromQueue, pushEnquiryToQueue,
+  popInvoicesFromQueue,  pushInvoiceToQueue,
 } from '@/lib/queue';
 import { upsertLead } from '@/lib/leads';
 import { sendAdminAlert } from '@/lib/adminAlert';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
-  const authHeader  = request.headers.get('authorization');
-  const cronSecret  = process.env.CRON_SECRET ?? '';
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-  const isManualCall = authHeader === ('Bearer ' + cronSecret) && cronSecret.length > 0;
-
-  if (!isVercelCron && !isManualCall) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+// IMPORTANT: this route deliberately lives OUTSIDE /api/admin/* .
+// proxy.ts's admin-auth middleware matches /api/admin/:path* and
+// rejects any request without an admin login session -- which a
+// Vercel Cron invocation never has. Vercel Cron also always sends a
+// GET request, not POST, regardless of what's configured in
+// vercel.json. Putting the real logic behind POST at an /api/admin/
+// path (the original implementation) meant this retry job could
+// never have run automatically: it would 401 at the middleware layer
+// before even reaching this file, and even if it got through, Cron's
+// GET would have hit a route that only had a POST handler.
+async function runRetry() {
   const supabase = getSupabaseAdmin();
 
   // ── Retry enquiries ──────────────────────────────────────────────
@@ -88,7 +90,7 @@ export async function POST(request: Request) {
     }
   }
 
-  // A retry cron failure means the item already failed once live AND
+  // A retry job failure means the item already failed once live AND
   // again here -- that's a persistent problem (schema drift, bad env
   // var, etc.), not a transient blip. Worth a human looking at it.
   if (eRequeued > 0 || iRequeued > 0) {
@@ -98,21 +100,41 @@ export async function POST(request: Request) {
     ].join('');
     await sendAdminAlert(
       `YAFT Site Alert: ${eRequeued + iRequeued} item(s) still failing to save`,
-      `<p>The daily retry job tried these and they failed again -- they're still queued and will be retried tomorrow, but this usually means something needs a manual fix (e.g. a missing DB column or migration).</p><ul>${rows}</ul>`
+      `<p>The retry job tried these and they failed again -- they're still queued and will be retried on the next run, but this usually means something needs a manual fix (e.g. a missing DB column or migration).</p><ul>${rows}</ul>`
     );
   }
 
-  return NextResponse.json({
+  return {
     ok: true,
     enquiries: { processed: eProcessed, requeued: eRequeued },
     invoices:  { processed: iProcessed, requeued: iRequeued },
-  });
+  };
 }
 
-export async function GET() {
-  const [enquiryQueue, invoiceQueue] = await Promise.all([
-    getQueueLength(),
-    getInvoiceQueueLength(),
-  ]);
-  return NextResponse.json({ enquiryQueue, invoiceQueue });
+// GET — this is what Vercel Cron actually calls (per vercel.json).
+// Also accepts a manual Bearer CRON_SECRET call for testing outside
+// the Vercel platform.
+export async function GET(request: Request) {
+  const authHeader   = request.headers.get('authorization');
+  const cronSecret   = process.env.CRON_SECRET ?? '';
+  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
+  const isManualCall = cronSecret.length > 0 && authHeader === ('Bearer ' + cronSecret);
+
+  if (!isVercelCron && !isManualCall) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const result = await runRetry();
+  return NextResponse.json(result);
+}
+
+// POST — manual "run now" trigger from the admin UI. Checked against
+// the admin session directly (this route isn't covered by the
+// /api/admin/:path* proxy matcher, so it isn't gated there).
+export async function POST() {
+  if (!(await isRequestFromAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const result = await runRetry();
+  return NextResponse.json(result);
 }

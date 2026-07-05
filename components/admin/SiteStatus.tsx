@@ -51,6 +51,32 @@ export default function SiteStatus() {
         ? 'Pages up — items queued for retry'
         : 'All systems operational';
 
+  const [retrying, setRetrying]   = useState(false);
+  const [retryMsg, setRetryMsg]   = useState('');
+
+  async function runRetryNow() {
+    setRetrying(true); setRetryMsg('');
+    try {
+      const res  = await fetch('/api/cron/retry-queue', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Failed');
+      const total = json.enquiries.processed + json.invoices.processed;
+      const stillStuck = json.enquiries.requeued + json.invoices.requeued;
+      setRetryMsg(
+        stillStuck > 0
+          ? `${total} recovered, ${stillStuck} still failing — check email alert`
+          : total > 0
+            ? `${total} recovered`
+            : 'Nothing was queued'
+      );
+    } catch (e: any) {
+      setRetryMsg(`Failed: ${e.message ?? 'Unknown error'}`);
+    } finally {
+      setRetrying(false);
+      check();
+    }
+  }
+
   return (
     <div style={{
       background: 'var(--paper-2, #111)',
@@ -135,6 +161,17 @@ export default function SiteStatus() {
           <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#555' }}>
             (auto-retries daily at 2am — a repeat failure sends an email alert)
           </span>
+          <button onClick={runRetryNow} disabled={retrying} style={{
+            background: 'transparent', border: '1px solid #e5a935',
+            color: '#e5a935', borderRadius: 4, padding: '3px 10px',
+            fontSize: 10, fontFamily: 'var(--mono)', cursor: 'pointer',
+            letterSpacing: '0.06em', opacity: retrying ? 0.6 : 1,
+          }}>
+            {retrying ? 'Running...' : 'Run retry now'}
+          </button>
+          {retryMsg && (
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#888' }}>{retryMsg}</span>
+          )}
         </div>
       )}
     </div>
