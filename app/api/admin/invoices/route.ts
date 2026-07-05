@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
+import { computeInvoiceTotals } from '@/lib/invoiceMath';
 
 // GET /api/admin/invoices?trash=true   — list active or trashed invoices
 // GET /api/admin/invoices?log=true     — list invoice event log (newest first)
@@ -26,20 +27,6 @@ export async function GET(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ data: data ?? [] });
-}
-
-const TAMIL_NADU = 'tamil nadu';
-const INTL_STATES = ['australia', 'singapore', 'uae', 'oman', 'international'];
-
-function computeTotal(items: { desc: string; hrs: number; qty: number; rate: number }[], clientState: string) {
-  const subtotal = items.reduce((s, i) => s + (i.rate || 0) * (i.qty || 0), 0);
-  const state = (clientState || '').toLowerCase();
-  const intra = state.includes(TAMIL_NADU);
-  const intl  = INTL_STATES.includes(state);
-  const cgst  = intra ? subtotal * 0.09 : 0;
-  const sgst  = intra ? subtotal * 0.09 : 0;
-  const igst  = (!intra && !intl) ? subtotal * 0.18 : 0;
-  return subtotal + cgst + sgst + igst;
 }
 
 // PATCH /api/admin/invoices
@@ -84,7 +71,7 @@ export async function PATCH(request: NextRequest) {
     }
     if (!client_state) return NextResponse.json({ error: 'Missing client_state' }, { status: 400 });
 
-    const total = computeTotal(items, client_state);
+    const { total } = computeInvoiceTotals(items, client_state);
     const advanceNum = typeof advance === 'number' ? advance : 0;
     const balance = total - advanceNum;
 

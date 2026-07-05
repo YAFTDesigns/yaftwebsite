@@ -1,4 +1,5 @@
 import path from 'path';
+import { computeInvoiceTotals } from './invoiceMath';
 
 const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
 const PAID_STAMP_PATH = path.join(process.cwd(), 'public', 'assets', 'images', 'paid-in-full.png');
@@ -143,10 +144,9 @@ export async function generatePDF(data: any): Promise<Buffer> {
     });
 
     // Data rows
-    let subtotal = 0;
     let ry = tableTop + 18;
     data.items.forEach((item: any, idx: number) => {
-      const total = item.rate * item.qty; subtotal += total;
+      const total = item.rate * item.qty;
       doc.rect(M, ry, W-2*M, 18).stroke('#aaaaaa');
       doc.font('Helvetica').fontSize(8).fillColor('#000000');
       doc.text(String(idx+1), cols[0]+3, ry+5, { width: colW[0]-6, align: 'center' });
@@ -170,20 +170,21 @@ export async function generatePDF(data: any): Promise<Buffer> {
       ry += 18;
     }
 
-    // GST calc — same logic for all invoice types including proforma
-    const intra = data.client_state.toLowerCase().includes('tamil');
-    const cgst  = intra ? subtotal * 0.09 : 0;
-    const sgst  = intra ? subtotal * 0.09 : 0;
-    const igst  = !intra ? subtotal * 0.18 : 0;
-    const grandTotal = subtotal + cgst + sgst + igst;
+    // GST calc — single source of truth shared with the app and the
+    // server, so the number printed here can never drift from what
+    // was actually charged (this used to be its own copy and was
+    // missing the international-client exemption).
+    const totals = computeInvoiceTotals(data.items, data.client_state);
+    const { subtotal: computedSubtotal, cgst, sgst, igst, total: grandTotal, taxMode } = totals;
 
     // Tax summary
     const tx = 369; let ty2 = ry + 10;
     const fmt = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2 });
     const taxRows = [
-      ['SUBTOTAL', fmt(subtotal)],
-      ...(intra ? [['CGST 9%', fmt(cgst)], ['SGST 9%', fmt(sgst)]]
-                : [['IGST 18%', fmt(igst)]]),
+      ['SUBTOTAL', fmt(computedSubtotal)],
+      ...(taxMode === 'intra' ? [['CGST 9%', fmt(cgst)], ['SGST 9%', fmt(sgst)]]
+        : taxMode === 'interstate' ? [['IGST 18%', fmt(igst)]]
+        : [['GST', 'N/A (export)']]),
       ['SHIPPING', '-'], ['OTHER', '-'],
     ];
     doc.font('Helvetica').fontSize(8).fillColor('#000000');

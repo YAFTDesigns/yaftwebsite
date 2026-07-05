@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
+import { computeInvoiceTotals } from '@/lib/invoiceMath';
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type Invoice = {
@@ -55,13 +56,8 @@ export default function InvoicesClient() {
   const [formError, setFormError] = useState('');
   const [pdfUrl, setPdfUrl]   = useState('');
 
-  const intra    = form.client_state.toLowerCase().includes('tamil');
-  const intl     = ['australia','singapore','uae','oman','international'].includes(form.client_state.toLowerCase());
-  const subtotal = items.reduce((s,i) => s + i.rate * i.qty, 0);
-  const cgst     = intra ? subtotal*0.09 : 0;
-  const sgst     = intra ? subtotal*0.09 : 0;
-  const igst     = (!intra && !intl) ? subtotal*0.18 : 0;
-  const grandTotal = subtotal + cgst + sgst + igst;
+  const { subtotal, cgst, sgst, igst, total: grandTotal, taxMode } = computeInvoiceTotals(items, form.client_state);
+  const intra = taxMode === 'intra';
   const balance    = grandTotal - advance;
 
   function setF(k: string, v: string) { setForm(f => ({...f, [k]: v})); }
@@ -419,13 +415,7 @@ export default function InvoicesClient() {
 
                   {/* Inline edit panel */}
                   {editInv?.id === inv.id && (() => {
-                    const eIntra = (editInv.client_state || '').toLowerCase().includes('tamil');
-                    const eIntl  = ['australia','singapore','uae','oman','international'].includes((editInv.client_state || '').toLowerCase());
-                    const eSubtotal = editInv.items.reduce((s, i) => s + i.rate * i.qty, 0);
-                    const eCgst = eIntra ? eSubtotal * 0.09 : 0;
-                    const eSgst = eIntra ? eSubtotal * 0.09 : 0;
-                    const eIgst = (!eIntra && !eIntl) ? eSubtotal * 0.18 : 0;
-                    const eTotal = eSubtotal + eCgst + eSgst + eIgst;
+                    const { total: eTotal } = computeInvoiceTotals(editInv.items, editInv.client_state);
                     const eBalance = eTotal - (editInv.advance || 0);
 
                     function setEditField<K extends keyof Invoice>(k: K, v: Invoice[K]) {
