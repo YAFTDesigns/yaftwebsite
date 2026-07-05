@@ -5,6 +5,7 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushInvoiceToQueue } from '@/lib/queue';
 import { generatePDF } from '@/lib/invoicePdf';
+import { logInvoiceEvent } from '@/lib/invoiceLog';
 
 const YAFT_EMAIL = 'yaftdesigns@gmail.com';
 
@@ -54,6 +55,15 @@ export async function POST(request: NextRequest) {
       status:         'sent',
     }).select('id').single();
 
+    if (!error && inv) {
+      await logInvoiceEvent({
+        invoiceId: inv.id,
+        invoiceNo: data.invoice_no,
+        event: 'created',
+        message: `Created for ${data.client_name} — ₹${Number(data.grand_total).toLocaleString('en-IN')}`,
+      });
+    }
+
     if (error) {
       console.error('Invoice save error — queueing for retry:', error);
       // Queue for retry when Supabase recovers — continue to send email
@@ -80,6 +90,12 @@ export async function POST(request: NextRequest) {
       } catch (qErr) {
         console.error('Invoice queue also failed:', qErr);
       }
+      await logInvoiceEvent({
+        invoiceNo: data.invoice_no,
+        event: 'queued',
+        message: `Save failed, queued for retry — ${error.message}`,
+        meta: { error: error.message },
+      });
       // Don't return error — continue to send email below
     }
 

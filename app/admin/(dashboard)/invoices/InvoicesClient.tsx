@@ -30,7 +30,7 @@ const STATES = [
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function InvoicesClient() {
-  const [tab, setTab] = useState<'create'|'sent'|'trash'>('create');
+  const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>([]);
   const [loadError, setLoadError] = useState('');
@@ -204,9 +204,22 @@ export default function InvoicesClient() {
     }
   }
 
+  type InvoiceLog = { id: string; created_at: string; invoice_no: string; event: string; message: string; };
+  const [logs, setLogs] = useState<InvoiceLog[]>([]);
+  const [logLoading, setLogLoading] = useState(false);
+
+  async function loadLogs() {
+    setLogLoading(true);
+    const res = await fetch('/api/admin/invoices?log=true');
+    const json = await res.json().catch(() => ({}));
+    if (res.ok) setLogs(json.data ?? []);
+    setLogLoading(false);
+  }
+
   useEffect(() => {
     if (tab === 'sent') loadInvoices();
     if (tab === 'trash') loadTrash();
+    if (tab === 'log') loadLogs();
   }, [tab]);
 
   // Load trash count on mount too, so the tab badge is accurate
@@ -268,6 +281,7 @@ export default function InvoicesClient() {
         <button className={`${styles.tab} ${tab==='create'?styles.activeTab:''}`} onClick={() => setTab('create')}>Create Invoice</button>
         <button className={`${styles.tab} ${tab==='sent'?styles.activeTab:''}`} onClick={() => setTab('sent')}>Sent Invoices</button>
         <button className={`${styles.tab} ${tab==='trash'?styles.activeTab:''}`} onClick={() => setTab('trash')}>Trash{trashedInvoices.length > 0 ? ` (${trashedInvoices.length})` : ''}</button>
+        <button className={`${styles.tab} ${tab==='log'?styles.activeTab:''}`} onClick={() => setTab('log')}>Log</button>
       </div>
 
       {/* ── SENT INVOICES ── */}
@@ -553,6 +567,49 @@ export default function InvoicesClient() {
                 </div>
               ))}
             </div>
+      )}
+
+      {/* ── LOG ── */}
+      {tab === 'log' && (
+        <div>
+          {logLoading && <p style={{ fontFamily:'var(--mono)', fontSize:13, color:'#888' }}>Loading...</p>}
+          {!logLoading && logs.length === 0 && <div className={styles.empty}>No activity yet.</div>}
+          {!logLoading && logs.length > 0 && (
+            <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+              {logs.map(l => {
+                const eventColors: Record<string, string> = {
+                  created: '#4caf50', edited: '#40c4ff', resent: '#40c4ff',
+                  payment_updated: '#40c4ff', restored: '#4caf50',
+                  queued: '#e5a935', retry_failed: '#e5a935',
+                  recovered: '#4caf50', deleted: '#e55',
+                };
+                const color = eventColors[l.event] ?? '#888';
+                return (
+                  <div key={l.id} style={{
+                    display:'flex', alignItems:'baseline', gap:14, padding:'10px 4px',
+                    borderBottom:'1px solid #1a1a1a',
+                  }}>
+                    <span style={{ fontFamily:'var(--mono)', fontSize:10, color:'#555', minWidth:118, flexShrink:0 }}>
+                      {new Date(l.created_at).toLocaleString('en-IN', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })}
+                    </span>
+                    <span style={{
+                      fontFamily:'var(--mono)', fontSize:10, textTransform:'uppercase', letterSpacing:'.04em',
+                      color, border:`1px solid ${color}55`, borderRadius:4, padding:'2px 7px', minWidth:96, textAlign:'center', flexShrink:0,
+                    }}>
+                      {l.event.replace('_', ' ')}
+                    </span>
+                    <span style={{ fontFamily:'var(--mono)', fontSize:12, color:'#ccc', minWidth:130, flexShrink:0 }}>
+                      {l.invoice_no}
+                    </span>
+                    <span style={{ fontFamily:'var(--body)', fontSize:13, color:'#999' }}>
+                      {l.message}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
 
       {/* ── CREATE INVOICE ── */}

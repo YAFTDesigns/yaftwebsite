@@ -3,6 +3,7 @@ import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { generatePDF } from '@/lib/invoicePdf';
+import { logInvoiceEvent } from '@/lib/invoiceLog';
 
 const YAFT_EMAIL = 'yaftdesigns@gmail.com';
 
@@ -122,6 +123,11 @@ export async function POST(request: NextRequest) {
     } catch (logErr) {
       console.error('[invoice-resend] email_logs insert failed:', logErr);
     }
+
+    await logInvoiceEvent({
+      invoiceId: inv.id, invoiceNo: inv.invoice_no, event: 'resent',
+      message: `PDF regenerated and resent to ${inv.client_email}`,
+    });
 
     return NextResponse.json({ ok: true, pdf: pdfBase64 });
   } catch (err) {

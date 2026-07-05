@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { logInvoiceEvent } from '@/lib/invoiceLog';
 
 // GET /api/admin/invoices?trash=true   — list active or trashed invoices
+// GET /api/admin/invoices?log=true     — list invoice event log (newest first)
 export async function GET(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const trash = new URL(request.url).searchParams.get('trash') === 'true';
+  const params = new URL(request.url).searchParams;
   const supabase = getSupabaseAdmin();
+
+  if (params.get('log') === 'true') {
+    const { data, error } = await supabase
+      .from('invoice_logs').select('*').order('created_at', { ascending: false }).limit(200);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ data: data ?? [] });
+  }
+
+  const trash = params.get('trash') === 'true';
 
   const { data, error } = trash
     ? await supabase.from('invoices').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
@@ -53,11 +64,15 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Missing id or advance' }, { status: 400 });
     }
     const { data: inv, error: fetchErr } = await supabase
-      .from('invoices').select('total').eq('id', id).single();
+      .from('invoices').select('total, invoice_no').eq('id', id).single();
     if (fetchErr || !inv) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
     const balance = inv.total - advance;
     const { error } = await supabase.from('invoices').update({ advance, balance }).eq('id', id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logInvoiceEvent({
+      invoiceId: id, invoiceNo: inv.invoice_no, event: 'payment_updated',
+      message: `Advance updated to ₹${Number(advance).toLocaleString('en-IN')} — balance now ₹${Number(balance).toLocaleString('en-IN')}`,
+    });
     return NextResponse.json({ ok: true, balance });
   }
 
@@ -90,15 +105,20 @@ export async function PATCH(request: NextRequest) {
     }).eq('id', id).select('*').single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logInvoiceEvent({
+      invoiceId: id, invoiceNo: updated.invoice_no, event: 'edited',
+      message: `Details updated — total now ₹${Number(total).toLocaleString('en-IN')}`,
+    });
     return NextResponse.json({ ok: true, invoice: updated });
   }
 
   if (body.action === 'soft_delete') {
     const { id } = body;
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-    const { error } = await supabase
-      .from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+    const { data: updated, error } = await supabase
+      .from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id).select('invoice_no').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logInvoiceEvent({ invoiceId: id, invoiceNo: updated.invoice_no, event: 'deleted', message: 'Moved to trash' });
     return NextResponse.json({ ok: true });
   }
 
@@ -107,17 +127,21 @@ export async function PATCH(request: NextRequest) {
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'Missing ids array' }, { status: 400 });
     }
-    const { error } = await supabase
-      .from('invoices').update({ deleted_at: new Date().toISOString() }).in('id', ids);
+    const { data: updated, error } = await supabase
+      .from('invoices').update({ deleted_at: new Date().toISOString() }).in('id', ids).select('id, invoice_no');
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    for (const row of updated ?? []) {
+      await logInvoiceEvent({ invoiceId: row.id, invoiceNo: row.invoice_no, event: 'deleted', message: 'Moved to trash (bulk)' });
+    }
     return NextResponse.json({ ok: true });
   }
 
   if (body.action === 'restore') {
     const { id } = body;
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-    const { error } = await supabase.from('invoices').update({ deleted_at: null }).eq('id', id);
+    const { data: updated, error } = await supabase.from('invoices').update({ deleted_at: null }).eq('id', id).select('invoice_no').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logInvoiceEvent({ invoiceId: id, invoiceNo: updated.invoice_no, event: 'restored', message: 'Restored from trash' });
     return NextResponse.json({ ok: true });
   }
 

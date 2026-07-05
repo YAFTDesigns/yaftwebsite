@@ -6,6 +6,7 @@ import {
 } from '@/lib/queue';
 import { upsertLead } from '@/lib/leads';
 import { sendAdminAlert } from '@/lib/adminAlert';
+import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 export const dynamic = 'force-dynamic';
@@ -62,7 +63,7 @@ async function runRetry() {
 
   for (const inv of invoices) {
     try {
-      const { error } = await supabase.from('invoices').insert({
+      const { data: reinserted, error } = await supabase.from('invoices').insert({
         invoice_no:   inv.invoice_no,
         date:         inv.date,
         client_name:  inv.client_name,
@@ -80,13 +81,23 @@ async function runRetry() {
         balance:      inv.balance,
         invoice_type: inv.invoice_type,
         status:       'sent',
-      });
+      }).select('id').single();
       if (error) throw error;
       iProcessed++;
+      await logInvoiceEvent({
+        invoiceId: reinserted?.id, invoiceNo: inv.invoice_no, event: 'recovered',
+        message: 'Recovered from retry queue',
+      });
     } catch (err: any) {
       await pushInvoiceToQueue(inv);
       iRequeued++;
-      invoiceErrors.push(`${inv.invoice_no} (${inv.client_email}): ${err?.message ?? String(err)}`);
+      const msg = err?.message ?? String(err);
+      invoiceErrors.push(`${inv.invoice_no} (${inv.client_email}): ${msg}`);
+      await logInvoiceEvent({
+        invoiceNo: inv.invoice_no, event: 'retry_failed',
+        message: `Retry failed — ${msg}`,
+        meta: { error: msg },
+      });
     }
   }
 
