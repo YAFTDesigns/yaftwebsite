@@ -111,7 +111,7 @@ export default async function CoursesPage() {
       />
 
       <main id="top">
-        <section className="page-hero">
+        <section className={`page-hero ${styles.coursesHero}`}>
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <h1>Browse our live courses in Rhino3D, Grasshopper &amp; BIM.</h1>
