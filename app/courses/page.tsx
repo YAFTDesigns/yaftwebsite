@@ -5,6 +5,7 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import CourseGateButton from '@/components/CourseGateButton';
+import CourseVisualLink from '@/components/CourseVisualLink';
 import CourseGateModal from '@/components/CourseGateModal';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
@@ -130,11 +131,24 @@ export default async function CoursesPage() {
             <div className={styles.courseGrid}>
               {courses.map((course) => (
                 <div className={styles.courseCard} key={course.slug}>
-                  <div className={styles.courseVisual}>
-                    <Image src={course.image} alt={course.alt} width={800} height={500} />
-                    <span className={styles.levelBadge}>{course.level}</span>
-                    <span className={styles.durationBadge}>{course.duration}</span>
-                  </div>
+                  {COURSE_DETAIL_PAGES[course.slug] ? (
+                    <CourseVisualLink
+                      href={COURSE_DETAIL_PAGES[course.slug]}
+                      course={course.title}
+                      slug={course.slug}
+                      className={styles.courseVisual}
+                    >
+                      <Image src={course.image} alt={course.alt} width={800} height={500} />
+                      <span className={styles.levelBadge}>{course.level}</span>
+                      <span className={styles.durationBadge}>{course.duration}</span>
+                    </CourseVisualLink>
+                  ) : (
+                    <div className={styles.courseVisual}>
+                      <Image src={course.image} alt={course.alt} width={800} height={500} />
+                      <span className={styles.levelBadge}>{course.level}</span>
+                      <span className={styles.durationBadge}>{course.duration}</span>
+                    </div>
+                  )}
                   <div className={styles.courseBody}>
                     <div className={styles.courseTool}>{course.tool}</div>
                     <h3>{course.title}</h3>
