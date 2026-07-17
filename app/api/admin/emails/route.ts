@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isAdminEmail } from '@/lib/admin';
 
 // GET /api/admin/emails?type=logs
 // GET /api/admin/emails?type=templates
@@ -24,7 +25,12 @@ export async function GET(request: NextRequest) {
       console.error('[emails-api] GET logs failed:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
-    return NextResponse.json({ data: data ?? [] });
+    // Flag rows sent to YAFT's own admin addresses (test sends, e.g.
+    // verifying the Gmail connection still works) so the UI can keep
+    // them out of the delivery-status summary counts without hiding
+    // them from the log entirely -- still useful to see they happened.
+    const flagged = (data ?? []).map((row) => ({ ...row, is_admin_recipient: isAdminEmail(row.to_email) }));
+    return NextResponse.json({ data: flagged });
   }
 
   if (type === 'templates') {

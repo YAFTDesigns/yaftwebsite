@@ -40,6 +40,7 @@ type Log = {
   status: string;
   error: string | null;
   template: string;
+  is_admin_recipient: boolean;
 };
 
 type Template = {
@@ -55,7 +56,12 @@ function LogCard({ l }: { l: Log }) {
     <div className={styles.card}>
       <div className={styles.cardTop}>
         <div>
-          <p className={styles.cardName}>{l.to_name}</p>
+          <p className={styles.cardName}>
+            {l.to_name}
+            {l.is_admin_recipient && (
+              <span style={{ fontFamily:'var(--mono)', fontSize:9, color:'#666', border:'1px solid #333', borderRadius:3, padding:'1px 6px', marginLeft:8, verticalAlign:'middle' }}>TEST</span>
+            )}
+          </p>
           <p className={styles.cardRole}>{l.to_email}</p>
           <p className={styles.cardCourse}>{l.subject}</p>
         </div>
@@ -156,18 +162,27 @@ export default function AdminEmailsClient() {
 
       {loading && <p className={styles.empty}>Loading…</p>}
 
-      {!loading && tab === 'logs' && logs.length > 0 && (
+      {!loading && tab === 'logs' && logs.length > 0 && (() => {
+        const clientLogs = logs.filter(l => !l.is_admin_recipient);
+        const testCount = logs.length - clientLogs.length;
+        return (
         <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
           <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:14 }}>Delivery status</p>
           <PieChart
             size={120}
             slices={[
-              { label: 'Sent', value: logs.filter(l => l.status === 'sent').length, color: '#4caf50' },
-              { label: 'Failed', value: logs.filter(l => l.status === 'failed').length, color: '#e55' },
+              { label: 'Sent', value: clientLogs.filter(l => l.status === 'sent').length, color: '#4caf50' },
+              { label: 'Failed', value: clientLogs.filter(l => l.status === 'failed').length, color: '#e55' },
             ]}
           />
+          {testCount > 0 && (
+            <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#555', marginTop:12 }}>
+              {testCount} internal test send{testCount > 1 ? 's' : ''} to your own inbox excluded from these counts (still listed below)
+            </p>
+          )}
         </div>
-      )}
+        );
+      })()}
 
       {/* EMAIL LOGS */}
       {!loading && tab === 'logs' && (

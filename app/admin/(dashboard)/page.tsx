@@ -3,6 +3,7 @@ import SiteStatus from '@/components/admin/SiteStatus';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
+import { computeInvoiceTotals } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -75,20 +76,27 @@ async function getCounts() {
     ),
     safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
-    safe(supabase.from('invoices').select('total, advance, balance').is('deleted_at', null).gte('created_at', monthStart), []),
+    safe(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart), []),
     safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'), null),
-    safe(supabase.from('invoices').select('total, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
+    safe(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
-  const revenueThisMonth = invoiceRows.reduce((sum, r) => sum + (r.total ?? 0), 0);
+  // Revenue is shown pre-tax; GST collected is a pass-through to the
+  // government, not YAFT's income, so lumping it into "revenue" would
+  // overstate actual earnings. total already includes tax (see
+  // lib/invoiceMath.ts), so subtotal is recomputed from items rather
+  // than relying on a stored pre-tax figure (no such column exists).
+  const invoiceBreakdowns = invoiceRows.map((r: any) => computeInvoiceTotals(r.items ?? [], r.client_state ?? ''));
+  const revenueThisMonth = invoiceBreakdowns.reduce((sum, b) => sum + b.subtotal, 0);
+  const taxThisMonth = invoiceBreakdowns.reduce((sum, b) => sum + (b.cgst + b.sgst + b.igst), 0);
   const outstandingBalance = invoiceRows.reduce((sum, r) => sum + (r.balance ?? 0), 0);
 
-  // Build 6-month revenue trend
+  // Build 6-month revenue trend (pre-tax, same reasoning as above)
   const now = new Date();
   const monthlyTotals: { label: string; value: number }[] = [];
   for (let i = 5; i >= 0; i--) {
@@ -99,7 +107,7 @@ async function getCounts() {
         const rd = new Date(r.created_at);
         return rd.getFullYear() === d.getFullYear() && rd.getMonth() === d.getMonth();
       })
-      .reduce((s: number, r: any) => s + (r.total ?? 0), 0);
+      .reduce((s: number, r: any) => s + computeInvoiceTotals(r.items ?? [], r.client_state ?? '').subtotal, 0);
     monthlyTotals.push({ label, value: sum });
   }
 
@@ -121,6 +129,7 @@ async function getCounts() {
     pendingTestimonials: pendingTestimonials.count ?? 0,
     invoicesThisMonth: invoiceRows.length,
     revenueThisMonth,
+    taxThisMonth,
     outstandingBalance,
     pendingStudentWork: pendingStudentWork.count ?? 0,
     pendingPublications: pendingPublications.count ?? 0,
@@ -190,6 +199,10 @@ export default async function AdminOverviewPage() {
         <div className={styles.stat}>
           <div className={styles.statValue}>₹{fmt(counts.revenueThisMonth)}</div>
           <div className={styles.statLabel}>Invoiced this month</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue} style={{ color: 'var(--ink-soft, #888)' }}>₹{fmt(counts.taxThisMonth)}</div>
+          <div className={styles.statLabel}>Tax collected (GST)</div>
         </div>
         <div className={styles.stat} style={{ borderTopColor: counts.outstandingBalance > 0 ? 'var(--brass)' : undefined }}>
           <div className={styles.statValue} style={{ color: counts.outstandingBalance > 0 ? 'var(--brass)' : undefined }}>
