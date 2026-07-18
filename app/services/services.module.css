@@ -10,8 +10,8 @@
   background-position:center;
   z-index:-2;
   opacity:0;
-  filter:saturate(0.85) brightness(0.55);
-  animation-duration:8min;
+  filter:saturate(0.9) brightness(0.9);
+  animation-duration:16s;
   animation-iteration-count:infinite;
   animation-timing-function:ease-in-out;
 }
@@ -30,8 +30,8 @@
   background:linear-gradient(180deg, rgba(10,10,10,.88) 0%, rgba(10,10,10,.82) 45%, rgba(10,10,10,.92) 100%);
   z-index:-1;
 }
-/* Each photo holds for ~4 minutes with a short crossfade between them,
-   so the pair completes one full cycle every ~8 minutes. */
+/* Each photo holds for ~8 seconds with a short crossfade between them,
+   so the pair completes one full cycle every ~16 seconds. */
 @keyframes heroFadeA{
   0%,44%{ opacity:1; }
   50%,94%{ opacity:0; }
