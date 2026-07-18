@@ -114,7 +114,9 @@ export default async function ServicesPage() {
       />
 
       <main id="top">
-        <section className="page-hero">
+        <section className={`page-hero ${styles.servicesHero}`}>
+          <div className={styles.heroSlide + ' ' + styles.heroSlide1} />
+          <div className={styles.heroSlide + ' ' + styles.heroSlide2} />
           <div className="wrap">
             <div className="eyebrow">SERVICES</div>
             <h1 style={{ fontFamily: 'var(--display)', fontWeight: 700, letterSpacing: '-0.02em' }}>Computational design execution: from parametric facade to fabrication-ready output.</h1>

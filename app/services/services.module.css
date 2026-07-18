@@ -1,3 +1,52 @@
+.servicesHero{
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.servicesHero .heroSlide{
+  position:absolute;
+  inset:-4%;
+  background-size:cover;
+  background-position:center;
+  z-index:-2;
+  opacity:0;
+  filter:saturate(0.85) brightness(0.55);
+  animation-duration:8min;
+  animation-iteration-count:infinite;
+  animation-timing-function:ease-in-out;
+}
+.servicesHero .heroSlide1{
+  background-image:url('/assets/images/services-hero-1.jpg');
+  animation-name:heroFadeA;
+}
+.servicesHero .heroSlide2{
+  background-image:url('/assets/images/services-hero-2.jpg');
+  animation-name:heroFadeB;
+}
+.servicesHero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg, rgba(10,10,10,.88) 0%, rgba(10,10,10,.82) 45%, rgba(10,10,10,.92) 100%);
+  z-index:-1;
+}
+/* Each photo holds for ~4 minutes with a short crossfade between them,
+   so the pair completes one full cycle every ~8 minutes. */
+@keyframes heroFadeA{
+  0%,44%{ opacity:1; }
+  50%,94%{ opacity:0; }
+  100%{ opacity:1; }
+}
+@keyframes heroFadeB{
+  0%,44%{ opacity:0; }
+  50%,94%{ opacity:1; }
+  100%{ opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .servicesHero .heroSlide{ animation:none; }
+  .servicesHero .heroSlide1{ opacity:1; }
+}
+
 .servicesList{border-top:1px solid var(--line);}
 .serviceRow{
   display:grid;grid-template-columns:60px 1fr 1.3fr;gap:24px;
