@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
+import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -14,7 +15,8 @@ export default function Rhino3DArchitecture() {
   return (
     <>
       <SiteHeader active="/courses" />
-      <main className={s.wrap}>
+      <main className={s.pageGrid}>
+      <div className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>
       <h1 className={s.headline}>Rhino3D for Architecture</h1>
       <p className={s.subtitle}>A Design Re-Thinking Workshop</p>
@@ -106,6 +108,8 @@ export default function Rhino3DArchitecture() {
         <p className={s.ctaBottomText}>Ready to start? Reach out and we will schedule a free intro call.</p>
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
+    </div>
+      <CourseSidebarNav current="/courses/rhino3d-architecture" />
     </main>
 
       <Lightbox

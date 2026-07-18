@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
+import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -14,7 +15,8 @@ export default function RevitRhinoInside() {
   return (
     <>
       <SiteHeader active="/courses" />
-      <main className={s.wrap}>
+      <main className={s.pageGrid}>
+      <div className={s.wrap}>
       <span className={s.tag}>BIM + Computational Design</span>
       <h1 className={s.headline}>Revit Architecture + Rhino.Inside</h1>
       <p className={s.subtitle}>Re-Imagining BIM Design Workshop</p>
@@ -108,6 +110,8 @@ export default function RevitRhinoInside() {
         <p className={s.ctaBottomText}>Ready to start? Reach out and we will schedule a free intro call.</p>
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
+    </div>
+      <CourseSidebarNav current="/courses/revit-rhino-inside" />
     </main>
 
       <Lightbox

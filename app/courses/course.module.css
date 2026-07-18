@@ -1,4 +1,17 @@
-.wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+.pageGrid { max-width: 1180px; margin: 0 auto; padding: 48px 24px 80px; display: grid; grid-template-columns: 860px 260px; gap: 40px; justify-content: center; align-items: start; }
+.wrap { min-width: 0; }
+.sideNav { position: sticky; top: 100px; display: flex; flex-direction: column; gap: 2px; }
+.sideNavLabel { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+.sideNavItem { display: block; font-size: 13px; color: var(--ink-soft); padding: 10px 12px; border-radius: 6px; border-left: 2px solid transparent; text-decoration: none; line-height: 1.4; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.sideNavItem:hover { background: var(--paper-2); color: var(--ink); }
+.sideNavItemActive { color: var(--ink); background: var(--paper-2); border-left-color: var(--brass); font-weight: 500; }
+@media (max-width: 1140px) {
+  .pageGrid { grid-template-columns: 1fr; max-width: 860px; }
+  .sideNav { position: static; flex-direction: row; flex-wrap: wrap; gap: 8px; border-top: 0.5px solid var(--line); padding-top: 24px; margin-top: 8px; }
+  .sideNavLabel { width: 100%; margin-bottom: 4px; }
+  .sideNavItem { border-left: none; border: 0.5px solid var(--line); }
+  .sideNavItemActive { border-color: var(--brass); }
+}
 .tag { display: inline-block; background: transparent; color: var(--blueprint); border: 1px solid var(--blueprint); border-radius: 4px; font-size: 11px; padding: 3px 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500; font-family: var(--mono); }
 .headline { font-size: clamp(26px, 4vw, 36px); font-weight: 500; color: var(--ink); line-height: 1.25; margin: 14px 0 6px; }
 .subtitle { font-size: 14px; color: var(--blueprint); font-style: italic; margin-bottom: 12px; }

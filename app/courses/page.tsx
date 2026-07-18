@@ -6,6 +6,7 @@ import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import CourseGateButton from '@/components/CourseGateButton';
 import CourseVisualLink from '@/components/CourseVisualLink';
+import { COURSE_DETAIL_PAGES } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
 import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
@@ -50,14 +51,6 @@ const INTEREST_OPTIONS = [
   'Institutional workshop',
 ];
 
-
-const COURSE_DETAIL_PAGES: Record<string, string> = {
-  'rhino-architecture':         '/courses/rhino3d-architecture',
-  'grasshopper-architecture':   '/courses/grasshopper-architecture',
-  'revit-rhino-inside':         '/courses/revit-rhino-inside',
-  'rhino-aec-climate':          '/courses/rhino3d-aec-climate',
-  'rhino-industrial-design':    '/courses/rhino3d-industrial-design',
-};
 
 export default async function CoursesPage() {
   const courses = await getCourses();
