@@ -77,6 +77,10 @@ export default function GrasshopperArchitecture() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 35,000 + GST<div className={s.feeUsd}>approx. $420</div></div></div>
       </div>
       <div className={s.payNote}>Payment: 60% advance on booking, 40% on commencement. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.comboOffer}>
+        <span className={s.comboOfferTag}>Combo offer</span>
+        <span className={s.comboOfferText}>Take <strong>Grasshopper for Architecture</strong> and <strong>Rhino3D for Architecture</strong> together for <strong>INR 40,000</strong>, personal training, all taxes included.</span>
+      </div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Prerequisites</p>
