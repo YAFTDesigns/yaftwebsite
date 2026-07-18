@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import Lightbox from '@/components/Lightbox';
+import CourseGallery from '../CourseGallery';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -56,6 +58,16 @@ export default function Rhino3DIndustrialDesign() {
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 05</span><span className={s.dayTitle}>Grasshopper automation and final project</span></div><div className={s.dayItem}>Grasshopper automation for perforated panels and batch DXF export</div><div className={s.dayItem}>Mini project: parametric models and CNC files</div></div>
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>Course gallery</p>
+      <CourseGallery
+        groupKey="rhino3d-industrial-design"
+        images={[
+          { src: '/assets/images/courses/rhino-industrial-design-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
+          { src: '/assets/images/courses/rhino-industrial-design-2.jpg', caption: 'Parametric digital assembly technique and twisting furniture design' },
+        ]}
+      />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 25,000 + GST<div className={s.feeUsd}>approx. $300</div></div></div>
@@ -95,6 +107,18 @@ export default function Rhino3DIndustrialDesign() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+
+      <Lightbox
+        groups={[{
+          key: 'rhino3d-industrial-design',
+          title: 'Rhinoceros for Industrial Design',
+          role: 'Course gallery',
+          photos: [
+            { src: '/assets/images/courses/rhino-industrial-design-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
+            { src: '/assets/images/courses/rhino-industrial-design-2.jpg', caption: 'Parametric digital assembly technique and twisting furniture design' },
+          ],
+        }]}
+      />
       <SiteFooter />
     </>
   );

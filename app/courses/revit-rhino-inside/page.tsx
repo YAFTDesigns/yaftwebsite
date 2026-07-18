@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import Lightbox from '@/components/Lightbox';
+import CourseGallery from '../CourseGallery';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -57,6 +59,16 @@ export default function RevitRhinoInside() {
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Week 6</span><span className={s.dayTitle}>Collaborations + Rhino.Inside.Revit</span></div><div className={s.dayItem}>Linking models, Copy/Monitor, central model vs detached models, worksets</div><div className={s.dayItem}>Rhino.Inside.Revit integration and computational design workflow</div></div>
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>Course gallery</p>
+      <CourseGallery
+        groupKey="revit-rhino-inside"
+        images={[
+          { src: '/assets/images/courses/revit-rhino-inside-1.jpg', caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
+          { src: '/assets/images/courses/revit-rhino-inside-2.jpg', caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
+        ]}
+      />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>Rs. 750/hr • 3 days / 9 hrs per week • exclusive of taxes</div></div><div className={s.feeAmt}>INR 40,000 + GST<div className={s.feeUsd}>approx. $480</div></div></div>
@@ -97,6 +109,18 @@ export default function RevitRhinoInside() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+
+      <Lightbox
+        groups={[{
+          key: 'revit-rhino-inside',
+          title: 'Revit Architecture + Rhino.Inside.Revit',
+          role: 'Course gallery',
+          photos: [
+            { src: '/assets/images/courses/revit-rhino-inside-1.jpg', caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
+            { src: '/assets/images/courses/revit-rhino-inside-2.jpg', caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
+          ],
+        }]}
+      />
       <SiteFooter />
     </>
   );

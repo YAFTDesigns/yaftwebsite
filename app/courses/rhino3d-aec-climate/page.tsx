@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import Lightbox from '@/components/Lightbox';
+import CourseGallery from '../CourseGallery';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -49,6 +51,16 @@ export default function Rhino3DAEC() {
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 02</span><span className={s.dayTitle}>Grasshopper: climatic analysis and optimisation</span></div><div className={s.dayItem}>Facade designing: building analysis with respect to climate data</div><div className={s.dayItem}>Optimising facade and orientation with respect to radiation received by the super-structure</div><div className={s.dayItem}>Case study: Al Bahar Towers</div></div>
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>Course gallery</p>
+      <CourseGallery
+        groupKey="rhino3d-aec-climate"
+        images={[
+          { src: '/assets/images/courses/rhino-aec-climate-1.jpg', caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
+          { src: '/assets/images/courses/rhino-aec-climate-2.jpg', caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
+        ]}
+      />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>6 hours total, split as 3+3 sessions • incl. all taxes</div></div><div className={s.feeAmt}>INR 10,000<div className={s.feeUsd}>approx. $120</div></div></div>
@@ -83,6 +95,18 @@ export default function Rhino3DAEC() {
         <a href="/courses#enquire" className={s.btnPrimary}>Get in touch</a>
       </div>
     </main>
+
+      <Lightbox
+        groups={[{
+          key: 'rhino3d-aec-climate',
+          title: 'Rhino3D for AEC & Climate',
+          role: 'Course gallery',
+          photos: [
+            { src: '/assets/images/courses/rhino-aec-climate-1.jpg', caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
+            { src: '/assets/images/courses/rhino-aec-climate-2.jpg', caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
+          ],
+        }]}
+      />
       <SiteFooter />
     </>
   );

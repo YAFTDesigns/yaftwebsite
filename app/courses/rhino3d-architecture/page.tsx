@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import Lightbox from '@/components/Lightbox';
+import CourseGallery from '../CourseGallery';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -56,6 +58,16 @@ export default function Rhino3DArchitecture() {
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 05</span><span className={s.dayTitle}>Master class and output</span></div><div className={s.dayItem}>Master class: surface modelling</div><div className={s.dayItem}>Layouts, importing and exporting</div><div className={s.dayItem}>Prototyping in 3D printing</div></div>
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>Course gallery</p>
+      <CourseGallery
+        groupKey="rhino3d-architecture"
+        images={[
+          { src: '/assets/images/courses/rhino-architecture-1.jpg', caption: 'Understanding morphology, key features, and recreating form-based modelling' },
+          { src: '/assets/images/courses/rhino-architecture-2.jpg', caption: 'Recreating complex surfaces with reference architectural projects' },
+        ]}
+      />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • incl. all taxes</div></div><div className={s.feeAmt}>INR 23,000<div className={s.feeUsd}>approx. $276</div></div></div>
@@ -95,6 +107,18 @@ export default function Rhino3DArchitecture() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+
+      <Lightbox
+        groups={[{
+          key: 'rhino3d-architecture',
+          title: 'Rhino3D for Architecture',
+          role: 'Course gallery',
+          photos: [
+            { src: '/assets/images/courses/rhino-architecture-1.jpg', caption: 'Understanding morphology, key features, and recreating form-based modelling' },
+            { src: '/assets/images/courses/rhino-architecture-2.jpg', caption: 'Recreating complex surfaces with reference architectural projects' },
+          ],
+        }]}
+      />
       <SiteFooter />
     </>
   );

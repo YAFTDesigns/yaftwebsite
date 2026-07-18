@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import Lightbox from '@/components/Lightbox';
+import CourseGallery from '../CourseGallery';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -57,6 +59,16 @@ export default function GrasshopperArchitecture() {
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 06</span><span className={s.dayTitle}>Plugins and analysis</span></div><div className={s.dayItem}>Visualising data</div><div className={s.dayItem}>Open Nest, Lunchbox, Ladybug, Galopagus (colors and gradients)</div></div>
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>Course gallery</p>
+      <CourseGallery
+        groupKey="grasshopper-architecture"
+        images={[
+          { src: '/assets/images/courses/grasshopper-architecture-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
+          { src: '/assets/images/courses/grasshopper-architecture-2.jpg', caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
+        ]}
+      />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
@@ -95,6 +107,18 @@ export default function GrasshopperArchitecture() {
         <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </main>
+
+      <Lightbox
+        groups={[{
+          key: 'grasshopper-architecture',
+          title: 'Grasshopper for Architecture',
+          role: 'Course gallery',
+          photos: [
+            { src: '/assets/images/courses/grasshopper-architecture-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
+            { src: '/assets/images/courses/grasshopper-architecture-2.jpg', caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
+          ],
+        }]}
+      />
       <SiteFooter />
     </>
   );
