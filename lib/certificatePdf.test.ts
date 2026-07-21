@@ -40,7 +40,6 @@ describe('generateCertificatePDF', () => {
 
   it('falls back gracefully for an unrecognized course key rather than throwing', async () => {
     const buf = await generateCertificatePDF({
-      // @ts-expect-error deliberately testing an invalid key from an untyped caller
       courseKey: 'revit',
       studentName: 'Edge Case',
       courseSuffix: 'FOR BIM',

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { storeCreds, getStoredCreds } from '@/lib/syllabusAccess';
+import { storeCreds, getStoredCreds, requestSyllabusAccess } from '@/lib/syllabusAccess';
 import { track } from '@/lib/analytics';
 
 export const OPEN_COURSE_GATE_EVENT = 'yaft:open-course-gate';
@@ -68,6 +68,20 @@ export default function CourseGateModal() {
     setSubmitting(true);
     storeCreds(trimEmail, trimLinkedin);
     track('course_gate_unlock', { courseSlug: pending?.slug ?? '' });
+    // This is the actual lead capture -- storeCreds() above only writes to
+    // the visitor's own browser (so the gate doesn't reprompt them), it
+    // never reaches the server. Without this call nothing is ever saved
+    // to the leads/syllabus_requests tables, which defeats the entire
+    // point of the gate. Best-effort: navigation proceeds either way, same
+    // as the API route's own "don't block access over a failed DB write"
+    // philosophy -- a missed lead log shouldn't strand a real visitor.
+    if (pending?.slug) {
+      try {
+        await requestSyllabusAccess(pending.slug, { email: trimEmail, linkedin: trimLinkedin }, pending.href);
+      } catch {
+        // swallow -- navigation below still proceeds
+      }
+    }
     close();
     if (pending?.href) router.push(pending.href);
   }
