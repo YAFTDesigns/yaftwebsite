@@ -31,7 +31,7 @@ export default function Rhino3DArchitecture() {
       <div className={s.ctaBar}>
         <div>
           <div className={s.priceMain}>$276 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group</span></div>
-          <div className={s.priceSub}>INR 23,000 (incl. taxes)</div>
+          <div className={s.priceSub}>INR 23,000 + GST</div>
           <div style={{marginTop:10,paddingTop:10,borderTop:'0.5px solid var(--line)'}}>
             <div className={s.priceMain}>$300 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
             <div className={s.priceSub}>INR 25,000 + GST</div>
@@ -72,7 +72,7 @@ export default function Rhino3DArchitecture() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • incl. all taxes</div></div><div className={s.feeAmt}>INR 23,000<div className={s.feeUsd}>approx. $276</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 23,000 + GST<div className={s.feeUsd}>approx. $276</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 25,000 + GST<div className={s.feeUsd}>approx. $300</div></div></div>
       </div>
       <div className={s.payNote}>Payment: 60% advance on booking, 40% on commencement. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
