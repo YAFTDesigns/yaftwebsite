@@ -30,6 +30,20 @@ export async function GET(request: NextRequest) {
     // them out of the delivery-status summary counts without hiding
     // them from the log entirely -- still useful to see they happened.
     const flagged = (data ?? []).map((row) => ({ ...row, is_admin_recipient: isAdminEmail(row.to_email) }));
+
+    // Loading this page counts as having seen the failed sends, so
+    // clear the nav badge for them. Fire-and-forget: a failure here
+    // just means the badge stays lit a bit longer, not worth failing
+    // the page load over.
+    supabase
+      .from('email_logs')
+      .update({ viewed_at: new Date().toISOString() })
+      .eq('status', 'failed')
+      .is('viewed_at', null)
+      .then(({ error: viewError }) => {
+        if (viewError) console.error('[emails-api] failed to mark logs viewed:', viewError);
+      });
+
     return NextResponse.json({ data: flagged });
   }
 

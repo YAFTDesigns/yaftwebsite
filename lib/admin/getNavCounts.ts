@@ -26,7 +26,7 @@ export async function getNavCounts() {
         'nav:publications'
       ),
       safeCount(
-        supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
+        supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null),
         'nav:email_logs'
       ),
     ]);
