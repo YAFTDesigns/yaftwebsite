@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className={styles.navItem}>
               <Link href="/admin/leads">Leads</Link>
               {counts.newLeads > 0 && (
-                <span className={styles.badge}>{counts.newLeads > 9 ? '9+' : counts.newLeads}</span>
+                <span className={styles.badge}>{counts.newLeads > 99 ? '99+' : counts.newLeads}</span>
               )}
             </span>
             <Link href="/admin/enquiries">Enquiries</Link>
@@ -29,19 +29,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span className={styles.navItem}>
               <Link href="/admin/emails">Emails</Link>
               {counts.failedEmails > 0 && (
-                <span className={styles.badge}>{counts.failedEmails > 9 ? '9+' : counts.failedEmails}</span>
+                <span className={styles.badge}>{counts.failedEmails > 99 ? '99+' : counts.failedEmails}</span>
               )}
             </span>
             <span className={styles.navItem}>
               <Link href="/admin/testimonials">Testimonials</Link>
               {counts.pendingTestimonials > 0 && (
-                <span className={styles.badge}>{counts.pendingTestimonials > 9 ? '9+' : counts.pendingTestimonials}</span>
+                <span className={styles.badge}>{counts.pendingTestimonials > 99 ? '99+' : counts.pendingTestimonials}</span>
               )}
             </span>
             <span className={styles.navItem}>
               <Link href="/admin/community">Community</Link>
               {counts.pendingApprovals > 0 && (
-                <span className={styles.badge}>{counts.pendingApprovals > 9 ? '9+' : counts.pendingApprovals}</span>
+                <span className={styles.badge}>{counts.pendingApprovals > 99 ? '99+' : counts.pendingApprovals}</span>
               )}
             </span>
             <Link href="/admin/projects">Projects</Link>
