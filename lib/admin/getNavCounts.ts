@@ -11,7 +11,7 @@ import { safeCount } from '@/lib/admin/safeQuery';
 export async function getNavCounts() {
   const supabase = getSupabaseAdmin();
 
-  const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails] =
+  const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, newLeads] =
     await Promise.all([
       safeCount(
         supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -29,11 +29,16 @@ export async function getNavCounts() {
         supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null),
         'nav:email_logs'
       ),
+      safeCount(
+        supabase.from('leads').select('id', { count: 'exact', head: true }).is('viewed_at', null),
+        'nav:leads'
+      ),
     ]);
 
   return {
     pendingTestimonials: pendingTestimonials.data,
     pendingApprovals: pendingStudentWork.data + pendingPublications.data,
     failedEmails: failedEmails.data,
+    newLeads: newLeads.data,
   };
 }

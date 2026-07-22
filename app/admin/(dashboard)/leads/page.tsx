@@ -24,6 +24,18 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null }> {
     [],
     'leads list'
   );
+
+  // Loading this page counts as having seen the new leads, so clear
+  // the nav badge for them. Fire-and-forget: same as the emails page,
+  // not worth failing the page load if this update hiccups.
+  supabase
+    .from('leads')
+    .update({ viewed_at: new Date().toISOString() })
+    .is('viewed_at', null)
+    .then(({ error }) => {
+      if (error) console.error('[leads] failed to mark leads viewed:', error);
+    });
+
   return { leads: result.data, error: result.error };
 }
 
