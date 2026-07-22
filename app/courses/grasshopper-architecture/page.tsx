@@ -30,11 +30,11 @@ export default function GrasshopperArchitecture() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>$360 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group</span></div>
-          <div className={s.priceSub}>INR 30,000 + GST</div>
+          <div className={s.priceMain}>$336 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group</span></div>
+          <div className={s.priceSub}>INR 28,000 + GST</div>
           <div style={{marginTop:10,paddingTop:10,borderTop:'0.5px solid var(--line)'}}>
-            <div className={s.priceMain}>$420 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
-            <div className={s.priceSub}>INR 35,000 + GST</div>
+            <div className={s.priceMain}>$360 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
+            <div className={s.priceSub}>INR 30,000 + GST</div>
           </div>
           <div className={s.priceUsd}>approx. rates · subject to change</div>
         </div>
@@ -73,8 +73,8 @@ export default function GrasshopperArchitecture() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 35,000 + GST<div className={s.feeUsd}>approx. $420</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 28,000 + GST<div className={s.feeUsd}>approx. $336</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
       </div>
       <div className={s.payNote}>Payment: 60% advance on booking, 40% on commencement. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
       <div className={s.comboOffer}>
