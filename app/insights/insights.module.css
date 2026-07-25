@@ -28,11 +28,8 @@
 
 .postThumb {
   flex-shrink: 0;
-  width: 220px;
+  width: 320px;
   aspect-ratio: 16 / 10;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--line);
 }
 
 .postThumb img {
@@ -40,6 +37,8 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  -webkit-mask-image: linear-gradient(to right, black 45%, transparent 92%);
+  mask-image: linear-gradient(to right, black 45%, transparent 92%);
 }
 
 @media (max-width: 640px) {

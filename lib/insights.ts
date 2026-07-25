@@ -69,6 +69,8 @@ clusters.append(current)` },
     body: [
       { type: 'p', text: "Rhino.Inside.Revit is genuinely powerful once it's working. You get Grasshopper's parametric logic driving live Revit elements, no round tripping through import and export. But the path from this works in a Python console to this works reliably inside a Grasshopper definition has a few specific traps that cost real debugging time. Mostly around two things: how Revit's Transaction model expects to be used, and how loosely typed Grasshopper data needs to be coerced into the exact Revit API types a method expects." },
 
+      { type: 'p', text: "Worth being upfront about what the cover image on this post actually shows. It's a stair definition going from Rhino into Revit through BEAM, a plugin from MKS DTECH that handles the Rhino to Revit handoff through a UI panel instead of code. It's a different tool from what this post is about, but the underlying problem, getting Rhino geometry into Revit as usable BIM elements, is the same one. If you'd rather not write and debug the Transaction and type-wrapping code below yourself, BEAM is a real no-code alternative worth knowing about." },
+
       { type: 'h2', text: "Why placing a family instance isn't just one API call" },
       { type: 'p', text: "The naive version, call NewFamilyInstance with a location and a family symbol, fails immediately if you haven't done two things first. Activate the FamilySymbol, since Revit loads family types lazily and an inactive symbol can't be placed. And wrap the whole operation in a Transaction. Skip the Transaction and Revit either throws immediately, or worse, appears to succeed in session but never actually commits, so the instance vanishes the moment the document is touched again." },
 
