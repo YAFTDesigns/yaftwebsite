@@ -41,7 +41,7 @@ export default function InsightsPage() {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader active="/insights" />
 
       <script
         type="application/ld+json"

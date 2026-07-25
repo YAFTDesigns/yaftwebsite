@@ -53,7 +53,7 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader active="/insights" />
 
       <script
         type="application/ld+json"

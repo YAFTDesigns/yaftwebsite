@@ -62,6 +62,7 @@ export default function SiteHeader({ active }: { active?: string }) {
 
           <Link href="/faculty"   className={active === '/faculty'   ? 'active' : undefined} onClick={() => setOpen(false)}>Faculty</Link>
           <Link href="/resources" className={active === '/resources' ? 'active' : undefined} onClick={() => setOpen(false)}>Resources</Link>
+          <Link href="/insights"  className={active === '/insights'  ? 'active' : undefined} onClick={() => setOpen(false)}>Insights</Link>
 
           <a href="#contact" className="cta-btn" onClick={() => setOpen(false)}>Enquire</a>
           <a href={RHINO_DIRECTORY_URL} target="_blank" rel="noopener">
