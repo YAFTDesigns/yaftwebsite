@@ -24,6 +24,8 @@ export const INSIGHT_POSTS: InsightPost[] = [
     tags: ['Grasshopper', 'GHPython', 'Facade Engineering'],
     publishedAt: '2026-07-25',
     readMinutes: 6,
+    coverImage: '/assets/images/insights/facade-fin-clustering-cover.jpg',
+    coverCaption: 'The actual clustering component: curves and a deflection tolerance in, cluster count and per-cluster colors out. The colored strips in the viewport are 1,048 fin segments grouped and colored by cluster.',
     body: [
       { type: 'p', text: "On a recent facade rationalization job, the design called for around 131 strip and fin elements, each following its own gentle curve across the building's surface. Left as is, that's 131 unique fabrication molds, and every unique mold costs real money and real lead time. The brief was simple to state and hard to do: find which of those 131 curves are close enough to each other that they can share a mold, without visibly changing the design intent." },
 
