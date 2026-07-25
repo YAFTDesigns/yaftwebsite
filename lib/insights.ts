@@ -11,6 +11,7 @@ export type InsightPost = {
   tags: string[];
   publishedAt: string; // ISO date
   readMinutes: number;
+  coverImage?: string;
   body: InsightBlock[];
 };
 
@@ -64,6 +65,7 @@ clusters.append(current)` },
     tags: ['Rhino.Inside.Revit', 'GHPython', 'Revit'],
     publishedAt: '2026-07-25',
     readMinutes: 7,
+    coverImage: '/assets/images/insights/rhino-inside-revit-cover.jpg',
     body: [
       { type: 'p', text: "Rhino.Inside.Revit is genuinely powerful once it's working. You get Grasshopper's parametric logic driving live Revit elements, no round tripping through import and export. But the path from this works in a Python console to this works reliably inside a Grasshopper definition has a few specific traps that cost real debugging time. Mostly around two things: how Revit's Transaction model expects to be used, and how loosely typed Grasshopper data needs to be coerced into the exact Revit API types a method expects." },
 

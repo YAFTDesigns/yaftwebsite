@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import FadeInOnView from '@/components/FadeInOnView';
 import { INSIGHT_POSTS } from '@/lib/insights';
 import styles from './insights.module.css';
 
@@ -65,21 +66,31 @@ export default function InsightsPage() {
               <p className={styles.empty}>Nothing published yet, check back soon.</p>
             ) : (
               <div className={styles.list}>
-                {posts.map((p) => (
-                  <Link href={`/insights/${p.slug}`} key={p.slug} className={styles.postCard}>
-                    <div className={styles.postMeta}>
-                      <span>{new Date(p.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                      <span>·</span>
-                      <span>{p.readMinutes} min read</span>
-                    </div>
-                    <h2>{p.title}</h2>
-                    <p className={styles.dek}>{p.dek}</p>
-                    <div className={styles.tags}>
-                      {p.tags.map((t) => (
-                        <span key={t} className={styles.tag}>{t}</span>
-                      ))}
-                    </div>
-                  </Link>
+                {posts.map((p, i) => (
+                  <FadeInOnView key={p.slug} delayMs={i * 60}>
+                    <Link href={`/insights/${p.slug}`} className={styles.postCard}>
+                      <div className={styles.postCardBody}>
+                        <div className={styles.postMeta}>
+                          <span>{new Date(p.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                          <span>·</span>
+                          <span>{p.readMinutes} min read</span>
+                        </div>
+                        <h2>{p.title}</h2>
+                        <p className={styles.dek}>{p.dek}</p>
+                        <div className={styles.tags}>
+                          {p.tags.map((t) => (
+                            <span key={t} className={styles.tag}>{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                      {p.coverImage && (
+                        <div className={styles.postThumb}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.coverImage} alt="" />
+                        </div>
+                      )}
+                    </Link>
+                  </FadeInOnView>
                 ))}
               </div>
             )}

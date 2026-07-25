@@ -6,7 +6,9 @@
 }
 
 .postCard {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 24px;
   background: var(--paper-2);
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -17,6 +19,36 @@
 .postCard:hover {
   border-color: var(--brass);
   transform: translateY(-2px);
+}
+
+.postCardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.postThumb {
+  flex-shrink: 0;
+  width: 220px;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.postThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .postCard {
+    flex-direction: column-reverse;
+  }
+  .postThumb {
+    width: 100%;
+  }
 }
 
 .postMeta {
@@ -99,6 +131,19 @@
   color: var(--ink-soft);
   line-height: 1.6;
   margin-bottom: 28px;
+}
+
+.heroImage {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-bottom: 32px;
+}
+
+.heroImage img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 .body p {

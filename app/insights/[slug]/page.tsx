@@ -25,13 +25,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: post.dek,
       url,
       type: 'article',
-      images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+      images: [{ url: post.coverImage ? `https://www.yaftdesigns.com${post.coverImage}` : 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.dek,
-      images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+      images: [post.coverImage ? `https://www.yaftdesigns.com${post.coverImage}` : 'https://www.yaftdesigns.com/assets/images/og-image.jpg'],
     },
   };
 }
@@ -73,6 +73,13 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
 
             <h1>{post.title}</h1>
             <p className={styles.dek2}>{post.dek}</p>
+
+            {post.coverImage && (
+              <div className={styles.heroImage}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={post.coverImage} alt={post.title} />
+              </div>
+            )}
 
             <div className={styles.body}>
               {post.body.map((block, i) => {
