@@ -1,0 +1,150 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 40px 0 64px;
+}
+
+.postCard {
+  display: block;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px 30px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.postCard:hover {
+  border-color: var(--brass);
+  transform: translateY(-2px);
+}
+
+.postMeta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.postCard h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  max-width: 780px;
+}
+
+.dek {
+  font-size: 15px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  max-width: 720px;
+  margin-bottom: 16px;
+}
+
+.tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--blueprint);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
+
+.empty {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 60px 0;
+  text-align: center;
+}
+
+/* article page */
+.article {
+  padding: 40px 0 80px;
+  max-width: 760px;
+}
+
+.backLink {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.backLink:hover {
+  color: var(--brass);
+}
+
+.articleMeta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dek2 {
+  font-size: 18px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.body p {
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--ink);
+  margin-bottom: 22px;
+}
+
+.body h2 {
+  font-size: 24px;
+  margin: 40px 0 16px;
+}
+
+.body pre {
+  background: #0f0f0f;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  margin-bottom: 22px;
+}
+
+.body code {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--blueprint);
+  white-space: pre;
+}
+
+.body blockquote {
+  border-left: 2px solid var(--brass);
+  padding-left: 20px;
+  margin: 32px 0;
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.articleTags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}

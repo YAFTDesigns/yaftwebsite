@@ -185,6 +185,7 @@ export default async function ServicesPage() {
         <NextSteps
           links={[
             { href: '/projects', label: 'See project case studies', description: 'Facade engineering, BIM automation, and computational design work across five countries.' },
+            { href: '/insights', label: 'Read our insights', description: 'Real workflows and scripts behind the work, like clustering 131 facade fins to cut mold counts.' },
             { href: '/courses', label: 'Browse courses', description: 'Learn the same Rhino and Grasshopper workflows we use on real projects.' },
           ]}
         />

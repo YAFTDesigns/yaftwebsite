@@ -120,6 +120,7 @@ export default async function ResourcesPage() {
 
         <NextSteps
           links={[
+            { href: '/insights', label: 'Read our insights', description: 'Technical writeups on Grasshopper scripts, workflows, and facade rationalization.' },
             { href: '/courses', label: 'Browse courses', description: 'Turn these resources into structured, hands-on Rhino and Grasshopper training.' },
             { href: '/services', label: 'See our services', description: 'Facade engineering, BIM automation, and computational design consulting.' },
           ]}
