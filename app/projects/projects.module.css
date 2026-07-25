@@ -32,16 +32,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
-}
-
-@media (max-width: 900px) {
-  .grid { grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 600px) {
-  .grid { grid-template-columns: 1fr; }
 }
 
 .card {
@@ -53,7 +45,7 @@
   overflow: hidden;
   cursor: pointer;
   padding: 0;
-  aspect-ratio: 4 / 5;
+  height: clamp(340px, 32vw, 460px);
   display: block;
   color: inherit;
   font: inherit;
