@@ -6,6 +6,15 @@ import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 
+// Most project images live in Supabase Storage, but some (e.g. where
+// we can't put client-confidential material through a third-party
+// service) are checked into the repo instead under /public. A path
+// starting with "/" is treated as a static asset path and served
+// as-is; anything else is resolved through Supabase Storage as before.
+function resolveImageUrl(path: string): string {
+  return path.startsWith('/') ? path : getSiteImageUrl(`projects/${path}`);
+}
+
 const CATEGORY_LABELS: Record<string, string> = {
   facade: 'Facade Engineering',
   'bim-automation': 'BIM Automation',
@@ -78,18 +87,18 @@ export default async function ProjectsPage() {
     clientOrCollab: p.client_or_collab,
     year: p.year,
     summary: p.summary,
-    coverSrc: p.cover_image_path ? getSiteImageUrl(`projects/${p.cover_image_path}`) : undefined,
+    coverSrc: p.cover_image_path ? resolveImageUrl(p.cover_image_path) : undefined,
     featured: p.featured,
   }));
 
   const lightboxGroups: WorkshopGroup[] = rows.map(p => {
     const galleryPhotos = (p.gallery ?? []).map(g => ({
       caption: g.caption,
-      src: getSiteImageUrl(`projects/${g.filename}`),
+      src: resolveImageUrl(g.filename),
     }));
     const photos = galleryPhotos.length > 0
       ? galleryPhotos
-      : [{ caption: p.description, src: p.cover_image_path ? getSiteImageUrl(`projects/${p.cover_image_path}`) : undefined }];
+      : [{ caption: p.description, src: p.cover_image_path ? resolveImageUrl(p.cover_image_path) : undefined }];
     return {
       key: p.slug,
       title: p.title,
