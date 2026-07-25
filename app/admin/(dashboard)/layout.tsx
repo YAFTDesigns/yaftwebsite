@@ -44,6 +44,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <span className={styles.badge}>{counts.pendingApprovals > 99 ? '99+' : counts.pendingApprovals}</span>
               )}
             </span>
+            <Link href="/admin/projects">Projects</Link>
             <Link href="/admin/certificates">Certificates</Link>
             <Link href="/admin/analytics">Analytics</Link>
           </nav>
