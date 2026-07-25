@@ -9,21 +9,24 @@ const RHINO_DIRECTORY_URL =
 
 export default function SiteHeader({ active }: { active?: string }) {
   const [open, setOpen] = useState(false);
-  const [dropOpen, setDropOpen] = useState(false);
-  const dropRef = useRef<HTMLDivElement>(null);
+  const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | null>(null);
+  const projectsRef = useRef<HTMLDivElement>(null);
+  const resourcesRef = useRef<HTMLDivElement>(null);
 
   // close dropdown on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
-        setDropOpen(false);
-      }
+      const target = e.target as Node;
+      const insideProjects = projectsRef.current && projectsRef.current.contains(target);
+      const insideResources = resourcesRef.current && resourcesRef.current.contains(target);
+      if (!insideProjects && !insideResources) setOpenMenu(null);
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const isProjectsActive = active === '/projects' || active === '/projects/community';
+  const isResourcesActive = active === '/resources' || active === '/insights';
 
   return (
     <header>
@@ -38,21 +41,21 @@ export default function SiteHeader({ active }: { active?: string }) {
           <Link href="/services" className={active === '/services' ? 'active' : undefined} onClick={() => setOpen(false)}>Services</Link>
 
           {/* Projects dropdown */}
-          <div className="nav-dropdown" ref={dropRef}>
+          <div className="nav-dropdown" ref={projectsRef}>
             <button
               className={`nav-drop-btn${isProjectsActive ? ' active' : ''}`}
-              onClick={() => setDropOpen(v => !v)}
-              aria-expanded={dropOpen}
+              onClick={() => setOpenMenu(v => v === 'projects' ? null : 'projects')}
+              aria-expanded={openMenu === 'projects'}
             >
               Projects <span className="nav-caret" aria-hidden>▾</span>
             </button>
-            {dropOpen && (
+            {openMenu === 'projects' && (
               <div className="nav-drop-menu">
-                <Link href="/projects" className="nav-drop-item" onClick={() => { setDropOpen(false); setOpen(false); }}>
+                <Link href="/projects" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
                   <span className="nav-drop-label">YAFT Works</span>
                   <span className="nav-drop-sub">Our projects and case studies</span>
                 </Link>
-                <Link href="/projects/community" className="nav-drop-item" onClick={() => { setDropOpen(false); setOpen(false); }}>
+                <Link href="/projects/community" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
                   <span className="nav-drop-label">YAFT Community Works</span>
                   <span className="nav-drop-sub">Student work, publications & partners</span>
                 </Link>
@@ -60,9 +63,30 @@ export default function SiteHeader({ active }: { active?: string }) {
             )}
           </div>
 
-          <Link href="/faculty"   className={active === '/faculty'   ? 'active' : undefined} onClick={() => setOpen(false)}>Faculty</Link>
-          <Link href="/resources" className={active === '/resources' ? 'active' : undefined} onClick={() => setOpen(false)}>Resources</Link>
-          <Link href="/insights"  className={active === '/insights'  ? 'active' : undefined} onClick={() => setOpen(false)}>Insights</Link>
+          <Link href="/faculty" className={active === '/faculty' ? 'active' : undefined} onClick={() => setOpen(false)}>Faculty</Link>
+
+          {/* Resources dropdown */}
+          <div className="nav-dropdown" ref={resourcesRef}>
+            <button
+              className={`nav-drop-btn${isResourcesActive ? ' active' : ''}`}
+              onClick={() => setOpenMenu(v => v === 'resources' ? null : 'resources')}
+              aria-expanded={openMenu === 'resources'}
+            >
+              Resources <span className="nav-caret" aria-hidden>▾</span>
+            </button>
+            {openMenu === 'resources' && (
+              <div className="nav-drop-menu">
+                <Link href="/resources" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                  <span className="nav-drop-label">Resources</span>
+                  <span className="nav-drop-sub">Videos, books and learning material</span>
+                </Link>
+                <Link href="/insights" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                  <span className="nav-drop-label">Insights</span>
+                  <span className="nav-drop-sub">Notes on our Grasshopper and Rhino workflows</span>
+                </Link>
+              </div>
+            )}
+          </div>
 
           <a href="#contact" className="cta-btn" onClick={() => setOpen(false)}>Enquire</a>
           <a href={RHINO_DIRECTORY_URL} target="_blank" rel="noopener">

@@ -146,7 +146,7 @@ export default async function AdminLeadsPage() {
                       </span>
                     </>
                   ) : (
-                    <span title="No tracked visits since this lead identified themselves">— no data</span>
+                    <span title="No tracked visits since this lead identified themselves">No data yet</span>
                   )}
                 </td>
                 <td>{formatSeen(lead.first_seen)}</td>

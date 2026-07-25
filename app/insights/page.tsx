@@ -54,7 +54,7 @@ export default function InsightsPage() {
             <h1>Notes from the desk, not the deck.</h1>
             <p className="lede">
               Real workflows, scripts, and decisions from facade engineering, BIM automation, and computational
-              design work — written up in the level of detail we wish more people shared.
+              design work, written up in the level of detail we wish more people shared.
             </p>
           </div>
         </section>
@@ -62,7 +62,7 @@ export default function InsightsPage() {
         <section>
           <div className="wrap">
             {posts.length === 0 ? (
-              <p className={styles.empty}>Nothing published yet — check back soon.</p>
+              <p className={styles.empty}>Nothing published yet, check back soon.</p>
             ) : (
               <div className={styles.list}>
                 {posts.map((p) => (
