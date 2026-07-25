@@ -6,13 +6,13 @@
 }
 
 .postCard {
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  position: relative;
+  display: block;
   background: var(--paper-2);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 28px 30px;
+  overflow: hidden;
   transition: border-color 0.2s, transform 0.2s;
 }
 
@@ -21,37 +21,56 @@
   transform: translateY(-2px);
 }
 
+.postCard.hasImage {
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+}
+
 .postCardBody {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
 }
 
-.postThumb {
-  flex-shrink: 0;
-  width: 320px;
-  aspect-ratio: 16 / 10;
+.hasImage .postCardBody h2,
+.hasImage .postMeta,
+.hasImage .dek {
+  color: #fff;
 }
 
-.postThumb img {
+.hasImage .dek {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.hasImage .postMeta {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.postThumbBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.postThumbBg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  -webkit-mask-image: linear-gradient(to right, black 45%, transparent 92%);
-  mask-image: linear-gradient(to right, black 45%, transparent 92%);
+}
+
+.postThumbBg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10, 8, 6, 0.94) 0%, rgba(10, 8, 6, 0.7) 38%, rgba(10, 8, 6, 0.15) 75%, rgba(10, 8, 6, 0) 100%);
 }
 
 @media (max-width: 640px) {
-  .postCard {
-    flex-direction: column-reverse;
-  }
-  .postThumb {
-    width: 100%;
-  }
-  .postThumb img {
-    -webkit-mask-image: none;
-    mask-image: none;
-    border-radius: 8px;
+  .postCard.hasImage {
+    min-height: 280px;
   }
 }
 

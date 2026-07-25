@@ -68,7 +68,13 @@ export default function InsightsPage() {
               <div className={styles.list}>
                 {posts.map((p, i) => (
                   <FadeInOnView key={p.slug} delayMs={i * 60}>
-                    <Link href={`/insights/${p.slug}`} className={styles.postCard}>
+                    <Link href={`/insights/${p.slug}`} className={`${styles.postCard}${p.coverImage ? ` ${styles.hasImage}` : ''}`}>
+                      {p.coverImage && (
+                        <div className={styles.postThumbBg}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={p.coverImage} alt="" />
+                        </div>
+                      )}
                       <div className={styles.postCardBody}>
                         <div className={styles.postMeta}>
                           <span>{new Date(p.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
@@ -83,12 +89,6 @@ export default function InsightsPage() {
                           ))}
                         </div>
                       </div>
-                      {p.coverImage && (
-                        <div className={styles.postThumb}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.coverImage} alt="" />
-                        </div>
-                      )}
                     </Link>
                   </FadeInOnView>
                 ))}
