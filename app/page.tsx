@@ -98,7 +98,7 @@ const JSON_LD = {
   founder: {
     '@type': 'Person',
     name: 'Yokes Marapa',
-    jobTitle: 'Founder, YAFT Designs, and Head of Design and Automations, VS-CRAFT Facades & Roofing',
+    jobTitle: 'Founder, YAFT Designs, and Head of Design and Automation, VS-CRAFT Facades & Roofing',
     url: 'https://www.linkedin.com/in/yokes-marapa-791b06216/',
   },
   hasCredential: {
@@ -442,7 +442,7 @@ export default async function HomePage() {
               <Image src={getSiteImageUrl('profile.jpeg')} alt="Yokes Marapa" className="faculty-photo-stand" width={320} height={400} />
               <div className="faculty-text">
                 <h3>Yokes Marapa</h3>
-                <div className="faculty-role">Founder, YAFT Designs, Head of Design and Automations, VS-CRAFT Facades &amp; Roofing</div>
+                <div className="faculty-role">Founder, YAFT Designs, Head of Design and Automation, VS-CRAFT Facades &amp; Roofing</div>
                 <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
                 <p>Visiting faculty at VIT Vellore, with prior workshops delivered at IIT Kharagpur. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
                 <div className="badge-row">
