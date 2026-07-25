@@ -80,6 +80,9 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
                 <img src={post.coverImage} alt={post.title} />
               </div>
             )}
+            {post.coverCaption && (
+              <p className={styles.heroCaption}>{post.coverCaption}</p>
+            )}
 
             <div className={styles.body}>
               {post.body.map((block, i) => {

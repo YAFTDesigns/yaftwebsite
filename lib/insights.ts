@@ -12,6 +12,7 @@ export type InsightPost = {
   publishedAt: string; // ISO date
   readMinutes: number;
   coverImage?: string;
+  coverCaption?: string;
   body: InsightBlock[];
 };
 
@@ -66,6 +67,7 @@ clusters.append(current)` },
     publishedAt: '2026-07-25',
     readMinutes: 7,
     coverImage: '/assets/images/insights/rhino-inside-revit-cover.jpg',
+    coverCaption: 'A BEAM-based Rhino to Revit workflow (Rhino geometry exported as a Revit family, opened in Revit). BEAM is a separate, no-code tool from MKS DTECH, different from the scripted Rhino.Inside.Revit approach this post covers, shown here because the underlying problem, getting Rhino geometry into Revit as real BIM data, is the same one.',
     body: [
       { type: 'p', text: "Rhino.Inside.Revit is genuinely powerful once it's working. You get Grasshopper's parametric logic driving live Revit elements, no round tripping through import and export. But the path from this works in a Python console to this works reliably inside a Grasshopper definition has a few specific traps that cost real debugging time. Mostly around two things: how Revit's Transaction model expects to be used, and how loosely typed Grasshopper data needs to be coerced into the exact Revit API types a method expects." },
 

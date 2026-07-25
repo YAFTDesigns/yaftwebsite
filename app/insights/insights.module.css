@@ -48,6 +48,11 @@
   .postThumb {
     width: 100%;
   }
+  .postThumb img {
+    -webkit-mask-image: none;
+    mask-image: none;
+    border-radius: 8px;
+  }
 }
 
 .postMeta {
@@ -136,13 +141,21 @@
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid var(--line);
-  margin-bottom: 32px;
+  margin-bottom: 12px;
 }
 
 .heroImage img {
   width: 100%;
   height: auto;
   display: block;
+}
+
+.heroCaption {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 32px;
 }
 
 .body p {
