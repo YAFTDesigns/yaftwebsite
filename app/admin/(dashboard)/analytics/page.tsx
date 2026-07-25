@@ -16,7 +16,7 @@ const FUNNEL_LABELS: Record<(typeof FUNNEL_STEPS)[number], string> = {
 async function getAnalytics() {
   const supabase = getSupabaseAdmin();
 
-  const [funnelRes, courseRes] = await Promise.all([
+  const [funnelRes, courseRes, sourceRes] = await Promise.all([
     safeQuery<{ event_type: string; sessions: number }[]>(
       supabase.from('analytics_funnel_counts').select('event_type, sessions'),
       [],
@@ -27,6 +27,11 @@ async function getAnalytics() {
       [],
       'syllabus requests by course'
     ),
+    safeQuery<{ source: string; sessions: number }[]>(
+      supabase.from('analytics_traffic_sources').select('source, sessions'),
+      [],
+      'analytics traffic sources'
+    ),
   ]);
 
   const byEventType: Record<string, number> = {};
@@ -35,18 +40,24 @@ async function getAnalytics() {
   const byCourse: Record<string, number> = {};
   for (const row of courseRes.data) byCourse[row.course_slug] = row.requests;
 
-  const errors = [funnelRes.error, courseRes.error].filter(Boolean) as string[];
+  const bySource: Record<string, number> = {};
+  for (const row of sourceRes.data) bySource[row.source] = row.sessions;
 
-  return { byEventType, byCourse, error: errors.length > 0 ? errors.join('; ') : null };
+  const errors = [funnelRes.error, courseRes.error, sourceRes.error].filter(Boolean) as string[];
+
+  return { byEventType, byCourse, bySource, error: errors.length > 0 ? errors.join('; ') : null };
 }
 
 export default async function AdminAnalyticsPage() {
-  const { byEventType, byCourse, error } = await getAnalytics();
+  const { byEventType, byCourse, bySource, error } = await getAnalytics();
 
   const funnelItems = FUNNEL_STEPS.map((step) => ({ label: FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
   const topCourses = Object.entries(byCourse)
     .sort((a, b) => b[1] - a[1])
     .map(([slug, count]) => ({ label: slug, value: count }));
+  const sourceItems = Object.entries(bySource)
+    .sort((a, b) => b[1] - a[1])
+    .map(([source, count]) => ({ label: source, value: count }));
 
   return (
     <>
@@ -67,6 +78,19 @@ export default async function AdminAnalyticsPage() {
           Unique sessions reaching each step, not raw event counts.
         </p>
         <BarChart items={funnelItems} />
+      </div>
+
+      <div className={`eyebrow ${styles.eyebrowSpaced}`}>TRAFFIC SOURCES</div>
+      <div className={styles.panel}>
+        <h2 className={styles.panelTitle}>Where sessions come from</h2>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', marginBottom: 14 }}>
+          First-touch attribution per session. Started tracking today, so history is limited until more data comes in.
+        </p>
+        {sourceItems.length === 0 ? (
+          <p className={styles.empty}>No traffic source data yet.</p>
+        ) : (
+          <BarChart items={sourceItems} color="var(--blueprint)" />
+        )}
       </div>
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>SYLLABUS REQUESTS</div>

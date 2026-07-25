@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
 
-const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit']);
+const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock']);
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 30, windowMs: 60000 });
@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
   const page = typeof body?.page === 'string' ? body.page : null;
   const courseSlug = typeof body?.courseSlug === 'string' ? body.courseSlug : null;
   const meta = body?.meta && typeof body.meta === 'object' ? body.meta : null;
+  const referrer = typeof body?.referrer === 'string' ? body.referrer.slice(0, 2048) : null;
+  const utmSource = typeof body?.utmSource === 'string' ? body.utmSource.slice(0, 200) : null;
+  const utmMedium = typeof body?.utmMedium === 'string' ? body.utmMedium.slice(0, 200) : null;
+  const utmCampaign = typeof body?.utmCampaign === 'string' ? body.utmCampaign.slice(0, 200) : null;
 
   if (!sessionId || !VALID_EVENTS.has(eventType)) {
     return NextResponse.json({ error: 'Invalid event.' }, { status: 400 });
@@ -38,6 +42,10 @@ export async function POST(request: NextRequest) {
       page,
       course_slug: courseSlug,
       meta,
+      referrer,
+      utm_source: utmSource,
+      utm_medium: utmMedium,
+      utm_campaign: utmCampaign,
     });
     if (error) throw error;
     return NextResponse.json({ ok: true });
