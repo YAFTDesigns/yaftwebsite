@@ -11,10 +11,29 @@ export const metadata: Metadata = {
   description: 'Master NURBS modeling, surface design and computational geometry in Rhino3D. 5-day live workshop for architects and designers. Authorized Rhino Training Center.',
 };
 
+const COURSE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Rhino3D for Architecture',
+  description: 'A 5-day live workshop covering NURBS modeling, surface design, and computational geometry in Rhino3D for architects and designers.',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/courses/rhino3d-architecture',
+  hasCourseInstance: [
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Group batch', price: '23000', priceCurrency: 'INR' } },
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Personal training', price: '25000', priceCurrency: 'INR' } },
+  ],
+};
+
 export default function Rhino3DArchitecture() {
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+      />
+
       <main className={s.pageGrid}>
       <div className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>

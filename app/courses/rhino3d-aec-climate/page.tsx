@@ -11,10 +11,27 @@ export const metadata: Metadata = {
   description: 'A focused 2-day workshop on Rhino3D for AEC professionals with Grasshopper climatic analysis and facade optimization using Ladybug.',
 };
 
+const COURSE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Rhino3D for AEC & Climate',
+  description: 'A 2-day workshop on Rhino3D for AEC professionals covering Grasshopper climatic analysis and facade optimization using Ladybug.',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/courses/rhino3d-aec-climate',
+  hasCourseInstance: [
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P2D', offers: { '@type': 'Offer', category: 'Individual / group training', price: '10000', priceCurrency: 'INR' } },
+  ],
+};
+
 export default function Rhino3DAEC() {
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+      />
       <main className={s.pageGrid}>
       <div className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>
@@ -69,6 +86,11 @@ export default function Rhino3DAEC() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Institutions / colleges</div><div className={s.feeNote}>Custom pricing, travel expenses borne by institution</div></div><div className={s.feeAmt}>Contact us</div></div>
       </div>
       <div className={s.payNote}>Payment: 60% advance on booking, 40% on commencement. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+
+      <hr className={s.divider} />
+      <p className={s.sectionLabel}>Computer requirements</p>
+      <div className={s.reqItem}>Windows OS preferred. Laptop + charger + mouse and mouse pad mandatory.</div>
+      <div className={s.reqItem}>Check full system requirements at rhino3d.com/system_requirements</div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Instructor</p>

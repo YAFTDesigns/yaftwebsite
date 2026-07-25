@@ -11,10 +11,28 @@ export const metadata: Metadata = {
   description: 'Re-Imagining Parametric Design for industrial designers. 5-day Rhino3D workshop covering NURBS, SubD, Grasshopper basics, CNC-ready geometry and parametric digital assembly.',
 };
 
+const COURSE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Rhinoceros for Industrial Design',
+  description: 'A 5-day Rhino3D workshop for industrial designers covering NURBS, SubD, Grasshopper basics, CNC-ready geometry, and parametric digital assembly.',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/courses/rhino3d-industrial-design',
+  hasCourseInstance: [
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Group batch', price: '25000', priceCurrency: 'INR' } },
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Personal training', price: '28000', priceCurrency: 'INR' } },
+  ],
+};
+
 export default function Rhino3DIndustrialDesign() {
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+      />
       <main className={s.pageGrid}>
       <div className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>

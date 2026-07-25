@@ -11,10 +11,28 @@ export const metadata: Metadata = {
   description: 'Re-Imagining BIM Design. 6-week comprehensive Revit Architecture course covering 10 modules from basics to collaboration, with Rhino.Inside.Revit integration.',
 };
 
+const COURSE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Revit Architecture + Rhino.Inside.Revit',
+  description: 'A 6-week Revit Architecture course covering 10 modules from basics to team collaboration, with Rhino.Inside.Revit integration.',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/courses/revit-rhino-inside',
+  hasCourseInstance: [
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P6W', offers: { '@type': 'Offer', category: 'Group batch', price: '40000', priceCurrency: 'INR' } },
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P6W', offers: { '@type': 'Offer', category: 'Personal training', price: '50000', priceCurrency: 'INR' } },
+  ],
+};
+
 export default function RevitRhinoInside() {
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+      />
       <main className={s.pageGrid}>
       <div className={s.wrap}>
       <span className={s.tag}>BIM + Computational Design</span>

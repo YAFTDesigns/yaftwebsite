@@ -11,10 +11,28 @@ export const metadata: Metadata = {
   description: 'Re-Imagining Parametric Design. 6-day live Grasshopper workshop covering data trees, attractors, surface mapping, and plugins like Ladybug, Kangaroo, and Galapagos.',
 };
 
+const COURSE_JSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Course',
+  name: 'Grasshopper for Architecture',
+  description: 'A 6-day live workshop on parametric design in Grasshopper, covering data trees, attractors, surface mapping, and plugins like Ladybug, Kangaroo, and Galapagos.',
+  provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
+  url: 'https://www.yaftdesigns.com/courses/grasshopper-architecture',
+  hasCourseInstance: [
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P6D', offers: { '@type': 'Offer', category: 'Group batch', price: '28000', priceCurrency: 'INR' } },
+    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P6D', offers: { '@type': 'Offer', category: 'Personal training', price: '30000', priceCurrency: 'INR' } },
+  ],
+};
+
 export default function GrasshopperArchitecture() {
   return (
     <>
       <SiteHeader active="/courses" />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+      />
       <main className={s.pageGrid}>
       <div className={s.wrap}>
       <span className={s.tag}>Authorized Rhino Training Center</span>
