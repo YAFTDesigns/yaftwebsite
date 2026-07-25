@@ -14,7 +14,9 @@ type Lead = {
   last_seen: string;
 };
 
-async function getLeads(): Promise<{ leads: Lead[]; error: string | null }> {
+type TimeOnSite = { seconds: number; pageViews: number } | null;
+
+async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite> }> {
   const supabase = getSupabaseAdmin();
   const result = await safeQuery<Lead[]>(
     supabase
@@ -36,7 +38,47 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null }> {
       if (error) console.error('[leads] failed to mark leads viewed:', error);
     });
 
-  return { leads: result.data, error: result.error };
+  // Time on site is derived from page_view events tagged with lead_id
+  // (see lib/leads.ts) -- only present for leads who identified
+  // themselves after session-linking shipped. Older leads won't have
+  // any tagged events, which the UI shows as "no data" rather than 0.
+  const timeOnSite: Record<string, TimeOnSite> = {};
+  const leadIds = result.data.map((l) => l.id);
+  if (leadIds.length > 0) {
+    const { data: events, error: eventsError } = await supabase
+      .from('analytics_events')
+      .select('lead_id, created_at')
+      .in('lead_id', leadIds)
+      .order('created_at', { ascending: true });
+
+    if (eventsError) {
+      console.error('[leads] failed to load analytics_events for time-on-site:', eventsError);
+    } else {
+      const byLead = new Map<string, string[]>();
+      for (const row of events ?? []) {
+        const id = row.lead_id as string;
+        if (!byLead.has(id)) byLead.set(id, []);
+        byLead.get(id)!.push(row.created_at as string);
+      }
+      for (const [id, timestamps] of byLead) {
+        const first = new Date(timestamps[0]).getTime();
+        const last = new Date(timestamps[timestamps.length - 1]).getTime();
+        timeOnSite[id] = { seconds: Math.round((last - first) / 1000), pageViews: timestamps.length };
+      }
+    }
+  }
+
+  return { leads: result.data, error: result.error, timeOnSite };
+}
+
+function formatDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  if (mins < 60) return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  const remMins = mins % 60;
+  return remMins > 0 ? `${hrs}h ${remMins}m` : `${hrs}h`;
 }
 
 function formatSeen(iso: string): string {
@@ -51,7 +93,7 @@ function formatSeen(iso: string): string {
 }
 
 export default async function AdminLeadsPage() {
-  const { leads, error } = await getLeads();
+  const { leads, error, timeOnSite } = await getLeads();
 
   return (
     <>
@@ -75,6 +117,7 @@ export default async function AdminLeadsPage() {
               <th>Name</th>
               <th>LinkedIn</th>
               <th>Source</th>
+              <th>Time on site</th>
               <th>First seen</th>
               <th>Last seen</th>
             </tr>
@@ -94,6 +137,18 @@ export default async function AdminLeadsPage() {
                   )}
                 </td>
                 <td>{lead.source ?? '—'}</td>
+                <td>
+                  {timeOnSite[lead.id] ? (
+                    <>
+                      {formatDuration(timeOnSite[lead.id]!.seconds)}{' '}
+                      <span style={{ opacity: 0.5, fontSize: '0.85em' }}>
+                        ({timeOnSite[lead.id]!.pageViews} views)
+                      </span>
+                    </>
+                  ) : (
+                    <span title="No tracked visits since this lead identified themselves">— no data</span>
+                  )}
+                </td>
                 <td>{formatSeen(lead.first_seen)}</td>
                 <td>{formatSeen(lead.last_seen)}</td>
               </tr>

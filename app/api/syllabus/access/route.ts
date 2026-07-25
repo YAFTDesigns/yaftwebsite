@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
   const emailRaw = typeof body?.email === 'string' ? body.email.trim() : '';
   const linkedinRaw = typeof body?.linkedin === 'string' ? body.linkedin.trim() : '';
   const slug = typeof body?.slug === 'string' ? body.slug : '';
+  const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : null;
 
   const emailOk = EMAIL_RE.test(emailRaw);
   const linkedinOk = LINKEDIN_RE.test(linkedinRaw);
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = getSupabaseAdmin();
-    const leadId = await upsertLead(supabase, { email, linkedinUrl: linkedin, source: 'syllabus_gate' });
+    const leadId = await upsertLead(supabase, { email, linkedinUrl: linkedin, source: 'syllabus_gate', sessionId });
 
     await supabase.from('syllabus_requests').insert({
       lead_id: leadId,

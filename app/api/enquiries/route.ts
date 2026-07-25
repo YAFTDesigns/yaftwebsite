@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
   const email    = typeof body?.email    === 'string' ? body.email.trim()    : '';
   const interest = typeof body?.interest === 'string' ? body.interest.trim() : '';
   const message  = typeof body?.message  === 'string' ? body.message.trim()  : '';
+  const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : null;
 
   if (!name || !EMAIL_RE.test(email) || !message) {
     return NextResponse.json({ error: 'Name, a valid email, and a message are required.' }, { status: 400 });
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseAdmin();
 
   try {
-    const leadId = await upsertLead(supabase, { email, name, source: 'contact_form' });
+    const leadId = await upsertLead(supabase, { email, name, source: 'contact_form', sessionId });
 
     const { data: enquiryRow, error } = await supabase
       .from('enquiries')

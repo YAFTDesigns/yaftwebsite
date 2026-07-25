@@ -1,3 +1,5 @@
+import { getSessionId } from '@/lib/analytics';
+
 const STORAGE_KEY = 'yaftSyllabusAccess';
 
 export type SyllabusCreds = { email: string; linkedin: string };
@@ -31,7 +33,7 @@ export async function requestSyllabusAccess(
     const res = await fetch('/api/syllabus/access', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: creds.email, linkedin: creds.linkedin, slug }),
+      body: JSON.stringify({ email: creds.email, linkedin: creds.linkedin, slug, sessionId: getSessionId() }),
     });
     if (!res.ok) return fallbackUrl;
     const data = await res.json();

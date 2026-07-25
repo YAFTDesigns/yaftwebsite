@@ -20,8 +20,20 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = getSupabaseAdmin();
+
+    // If this session has already identified as a lead (syllabus unlock,
+    // contact form), tag the event so time-on-site can be computed later.
+    let leadId: string | null = null;
+    const { data: linked } = await supabase
+      .from('lead_sessions')
+      .select('lead_id')
+      .eq('session_id', sessionId)
+      .maybeSingle();
+    if (linked) leadId = linked.lead_id as string;
+
     const { error } = await supabase.from('analytics_events').insert({
       session_id: sessionId,
+      lead_id: leadId,
       event_type: eventType,
       page,
       course_slug: courseSlug,

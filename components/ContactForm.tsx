@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { track } from '@/lib/analytics';
+import { track, getSessionId } from '@/lib/analytics';
 
 type ContactFormProps = {
   options: string[];
@@ -26,6 +26,7 @@ export default function ContactForm({ options }: ContactFormProps) {
           email: data.get('email'),
           interest,
           message: data.get('message'),
+          sessionId: getSessionId(),
         }),
       });
       if (!res.ok) throw new Error('request failed');
