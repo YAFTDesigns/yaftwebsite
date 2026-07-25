@@ -35,7 +35,7 @@ const PERSON_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Yokes Marapa',
-  jobTitle: 'Founder and Authorized Rhino Trainer',
+  jobTitle: 'Founder, YAFT Designs, and Head of Design and Automations, VS-CRAFT Facades & Roofing',
   url: 'https://www.yaftdesigns.com/faculty',
   image: 'https://www.yaftdesigns.com/assets/images/og-image.jpg',
   worksFor: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },

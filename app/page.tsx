@@ -98,7 +98,7 @@ const JSON_LD = {
   founder: {
     '@type': 'Person',
     name: 'Yokes Marapa',
-    jobTitle: 'Founder and Authorized Rhino Trainer',
+    jobTitle: 'Founder, YAFT Designs, and Head of Design and Automations, VS-CRAFT Facades & Roofing',
     url: 'https://www.linkedin.com/in/yokes-marapa-791b06216/',
   },
   hasCredential: {
