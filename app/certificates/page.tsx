@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import CertificateVerify from './CertificateVerify';
+import NextSteps from '@/components/NextSteps';
 
 export const metadata: Metadata = {
   title: 'Verify a Certificate | YAFT Designs',
@@ -21,6 +22,12 @@ export default function CertificatesPage() {
           </div>
         </section>
         <CertificateVerify />
+        <NextSteps
+          links={[
+            { href: '/courses', label: 'Earn your own certificate', description: 'Browse our Rhino, Grasshopper, and Rhino.Inside.Revit training courses.' },
+            { href: '/services#contact', label: 'Have a question?', description: 'Reach out about a certificate, a course, or a project enquiry.' },
+          ]}
+        />
       </main>
       <SiteFooter />
     </>

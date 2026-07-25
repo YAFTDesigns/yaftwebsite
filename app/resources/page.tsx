@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import NextSteps from '@/components/NextSteps';
 import VideoGallery, { type VideoItem } from '@/components/VideoGallery';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import styles from './resources.module.css';
@@ -116,6 +117,13 @@ export default async function ResourcesPage() {
             </div>
           </div>
         </section>
+
+        <NextSteps
+          links={[
+            { href: '/courses', label: 'Browse courses', description: 'Turn these resources into structured, hands-on Rhino and Grasshopper training.' },
+            { href: '/services', label: 'See our services', description: 'Facade engineering, BIM automation, and computational design consulting.' },
+          ]}
+        />
 
         <section id="contact">
           <div className="wrap">

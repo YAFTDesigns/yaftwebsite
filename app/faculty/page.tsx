@@ -3,6 +3,7 @@ import Image from 'next/image';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import NextSteps from '@/components/NextSteps';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from './faculty.module.css';
@@ -177,6 +178,13 @@ export default async function FacultyPage() {
             </div>
           </div>
         </section>
+
+        <NextSteps
+          links={[
+            { href: '/courses', label: 'Browse courses', description: 'See what our faculty and mentors teach, from Rhino fundamentals to Rhino.Inside.Revit.' },
+            { href: '/services', label: 'Explore our services', description: 'Facade engineering, BIM automation, and computational design consulting.' },
+          ]}
+        />
 
         <section id="contact">
           <div className="wrap">

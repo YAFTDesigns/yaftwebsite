@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import NextSteps from '@/components/NextSteps';
 import WorkshopGallery from '@/components/WorkshopGallery';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
@@ -180,6 +181,13 @@ export default async function ServicesPage() {
             </div>
           </div>
         </section>
+
+        <NextSteps
+          links={[
+            { href: '/projects', label: 'See project case studies', description: 'Facade engineering, BIM automation, and computational design work across five countries.' },
+            { href: '/courses', label: 'Browse courses', description: 'Learn the same Rhino and Grasshopper workflows we use on real projects.' },
+          ]}
+        />
 
         <section id="contact">
           <div className="wrap">
