@@ -13,32 +13,29 @@ const FUNNEL_LABELS: Record<(typeof FUNNEL_STEPS)[number], string> = {
   enquiry_submit: 'Enquiry submit',
 };
 
-function countBy<T extends string>(rows: { value: T }[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const row of rows) counts[row.value] = (counts[row.value] ?? 0) + 1;
-  return counts;
-}
-
 async function getAnalytics() {
   const supabase = getSupabaseAdmin();
 
-  const [eventsRes, courseRes] = await Promise.all([
-    safeQuery<{ event_type: string }[]>(
-      supabase.from('analytics_events').select('event_type').limit(20000),
+  const [funnelRes, courseRes] = await Promise.all([
+    safeQuery<{ event_type: string; sessions: number }[]>(
+      supabase.from('analytics_funnel_counts').select('event_type, sessions'),
       [],
-      'analytics events'
+      'analytics funnel counts'
     ),
-    safeQuery<{ course_slug: string }[]>(
-      supabase.from('syllabus_requests').select('course_slug').limit(20000),
+    safeQuery<{ course_slug: string; requests: number }[]>(
+      supabase.from('syllabus_requests_by_course').select('course_slug, requests'),
       [],
-      'syllabus requests'
+      'syllabus requests by course'
     ),
   ]);
 
-  const byEventType = countBy((eventsRes.data ?? []).map((r) => ({ value: r.event_type as string })));
-  const byCourse = countBy((courseRes.data ?? []).map((r) => ({ value: r.course_slug as string })));
+  const byEventType: Record<string, number> = {};
+  for (const row of funnelRes.data) byEventType[row.event_type] = row.sessions;
 
-  const errors = [eventsRes.error, courseRes.error].filter(Boolean) as string[];
+  const byCourse: Record<string, number> = {};
+  for (const row of courseRes.data) byCourse[row.course_slug] = row.requests;
+
+  const errors = [funnelRes.error, courseRes.error].filter(Boolean) as string[];
 
   return { byEventType, byCourse, error: errors.length > 0 ? errors.join('; ') : null };
 }
@@ -66,6 +63,9 @@ export default async function AdminAnalyticsPage() {
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>FUNNEL</div>
       <div className={styles.panel}>
         <h2 className={styles.panelTitle}>Page view → modal → unlock → enquiry</h2>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', marginBottom: 14 }}>
+          Unique sessions reaching each step, not raw event counts.
+        </p>
         <BarChart items={funnelItems} />
       </div>
 
