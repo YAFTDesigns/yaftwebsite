@@ -39,6 +39,17 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null }> {
   return { leads: result.data, error: result.error };
 }
 
+function formatSeen(iso: string): string {
+  return new Date(iso).toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default async function AdminLeadsPage() {
   const { leads, error } = await getLeads();
 
@@ -83,8 +94,8 @@ export default async function AdminLeadsPage() {
                   )}
                 </td>
                 <td>{lead.source ?? '—'}</td>
-                <td>{new Date(lead.first_seen).toLocaleDateString()}</td>
-                <td>{new Date(lead.last_seen).toLocaleDateString()}</td>
+                <td>{formatSeen(lead.first_seen)}</td>
+                <td>{formatSeen(lead.last_seen)}</td>
               </tr>
             ))}
           </tbody>
