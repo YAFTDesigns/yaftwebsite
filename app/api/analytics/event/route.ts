@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
   const utmSource = typeof body?.utmSource === 'string' ? body.utmSource.slice(0, 200) : null;
   const utmMedium = typeof body?.utmMedium === 'string' ? body.utmMedium.slice(0, 200) : null;
   const utmCampaign = typeof body?.utmCampaign === 'string' ? body.utmCampaign.slice(0, 200) : null;
+  const isInternal = body?.isInternal === true;
 
   if (!sessionId || !VALID_EVENTS.has(eventType)) {
     return NextResponse.json({ error: 'Invalid event.' }, { status: 400 });
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       utm_source: utmSource,
       utm_medium: utmMedium,
       utm_campaign: utmCampaign,
+      is_internal: isInternal,
     });
     if (error) throw error;
     return NextResponse.json({ ok: true });

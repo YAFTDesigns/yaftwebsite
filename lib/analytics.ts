@@ -1,5 +1,30 @@
 const SESSION_KEY = 'yaftSessionId';
 const SOURCE_KEY = 'yaftSessionSource';
+const INTERNAL_KEY = 'yaftInternalTraffic';
+
+// Founder/team browsers can mark themselves as internal once, via
+// ?internal=1 in the URL (any page). Persists in localStorage until
+// cleared with ?internal=0. Internal traffic is still recorded (so
+// nothing silently breaks) but tagged so reporting can exclude it.
+function checkInternalFlag() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('internal')) {
+      const on = params.get('internal') !== '0';
+      localStorage.setItem(INTERNAL_KEY, on ? '1' : '0');
+    }
+  } catch {
+    // ignore
+  }
+}
+
+function isInternalTraffic(): boolean {
+  try {
+    return localStorage.getItem(INTERNAL_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
 
 type SessionSource = {
   referrer: string | null;
@@ -51,8 +76,9 @@ export function track(
   extra: { page?: string; courseSlug?: string; meta?: Record<string, unknown> } = {}
 ) {
   try {
+    checkInternalFlag();
     const source = getSessionSource();
-    const payload = JSON.stringify({ sessionId: getSessionId(), eventType, ...source, ...extra });
+    const payload = JSON.stringify({ sessionId: getSessionId(), eventType, isInternal: isInternalTraffic(), ...source, ...extra });
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/analytics/event', new Blob([payload], { type: 'application/json' }));
     } else {
