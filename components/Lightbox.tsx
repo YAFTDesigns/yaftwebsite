@@ -62,7 +62,7 @@ export default function Lightbox({ groups }: { groups: WorkshopGroup[] }) {
         <div className={styles.imgwrap}>
           {photo?.src && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={photo.src} alt={photo.caption ?? ''} />
+            <img src={photo.src} alt={photo.caption ?? ''} loading="lazy" decoding="async" />
           )}
         </div>
         <div className={styles.side}>

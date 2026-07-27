@@ -72,7 +72,7 @@ export default function InsightsPage() {
                       {p.coverImage && (
                         <div className={styles.postThumbBg}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={p.coverImage} alt="" />
+                          <img src={p.coverImage} alt="" loading="lazy" decoding="async" />
                         </div>
                       )}
                       <div className={styles.postCardBody}>

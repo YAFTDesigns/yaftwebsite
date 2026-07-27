@@ -62,7 +62,7 @@ export default function ProjectsGrid({ projects }: { projects: PortfolioProject[
               <div className={styles.thumb}>
                 {p.coverSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.coverSrc} alt={p.title} />
+                  <img src={p.coverSrc} alt={p.title} loading="lazy" decoding="async" />
                 ) : (
                   <span className={styles.phLabel}>Coming soon</span>
                 )}
