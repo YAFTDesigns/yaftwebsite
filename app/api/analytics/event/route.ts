@@ -4,6 +4,19 @@ import { rateLimit } from '@/lib/rateLimit';
 
 const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock']);
 
+// A recent scan showed bot/scanner traffic posting fabricated page
+// values straight to this endpoint (e.g. base64-looking garbage,
+// "/courses.Group") -- this endpoint has no auth, so anything can hit
+// it directly, not just the site's own tracker. Only store page_view
+// events whose page actually matches a real route on the site.
+const VALID_PAGE_PATTERN = /^\/(courses|services|projects|projects\/community|faculty|resources|insights|certificates|consent|cookies|terms)?(\/[a-z0-9-]{1,80})?$/;
+
+function isValidPage(page: string | null): boolean {
+  if (page === null) return true; // some event types don't send a page
+  if (page.length > 200) return false;
+  return VALID_PAGE_PATTERN.test(page);
+}
+
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 30, windowMs: 60000 });
   if (limited) return limited;
@@ -21,6 +34,12 @@ export async function POST(request: NextRequest) {
 
   if (!sessionId || !VALID_EVENTS.has(eventType)) {
     return NextResponse.json({ error: 'Invalid event.' }, { status: 400 });
+  }
+  if (!isValidPage(page)) {
+    // Don't hint to whatever's probing this endpoint that it was
+    // rejected for a specific reason -- just look like a normal
+    // fire-and-forget success and drop it.
+    return NextResponse.json({ ok: true });
   }
 
   try {
