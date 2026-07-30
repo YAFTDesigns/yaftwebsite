@@ -1,19 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import FaqAccordion from '@/components/FaqAccordion';
 import Hero3D from '@/components/Hero3D';
-import { getSiteImageUrl } from '@/lib/supabase/storage';
 import CarouselDrag from '@/components/CarouselDrag';
 import CarouselProgress from '@/components/CarouselProgress';
 import ContourCanvas from '@/components/ContourCanvas';
 import CoursesHeroBlock from '@/components/CoursesHeroBlock';
 import FeatureWall from '@/components/FeatureWall';
-import { getStudentWork, getPublications, getPartners } from '@/lib/feature-wall';
+import { getStudentWork, getPublications, getPartners, getRandomTestimonial } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
 const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific and Middle East | YAFT Designs';
@@ -195,10 +193,11 @@ const LOCAL_BUSINESS_JSON_LD = {
 };
 
 export default async function HomePage() {
-  const [studentWork, publications, partners] = await Promise.all([
+  const [studentWork, publications, partners, testimonial] = await Promise.all([
     getStudentWork(),
     getPublications(),
     getPartners(),
+    getRandomTestimonial(),
   ]);
   return (
     <>
@@ -434,28 +433,46 @@ export default async function HomePage() {
 
         <section id="faculty">
           <div className="wrap">
-            <div className="eyebrow">FACULTY</div>
-            <div className="section-head">
-              <h2>Founder &amp; lead instructor</h2>
-            </div>
-            <div className="faculty-wrap">
-              <Image src={getSiteImageUrl('profile.jpeg')} alt="Yokes Marapa" className="faculty-photo-stand" width={320} height={400} />
-              <div className="faculty-text">
-                <h3>Yokes Marapa</h3>
-                <div className="faculty-role">Founder, YAFT Designs, Head of Design and Automation, VS-CRAFT Facades &amp; Roofing</div>
-                <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
-                <p>Visiting faculty at VIT Vellore, with prior workshops delivered at IIT Kharagpur. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
-                <div className="badge-row">
-                  <span className="badge">ARTC, McNeel &amp; Associates</span>
-                  <span className="badge">Visiting Faculty, VIT Vellore</span>
-                  <span className="badge">IIT Kharagpur Workshops</span>
+            <div className={styles.testiSection}>
+              {testimonial && (
+                <div className={styles.testiCard}>
+                  <div className={styles.testiStars}>
+                    {'★'.repeat(Math.round(testimonial.rating ?? 5))}
+                  </div>
+                  <div className={styles.testiQuote}>&quot;{testimonial.quote}&quot;</div>
+                  <div className={styles.testiName}>{testimonial.name}</div>
+                  {(testimonial.role || testimonial.institution) && (
+                    <div className={styles.testiRole}>
+                      {[testimonial.role, testimonial.institution].filter(Boolean).join(', ')}
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '24px' }}>
-                  <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/" target="_blank" rel="noopener" className="profile-link">LinkedIn →</a>
-                  <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" className="profile-link">Rhino Trainer Listing →</a>
+              )}
+              <div className={styles.portraitBlock}>
+                <div className={styles.portraitFrame}>
+                  <div className={styles.portraitBackdrop}></div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/assets/images/profile-cutout.png" alt="Yokes Marapa" className={styles.portraitCutout} loading="lazy" decoding="async" />
                 </div>
               </div>
             </div>
+
+            {partners.length > 0 && (
+              <div className={styles.marqueeWrap}>
+                <div className={styles.glassPanel}>
+                  <div className={styles.marqueeMask}>
+                    <div className={styles.marqueeTrack}>
+                      {[...partners, ...partners].map((p, i) => (
+                        <div className={styles.marqueeItem} key={`${p.id}-${i}`}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          {p.logo_url && <img src={p.logo_url} alt={p.name} loading="lazy" decoding="async" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </section>
 

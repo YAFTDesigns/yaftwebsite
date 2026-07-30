@@ -394,3 +394,40 @@
   color: var(--ink-soft) !important;
   line-height: 1.8 !important;
 }
+
+/* ===== TESTIMONIAL + PORTRAIT + PARTNER MARQUEE ===== */
+.testiSection { display:flex; align-items:center; gap:40px; flex-wrap:wrap; }
+.testiCard { flex:1; min-width:280px; background:var(--paper-2); border:1px solid var(--line); border-radius:10px; padding:28px 30px; }
+.testiStars { color:var(--brass); font-size:16px; letter-spacing:2px; margin-bottom:16px; }
+.testiQuote { font-family:var(--display); font-size:17px; color:var(--ink); line-height:1.55; margin-bottom:20px; }
+.testiName { font-size:14px; color:var(--ink); font-weight:600; }
+.testiRole { font-family:var(--mono); font-size:12px; color:var(--ink-soft); margin-top:2px; }
+
+.portraitBlock { flex:0 0 300px; text-align:center; }
+.portraitFrame { position:relative; width:100%; height:400px; display:flex; align-items:flex-end; justify-content:center; overflow:hidden; }
+.portraitBackdrop {
+  position:absolute; top:-30px; right:20px; width:190px; height:480px;
+  background:linear-gradient(160deg, var(--brass), #8a1a24);
+  transform:rotate(22deg); border-radius:20px;
+}
+.portraitCutout { height:100%; max-height:400px; object-fit:contain; object-position:bottom; position:relative; z-index:1; filter: grayscale(100%) contrast(1.05); }
+
+.marqueeWrap { margin-top:20px; }
+.glassPanel {
+  position:relative; border-radius:20px; padding:32px 0;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 40px rgba(255,255,255,0.02), 0 8px 32px rgba(0,0,0,0.35);
+  backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%);
+  overflow:hidden;
+}
+.glassPanel::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); }
+.marqueeMask { position:relative; overflow:hidden; -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent); mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent); }
+.marqueeTrack { display:flex; align-items:center; gap:64px; width:max-content; animation: marqueeScroll 24s linear infinite; }
+@keyframes marqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.marqueeItem { display:flex; align-items:center; justify-content:center; filter: grayscale(100%) brightness(1.6) contrast(0.9); opacity:0.8; }
+.marqueeItem img { height:48px; width:auto; max-width:130px; object-fit:contain; }
+
+@media (max-width: 640px) {
+  .testiSection { flex-direction:column-reverse; }
+  .portraitBlock { flex:0 0 auto; width:100%; max-width:280px; }
+}

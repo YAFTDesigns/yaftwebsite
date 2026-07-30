@@ -65,6 +65,27 @@ export async function getPublications(): Promise<Publication[]> {
   } catch { return []; }
 }
 
+export type Testimonial = {
+  id: string;
+  name: string;
+  role: string | null;
+  institution: string | null;
+  quote: string;
+  rating: number | null;
+};
+
+export async function getRandomTestimonial(): Promise<Testimonial | null> {
+  try {
+    const { data, error } = await getSupabasePublic()
+      .from('testimonials')
+      .select('id,name,role,institution,quote,rating')
+      .eq('status', 'approved');
+    if (error) throw error;
+    if (!data || data.length === 0) return null;
+    return data[Math.floor(Math.random() * data.length)];
+  } catch { return null; }
+}
+
 export async function getPartners(): Promise<Partner[]> {
   try {
     const { data, error } = await getSupabasePublic()
