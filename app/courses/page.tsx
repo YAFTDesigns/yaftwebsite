@@ -8,7 +8,6 @@ import CourseGateButton from '@/components/CourseGateButton';
 import CourseVisualLink from '@/components/CourseVisualLink';
 import { COURSE_DETAIL_PAGES } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
-import SyllabusModal from '@/components/SyllabusModal';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
@@ -217,7 +216,6 @@ export default async function CoursesPage() {
 
       <SiteFooter />
       <CourseGateModal />
-      <SyllabusModal />
     </>
   );
 }
