@@ -192,6 +192,8 @@ const LOCAL_BUSINESS_JSON_LD = {
   ],
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const [studentWork, publications, partners, testimonial] = await Promise.all([
     getStudentWork(),
