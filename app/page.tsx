@@ -434,7 +434,7 @@ export default async function HomePage() {
         <section id="faculty">
           <div className="wrap">
             <h2 className={styles.testiHeading}>What our students actually say</h2>
-            <p className={styles.testiSubheading}>Unedited feedback from people who sat through the sessions, not handpicked marketing copy.</p>
+            <p className={styles.testiSubheading}>What it&apos;s actually like to learn with us.</p>
             <div className={styles.testiSection}>
               {testimonial && (
                 <div className={styles.testiCard}>
