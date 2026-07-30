@@ -433,6 +433,7 @@ export default async function HomePage() {
 
         <section id="faculty">
           <div className="wrap">
+            <h2 className={styles.testiHeading}>Testimonials from our students</h2>
             <div className={styles.testiSection}>
               {testimonial && (
                 <div className={styles.testiCard}>
@@ -456,24 +457,24 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
+          </div>
 
-            {partners.length > 0 && (
-              <div className={styles.marqueeWrap}>
-                <div className={styles.glassPanel}>
-                  <div className={styles.marqueeMask}>
-                    <div className={styles.marqueeTrack}>
-                      {[...partners, ...partners].map((p, i) => (
-                        <div className={styles.marqueeItem} key={`${p.id}-${i}`}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          {p.logo_url && <img src={p.logo_url} alt={p.name} loading="lazy" decoding="async" />}
-                        </div>
-                      ))}
-                    </div>
+          {partners.length > 0 && (
+            <div className={styles.marqueeWrap}>
+              <div className={styles.glassPanel}>
+                <div className={styles.marqueeMask}>
+                  <div className={styles.marqueeTrack}>
+                    {[...partners, ...partners].map((p, i) => (
+                      <div className={styles.marqueeItem} key={`${p.id}-${i}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {p.logo_url && <img src={p.logo_url} alt={p.name} loading="lazy" decoding="async" />}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </section>
 
         <section id="faq">
