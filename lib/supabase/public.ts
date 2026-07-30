@@ -10,6 +10,16 @@ export function getSupabasePublic(): SupabaseClient {
   if (cached) return cached;
   const url     = process.env.NEXT_PUBLIC_SUPABASE_URL     ?? DEFAULT_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? DEFAULT_KEY;
-  cached = createClient(url, anonKey, { auth: { persistSession: false } });
+  cached = createClient(url, anonKey, {
+    auth: { persistSession: false },
+    global: {
+      // Next.js's fetch cache can persist responses independently of
+      // the page's dynamic/force-dynamic setting, which was causing
+      // getRandomTestimonial() to keep returning the same cached row
+      // on every request instead of a fresh random pick. Force every
+      // request from this client to bypass that cache entirely.
+      fetch: (input, init) => fetch(input, { ...init, cache: 'no-store' }),
+    },
+  });
   return cached;
 }
