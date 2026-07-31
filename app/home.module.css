@@ -456,4 +456,6 @@
 @media (max-width: 640px) {
   .testiSection { flex-direction:column-reverse; }
   .portraitBlock { flex:0 0 auto; width:100%; max-width:280px; }
+  .portraitFrame { height:340px; overflow:hidden; }
+  .portraitBackdrop { top:-40px; right:-10px; width:170px; height:440px; }
 }
