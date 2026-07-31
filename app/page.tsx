@@ -14,7 +14,7 @@ import FeatureWall from '@/components/FeatureWall';
 import { getStudentWork, getPublications, getPartners, getRandomTestimonial } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
-const TITLE = 'Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific and Middle East | YAFT Designs';
+const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
 const DESCRIPTION =
   'Authorized Rhino3D Training Center based in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
 

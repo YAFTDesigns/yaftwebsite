@@ -13,7 +13,7 @@ export default function SiteFooter() {
           </div>
           <div className="fcol">
             <h4>Company</h4>
-            <p>© 2026 YAFT Designs<br />All rights reserved<br /><a href="/terms" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Terms</a><br /><a href="/consent" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Consent</a><br /><a href="/cookies" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Cookies</a></p>
+            <p>© 2026 YAFT Designs<br />All rights reserved<br /><a href="/terms" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Terms</a><br /><a href="/privacy" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Privacy</a><br /><a href="/consent" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Consent</a><br /><a href="/cookies" style={{ color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Cookies</a></p>
           </div>
         </div>
         <div style={{
@@ -30,7 +30,7 @@ export default function SiteFooter() {
             lineHeight: 1.7,
             margin: 0,
           }}>
-            By engaging with YAFT Designs you agree to our terms and conditions. Course materials are for individual use only and remain the intellectual property of YAFT Designs. Fees paid are non-refundable within 15 days of course commencement. YAFT Designs does not sell or resell Rhino3D licenses. Certificates issued are informal and do not carry statutory credentials. Governed by the laws of India, jurisdiction: Coimbatore, Tamil Nadu.
+            By engaging with YAFT Designs you agree to our terms and conditions. Course materials are for individual use only and remain the intellectual property of YAFT Designs. Fees paid are non-refundable within 15 days of course commencement. YAFT Designs does not sell or resell Rhino3D licenses. Certificates issued are informal and do not carry statutory credentials. Governed by the laws of India, jurisdiction: Coimbatore, Tamil Nadu. YAFT Designs uses the Gmail API, authorized to our own account, solely to send transactional emails such as enquiry confirmations, invoices, and certificates on our behalf. We do not access, read, or store any Gmail account data belonging to visitors.
           </p>
         </div>
       </div>
