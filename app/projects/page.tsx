@@ -27,6 +27,8 @@ const TITLE = 'Computational Design Projects | YAFT Designs Coimbatore';
 const DESCRIPTION =
   'Facade engineering, BIM automation, and computational design projects by YAFT Designs. Live project work across India, Singapore, Hong Kong, Australia and Oman.';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,

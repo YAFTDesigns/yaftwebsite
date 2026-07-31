@@ -18,6 +18,8 @@ const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacifi
 const DESCRIPTION =
   'Professional Rhino3D and Grasshopper training for architects and designers. Live online masterclasses available across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,

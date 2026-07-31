@@ -10,6 +10,8 @@ import styles from './resources.module.css';
 const TITLE = 'Rhino3D & Grasshopper Learning Resources';
 const DESCRIPTION = 'Free Rhino3D, Grasshopper and computational design resources, tutorials, guides and learning materials.';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,

@@ -12,6 +12,8 @@ const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
   'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty at VIT Vellore, with workshops at IIT Kharagpur.';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,

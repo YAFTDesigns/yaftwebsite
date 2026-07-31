@@ -13,6 +13,8 @@ const TITLE = 'BIM Consulting & Computational Design Services | India, Australia
 const DESCRIPTION =
   'Computational design, BIM consulting, parametric facades and digital fabrication services. Active on projects across India, Australia, Singapore, Hong Kong, UAE, Saudi Arabia, Qatar and Oman.';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
