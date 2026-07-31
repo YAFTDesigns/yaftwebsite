@@ -235,7 +235,7 @@ export default async function HomePage() {
                 <a href="#contact" className="btn-secondary">Talk to Us</a>
               </div>
               <p className="credline"><strong>Authorized Rhino Training Center (ARTC)</strong>, recognized by McNeel &amp; Associates. We teach the tools; we don&apos;t sell software licenses.</p>
-              <p className="credline" style={{ marginTop: 8 }}>This website is operated by YAFT Designs to provide Rhino3D and Grasshopper training and computational design consulting. We use the Gmail API, authorized to our own account, only to send transactional emails such as enquiry confirmations, invoices, and certificates. See our <Link href="/privacy" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>Privacy Policy</Link> for details.</p>
+              <p className="credline" style={{ marginTop: 8 }}>This website is operated by YAFT Designs to provide Rhino3D and Grasshopper training and computational design consulting. We use the Gmail API, authorized to our own account, only to send transactional emails such as enquiry confirmations, invoices, and certificates.</p>
             </div>
           </div>
         </section>
