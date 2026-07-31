@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     "Authorized Rhino3D Training Center in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.",
   authors: [{ name: "YAFT Designs" }],
   verification: {
-    google: "eB3V1cesYNaiQJ0YYHX3iDu8cdAv1TKW60nu7VXg-4U",
+    google: "Nzk_mrqn6LX23Lb2ZJnbz2FfLSEOsBFEpC_pC5I_nVU",
   },
   icons: {
     icon: [
