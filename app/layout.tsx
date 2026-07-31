@@ -9,12 +9,15 @@ const GA_MEASUREMENT_ID = "G-XDVDJC7X24";
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.yaftdesigns.com"),
   title: {
-    default: "Authorized Rhino3D Trainer India | Grasshopper Training Asia Pacific and Middle East | YAFT Designs",
+    default: "YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East",
     template: "%s | YAFT Designs",
   },
   description:
     "Authorized Rhino3D Training Center in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.",
   authors: [{ name: "YAFT Designs" }],
+  verification: {
+    google: "eB3V1cesYNaiQJ0YYHX3iDu8cdAv1TKW60nu7VXg-4U",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
