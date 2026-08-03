@@ -3,41 +3,10 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { getCourseBySlug } from '@/lib/courses';
 import { rateLimit } from '@/lib/rateLimit';
-import { google } from 'googleapis';
+import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LINKEDIN_RE = /linkedin\.com\//i;
-const YAFT_EMAIL = 'yaftdesigns@gmail.com';
-
-async function getGmailClient() {
-  const auth = new google.auth.OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-  auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-  return google.gmail({ version: 'v1', auth });
-}
-
-function makeEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  const lines = [
-    `From: YAFT Designs <${YAFT_EMAIL}>`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset=utf-8`,
-    ``,
-    html,
-  ];
-  return Buffer.from(lines.join('\n')).toString('base64url');
-}
-
-function renderTemplate(template: string, vars: Record<string, string>) {
-  return Object.entries(vars).reduce(
-    (t, [k, v]) => t.replaceAll(`{{${k}}}`, v),
-    template
-  );
-}
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
@@ -78,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Send confirmation email, best-effort: a failure here shouldn't block
     // access to a syllabus PDF that's still publicly reachable anyway.
-    if (email && process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
+    if (email && isEmailConfigured()) {
       let status = 'sent';
       let errMsg = null;
       let subject = '';
@@ -93,15 +62,11 @@ export async function POST(request: NextRequest) {
         subject = renderTemplate(tmpl?.subject ?? '{{course_title}} syllabus - YAFT Designs', vars);
         const html = renderTemplate(tmpl?.body_html ?? `<p>Thanks for checking out ${course.title}.</p>`, vars);
 
-        const gmail = await getGmailClient();
-        await gmail.users.messages.send({
-          userId: 'me',
-          requestBody: { raw: makeEmail({ to: email, subject, html }) },
-        });
+        await sendEmail({ to: email, subject, html });
       } catch (mailErr: any) {
         status = 'failed';
         errMsg = mailErr?.message ?? 'Unknown error';
-        console.error('syllabus confirmation Gmail send failed:', mailErr);
+        console.error('syllabus confirmation send failed:', mailErr);
       }
 
       await supabase.from('email_logs').insert({
@@ -119,7 +84,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: course.pdf });
   } catch (err) {
     console.error('syllabus/access failed', err);
-    // Lead capture/logging is best-effort from the visitor's point of view —
+    // Lead capture/logging is best-effort from the visitor's point of view,
     // don't block access to a PDF that's still public just because the DB write failed.
     return NextResponse.json({ url: course.pdf, warning: 'lead-not-recorded' });
   }

@@ -1,23 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushInvoiceToQueue } from '@/lib/queue';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
-
-const YAFT_EMAIL = 'yaftdesigns@gmail.com';
-
-async function getGmailClient() {
-  const auth = new google.auth.OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-  auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-  return google.gmail({ version: 'v1', auth });
-}
+import { sendEmail, isEmailConfigured } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
@@ -60,13 +48,13 @@ export async function POST(request: NextRequest) {
         invoiceId: inv.id,
         invoiceNo: data.invoice_no,
         event: 'created',
-        message: `Created for ${data.client_name} — ₹${Number(data.grand_total).toLocaleString('en-IN')}`,
+        message: `Created for ${data.client_name}, INR ${Number(data.grand_total).toLocaleString('en-IN')}`,
       });
     }
 
     if (error) {
-      console.error('Invoice save error — queueing for retry:', error);
-      // Queue for retry when Supabase recovers — continue to send email
+      console.error('Invoice save error, queueing for retry:', error);
+      // Queue for retry when Supabase recovers, continue to send email
       try {
         await pushInvoiceToQueue({
           invoice_no:   data.invoice_no,
@@ -93,17 +81,14 @@ export async function POST(request: NextRequest) {
       await logInvoiceEvent({
         invoiceNo: data.invoice_no,
         event: 'queued',
-        message: `Save failed, queued for retry — ${error.message}`,
+        message: `Save failed, queued for retry, ${error.message}`,
         meta: { error: error.message },
       });
-      // Don't return error — continue to send email below
+      // Don't return error, continue to send email below
     }
 
-    // Send via Gmail with PDF attachment
-    if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
-      const gmail = await getGmailClient();
-      const boundary = 'yaft_invoice_boundary';
-      const altBound = 'yaft_alt_boundary';
+    // Send via Resend with PDF attachment
+    if (isEmailConfigured()) {
       const isProformaEmail = data.invoice_type === 'proforma';
       const subject  = isProformaEmail
         ? `Proforma Invoice ${data.invoice_no} - YAFT Designs`
@@ -122,54 +107,45 @@ export async function POST(request: NextRequest) {
     ${advance > 0 ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(advance)}</td></tr>` : ''}
     ${balance > 0 ? `<tr style="background:#fff3f3;"><td style="padding:8px 12px;color:#888;">Balance Due</td><td style="padding:8px 12px;font-weight:600;color:#E63946;">INR ${fmt(balance)}</td></tr>` : ''}
   </table>
-  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
+  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
   <p style="font-size:13px;font-weight:600;color:#111;margin:0 0 8px;">Share your experience</p>
   <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">If the training has been useful, we'd love a quick testimonial. It helps other students and professionals find us.</p>
-  <a href="https://www.yaftdesigns.com/#contact" style="display:inline-block;background:#E63946;color:#fff;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:20px;">Leave a testimonial →</a>
+  <a href="https://www.yaftdesigns.com/#contact" style="display:inline-block;background:#E63946;color:#fff;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:20px;">Leave a testimonial &rarr;</a>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
   <p style="font-size:13px;font-weight:600;color:#111;margin:0 0 8px;">Feature your work on yaftdesigns.com</p>
-  <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">Once your project is done, submit it to our <strong>YAFT Community Works</strong> wall — a public portfolio space where students and collaborators showcase what they've built. Your card includes your project, tools used, and a link to your portfolio or LinkedIn.</p>
-  <a href="https://www.yaftdesigns.com/projects/community" style="display:inline-block;border:1px solid #E63946;color:#E63946;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:24px;">Submit your project →</a>
+  <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">Once your project is done, submit it to our <strong>YAFT Community Works</strong> wall, a public portfolio space where students and collaborators showcase what they've built. Your card includes your project, tools used, and a link to your portfolio or LinkedIn.</p>
+  <a href="https://www.yaftdesigns.com/projects/community" style="display:inline-block;border:1px solid #E63946;color:#E63946;font-size:12px;padding:9px 18px;border-radius:6px;text-decoration:none;margin-bottom:24px;">Submit your project &rarr;</a>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
-  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs · Authorized Rhino Training Center · Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
+  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
 </div>`;
 
-      const raw = [
-        `From: YAFT Designs <${YAFT_EMAIL}>`,
-        `To: ${data.client_name} <${data.client_email}>`,
-        `Subject: ${subject}`,
-        `MIME-Version: 1.0`,
-        `Content-Type: multipart/mixed; boundary="${boundary}"`,
-        ``,
-        `--${boundary}`,
-        `Content-Type: text/html; charset=utf-8`,
-        ``,
-        htmlBody,
-        ``,
-        `--${boundary}`,
-        `Content-Type: application/pdf`,
-        `Content-Transfer-Encoding: base64`,
-        `Content-Disposition: attachment; filename="${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${data.invoice_no}.pdf"`,
-        ``,
-        pdfBase64,
-        `--${boundary}--`,
-      ].join('\n');
+      let status = 'sent';
+      let errMsg = null;
+      try {
+        await sendEmail({
+          to: `${data.client_name} <${data.client_email}>`,
+          subject,
+          html: htmlBody,
+          attachments: [{
+            filename: `${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${data.invoice_no}.pdf`,
+            content: pdfBase64,
+          }],
+        });
+      } catch (mailErr: any) {
+        status = 'failed';
+        errMsg = mailErr?.message ?? 'Unknown error';
+        console.error('Invoice email send failed:', mailErr);
+      }
 
-      await gmail.users.messages.send({
-        userId: 'me',
-        requestBody: { raw: Buffer.from(raw).toString('base64url') },
-      });
-
-      // Log to email_logs
       try {
         await supabase.from('email_logs').insert({
           to_email: data.client_email,
           to_name:  data.client_name,
           subject,
           template: isProformaEmail ? 'proforma_invoice' : 'invoice',
-          status:   'sent',
-          error:    null,
+          status,
+          error: errMsg,
         });
       } catch (logErr) {
         console.error('[invoice] email_logs insert failed:', logErr);

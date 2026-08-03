@@ -1,21 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
-
-const YAFT_EMAIL = 'yaftdesigns@gmail.com';
-
-async function getGmailClient() {
-  const auth = new google.auth.OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-  auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-  return google.gmail({ version: 'v1', auth });
-}
+import { sendEmail, isEmailConfigured } from '@/lib/email';
 
 // POST /api/admin/invoices/resend  { id }
 // Regenerates the PDF from the invoice's current (possibly just-edited)
@@ -60,12 +48,10 @@ export async function POST(request: NextRequest) {
     const pdfBuffer = await generatePDF(pdfData);
     const pdfBase64 = pdfBuffer.toString('base64');
 
-    if (!process.env.GMAIL_CLIENT_ID || !process.env.GMAIL_REFRESH_TOKEN) {
+    if (!isEmailConfigured()) {
       return NextResponse.json({ error: 'Email is not configured' }, { status: 500 });
     }
 
-    const gmail = await getGmailClient();
-    const boundary = 'yaft_invoice_resend_boundary';
     const isProformaEmail = inv.invoice_type === 'proforma';
     const subject = isProformaEmail
       ? `Revised Proforma Invoice ${inv.invoice_no} - YAFT Designs`
@@ -82,33 +68,17 @@ export async function POST(request: NextRequest) {
     ${inv.advance > 0 ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(inv.advance)}</td></tr>` : ''}
     ${inv.balance > 0 ? `<tr style="background:#fff3f3;"><td style="padding:8px 12px;color:#888;">Balance Due</td><td style="padding:8px 12px;font-weight:600;color:#E63946;">INR ${fmt(inv.balance)}</td></tr>` : ''}
   </table>
-  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs · Authorized Rhino Training Center · Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
+  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
 </div>`;
 
-    const raw = [
-      `From: YAFT Designs <${YAFT_EMAIL}>`,
-      `To: ${inv.client_name} <${inv.client_email}>`,
-      `Subject: ${subject}`,
-      `MIME-Version: 1.0`,
-      `Content-Type: multipart/mixed; boundary="${boundary}"`,
-      ``,
-      `--${boundary}`,
-      `Content-Type: text/html; charset=utf-8`,
-      ``,
-      htmlBody,
-      ``,
-      `--${boundary}`,
-      `Content-Type: application/pdf`,
-      `Content-Transfer-Encoding: base64`,
-      `Content-Disposition: attachment; filename="${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${inv.invoice_no}_revised.pdf"`,
-      ``,
-      pdfBase64,
-      `--${boundary}--`,
-    ].join('\n');
-
-    await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: { raw: Buffer.from(raw).toString('base64url') },
+    await sendEmail({
+      to: `${inv.client_name} <${inv.client_email}>`,
+      subject,
+      html: htmlBody,
+      attachments: [{
+        filename: `${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${inv.invoice_no}_revised.pdf`,
+        content: pdfBase64,
+      }],
     });
 
     try {

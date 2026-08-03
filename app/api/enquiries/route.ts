@@ -1,42 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
-import { google } from 'googleapis';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushEnquiryToQueue } from '@/lib/queue';
+import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const YAFT_EMAIL = 'yaftdesigns@gmail.com';
-
-async function getGmailClient() {
-  const auth = new google.auth.OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-  auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
-  return google.gmail({ version: 'v1', auth });
-}
-
-function makeEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  const lines = [
-    `From: YAFT Designs <${YAFT_EMAIL}>`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/html; charset=utf-8`,
-    ``,
-    html,
-  ];
-  return Buffer.from(lines.join('\n')).toString('base64url');
-}
-
-function renderTemplate(template: string, vars: Record<string, string>) {
-  return Object.entries(vars).reduce(
-    (t, [k, v]) => t.replaceAll(`{{${k}}}`, v),
-    template
-  );
-}
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
@@ -66,14 +35,12 @@ export async function POST(request: NextRequest) {
 
     const enquiryId = enquiryRow?.id ?? null;
 
-    // Send via Gmail API
-    if (process.env.GMAIL_CLIENT_ID && process.env.GMAIL_REFRESH_TOKEN) {
+    if (isEmailConfigured()) {
       let status = 'sent';
       let errMsg = null;
       let subject = '';
 
       try {
-        // Fetch template from DB
         const { data: tmpl } = await supabase
           .from('email_templates')
           .select('subject, body_html')
@@ -94,37 +61,32 @@ export async function POST(request: NextRequest) {
   <table style="font-size:14px;line-height:1.9;margin:0 0 20px;border-collapse:collapse;width:100%;">
     <tr>
       <td style="color:#555;padding:4px 16px 4px 0;vertical-align:top;white-space:nowrap;">Training schedule</td>
-      <td style="padding:4px 0;color:#111;">10 hrs/week across 3 consecutive sessions. Total duration depends on course level — full details on <a href="https://www.yaftdesigns.com/courses" style="color:#E63946;text-decoration:none;">yaftdesigns.com/courses</a>.</td>
+      <td style="padding:4px 0;color:#111;">10 hrs/week across 3 consecutive sessions. Total duration depends on course level, full details on <a href="https://www.yaftdesigns.com/courses" style="color:#E63946;text-decoration:none;">yaftdesigns.com/courses</a>.</td>
     </tr>
     <tr>
       <td style="color:#555;padding:4px 16px 4px 0;vertical-align:top;white-space:nowrap;">Group discount</td>
       <td style="padding:4px 0;color:#111;">Available for a minimum batch of 3. Reply to this email to avail.</td>
     </tr>
   </table>
-  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros — design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 20px;" />
+  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 20px;" />
   <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Reply to this email to confirm your slot or ask any questions.</p>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">
     This is an automated message from YAFT Designs.<br>
-    Authorized Rhino Training Center · Coimbatore, India<br>
+    Authorized Rhino Training Center &middot; Coimbatore, India<br>
     <a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a>
   </p>
 </div>`;
 
         const html = renderTemplate(tmpl?.body_html ?? defaultHtml, vars);
 
-        const gmail = await getGmailClient();
-        await gmail.users.messages.send({
-          userId: 'me',
-          requestBody: { raw: makeEmail({ to: `${name} <${email}>`, subject, html }) },
-        });
+        await sendEmail({ to: `${name} <${email}>`, subject, html });
       } catch (mailErr: any) {
         status = 'failed';
         errMsg = mailErr?.message ?? 'Unknown error';
-        console.error('Gmail send failed:', mailErr);
+        console.error('Email send failed:', mailErr);
       }
 
-      // Log the email
       await supabase.from('email_logs').insert({
         to_email: email,
         to_name: name,

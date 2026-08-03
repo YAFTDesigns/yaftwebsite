@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['pdfkit', 'googleapis'],
+  serverExternalPackages: ['pdfkit'],
   async redirects() {
     // These .html URLs are from the old static GitHub Pages site,
     // before the migration to Next.js. Google indexed them back then
