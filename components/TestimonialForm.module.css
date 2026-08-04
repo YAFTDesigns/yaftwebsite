@@ -346,3 +346,110 @@
   margin-left: 8px;
   min-width: 48px;
 }
+
+/* ===== Upfront choice screen ===== */
+.choiceBody {
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.choiceCard {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: border-color 0.2s;
+}
+.choiceCard:hover {
+  border-color: rgba(255,255,255,0.28);
+}
+
+.choiceGoogleIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.choiceWriteIcon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--brass);
+}
+
+.choiceCardTitle {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.choiceCardNote {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+}
+
+.choiceOr {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ===== Post-submit Google nudge ===== */
+.googleNudge {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 28px;
+  margin-top: 4px;
+}
+
+.googleNudgeText {
+  font-size: 14px;
+  color: var(--ink);
+  margin: 0 0 16px;
+  line-height: 1.6;
+}
+
+.googleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 22px;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+.googleBtn:hover {
+  border-color: rgba(255,255,255,0.28);
+}
+
+.googleG {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
