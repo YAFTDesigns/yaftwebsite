@@ -7,7 +7,14 @@ export default function CarouselDrag({ id }: { id: string }) {
     const track = document.getElementById(id);
     if (!track) return;
 
-    /* ── Mouse drag (desktop) ── */
+    /* ── Mouse drag (desktop only) ──
+       Touch devices are deliberately left untouched: overflow-x:auto
+       already gives native touch-scrolling for free, and native
+       handles momentum/rubber-banding far better than any JS
+       reimplementation. A previous version of this component also
+       intercepted touchmove to add custom momentum, but that
+       conflicted with native scroll handling on real devices and
+       made the carousel feel stuck/unresponsive to touch. */
     let isDragging = false;
     let startX = 0;
     let scrollLeft = 0;
@@ -19,7 +26,6 @@ export default function CarouselDrag({ id }: { id: string }) {
       startX = e.pageX - track.getBoundingClientRect().left;
       scrollLeft = track.scrollLeft;
       track.style.cursor = 'grabbing';
-      cancelMomentum();
     };
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging) return;
@@ -42,63 +48,9 @@ export default function CarouselDrag({ id }: { id: string }) {
       track.scrollLeft += e.deltaY + e.deltaX;
     };
 
-    /* ── Touch with momentum (mobile) ── */
-    let touchStartX = 0;
-    let touchScrollLeft = 0;
-    let touchDidMove = false;
-    let lastTouchX = 0;
-    let lastTouchTime = 0;
-    let velocity = 0;
-    let momentumRaf = 0;
-
-    function cancelMomentum() {
-      cancelAnimationFrame(momentumRaf);
-      velocity = 0;
-    }
-
-    function runMomentum() {
-      if (!track || Math.abs(velocity) < 0.5) return;
-      track.scrollLeft += velocity;
-      velocity *= 0.92; // friction — higher = more glide
-      momentumRaf = requestAnimationFrame(runMomentum);
-    }
-
-    const onTouchStart = (e: TouchEvent) => {
-      cancelMomentum();
-      touchStartX = e.touches[0].clientX;
-      touchScrollLeft = track.scrollLeft;
-      lastTouchX = touchStartX;
-      lastTouchTime = Date.now();
-      touchDidMove = false;
-      velocity = 0;
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      const dx = touchStartX - e.touches[0].clientX;
-      if (Math.abs(dx) > 6) {
-        touchDidMove = true;
-        e.preventDefault();
-        track.scrollLeft = touchScrollLeft + dx;
-
-        // track velocity
-        const now = Date.now();
-        const dt = now - lastTouchTime || 1;
-        velocity = (e.touches[0].clientX - lastTouchX) / dt * 16; // px per frame ~16ms
-        lastTouchX = e.touches[0].clientX;
-        lastTouchTime = now;
-      }
-    };
-
-    const onTouchEnd = () => {
-      // flip velocity direction (scroll follows finger direction)
-      velocity = -velocity;
-      momentumRaf = requestAnimationFrame(runMomentum);
-      setTimeout(() => { touchDidMove = false; }, 50);
-    };
-
-    /* ── Prevent link clicks on drag ── */
-    track.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', (e) => { if (didDrag || touchDidMove) e.preventDefault(); });
+    /* ── Prevent link clicks after a mouse-drag (desktop only) ── */
+    track.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', (e) => { if (didDrag) e.preventDefault(); });
     });
 
     track.style.cursor = 'grab';
@@ -107,19 +59,12 @@ export default function CarouselDrag({ id }: { id: string }) {
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
     track.addEventListener('wheel', onWheel, { passive: false });
-    track.addEventListener('touchstart', onTouchStart, { passive: true });
-    track.addEventListener('touchmove', onTouchMove, { passive: false });
-    track.addEventListener('touchend', onTouchEnd);
 
     return () => {
-      cancelMomentum();
       track.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
       track.removeEventListener('wheel', onWheel);
-      track.removeEventListener('touchstart', onTouchStart);
-      track.removeEventListener('touchmove', onTouchMove);
-      track.removeEventListener('touchend', onTouchEnd);
     };
   }, [id]);
 

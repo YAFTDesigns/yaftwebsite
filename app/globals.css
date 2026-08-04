@@ -109,7 +109,7 @@ nav{
 .insta-carousel-outer{position:relative;flex:1 1 320px;min-width:0;max-width:640px;}
 .insta-carousel-track{
   display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
-  -ms-overflow-style:none;scrollbar-width:none;cursor:grab;user-select:none;padding:2px;
+  -webkit-overflow-scrolling:touch;-ms-overflow-style:none;scrollbar-width:none;cursor:grab;user-select:none;padding:2px;
 }
 .insta-carousel-track::-webkit-scrollbar{display:none;}
 .insta-carousel-track:active{cursor:grabbing;}
