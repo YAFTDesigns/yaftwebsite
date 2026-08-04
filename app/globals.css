@@ -99,14 +99,33 @@ nav{
 
 /* ===== INSTAGRAM CTA (projects page) ===== */
 .insta-section{padding:72px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+.insta-left{flex:0 0 auto;}
 .insta-left h2{font-size:clamp(22px,2.8vw,30px);margin-bottom:10px;}
 .insta-left p{color:var(--ink-soft);font-size:15px;max-width:420px;}
-.insta-btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;border:1px solid var(--ink);padding:14px 28px;color:var(--ink);transition:background .2s,color .2s;white-space:nowrap;}
+.insta-btn{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;border:1px solid var(--ink);padding:14px 28px;color:var(--ink);transition:background .2s,color .2s;white-space:nowrap;margin-top:20px;}
 .insta-btn:hover{background:var(--ink);color:var(--paper);}
 .insta-btn svg{width:17px;height:17px;flex-shrink:0;}
+
+.insta-carousel-outer{position:relative;flex:1 1 320px;min-width:0;max-width:640px;}
+.insta-carousel-track{
+  display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;
+  -ms-overflow-style:none;scrollbar-width:none;cursor:grab;user-select:none;padding:2px;
+}
+.insta-carousel-track::-webkit-scrollbar{display:none;}
+.insta-carousel-track:active{cursor:grabbing;}
+.insta-thumb-card{
+  position:relative;flex:0 0 130px;aspect-ratio:9/16;border-radius:10px;overflow:hidden;
+  display:block;background:var(--paper-2);border:1px solid var(--line);scroll-snap-align:start;
+  text-decoration:none;
+}
+.insta-thumb-card img{width:100%;height:100%;object-fit:cover;pointer-events:none;}
+.insta-play-icon{position:absolute;top:6px;right:6px;width:16px;height:16px;opacity:0.85;}
+
 @media(max-width:880px){
   .insta-section{flex-direction:column;align-items:flex-start;}
+  .insta-carousel-outer{max-width:100%;width:100%;}
 }
+
 
 /* ===== HOME HERO ===== */
 .hero h1{

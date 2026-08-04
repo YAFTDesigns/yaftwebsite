@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ProjectsGrid, { type PortfolioProject } from '@/components/ProjectsGrid';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
+import CarouselDrag from '@/components/CarouselDrag';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import { getInstagramMedia } from '@/lib/instagram';
@@ -167,40 +168,35 @@ export default async function ProjectsPage() {
               </a>
             </div>
             {instagramMedia.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, width: '100%', maxWidth: 480 }}>
-                {instagramMedia.slice(0, 8).map((item) => (
-                  <a
-                    key={item.id}
-                    href={item.permalink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      position: 'relative',
-                      aspectRatio: '9/16',
-                      borderRadius: 8,
-                      overflow: 'hidden',
-                      display: 'block',
-                      background: 'var(--paper-2)',
-                      border: '1px solid var(--line)',
-                    }}
-                  >
-                    {item.thumbnailUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={item.thumbnailUrl}
-                        alt={item.caption ? item.caption.slice(0, 80) : 'Instagram post'}
-                        loading="lazy"
-                        decoding="async"
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    )}
-                    {item.mediaType === 'VIDEO' && (
-                      <span style={{ position: 'absolute', top: 6, right: 6, width: 16, height: 16, opacity: 0.85 }}>
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
-                      </span>
-                    )}
-                  </a>
-                ))}
+              <div className="insta-carousel-outer">
+                <CarouselDrag id="instaTrack" />
+                <div className="insta-carousel-track" id="instaTrack">
+                  {instagramMedia.map((item) => (
+                    <a
+                      key={item.id}
+                      href={item.permalink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="insta-thumb-card"
+                    >
+                      {item.thumbnailUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.thumbnailUrl}
+                          alt={item.caption ? item.caption.slice(0, 80) : 'Instagram post'}
+                          loading="lazy"
+                          decoding="async"
+                          draggable="false"
+                        />
+                      )}
+                      {item.mediaType === 'VIDEO' && (
+                        <span className="insta-play-icon">
+                          <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
+                        </span>
+                      )}
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
           </div>
