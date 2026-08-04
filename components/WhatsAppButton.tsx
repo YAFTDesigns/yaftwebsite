@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 const ALLOWED_PATHS = ['/', '/courses', '/services'];
@@ -8,7 +9,32 @@ const DEFAULT_MESSAGE = "Hi, I'm interested in your Rhino3D and Grasshopper cour
 
 export default function WhatsAppButton() {
   const pathname = usePathname();
-  if (!ALLOWED_PATHS.includes(pathname)) return null;
+  const allowed = ALLOWED_PATHS.includes(pathname);
+  const [pastHero, setPastHero] = useState(!allowed || pathname !== '/');
+
+  useEffect(() => {
+    if (!allowed) return;
+    // Only the homepage has a hero section to watch; other allowed pages
+    // (courses, services) show the button immediately.
+    if (pathname !== '/') {
+      setPastHero(true);
+      return;
+    }
+    const hero = document.getElementById('hero-section');
+    if (!hero) {
+      setPastHero(true);
+      return;
+    }
+    setPastHero(false);
+    const observer = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(hero);
+    return () => observer.disconnect();
+  }, [allowed, pathname]);
+
+  if (!allowed || !pastHero) return null;
 
   const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
 

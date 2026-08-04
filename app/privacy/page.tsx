@@ -24,7 +24,7 @@ const CLAUSES = [
   },
   {
     title: 'Email Communications',
-    body: 'When you submit an enquiry, unlock a syllabus, or receive an invoice, we send transactional emails (confirmations, invoices, certificates) through the Gmail API, using a Google account authorized specifically for this purpose. We do not use your email address for marketing unless you separately opt in, and every email includes a way to reply directly to us with questions.',
+    body: 'When you submit an enquiry, unlock a syllabus, or receive an invoice, we send transactional emails (confirmations, invoices, certificates) through Resend, a third-party email delivery service. We do not use your email address for marketing unless you separately opt in, and every email includes a way to reply directly to us with questions.',
   },
   {
     title: 'Where Your Data Is Stored',
@@ -40,7 +40,7 @@ const CLAUSES = [
   },
   {
     title: 'Third-Party Services',
-    body: 'This site uses Google Analytics 4 for traffic analysis, the Gmail API for transactional email, Supabase for data storage, and Vercel for hosting. Each of these providers processes data under their own privacy policies. We choose providers that meet reasonable data protection standards and only share the minimum data necessary for them to perform their function.',
+    body: 'This site uses Google Analytics 4 for traffic analysis, Resend for transactional email, Supabase for data storage, and Vercel for hosting. Each of these providers processes data under their own privacy policies. We choose providers that meet reasonable data protection standards and only share the minimum data necessary for them to perform their function.',
   },
   {
     title: "Children's Privacy",
