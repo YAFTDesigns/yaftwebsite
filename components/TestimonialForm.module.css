@@ -24,7 +24,7 @@
 }
 
 .formWrap {
-  max-width: 680px;
+  max-width: 860px;
   margin: 0 auto 48px;
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
@@ -347,61 +347,81 @@
   min-width: 48px;
 }
 
-/* ===== Upfront choice screen, equal 50/50 split ===== */
-.choiceSplit {
+/* ===== Split layout: form on the left, persistent Google sidebar on the right ===== */
+.splitLayout {
   display: flex;
-  align-items: stretch;
-  min-height: 240px;
-}
-
-.choiceHalf {
-  flex: 1 1 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
   gap: 8px;
-  padding: 40px 24px;
-  background: none;
-  border: none;
-  text-decoration: none;
-  cursor: pointer;
+}
+
+.splitLayout .form {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.googleSidebar {
+  flex: 0 0 220px;
+  border-left: 1px solid var(--line);
+  padding: 32px 24px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+}
+
+.googleSidebarInner {
   text-align: center;
-  transition: background 0.2s;
-}
-.choiceHalf:hover {
-  background: rgba(255,255,255,0.03);
+  width: 100%;
 }
 
-.choiceDivider {
-  width: 1px;
-  background: var(--line);
-  flex-shrink: 0;
+.googleSidebarIcon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 10px;
 }
 
-.choiceHalfIcon {
-  font-size: 26px;
-  color: var(--brass);
-  margin-bottom: 8px;
-}
-
-.choiceHalfGoogleIcon {
-  width: 34px;
-  height: 34px;
-  margin-bottom: 8px;
-}
-
-.choiceHalfTitle {
+.googleSidebarTitle {
   font-family: var(--display);
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink);
+  margin-bottom: 6px;
 }
 
-.choiceHalfNote {
+.googleSidebarNote {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.googleSidebarBtn {
+  display: inline-block;
+  width: 100%;
+  background: var(--paper-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  transition: border-color 0.2s;
+}
+.googleSidebarBtn:hover {
+  border-color: rgba(255,255,255,0.28);
+}
+
+@media (max-width: 720px) {
+  .splitLayout {
+    flex-direction: column;
+  }
+  .googleSidebar {
+    border-left: none;
+    border-top: 1px solid var(--line);
+    width: 100%;
+  }
 }
 
 /* ===== Post-submit Google nudge ===== */
