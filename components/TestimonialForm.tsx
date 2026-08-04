@@ -21,7 +21,6 @@ export default function TestimonialForm({ source }: { source?: string }) {
     course_taken: '',
     quote: '',
     linkedin_url: '',
-    instagram_url: '',
     show_social: false,
   });
 
@@ -54,7 +53,6 @@ export default function TestimonialForm({ source }: { source?: string }) {
     fd.append('course_taken', form.course_taken);
     fd.append('quote', form.quote);
     fd.append('linkedin_url', form.linkedin_url);
-    fd.append('instagram_url', form.instagram_url);
     fd.append('show_social', String(form.show_social));
     fd.append('rating', String(rating || 5.0));
     if (source) fd.append('source', source);
@@ -275,32 +273,20 @@ export default function TestimonialForm({ source }: { source?: string }) {
           </div>
         </div>
 
-        {/* Social links */}
-        <div className={styles.row}>
-          <div className={styles.field}>
-            <label className={styles.label}>LinkedIn URL</label>
-            <input
-              className={styles.input}
-              value={form.linkedin_url}
-              onChange={e => set('linkedin_url', e.target.value)}
-              placeholder="https://linkedin.com/in/..."
-              type="url"
-            />
-          </div>
-          <div className={styles.field}>
-            <label className={styles.label}>Instagram URL</label>
-            <input
-              className={styles.input}
-              value={form.instagram_url}
-              onChange={e => set('instagram_url', e.target.value)}
-              placeholder="https://instagram.com/..."
-              type="url"
-            />
-          </div>
+        {/* LinkedIn */}
+        <div className={styles.field}>
+          <label className={styles.label}>LinkedIn URL</label>
+          <input
+            className={styles.input}
+            value={form.linkedin_url}
+            onChange={e => set('linkedin_url', e.target.value)}
+            placeholder="https://linkedin.com/in/..."
+            type="url"
+          />
         </div>
 
         {/* Consent checkbox */}
-        {(form.linkedin_url || form.instagram_url) && (
+        {form.linkedin_url && (
           <label className={styles.consentRow}>
             <input
               type="checkbox"
@@ -309,13 +295,13 @@ export default function TestimonialForm({ source }: { source?: string }) {
               className={styles.checkbox}
             />
             <span className={styles.consentText}>
-              I am okay with my LinkedIn or Instagram being shown publicly on the site alongside my testimonial.
+              I am okay with my LinkedIn being shown publicly on the site alongside my testimonial.
             </span>
           </label>
         )}
 
         <p className={styles.notice}>
-          Your testimonial will be reviewed before it appears on the site. Only your name, designation, photo, and quote are shown publicly. Your social links are kept private unless you opt in above.
+          Your testimonial will be reviewed before it appears on the site. Only your name, designation, photo, and quote are shown publicly. Your LinkedIn is kept private unless you opt in above.
         </p>
 
         {status === 'error' && (
