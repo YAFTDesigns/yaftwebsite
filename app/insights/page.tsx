@@ -80,6 +80,12 @@ export default function InsightsPage() {
                           <span>{new Date(p.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                           <span>·</span>
                           <span>{p.readMinutes} min read</span>
+                          {p.updatedAt && p.updatedAt !== p.publishedAt && (
+                            <>
+                              <span>·</span>
+                              <span>Updated {new Date(p.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                            </>
+                          )}
                         </div>
                         <h2>{p.title}</h2>
                         <p className={styles.dek}>{p.dek}</p>

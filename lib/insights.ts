@@ -10,6 +10,7 @@ export type InsightPost = {
   dek: string;
   tags: string[];
   publishedAt: string; // ISO date
+  updatedAt: string; // ISO date, bump this whenever a post's content is substantively edited
   readMinutes: number;
   coverImage?: string;
   coverCaption?: string;
@@ -23,6 +24,7 @@ export const INSIGHT_POSTS: InsightPost[] = [
     dek: 'A unitized facade with 131 uniquely curved fins means 131 fabrication molds, unless you can prove some of those curves are close enough to share one. Here is the workflow we used to find out.',
     tags: ['Grasshopper', 'GHPython', 'Facade Engineering'],
     publishedAt: '2026-07-25',
+    updatedAt: '2026-07-25',
     readMinutes: 6,
     body: [
       { type: 'p', text: "On a recent facade rationalization job, the design called for around 131 strip and fin elements, each following its own gentle curve across the building's surface. Left as is, that's 131 unique fabrication molds, and every unique mold costs real money and real lead time. The brief was simple to state and hard to do: find which of those 131 curves are close enough to each other that they can share a mold, without visibly changing the design intent." },
@@ -65,6 +67,7 @@ clusters.append(current)` },
     dek: "Getting Grasshopper to place Revit family instances and build Assemblies through GHPython sounds simple until the Transaction fails silently and the geometry you passed in isn't the type Revit expected.",
     tags: ['Rhino.Inside.Revit', 'GHPython', 'Revit'],
     publishedAt: '2026-07-25',
+    updatedAt: '2026-07-25',
     readMinutes: 7,
     coverImage: '/assets/images/insights/rhino-inside-revit-cover.jpg',
     coverCaption: 'A BEAM-based Rhino to Revit workflow (Rhino geometry exported as a Revit family, opened in Revit). BEAM is a separate, no-code tool from MKS DTECH, different from the scripted Rhino.Inside.Revit approach this post covers, shown here because the underlying problem, getting Rhino geometry into Revit as real BIM data, is the same one.',
@@ -105,6 +108,7 @@ clusters.append(current)` },
     dek: 'Every Grasshopper user eventually hits the same fork in the road. Keep wiring native components together, or drop into a Python node. Here is what that decision actually looked like on a real 600 curve sort.',
     tags: ['Grasshopper', 'GHPython'],
     publishedAt: '2026-07-25',
+    updatedAt: '2026-07-25',
     readMinutes: 5,
     coverImage: '/assets/images/insights/facade-fin-clustering-cover.jpg',
     coverCaption: 'The actual GHPython component from a real sort-and-group script: curves and a tolerance in, cluster count and per-cluster colors out. 1,048 branches sorted and grouped in the viewport.',
@@ -144,6 +148,7 @@ groups.append(current_group)` },
     dek: 'Running a workshop on recursion and fractal logic for B.Arch and M.Arch students surfaced a gap that is easy to miss when you already think recursively. The hard part was never the code.',
     tags: ['Teaching', 'Grasshopper', 'WASP'],
     publishedAt: '2026-07-25',
+    updatedAt: '2026-07-25',
     readMinutes: 5,
     body: [
       { type: 'p', text: "ITERATE was a workshop built around a simple premise. Fractal and recursive logic isn't just a visual style in parametric design, it's a different way of describing a rule. Instead of drawing the final form, you describe the step that repeats, and the form emerges from how many times and how it repeats. Running it for B.Arch and M.Arch students, using Grasshopper with Python and WASP for the aggregation side, surfaced something I hadn't fully anticipated going in." },
@@ -167,6 +172,7 @@ groups.append(current_group)` },
     dek: 'Both tools show up in facade engineering conversations, usually with more opinion than evidence behind the take. Here is what actually differs once you have run real rationalization work through both.',
     tags: ['Facade Engineering', 'Rhino', 'HiCAD'],
     publishedAt: '2026-07-25',
+    updatedAt: '2026-07-25',
     readMinutes: 6,
     body: [
       { type: 'p', text: "HiCAD and Rhino/Grasshopper get compared a lot in facade engineering circles, usually as a proxy for a bigger argument about parametric first versus detailing first workflows. Having run real rationalization and fabrication drawing work through both, the honest answer is neither wins outright. They're built around different assumptions about where in the process the hard thinking happens." },

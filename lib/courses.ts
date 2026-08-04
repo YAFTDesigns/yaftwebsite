@@ -11,6 +11,7 @@ export type Course = {
   title: string;
   desc: string;
   pdf: string;
+  updatedAt: string;
 };
 
 type CourseRow = {
@@ -22,9 +23,10 @@ type CourseRow = {
   description: string | null;
   image_path: string | null;
   pdf_storage_path: string | null;
+  updated_at: string;
 };
 
-const COLUMNS = 'slug, title, tool, level, duration, description, image_path, pdf_storage_path';
+const COLUMNS = 'slug, title, tool, level, duration, description, image_path, pdf_storage_path, updated_at';
 
 function toCourse(row: CourseRow): Course {
   return {
@@ -39,6 +41,7 @@ function toCourse(row: CourseRow): Course {
     // Phase 1: PDFs are still served from /public. Phase 2 swaps this for a
     // signed Supabase Storage URL built from the same pdf_storage_path.
     pdf: row.pdf_storage_path ? `/assets/pdfs/${row.pdf_storage_path}` : '',
+    updatedAt: row.updated_at,
   };
 }
 

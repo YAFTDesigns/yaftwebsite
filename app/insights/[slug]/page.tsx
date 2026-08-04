@@ -47,6 +47,7 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
     headline: post.title,
     description: post.dek,
     datePublished: post.publishedAt,
+    dateModified: post.updatedAt ?? post.publishedAt,
     author: { '@type': 'Person', name: 'Yokes Marapa' },
     publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
   };
@@ -69,6 +70,12 @@ export default async function InsightPostPage({ params }: { params: Promise<{ sl
               <span>{new Date(post.publishedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
               <span>·</span>
               <span>{post.readMinutes} min read</span>
+              {post.updatedAt && post.updatedAt !== post.publishedAt && (
+                <>
+                  <span>·</span>
+                  <span>Updated {new Date(post.updatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                </>
+              )}
             </div>
 
             <h1>{post.title}</h1>

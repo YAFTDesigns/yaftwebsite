@@ -14,6 +14,18 @@ import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
 import styles from './courses.module.css';
 
+function formatUpdated(iso: string): string {
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const days = Math.floor((now - then) / 86400000);
+  if (days < 1) return 'Updated today';
+  if (days === 1) return 'Updated yesterday';
+  if (days < 14) return `Updated ${days} days ago`;
+  if (days < 60) return `Updated ${Math.floor(days / 7)} weeks ago`;
+  if (days < 365) return `Updated ${Math.floor(days / 30)} months ago`;
+  return `Updated ${Math.floor(days / 365)} year${days >= 730 ? 's' : ''} ago`;
+}
+
 const TITLE = 'Rhino3D & Grasshopper Courses India | Online Training Asia Pacific and Middle East';
 const DESCRIPTION =
   'Professional Rhino3D and Grasshopper training for architects and designers. Live online masterclasses available across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
@@ -147,6 +159,9 @@ export default async function CoursesPage() {
                     <div className={styles.courseTool}>{course.tool}</div>
                     <h3>{course.title}</h3>
                     <p className={styles.desc}>{course.desc}</p>
+                    <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', margin: '-8px 0 12px' }}>
+                      {formatUpdated(course.updatedAt)}
+                    </p>
                     {COURSE_DETAIL_PAGES[course.slug] && (
                       <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--line)' }}>
                         <CourseGateButton href={COURSE_DETAIL_PAGES[course.slug]} course={course.title} slug={course.slug} />
