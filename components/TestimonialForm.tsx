@@ -106,7 +106,7 @@ export default function TestimonialForm({ source }: { source?: string }) {
             }
           </div>
           <div>
-            <p className={styles.photoHint}>Profile photo (optional)</p>
+            <p className={styles.photoHint}>Profile photo</p>
             <button type="button" className={styles.photoBtn} onClick={() => fileRef.current?.click()}>
               {photoPreview ? 'Change photo' : 'Upload photo'}
             </button>
