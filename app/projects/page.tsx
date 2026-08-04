@@ -5,6 +5,7 @@ import ProjectsGrid, { type PortfolioProject } from '@/components/ProjectsGrid';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
+import { getInstagramMedia } from '@/lib/instagram';
 
 // Most project images live in Supabase Storage, but some (e.g. where
 // we can't put client-confidential material through a third-party
@@ -73,11 +74,14 @@ type ProjectRow = {
 };
 
 export default async function ProjectsPage() {
-  const { data } = await getSupabaseAdmin()
-    .from('portfolio_projects')
-    .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
-    .eq('active', true)
-    .order('display_order');
+  const [{ data }, instagramMedia] = await Promise.all([
+    getSupabaseAdmin()
+      .from('portfolio_projects')
+      .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
+      .eq('active', true)
+      .order('display_order'),
+    getInstagramMedia(8),
+  ]);
 
   const rows = (data as ProjectRow[] | null) ?? [];
 
@@ -153,15 +157,52 @@ export default async function ProjectsPage() {
                 Scripts running, panels rationalizing, workshops in progress. Follow <strong>@yaft_designs</strong>{' '}
                 for the unedited version.
               </p>
+              <a href="https://www.instagram.com/yaft_designs/?hl=en" target="_blank" rel="noopener noreferrer" className="insta-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
+                </svg>
+                @yaft_designs
+              </a>
             </div>
-            <a href="https://www.instagram.com/yaft_designs/?hl=en" target="_blank" rel="noopener noreferrer" className="insta-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="0.5" fill="currentColor" stroke="none" />
-              </svg>
-              @yaft_designs
-            </a>
+            {instagramMedia.length > 0 && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, width: '100%', maxWidth: 480 }}>
+                {instagramMedia.slice(0, 8).map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.permalink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      position: 'relative',
+                      aspectRatio: '9/16',
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      display: 'block',
+                      background: 'var(--paper-2)',
+                      border: '1px solid var(--line)',
+                    }}
+                  >
+                    {item.thumbnailUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.thumbnailUrl}
+                        alt={item.caption ? item.caption.slice(0, 80) : 'Instagram post'}
+                        loading="lazy"
+                        decoding="async"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    )}
+                    {item.mediaType === 'VIDEO' && (
+                      <span style={{ position: 'absolute', top: 6, right: 6, width: 16, height: 16, opacity: 0.85 }}>
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z" /></svg>
+                      </span>
+                    )}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
