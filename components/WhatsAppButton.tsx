@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 const ALLOWED_PATHS = ['/', '/courses', '/services'];
-const WHATSAPP_NUMBER = '919789303375';
 const DEFAULT_MESSAGE = "Hi, I'm interested in your Rhino3D and Grasshopper courses.";
 
 export default function WhatsAppButton() {
@@ -36,7 +35,7 @@ export default function WhatsAppButton() {
 
   if (!allowed || !pastHero) return null;
 
-  const href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
+  const href = `/api/wa?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
 
   return (
     <>
@@ -109,9 +108,10 @@ export default function WhatsAppButton() {
         }
         .wa-float-pill span:first-child {
           color: #ededed;
-          font-family: var(--body, sans-serif);
+          font-family: var(--display, sans-serif);
           font-weight: 600;
           font-size: 14px;
+          letter-spacing: 0.01em;
           white-space: nowrap;
           text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
