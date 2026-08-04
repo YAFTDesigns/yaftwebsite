@@ -55,6 +55,11 @@ header{
   background:rgba(10, 10, 10, 0.85);
   backdrop-filter:blur(6px);
   border-bottom:1px solid var(--line);
+  transform:translateY(0);
+  transition:transform 0.25s ease;
+}
+header.headerHidden{
+  transform:translateY(-100%);
 }
 nav{
   max-width:1180px;margin:0 auto;padding:22px 40px;

@@ -10,8 +10,35 @@ const RHINO_DIRECTORY_URL =
 export default function SiteHeader({ active }: { active?: string }) {
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | null>(null);
+  const [hidden, setHidden] = useState(false);
   const projectsRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
+
+  // Auto-hide on scroll down, reveal instantly on scroll up. Stays visible
+  // near the top of the page (within HIDE_AFTER px) so it doesn't
+  // disappear on a tiny scroll, and stays visible whenever the mobile
+  // menu is open so it can't vanish mid-navigation.
+  useEffect(() => {
+    const HIDE_AFTER = 80;
+    let lastY = window.scrollY;
+
+    function onScroll() {
+      if (open) return; // never hide while the mobile menu is open
+      const y = window.scrollY;
+      const goingDown = y > lastY;
+      if (y < HIDE_AFTER) {
+        setHidden(false);
+      } else if (goingDown) {
+        setHidden(true);
+      } else {
+        setHidden(false);
+      }
+      lastY = y;
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [open]);
 
   // close dropdown on outside click
   useEffect(() => {
@@ -29,7 +56,7 @@ export default function SiteHeader({ active }: { active?: string }) {
   const isResourcesActive = active === '/resources' || active === '/insights';
 
   return (
-    <header>
+    <header className={hidden ? 'headerHidden' : undefined}>
       <nav>
         <Link href="/" className="logo">
           <span className="mark">YAFT</span>
