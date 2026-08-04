@@ -26,6 +26,8 @@ export const INSIGHT_POSTS: InsightPost[] = [
     publishedAt: '2026-07-25',
     updatedAt: '2026-07-25',
     readMinutes: 6,
+    coverImage: '/assets/images/insights/fin-clustering-shell-cover.jpg',
+    coverCaption: 'A stylized illustration of the clustering result: elements grouped by curvature band into six shared-mold clusters across a curved shell surface.',
     body: [
       { type: 'p', text: "On a recent facade rationalization job, the design called for around 131 strip and fin elements, each following its own gentle curve across the building's surface. Left as is, that's 131 unique fabrication molds, and every unique mold costs real money and real lead time. The brief was simple to state and hard to do: find which of those 131 curves are close enough to each other that they can share a mold, without visibly changing the design intent." },
 
