@@ -70,10 +70,10 @@ export default function ServicesCarousel() {
     timerRef.current = setInterval(() => {
       setCurrent((prev) => {
         setExitingIndex(prev);
-        setTimeout(() => setExitingIndex(null), 600);
+        setTimeout(() => setExitingIndex(null), 1000);
         return (prev + 1) % SERVICES.length;
       });
-    }, 3500);
+    }, 5500);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
