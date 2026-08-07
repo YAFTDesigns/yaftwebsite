@@ -192,6 +192,49 @@ groups.append(current_group)` },
       { type: 'p', text: "The practical answer that's held up across multiple jobs: use Grasshopper for the phase where the geometry is still a question, and hand off to HiCAD, or an equivalent detailing tool, once the geometry is a settled answer and the job becomes documentation and fabrication output. Trying to force one tool to cover both phases is where most of the real pain shows up. Either over engineering a Grasshopper definition to do detailing work it wasn't designed for, or fighting HiCAD's assumptions during a phase where the design is still genuinely moving." },
     ],
   },
+  {
+    slug: 'automating-shop-drawings-in-grasshopper',
+    title: 'Automating Shop Drawings in Grasshopper: From Curved Panel to Print-Ready DXF',
+    dek: 'A stadium roof with 39 gutter panels, most of them close but not identical. Here is the actual Grasshopper pipeline that took them from surface geometry to labeled, layered DXFs ready for an AutoCAD title block.',
+    tags: ['Grasshopper', 'Elefront', 'Shop Drawings', 'Facade Engineering'],
+    publishedAt: '2026-08-08',
+    updatedAt: '2026-08-08',
+    readMinutes: 7,
+    body: [
+      { type: 'p', text: "39 gutter panels sounds like a small job until you're the one drafting each one by hand. 34 of them were single-fold, close enough to a family that they looked interchangeable at a glance. The other 5 were multi-panel assemblies with their own joint conditions. None of them were actually identical, because the roof geometry that generated them wasn't repetitive, it was continuously varying. Every panel needed its own accurate unroll, its own dimensions, and its own labeled sheet. The geometry itself, Rhino handles natively without much drama. What eats the hours is everything downstream of the unroll: naming, dimensioning, layer discipline, and getting 39 sheets into a state where a fabricator can pick any one of them up and know exactly what they're looking at." },
+
+      { type: 'h2', text: 'Where the real bottleneck was' },
+      { type: 'p', text: "It's tempting to assume the hard part of shop drawing automation is the flattening. It mostly isn't. Rhino's UnrollSrf handles single-curved, developable surfaces exactly, no approximation involved. For genuinely double-curved geometry, which a few of the multi-panel assemblies were, UnrollSrf can't produce an exact result because a doubly curved surface can't be flattened without distortion, full stop. That's where Squish comes in: an approximate flattening that spreads unavoidable distortion across the surface instead of concentrating it, with a deviation readout so you know how far off any given panel is running. Both are one-click Rhino commands. Neither is where a batch of 39 panels loses a day." },
+      { type: 'p', text: "The actual bottleneck was documentation discipline at volume. Every panel needs a consistent ID, correctly computed overall dimensions, fold lines annotated, and geometry baked to the right named layers so that when the DXF lands in AutoCAD, the VS-CRAFT title block and plot styles just work without someone manually fixing layer names on 39 separate files. Doing that by hand for panel 1 is fine. Doing it identically, with zero naming drift, for panel 39, at the end of a long day, is where mistakes get into fabrication-ready output." },
+
+      { type: 'h2', text: 'The pipeline' },
+      { type: 'p', text: "The script that replaced the manual pass runs each panel through the same five steps: unroll (UnrollSrf where the surface is developable, Squish with a logged deviation value where it isn't), compute the unrolled outline's bounding dimensions, place panel ID and dimension text at a fixed offset from the outline, bake outline and text to panel-specific layers through Elefront, then batch export. Elefront is doing the unglamorous but essential part here, it's a Grasshopper plugin built for exactly this: baking geometry to named layers, with attributes, in a loop, instead of the one-off manual bake Grasshopper's native Bake command is really meant for." },
+      { type: 'code', text: `for panel in panels:
+    if panel.is_developable:
+        flat = unroll(panel.surface)
+    else:
+        flat, deviation = squish(panel.surface)
+        log_deviation(panel.id, deviation)
+
+    width, height = bounding_dimensions(flat)
+    label = make_text(f"PANEL-{panel.id}", at=flat.origin_offset())
+    dims = make_dimension_text(width, height, at=flat.origin_offset())
+
+    bake(flat.outline, layer=f"PANEL-{panel.id}-OUTLINE")
+    bake(label, layer=f"PANEL-{panel.id}-TEXT")
+    bake(dims, layer=f"PANEL-{panel.id}-TEXT")
+
+export_dxf(panel.id)` },
+      { type: 'p', text: "Nothing in that loop is doing anything a person couldn't do manually. What it's actually buying is that panel 39 gets exactly the same layer naming, exactly the same text placement logic, and exactly the same deviation check as panel 1, because the rule lives in one place instead of in whoever happened to be drafting that sheet." },
+
+      { type: 'h2', text: 'The deviation log matters more than it looks' },
+      { type: 'p', text: "Logging the Squish deviation per panel, rather than eyeballing it in the viewport, turned out to be one of the more useful parts of the script. It's a single number per doubly-curved panel, but it's the number that tells you, before the DXF ever reaches a fabricator, whether that panel's flattening is inside tolerance or needs a second look. On a batch of 39, checking that number in a table is a five minute pass. Re-deriving it by eye per panel is not." },
+
+      { type: 'h2', text: 'What this generalizes to' },
+      { type: 'p', text: "None of this is specific to gutter panels or to this particular stadium job. The same shape, unroll or approximate-flatten depending on developability, compute and place documentation automatically instead of by hand, bake to a strict layer naming convention, log anything that needed an approximation, applies to any batch of panels, brackets, or fins where the geometry is genuinely varying and the real cost isn't the flattening, it's keeping 30 or 40 sheets of documentation consistent with each other under deadline pressure." },
+      { type: 'quote', text: "The unroll was never the hard part. Getting the same naming and dimensioning right on sheet 39 as sheet 1 was." },
+    ],
+  },
 ];
 
 export function getInsightPost(slug: string): InsightPost | undefined {
