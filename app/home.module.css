@@ -22,6 +22,8 @@
 .trackCard .place{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;}
 .trackCard h3{color:var(--ink);font-size:18px;margin-bottom:8px;}
 .trackCard p{color:var(--ink-soft);font-size:14.5px;}
+.trackCardLink{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--brass);text-decoration:none;}
+.trackCardLink:hover{text-decoration:underline;}
 .trackLede{max-width:620px;color:var(--ink-soft);font-size:16px;margin-top:18px;}
 
 @media (max-width:880px){
@@ -168,6 +170,12 @@
     inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
+.courseCardVisual {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
 .courseImgCard img {
   width: 100%;
   height: 100%;
@@ -205,6 +213,7 @@
     rgba(0,0,0,0.05) 100%
   );
   z-index: 2;
+  pointer-events: none;
   transition: background 0.35s;
 }
 
@@ -225,6 +234,7 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 22px;
+  pointer-events: none;
 }
 
 .cardTag {
@@ -253,18 +263,18 @@
   letter-spacing: -0.01em;
 }
 
-.cardCta {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  color: var(--brass);
-  text-transform: uppercase;
+.cardCtaRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  pointer-events: auto;
   opacity: 0;
   transform: translateY(8px);
   transition: opacity 0.3s, transform 0.3s;
 }
 
-.courseImgCard:hover .cardCta {
+.courseImgCard:hover .cardCtaRow {
   opacity: 1;
   transform: translateY(0);
 }

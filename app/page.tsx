@@ -11,8 +11,13 @@ import ServicesCarousel from '@/components/ServicesCarousel';
 import CarouselProgress from '@/components/CarouselProgress';
 import ContourCanvas from '@/components/ContourCanvas';
 import CoursesHeroBlock from '@/components/CoursesHeroBlock';
+import CourseVisualLink from '@/components/CourseVisualLink';
+import CourseGateButton from '@/components/CourseGateButton';
+import CourseGateModal from '@/components/CourseGateModal';
+import { COURSE_DETAIL_PAGES } from './courses/courseNav';
 import FeatureWall from '@/components/FeatureWall';
-import { getStudentWork, getPublications, getPartners, getRandomTestimonial } from '@/lib/feature-wall';
+import TestimonialRotator from '@/components/TestimonialRotator';
+import { getStudentWork, getPublications, getPartners, getFeaturedTestimonials } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
@@ -117,6 +122,15 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
+const HOME_COURSE_CARDS = [
+  { title: 'Rhino3D for Architecture', img: '/assets/images/courses/rhino-architecture.jpg', alt: 'Rhino3D for Architecture', tag: 'Beginner → Inter', dbSlug: 'rhino-architecture' },
+  { title: 'Grasshopper for Computational Design', img: '/assets/images/courses/grasshopper-architecture.jpg', alt: 'Grasshopper', tag: 'Basic → Advanced', dbSlug: 'grasshopper-architecture' },
+  { title: 'Rhino.Inside.Revit', img: '/assets/images/courses/revit-rhino-inside.jpg', alt: 'Rhino.Inside.Revit', tag: 'Advanced', dbSlug: 'revit-rhino-inside' },
+  { title: 'Rhino3D for AEC & Climate Design', img: '/assets/images/courses/rhino-aec-climate.jpg', alt: 'AEC & Climate Design', tag: 'Intermediate', dbSlug: 'rhino-aec-climate' },
+  { title: 'Wearables & Product Design', img: '/assets/images/courses/rhino-wearables-footwear.jpg', alt: 'Wearables & Product Design', tag: 'All levels', dbSlug: null },
+  { title: 'Industrial Design', img: '/assets/images/courses/rhino-industrial-design.jpg', alt: 'Industrial Design', tag: 'All levels', dbSlug: 'rhino-industrial-design' },
+] as const;
+
 const FAQ_ITEMS = [
   { q: 'Do you sell Rhino software or licenses?', a: 'No. YAFT Designs is a training and consulting business only. For licenses, go directly to McNeel at rhino3d.com.' },
   { q: 'Is training online or in person?', a: 'Both. In-person sessions run from our Coimbatore base; remote sessions are available for individuals, teams, and institutions anywhere in the world.' },
@@ -196,11 +210,11 @@ const LOCAL_BUSINESS_JSON_LD = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [studentWork, publications, partners, testimonial] = await Promise.all([
+  const [studentWork, publications, partners, testimonials] = await Promise.all([
     getStudentWork(),
     getPublications(),
     getPartners(),
-    getRandomTestimonial(),
+    getFeaturedTestimonials(4),
   ]);
   return (
     <>
@@ -267,77 +281,41 @@ export default async function HomePage() {
             <CarouselDrag id="courseTrack" />
             <div className={styles.carouselTrack} id="courseTrack">
 
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/rhino-architecture.jpg" alt="Rhino3D for Architecture" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>Beginner → Inter</span>
-                  <h3 className={styles.cardTitle}>Rhino3D for Architecture</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
-
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/grasshopper-architecture.jpg" alt="Grasshopper" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>Basic → Advanced</span>
-                  <h3 className={styles.cardTitle}>Grasshopper for Computational Design</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
-
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/revit-rhino-inside.jpg" alt="Rhino.Inside.Revit" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>Advanced</span>
-                  <h3 className={styles.cardTitle}>Rhino.Inside.Revit</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
-
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/rhino-aec-climate.jpg" alt="AEC & Climate Design" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>Intermediate</span>
-                  <h3 className={styles.cardTitle}>Rhino3D for AEC &amp; Climate Design</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
-
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/rhino-wearables-footwear.jpg" alt="Wearables & Product Design" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>All levels</span>
-                  <h3 className={styles.cardTitle}>Wearables &amp; Product Design</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
-
-              <Link href="/courses" className={styles.courseImgCard}>
-                <img src="/assets/images/courses/rhino-industrial-design.jpg" alt="Industrial Design" draggable="false" />
-                <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
-                <div className={styles.glassOverlay}></div>
-                <div className={styles.cardGradient}></div>
-                <div className={styles.cardContent}>
-                  <span className={styles.cardTag}>All levels</span>
-                  <h3 className={styles.cardTitle}>Industrial Design</h3>
-                  <span className={styles.cardCta}>Enquire</span>
-                </div>
-              </Link>
+              {HOME_COURSE_CARDS.map((c) => {
+                const detailHref = c.dbSlug ? COURSE_DETAIL_PAGES[c.dbSlug] : undefined;
+                return (
+                  <div className={styles.courseImgCard} key={c.title}>
+                    {detailHref ? (
+                      <CourseVisualLink
+                        href={detailHref}
+                        course={c.title}
+                        slug={c.dbSlug!}
+                        className={styles.courseCardVisual}
+                      >
+                        <img src={c.img} alt={c.alt} draggable="false" />
+                        <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                        <div className={styles.glassOverlay}></div>
+                        <div className={styles.cardGradient}></div>
+                      </CourseVisualLink>
+                    ) : (
+                      <Link href="/courses" className={styles.courseCardVisual} aria-label={`View ${c.title}`}>
+                        <img src={c.img} alt={c.alt} draggable="false" />
+                        <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
+                        <div className={styles.glassOverlay}></div>
+                        <div className={styles.cardGradient}></div>
+                      </Link>
+                    )}
+                    <div className={styles.cardContent}>
+                      <span className={styles.cardTag}>{c.tag}</span>
+                      <h3 className={styles.cardTitle}>{c.title}</h3>
+                      <div className={styles.cardCtaRow}>
+                        <EnquireLink course={c.title} />
+                        {detailHref && <CourseGateButton href={detailHref} course={c.title} slug={c.dbSlug!} />}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
 
             </div>
           </div>
@@ -378,6 +356,7 @@ export default async function HomePage() {
                 <span className={styles.place}>India</span>
                 <h3>Vande Bharat cockpit facelift</h3>
                 <p>Design through FRP manufacture and 3D mold production, with INTO Designs.</p>
+                <Link href="/projects/vande-bharat-cockpit" className={styles.trackCardLink}>Full case study →</Link>
               </div>
               <div className={styles.trackCard}>
                 <span className={styles.place}>Singapore / Australia / Oman</span>
@@ -393,20 +372,7 @@ export default async function HomePage() {
             <h2 className={styles.testiHeading}>What our students actually say</h2>
             <p className={styles.testiSubheading}>What it&apos;s actually like to learn with us.</p>
             <div className={styles.testiSection}>
-              {testimonial && (
-                <div className={styles.testiCard}>
-                  <div className={styles.testiStars}>
-                    {'★'.repeat(Math.round(testimonial.rating ?? 5))}
-                  </div>
-                  <div className={styles.testiQuote}>&quot;{testimonial.quote}&quot;</div>
-                  <div className={styles.testiName}>{testimonial.name}</div>
-                  {(testimonial.role || testimonial.institution) && (
-                    <div className={styles.testiRole}>
-                      {[testimonial.role, testimonial.institution].filter(Boolean).join(', ')}
-                    </div>
-                  )}
-                </div>
-              )}
+              <TestimonialRotator testimonials={testimonials} />
               <div className={styles.portraitBlock}>
                 <div className={styles.portraitFrame}>
                   <div className={styles.portraitBackdrop}></div>
@@ -463,6 +429,7 @@ export default async function HomePage() {
       </main>
 
       <SiteFooter />
+      <CourseGateModal />
     </>
   );
 }

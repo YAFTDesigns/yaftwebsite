@@ -86,6 +86,25 @@ export async function getRandomTestimonial(): Promise<Testimonial | null> {
   } catch { return null; }
 }
 
+// Homepage spotlight: a handful of approved testimonials to rotate through,
+// rather than a single static one. Shuffled server-side on each request.
+export async function getFeaturedTestimonials(limit = 4): Promise<Testimonial[]> {
+  try {
+    const { data, error } = await getSupabasePublic()
+      .from('testimonials')
+      .select('id,name,role,institution,quote,rating')
+      .eq('status', 'approved');
+    if (error) throw error;
+    if (!data || data.length === 0) return [];
+    const shuffled = [...data];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, limit);
+  } catch { return []; }
+}
+
 export async function getPartners(): Promise<Partner[]> {
   try {
     const { data, error } = await getSupabasePublic()

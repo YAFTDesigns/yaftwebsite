@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { OPEN_LIGHTBOX_EVENT, type LightboxOpenDetail } from './Lightbox';
 import styles from '@/app/projects/projects.module.css';
@@ -49,17 +50,17 @@ export default function ProjectsGrid({ projects }: { projects: PortfolioProject[
       ) : (
         <div className={styles.grid}>
           {visible.map(p => (
-            <button
-              key={p.slug}
-              type="button"
-              className={styles.card}
-              onClick={() =>
-                window.dispatchEvent(
-                  new CustomEvent<LightboxOpenDetail>(OPEN_LIGHTBOX_EVENT, { detail: { groupKey: p.slug, index: 0 } })
-                )
-              }
-            >
-              <div className={styles.thumb}>
+            <div key={p.slug} className={styles.card}>
+              <button
+                type="button"
+                className={styles.thumb}
+                aria-label={`Quick view: ${p.title}`}
+                onClick={() =>
+                  window.dispatchEvent(
+                    new CustomEvent<LightboxOpenDetail>(OPEN_LIGHTBOX_EVENT, { detail: { groupKey: p.slug, index: 0 } })
+                  )
+                }
+              >
                 {p.coverSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.coverSrc} alt={p.title} loading="lazy" decoding="async" />
@@ -67,14 +68,15 @@ export default function ProjectsGrid({ projects }: { projects: PortfolioProject[
                   <span className={styles.phLabel}>Coming soon</span>
                 )}
                 {p.featured && <span className={styles.featuredTag}>Featured</span>}
-              </div>
+              </button>
               <div className={styles.cardBody}>
                 <span className={styles.cardCategory}>{CATEGORY_LABELS[p.category] ?? p.category}</span>
                 <h3>{p.title}</h3>
                 <p className={styles.cardMeta}>{p.location}{p.year ? ` · ${p.year}` : ''}</p>
                 <p className={styles.cardSummary}>{p.summary}</p>
+                <Link href={`/projects/${p.slug}`} className={styles.caseStudyLink}>Full case study →</Link>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
