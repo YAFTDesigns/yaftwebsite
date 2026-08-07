@@ -66,10 +66,26 @@ const SERVICES: Service[] = [
   },
 ];
 
+type BgImage = {
+  src: string;
+  alt: string;
+  duration: number;
+};
+
+const BG_IMAGES: BgImage[] = [
+  { src: '/assets/images/services-loop/kinetic-facade-panels.jpg', alt: 'Kinetic parametric facade panel system', duration: 8000 },
+  { src: '/assets/images/services-loop/facade-pattern-diagram.jpg', alt: 'Facade panel tessellation pattern study', duration: 8000 },
+  { src: '/assets/images/services-hero-1.jpg', alt: 'Rhino and Grasshopper training session', duration: 5000 },
+  { src: '/assets/images/services-hero-2.jpg', alt: 'Rhinoceros software workshop presentation', duration: 5000 },
+];
+
 export default function ServicesCarousel() {
   const [current, setCurrent] = useState(0);
   const [exitingIndex, setExitingIndex] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const [bgIndex, setBgIndex] = useState(0);
+  const bgTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Respect reduced-motion preference: stop auto-advancing, first card just stays put.
@@ -89,6 +105,24 @@ export default function ServicesCarousel() {
     };
   }, []);
 
+  useEffect(() => {
+    // Background image loop, additional layer over the looping video. Each image
+    // holds for its own duration (new facade shots run longer than the rest).
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const advance = () => {
+      bgTimerRef.current = setTimeout(() => {
+        setBgIndex((prev) => (prev + 1) % BG_IMAGES.length);
+      }, BG_IMAGES[bgIndex].duration);
+    };
+    advance();
+
+    return () => {
+      if (bgTimerRef.current) clearTimeout(bgTimerRef.current);
+    };
+  }, [bgIndex]);
+
   return (
     <div className={styles.section}>
       <video
@@ -102,6 +136,20 @@ export default function ServicesCarousel() {
         <source src="/assets/video/services-bg.webm" type="video/webm" />
         <source src="/assets/video/services-bg.mp4" type="video/mp4" />
       </video>
+
+      <div className={styles.bgImageLoop}>
+        {BG_IMAGES.map((img, i) => (
+          <img
+            key={img.src}
+            src={img.src}
+            alt={img.alt}
+            className={`${styles.bgImage} ${i === bgIndex ? styles.bgImageVisible : ''}`}
+            loading={i === 0 ? 'eager' : 'lazy'}
+            decoding="async"
+          />
+        ))}
+      </div>
+
       <div className={styles.bgFade} />
 
       <div className={styles.inner}>
