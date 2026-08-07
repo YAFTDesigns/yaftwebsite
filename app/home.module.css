@@ -15,66 +15,6 @@
 .servicesSection{ position:relative; }
 .servicesHead{ padding:0; margin-bottom:48px; }
 
-/* 2x2 card grid */
-.servicesGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.svcCard {
-  background: #111111;
-  border: 1px solid #222222;
-  border-radius: 12px;
-  padding: 32px 28px;
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s ease;
-}
-.svcCard:hover { border-color: #3a3a3a; }
-
-.svcTitle {
-  font-family: var(--display);
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: -0.01em;
-  margin-bottom: 14px;
-}
-
-.svcBody {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ink-soft);
-  line-height: 1.75;
-  margin-bottom: 20px;
-}
-
-.svcList {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
-  padding: 0;
-}
-
-.svcList li {
-  font-family: var(--display);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink);
-  padding-left: 18px;
-  position: relative;
-  line-height: 1.5;
-}
-
-.svcList li::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: var(--ink-soft);
-}
-
 
 
 .trackGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:40px;}
@@ -86,7 +26,6 @@
 
 @media (max-width:880px){
   .courseGrid{grid-template-columns:1fr;}
-  .servicesGrid{grid-template-columns:1fr;}
   .trackGrid{grid-template-columns:1fr;}
 }
 
