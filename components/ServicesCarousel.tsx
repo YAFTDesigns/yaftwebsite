@@ -5,6 +5,7 @@ import styles from './ServicesCarousel.module.css';
 
 type Service = {
   title: string;
+  kicker: string;
   color: string;
   body: string;
   points: string[];
@@ -13,45 +14,53 @@ type Service = {
 const SERVICES: Service[] = [
   {
     title: 'One-on-One Training',
+    kicker: 'Individual',
     color: '#40E0D0',
     body: 'Paced to your project or portfolio, in person in Coimbatore or remote. Built around what you are actually working on, not a generic syllabus.',
     points: [
       'Rhino3D, Grasshopper, Rhino.Inside.Revit',
       'Sessions built around your live project',
       'Flexible pacing, 1:1 or small cohort',
+      'Direct feedback on your own scripts and models',
       'Available online across India',
     ],
   },
   {
     title: 'Institutional & Corporate Training',
+    kicker: 'Programs',
     color: '#E6A817',
     body: 'Multi-day or semester-length programs for architecture schools and design firms, delivered on campus or online. Curriculum shaped to your context.',
     points: [
       'Conducted at IIT Kharagpur, VIT, ASADI, NIT Trichy',
       'Parametric design, fabrication, climate analysis',
+      'Runs from single-day intensives to full electives',
       'Customised to institution curriculum',
       'Certificates issued on completion',
     ],
   },
   {
     title: 'Expert Mentorship',
+    kicker: 'Faculty',
     color: '#A78BFA',
     body: 'Embedded visiting faculty for schools adding Rhino and Grasshopper to their curriculum. Semester-length or elective module format at B.Arch and M.Arch levels.',
     points: [
       'Currently at VIT Vellore and ASADI College',
       'Semester-length or elective module format',
+      'Curriculum shaped around department needs',
       'M.Arch and B.Arch levels',
       'Open to new institutional partnerships',
     ],
   },
   {
     title: 'Computational Consulting',
+    kicker: 'Industry',
     color: '#E63946',
     body: 'Panel rationalization, facade scripting, and fabrication documentation for studios and contractors. Active on projects across five countries.',
     points: [
       'Double-curved surface rationalization',
       'Shop drawing automation via Grasshopper',
       'Rhino.Inside.Revit BIM integration',
+      'Deliverables handed off fabrication-ready',
       'Active on projects across 5 countries',
     ],
   },
@@ -105,8 +114,10 @@ export default function ServicesCarousel() {
                 key={svc.title}
                 className={`${styles.card} ${isActive ? styles.active : ''} ${isExiting ? styles.exiting : ''}`}
               >
+                <span className={styles.cardKicker} style={{ color: svc.color }}>{svc.kicker}</span>
                 <h3 className={styles.cardTitle} style={{ color: svc.color }}>{svc.title}</h3>
                 <p className={styles.cardBody}>{svc.body}</p>
+                <div className={styles.cardDivider} />
                 <ul className={styles.cardList}>
                   {svc.points.map((p) => <li key={p}>{p}</li>)}
                 </ul>

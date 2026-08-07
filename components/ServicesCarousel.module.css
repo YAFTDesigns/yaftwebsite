@@ -54,7 +54,7 @@
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 16px;
-  padding: 36px 32px;
+  padding: 44px 44px 40px;
   backdrop-filter: blur(16px) saturate(150%);
   -webkit-backdrop-filter: blur(16px) saturate(150%);
   box-shadow:
@@ -81,33 +81,54 @@
   visibility: visible;
 }
 
+.cardKicker {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.85;
+}
+
 .cardTitle {
   font-family: var(--display);
   font-weight: 700;
-  font-size: 20px;
-  margin: 0 0 14px;
+  font-size: 30px;
+  line-height: 1.15;
+  margin: 0 0 22px;
+  max-width: 380px;
 }
 
 .cardBody {
   font-family: var(--mono);
-  font-size: 13.5px;
-  color: #c0c0c0;
-  line-height: 1.8;
+  font-size: 15px;
+  color: #c8c8c8;
+  line-height: 1.9;
   margin: 0;
+  max-width: 400px;
+}
+
+.cardDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 32px 0;
+  width: 60px;
 }
 
 .cardList {
   list-style: none;
-  padding: 16px 0 0;
+  padding: 0;
   margin-top: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
 }
 
 .cardList li {
   font-family: var(--display);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--ink);
   padding-left: 18px;
