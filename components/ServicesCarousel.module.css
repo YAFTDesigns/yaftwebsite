@@ -24,6 +24,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: right center;
   background: #0A0A0A;
   z-index: 0;
 }
