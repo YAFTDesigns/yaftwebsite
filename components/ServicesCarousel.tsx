@@ -95,29 +95,31 @@ export default function ServicesCarousel() {
       </video>
       <div className={styles.bgFade} />
 
-      <div className={styles.track}>
-        {SERVICES.map((svc, i) => {
-          const isActive = i === current;
-          const isExiting = i === exitingIndex;
-          return (
-            <div
-              key={svc.title}
-              className={`${styles.card} ${isActive ? styles.active : ''} ${isExiting ? styles.exiting : ''}`}
-            >
-              <h3 className={styles.cardTitle} style={{ color: svc.color }}>{svc.title}</h3>
-              <p className={styles.cardBody}>{svc.body}</p>
-              <ul className={styles.cardList}>
-                {svc.points.map((p) => <li key={p}>{p}</li>)}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
+      <div className={styles.inner}>
+        <div className={styles.track}>
+          {SERVICES.map((svc, i) => {
+            const isActive = i === current;
+            const isExiting = i === exitingIndex;
+            return (
+              <div
+                key={svc.title}
+                className={`${styles.card} ${isActive ? styles.active : ''} ${isExiting ? styles.exiting : ''}`}
+              >
+                <h3 className={styles.cardTitle} style={{ color: svc.color }}>{svc.title}</h3>
+                <p className={styles.cardBody}>{svc.body}</p>
+                <ul className={styles.cardList}>
+                  {svc.points.map((p) => <li key={p}>{p}</li>)}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
 
-      <div className={styles.dots}>
-        {SERVICES.map((svc, i) => (
-          <span key={svc.title} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
-        ))}
+        <div className={styles.dots}>
+          {SERVICES.map((svc, i) => (
+            <span key={svc.title} className={`${styles.dot} ${i === current ? styles.dotActive : ''}`} />
+          ))}
+        </div>
       </div>
     </div>
   );

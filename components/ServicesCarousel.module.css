@@ -1,8 +1,21 @@
 .section {
   position: relative;
   min-height: 420px;
-  border-radius: 16px;
   overflow: hidden;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  padding: 48px 40px 0;
+  box-sizing: border-box;
+}
+
+.inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .bgVideo {
