@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { INSIGHT_POSTS } from '@/lib/insights';
+import { getSupabasePublic } from '@/lib/supabase/public';
 
 const BASE = 'https://www.yaftdesigns.com';
 const NOW = new Date().toISOString();
@@ -12,7 +13,22 @@ const COURSE_SLUGS = [
   'revit-rhino-inside',
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+async function getActiveProjectSlugs(): Promise<{ slug: string; updated: string }[]> {
+  try {
+    const { data, error } = await getSupabasePublic()
+      .from('portfolio_projects')
+      .select('slug, created_at')
+      .eq('active', true);
+    if (error || !data) return [];
+    return data.map((p) => ({ slug: p.slug, updated: p.created_at ?? NOW }));
+  } catch {
+    return [];
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projectSlugs = await getActiveProjectSlugs();
+
   return [
     { url: `${BASE}`,           lastModified: NOW, changeFrequency: 'weekly',  priority: 1.0 },
     { url: `${BASE}/courses`,   lastModified: NOW, changeFrequency: 'weekly',  priority: 0.9 },
@@ -23,6 +39,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/faculty`,   lastModified: NOW, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE}/projects`,           lastModified: NOW, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE}/projects/community`, lastModified: NOW, changeFrequency: 'weekly',  priority: 0.7 },
+    ...projectSlugs.map(({ slug, updated }) => ({
+      url: `${BASE}/projects/${slug}`, lastModified: updated, changeFrequency: 'monthly' as const, priority: 0.65,
+    })),
     { url: `${BASE}/resources`,           lastModified: NOW, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE}/insights`,            lastModified: NOW, changeFrequency: 'weekly',  priority: 0.7 },
     ...INSIGHT_POSTS.map((post) => ({

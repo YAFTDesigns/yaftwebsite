@@ -15,9 +15,8 @@ import CourseVisualLink from '@/components/CourseVisualLink';
 import CourseGateButton from '@/components/CourseGateButton';
 import CourseGateModal from '@/components/CourseGateModal';
 import { COURSE_DETAIL_PAGES } from './courses/courseNav';
-import FeatureWall from '@/components/FeatureWall';
 import TestimonialRotator from '@/components/TestimonialRotator';
-import { getStudentWork, getPublications, getPartners, getFeaturedTestimonials } from '@/lib/feature-wall';
+import { getPartners, getFeaturedTestimonials } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
@@ -210,9 +209,7 @@ const LOCAL_BUSINESS_JSON_LD = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [studentWork, publications, partners, testimonials] = await Promise.all([
-    getStudentWork(),
-    getPublications(),
+  const [partners, testimonials] = await Promise.all([
     getPartners(),
     getFeaturedTestimonials(4),
   ]);
