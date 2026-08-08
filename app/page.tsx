@@ -211,7 +211,7 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const [partners, testimonials] = await Promise.all([
     getPartners(),
-    getFeaturedTestimonials(4),
+    getFeaturedTestimonials(6),
   ]);
   return (
     <>
