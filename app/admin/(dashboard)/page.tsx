@@ -59,7 +59,7 @@ async function getCounts() {
   const sixMoStart = sixMonthsAgoStart();
 
   const [
-    leads, enquiries, syllabusRequests, unlocks, leadsBySource,
+    leads, enquiries, syllabusRequests, unlocks, whatsappClicks, leadsBySource,
     pendingTestimonials, enquiriesThisWeek,
     invoicesThisMonth, pendingStudentWork, pendingPublications,
     recentEnquiries, recentInvoices, failedEmails,
@@ -69,6 +69,7 @@ async function getCounts() {
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('syllabus_requests').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'syllabus_unlock'), null),
+    safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_click'), null),
     Promise.all(
       SOURCES.map((source) =>
         safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source), null)
@@ -123,6 +124,7 @@ async function getCounts() {
     enquiriesThisWeek: enquiriesThisWeek.count ?? 0,
     syllabusRequests: syllabusRequests.count ?? 0,
     unlocks: unlocks.count ?? 0,
+    whatsappClicks: whatsappClicks.count ?? 0,
     leadsBySource: SOURCES.map((source, i) => ({ label: source, value: leadsBySource[i].count ?? 0 })),
     enquirySourceSlices,
     monthlyRevenue: monthlyTotals,
@@ -237,6 +239,10 @@ export default async function AdminOverviewPage() {
         <div className={styles.stat}>
           <div className={styles.statValue}>{counts.unlocks}</div>
           <div className={styles.statLabel}>Syllabus unlocks (events)</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{counts.whatsappClicks}</div>
+          <div className={styles.statLabel}>WhatsApp button clicks</div>
         </div>
       </div>
 

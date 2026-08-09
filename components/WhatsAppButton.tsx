@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { track } from '@/lib/analytics';
 
 const ALLOWED_PATHS = ['/', '/courses', '/services'];
 const DEFAULT_MESSAGE = "Hi, I'm interested in your Rhino3D and Grasshopper courses.";
@@ -51,6 +52,7 @@ export default function WhatsAppButton() {
         rel="noopener noreferrer"
         aria-label="Chat with YAFT Designs on WhatsApp"
         className="wa-float-pill"
+        onClick={() => track('whatsapp_click', { page: pathname })}
       >
         <span>Chat With Us</span>
         <span className="wa-icon-wrap">
