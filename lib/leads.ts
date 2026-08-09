@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-export type LeadSource = 'syllabus_gate' | 'contact_form';
+export type LeadSource = 'syllabus_gate' | 'contact_form' | 'whatsapp_gate';
 
 export async function upsertLead(
   supabase: SupabaseClient,

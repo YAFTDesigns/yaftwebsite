@@ -8,7 +8,7 @@ import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const SOURCES = ['syllabus_gate', 'contact_form'] as const;
+const SOURCES = ['syllabus_gate', 'contact_form', 'whatsapp_gate'] as const;
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 function startOfMonth() {
@@ -116,6 +116,7 @@ async function getCounts() {
   const enquirySourceSlices = [
     { label: 'Syllabus gate', value: leadsBySource[0].count ?? 0, color: 'var(--blueprint)' },
     { label: 'Contact form', value: leadsBySource[1].count ?? 0, color: 'var(--brass)' },
+    { label: 'WhatsApp gate', value: leadsBySource[2].count ?? 0, color: '#25D366' },
   ];
 
   return {

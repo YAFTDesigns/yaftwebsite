@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
 
-const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock', 'whatsapp_click']);
+const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock', 'whatsapp_click', 'whatsapp_gate_open']);
 
 // A recent scan showed bot/scanner traffic posting fabricated page
 // values straight to this endpoint (e.g. base64-looking garbage,

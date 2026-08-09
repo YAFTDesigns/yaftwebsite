@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import WhatsAppGateModal from "@/components/WhatsAppGateModal";
 import "./globals.css";
 
 const GA_MEASUREMENT_ID = "G-XDVDJC7X24";
@@ -72,6 +73,7 @@ gtag('config', '${GA_MEASUREMENT_ID}');`}
         )}
         {children}
         <WhatsAppButton />
+        <WhatsAppGateModal />
       </body>
     </html>
   );

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { track } from '@/lib/analytics';
+import { hasStoredWhatsappAccess } from '@/lib/whatsappAccess';
+import { OPEN_WHATSAPP_GATE_EVENT, type WhatsAppGateDetail } from './WhatsAppGateModal';
 
 const ALLOWED_PATHS = ['/', '/courses', '/services'];
 const DEFAULT_MESSAGE = "Hi, I'm interested in your Rhino3D and Grasshopper courses.";
@@ -38,6 +40,19 @@ export default function WhatsAppButton() {
 
   const href = `/api/wa?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
 
+  function handleClick() {
+    if (hasStoredWhatsappAccess()) {
+      track('whatsapp_click', { page: pathname });
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    window.dispatchEvent(
+      new CustomEvent<WhatsAppGateDetail>(OPEN_WHATSAPP_GATE_EVENT, {
+        detail: { text: DEFAULT_MESSAGE, fallbackUrl: href },
+      })
+    );
+  }
+
   return (
     <>
       <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
@@ -46,13 +61,11 @@ export default function WhatsAppButton() {
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="14" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </svg>
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={handleClick}
         aria-label="Chat with YAFT Designs on WhatsApp"
         className="wa-float-pill"
-        onClick={() => track('whatsapp_click', { page: pathname })}
       >
         <span>Chat With Us</span>
         <span className="wa-icon-wrap">
@@ -65,7 +78,7 @@ export default function WhatsAppButton() {
             </svg>
           </span>
         </span>
-      </a>
+      </button>
       <style jsx>{`
         .wa-float-pill {
           position: fixed;
@@ -79,6 +92,9 @@ export default function WhatsAppButton() {
           border-radius: 999px;
           cursor: pointer;
           text-decoration: none;
+          font: inherit;
+          -webkit-appearance: none;
+          appearance: none;
           animation: wa-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 
           background: rgba(255, 255, 255, 0.05);
