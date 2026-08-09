@@ -145,7 +145,7 @@ export default function WhatsAppButton() {
           inset: 0;
           border-radius: 50%;
           background: #25d366;
-          animation: wa-ripple 2.2s ease-out infinite;
+          animation: wa-ripple 2.2s ease-out 2;
         }
         .wa-ring-delay {
           animation-delay: 1.1s;
@@ -167,7 +167,7 @@ export default function WhatsAppButton() {
           box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 2px 6px rgba(37, 211, 102, 0.4);
         }
         .wa-icon-circle svg {
-          animation: wa-ring-shake 2.6s ease-in-out infinite;
+          animation: wa-ring-shake 2.6s ease-in-out 1;
           transform-origin: 50% 20%;
         }
         @keyframes wa-ring-shake {
