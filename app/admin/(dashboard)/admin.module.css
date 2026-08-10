@@ -23,6 +23,29 @@
   box-shadow:0 0 0 2px var(--paper);
   pointer-events:none;
 }
+.navDropdownTrigger{
+  font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+  background:none;border:none;border-bottom:1px solid transparent;padding-bottom:2px;
+  cursor:pointer;display:inline-flex;align-items:center;
+}
+.navDropdownTrigger:hover{color:var(--ink);border-color:var(--brass);}
+.navDropdownMenu{
+  position:absolute;top:calc(100% + 12px);left:50%;transform:translateX(-50%);
+  background:var(--paper);border:1px solid var(--line);
+  min-width:180px;padding:6px;z-index:20;
+  box-shadow:0 8px 24px rgba(0,0,0,0.08);
+}
+.navDropdownLink{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+  padding:9px 10px;text-decoration:none;
+}
+.navDropdownLink:hover{background:var(--paper-2);color:var(--ink);}
+.navDropdownBadge{
+  min-width:16px;height:16px;padding:0 4px;
+  background:#e53935;color:#fff;border-radius:999px;
+  font-family:var(--mono);font-size:10px;font-weight:600;line-height:16px;text-align:center;
+}
 .main{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
 
 .statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:48px;}

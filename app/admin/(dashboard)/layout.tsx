@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/SignOutButton';
+import AdminNav from '@/components/admin/AdminNav';
 import { getNavCounts } from '@/lib/admin/getNavCounts';
 import styles from './admin.module.css';
 
@@ -15,46 +16,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin" className={styles.logo}>
             YAFT <span>Admin</span>
           </Link>
-          <nav className={styles.nav}>
-            <Link href="/admin">Overview</Link>
-            <span className={styles.navItem}>
-              <Link href="/admin/leads">Leads</Link>
-              {counts.newLeads > 0 && (
-                <span className={styles.badge}>{counts.newLeads > 99 ? '99+' : counts.newLeads}</span>
-              )}
-            </span>
-            <Link href="/admin/enquiries">Enquiries</Link>
-            <Link href="/admin/invoices">Invoices</Link>
-            <span className={styles.navItem}>
-              <Link href="/admin/jobs">Jobs</Link>
-              {counts.pendingJobs > 0 && (
-                <span className={styles.badge}>{counts.pendingJobs > 99 ? '99+' : counts.pendingJobs}</span>
-              )}
-            </span>
-            <Link href="/admin/clients">Clients</Link>
-            <Link href="/admin/inbox" className={styles.navLink}>Inbox</Link>
-            <span className={styles.navItem}>
-              <Link href="/admin/emails">Emails</Link>
-              {counts.failedEmails > 0 && (
-                <span className={styles.badge}>{counts.failedEmails > 99 ? '99+' : counts.failedEmails}</span>
-              )}
-            </span>
-            <span className={styles.navItem}>
-              <Link href="/admin/testimonials">Testimonials</Link>
-              {counts.pendingTestimonials > 0 && (
-                <span className={styles.badge}>{counts.pendingTestimonials > 99 ? '99+' : counts.pendingTestimonials}</span>
-              )}
-            </span>
-            <span className={styles.navItem}>
-              <Link href="/admin/community">Community</Link>
-              {counts.pendingApprovals > 0 && (
-                <span className={styles.badge}>{counts.pendingApprovals > 99 ? '99+' : counts.pendingApprovals}</span>
-              )}
-            </span>
-            <Link href="/admin/projects">Projects</Link>
-            <Link href="/admin/certificates">Certificates</Link>
-            <Link href="/admin/analytics">Analytics</Link>
-          </nav>
+          <AdminNav counts={counts} />
           <SignOutButton />
         </div>
       </header>
