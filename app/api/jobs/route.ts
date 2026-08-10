@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = getSupabaseAdmin();
   const { data: job, error } = await supabase.from('jobs').insert({
+    job_no: data.job_no ? String(data.job_no).trim() : null,
     client_id: data.client_id || null,
     client_name,
     job_type,

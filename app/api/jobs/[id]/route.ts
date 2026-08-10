@@ -32,6 +32,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const update: Record<string, unknown> = {};
 
+  if (data.job_no !== undefined) update.job_no = data.job_no ? String(data.job_no).trim() : null;
   if (data.client_name !== undefined) {
     const client_name = String(data.client_name).trim();
     if (!client_name) return NextResponse.json({ error: 'Client name is required' }, { status: 400 });

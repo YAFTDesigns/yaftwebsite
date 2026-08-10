@@ -6,7 +6,7 @@ import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
 
 type Client = { id: string; name: string; company_name: string | null };
 type Job = {
-  id: string; created_at: string; job_date: string;
+  id: string; created_at: string; job_date: string; job_no: string | null;
   client_id: string | null; client_name: string; job_type: string;
   qty: number; rate: number; gst_type: string;
   cgst: number; sgst: number; igst: number; total: number;
@@ -25,10 +25,23 @@ const STATUSES = ['Pending', 'Invoiced', 'Paid'];
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 const EMPTY_FORM = {
-  client_id: '', client_name: '', job_type: JOB_TYPES[0],
+  job_no: '', client_id: '', client_name: '', job_type: JOB_TYPES[0],
   job_date: new Date().toISOString().slice(0, 10),
   qty: '1', rate: '0', gst_type: 'intra', notes: '',
 };
+
+// Next sequential job order number, e.g. GY0001 -> GY0002. Looks at every
+// job_no on file (not just the current filtered view) so numbering stays
+// sequential regardless of status filters, matching how invoice numbers
+// are suggested but editable.
+function nextJobNo(jobs: Job[]): string {
+  let max = 0;
+  for (const j of jobs) {
+    const match = /^GY(\d+)$/.exec(j.job_no ?? '');
+    if (match) max = Math.max(max, parseInt(match[1], 10));
+  }
+  return `GY${String(max + 1).padStart(4, '0')}`;
+}
 
 export default function JobsClient() {
   const [tab, setTab] = useState<'log' | 'all' | 'trash'>('log');
@@ -78,6 +91,12 @@ export default function JobsClient() {
 
   useEffect(() => { loadJobs(); loadTrash(); loadClients(); }, []);
 
+  // Auto-suggest the next job number once jobs are loaded, but only when
+  // the field is empty -- never clobbers something the user is mid-typing.
+  useEffect(() => {
+    setForm(f => f.job_no ? f : { ...f, job_no: nextJobNo(jobs) });
+  }, [jobs]);
+
   function setF(k: keyof typeof EMPTY_FORM, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
   const qtyNum = parseFloat(form.qty) || 0;
@@ -102,7 +121,7 @@ export default function JobsClient() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
-      setForm({ ...EMPTY_FORM, job_date: new Date().toISOString().slice(0, 10) });
+      setForm({ ...EMPTY_FORM, job_no: '', job_date: new Date().toISOString().slice(0, 10) });
       setDone(true);
       setTimeout(() => setDone(false), 2500);
       await loadJobs();
@@ -165,6 +184,17 @@ export default function JobsClient() {
 
       {tab === 'log' && (
         <div style={{ maxWidth: 560 }}>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Job order no.</label>
+            <input
+              type="text"
+              value={form.job_no}
+              onChange={e => setF('job_no', e.target.value)}
+              placeholder="GY0001"
+              style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13, fontFamily: 'var(--mono)' }}
+            />
+          </div>
+
           <div style={{ marginBottom: 14 }}>
             <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client</label>
             <select
@@ -252,6 +282,12 @@ export default function JobsClient() {
               <option value="all">All statuses</option>
               {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+            <a
+              href={`/api/jobs/export?status=${statusFilter}`}
+              style={{ background: 'transparent', border: '1px solid var(--brass)', color: 'var(--brass)', borderRadius: 6, padding: '9px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' }}
+            >
+              ↓ Export to Excel
+            </a>
           </div>
 
           {loading ? (
@@ -266,7 +302,7 @@ export default function JobsClient() {
                 <div className={styles.card} key={j.id}>
                   <div className={styles.cardTop}>
                     <div>
-                      <p className={styles.cardName}>{j.client_name}</p>
+                      <p className={styles.cardName}>{j.job_no ? `${j.job_no} · ` : ''}{j.client_name}</p>
                       <p className={styles.cardRole}>{j.job_type} · {j.qty} × INR {fmt(j.rate)}</p>
                       <p className={styles.cardCourse}>{j.job_date} · {j.gst_type === 'none' ? 'No GST' : j.gst_type === 'intra' ? 'Intra-state' : 'Inter-state'}</p>
                     </div>
