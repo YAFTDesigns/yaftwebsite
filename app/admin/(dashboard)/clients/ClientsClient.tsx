@@ -8,6 +8,7 @@ type Client = {
   name: string; company_name: string | null; gstin: string | null;
   address: string | null; phone: string | null; email: string | null;
   notes: string | null; active: boolean; deleted_at: string | null;
+  share_token: string | null;
 };
 
 const EMPTY_FORM = { name: '', company_name: '', gstin: '', address: '', phone: '', email: '', notes: '' };
@@ -97,6 +98,36 @@ export default function ClientsClient() {
     await load();
   }
 
+  const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
+
+  async function getShareLink(c: Client) {
+    setLinkBusyId(c.id);
+    try {
+      const res = await fetch(`/api/clients/${c.id}/share-link`, { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Failed to generate link');
+      const fullUrl = `${window.location.origin}${json.url}`;
+      await navigator.clipboard.writeText(fullUrl).catch(() => {});
+      alert(`Share link copied to clipboard:\n\n${fullUrl}\n\nAnyone with this link can view/download ${c.name}'s job list, no login needed. Send it directly to the client.`);
+      await load();
+    } catch (err: any) {
+      alert(err?.message ?? 'Failed to generate link');
+    } finally {
+      setLinkBusyId(null);
+    }
+  }
+
+  async function revokeShareLink(c: Client) {
+    if (!confirm(`Revoke the share link for "${c.name}"? The old link will stop working immediately. You can generate a new one anytime.`)) return;
+    setLinkBusyId(c.id);
+    try {
+      await fetch(`/api/clients/${c.id}/share-link`, { method: 'DELETE' });
+      await load();
+    } finally {
+      setLinkBusyId(null);
+    }
+  }
+
   const visible = clients.filter(c => {
     if (!showInactive && !c.active) return false;
     if (!searchQuery.trim()) return true;
@@ -156,6 +187,16 @@ export default function ClientsClient() {
                 </div>
                 <div className={styles.actions} style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => openEdit(c)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Edit</button>
+                  {c.share_token ? (
+                    <>
+                      <button onClick={() => getShareLink(c)} disabled={linkBusyId === c.id} style={{ background: 'transparent', border: '1px solid #25D366', color: '#25D366', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Copy share link</button>
+                      <button onClick={() => revokeShareLink(c)} disabled={linkBusyId === c.id} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#888', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Revoke</button>
+                    </>
+                  ) : (
+                    <button onClick={() => getShareLink(c)} disabled={linkBusyId === c.id} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>
+                      {linkBusyId === c.id ? 'Generating...' : 'Get share link'}
+                    </button>
+                  )}
                   <button onClick={() => toggleActive(c)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>
                     {c.active ? 'Deactivate' : 'Reactivate'}
                   </button>
