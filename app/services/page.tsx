@@ -102,9 +102,9 @@ export default async function ServicesPage() {
     title: w.title,
     role: w.role,
     description: w.description,
-    photos: (w.photos as { filename: string; caption: string }[]).map(p => ({
+    photos: (w.photos as { filename?: string; caption: string }[]).map(p => ({
       caption: p.caption,
-      src: getSiteImageUrl(`workshops/${p.filename}`),
+      src: p.filename ? getSiteImageUrl(`workshops/${p.filename}`) : undefined,
     })),
   }));
   return (
