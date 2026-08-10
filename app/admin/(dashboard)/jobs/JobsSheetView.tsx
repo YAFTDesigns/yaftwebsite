@@ -22,7 +22,7 @@ const td: React.CSSProperties = { padding: '8px 10px', fontSize: 12.5, color: '#
 // segregation, same color-coded status, same Summary breakdown -- but for
 // Yokes' own internal view only. Never used for the client-facing share
 // link, which has its own simpler read-only table.
-export default function JobsSheetView({ jobs }: { jobs: Job[] }) {
+export default function JobsSheetView({ jobs, hideClientColumn }: { jobs: Job[]; hideClientColumn?: boolean }) {
   const byMonth = groupByMonth(jobs);
   const [activeSheet, setActiveSheet] = useState<string>('summary');
 
@@ -113,7 +113,7 @@ export default function JobsSheetView({ jobs }: { jobs: Job[] }) {
               <tr style={{ background: '#161616' }}>
                 <th style={th}>Job No</th>
                 <th style={th}>Date</th>
-                <th style={th}>Client</th>
+                {!hideClientColumn && <th style={th}>Client</th>}
                 <th style={th}>Job Type</th>
                 <th style={th}>Qty</th>
                 <th style={{ ...th, textAlign: 'right' }}>Rate</th>
@@ -132,7 +132,7 @@ export default function JobsSheetView({ jobs }: { jobs: Job[] }) {
                 <tr key={j.id}>
                   <td style={{ ...td, fontFamily: 'var(--mono)' }}>{j.job_no || ''}</td>
                   <td style={td}>{j.job_date}</td>
-                  <td style={td}>{j.client_name}</td>
+                  {!hideClientColumn && <td style={td}>{j.client_name}</td>}
                   <td style={td}>{j.job_type}</td>
                   <td style={td}>{j.qty}</td>
                   <td style={{ ...td, textAlign: 'right' }}>{fmt(Number(j.rate))}</td>
@@ -157,7 +157,7 @@ export default function JobsSheetView({ jobs }: { jobs: Job[] }) {
             </tbody>
             <tfoot>
               <tr style={{ borderTop: '2px solid #2a2a2a' }}>
-                <td style={{ ...td, borderBottom: 'none' }} colSpan={10}></td>
+                <td style={{ ...td, borderBottom: 'none' }} colSpan={hideClientColumn ? 9 : 10}></td>
                 <td style={{ ...td, borderBottom: 'none', textAlign: 'right', fontWeight: 700, color: 'var(--brass)' }}>
                   TOTAL: INR {fmt((byMonth.get(activeSheet) ?? []).reduce((s, j) => s + Number(j.total), 0))}
                 </td>

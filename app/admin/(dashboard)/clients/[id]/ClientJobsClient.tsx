@@ -4,15 +4,16 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '../../../../admin/testimonials/testimonials.module.css';
+import JobsSheetView from '../../jobs/JobsSheetView';
 
 type Client = {
   id: string; name: string; company_name: string | null; gstin: string | null;
   address: string | null; phone: string | null; email: string | null; active: boolean;
 };
 type Job = {
-  id: string; job_no: string | null; job_date: string; job_type: string;
-  qty: number; rate: number; gst_type: string; total: number;
-  status: string; notes: string | null; invoice_id: string | null;
+  id: string; job_no: string | null; job_date: string; job_type: string; client_name: string;
+  qty: number; rate: number; gst_type: string; cgst: number; sgst: number; igst: number; total: number;
+  status: string; notes: string | null; invoice_id: string | null; status_date?: string | null;
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -28,6 +29,7 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [view, setView] = useState<'bill' | 'sheet'>('bill');
 
   async function load() {
     setLoading(true);
@@ -113,6 +115,15 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
         <p className={styles.empty}>No jobs logged for this client yet.</p>
       ) : (
         <>
+          <div className={styles.tabs} style={{ marginBottom: 20 }}>
+            <button className={`${styles.tab} ${view === 'bill' ? styles.activeTab : ''}`} onClick={() => setView('bill')}>Billing</button>
+            <button className={`${styles.tab} ${view === 'sheet' ? styles.activeTab : ''}`} onClick={() => setView('sheet')}>Sheet View</button>
+          </div>
+
+          {view === 'sheet' ? (
+            <JobsSheetView jobs={jobs} hideClientColumn />
+          ) : (
+          <>
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center' }}>
             <button onClick={selectAllBillable} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 6, padding: '8px 14px', fontSize: 12, cursor: 'pointer' }}>
               Select all billable ({billableJobs.length})
@@ -179,6 +190,8 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
                 Bill Selected Jobs →
               </button>
             </div>
+          )}
+          </>
           )}
         </>
       )}
