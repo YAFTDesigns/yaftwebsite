@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import SignOutButton from '@/components/SignOutButton';
 import AdminNav from '@/components/admin/AdminNav';
+import AdminSubNav from '@/components/admin/AdminSubNav';
 import { getNavCounts } from '@/lib/admin/getNavCounts';
 import styles from './admin.module.css';
 
@@ -19,6 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <AdminNav counts={counts} />
           <SignOutButton />
         </div>
+        <AdminSubNav counts={counts} />
       </header>
       <main className={styles.main}>{children}</main>
     </div>

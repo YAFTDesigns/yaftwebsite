@@ -2,48 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import styles from '../../app/admin/(dashboard)/admin.module.css';
+import { getNavGroups, type NavCounts } from '@/lib/admin/navGroups';
 
-type Counts = {
-  pendingTestimonials: number;
-  pendingApprovals: number;
-  failedEmails: number;
-  newLeads: number;
-  pendingJobs: number;
-};
-
-type NavLink = { href: string; label: string; badge?: number };
-type NavGroup = { label: string; links: NavLink[] };
-
-export default function AdminNav({ counts }: { counts: Counts }) {
-  const groups: NavGroup[] = [
-    {
-      label: 'Pipeline',
-      links: [
-        { href: '/admin/leads', label: 'Leads', badge: counts.newLeads },
-        { href: '/admin/enquiries', label: 'Enquiries' },
-        { href: '/admin/jobs', label: 'Jobs', badge: counts.pendingJobs },
-        { href: '/admin/clients', label: 'Clients' },
-        { href: '/admin/invoices', label: 'Invoices' },
-      ],
-    },
-    {
-      label: 'Content',
-      links: [
-        { href: '/admin/testimonials', label: 'Testimonials', badge: counts.pendingTestimonials },
-        { href: '/admin/community', label: 'Community', badge: counts.pendingApprovals },
-        { href: '/admin/projects', label: 'Projects' },
-        { href: '/admin/certificates', label: 'Certificates' },
-      ],
-    },
-    {
-      label: 'Comms',
-      links: [
-        { href: '/admin/inbox', label: 'Inbox' },
-        { href: '/admin/emails', label: 'Emails', badge: counts.failedEmails },
-      ],
-    },
-  ];
+export default function AdminNav({ counts }: { counts: NavCounts }) {
+  const pathname = usePathname();
+  const groups = getNavGroups(counts);
+  const activeGroup = groups.find((g) => g.links.some((l) => pathname === l.href || pathname.startsWith(l.href + '/')));
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
@@ -70,12 +36,14 @@ export default function AdminNav({ counts }: { counts: Counts }) {
       {groups.map((group) => {
         const groupBadgeTotal = group.links.reduce((s, l) => s + (l.badge ?? 0), 0);
         const isOpen = openGroup === group.label;
+        const isActive = activeGroup?.label === group.label;
         return (
           <span key={group.label} className={styles.navItem} style={{ position: 'relative' }}>
             <button
               type="button"
               onClick={() => setOpenGroup(isOpen ? null : group.label)}
               className={styles.navDropdownTrigger}
+              style={isActive ? { color: 'var(--brass)', borderColor: 'var(--brass)' } : undefined}
               aria-expanded={isOpen}
             >
               {group.label} <span style={{ fontSize: 9, marginLeft: 2 }}>{isOpen ? '\u25b2' : '\u25bc'}</span>

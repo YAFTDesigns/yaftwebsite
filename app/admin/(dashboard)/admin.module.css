@@ -46,6 +46,17 @@
   background:#e53935;color:#fff;border-radius:999px;
   font-family:var(--mono);font-size:10px;font-weight:600;line-height:16px;text-align:center;
 }
+.subNav{
+  border-top:1px solid var(--line);
+  max-width:1180px;margin:0 auto;padding:10px 32px;
+  display:flex;gap:20px;flex-wrap:wrap;
+}
+.subNavLink{
+  font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+  border-bottom:1px solid transparent;padding-bottom:2px;
+  display:inline-flex;align-items:center;
+}
+.subNavLink:hover{color:var(--ink);border-color:var(--brass);}
 .main{max-width:1180px;margin:0 auto;padding:40px 32px 80px;}
 
 .statGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:48px;}
