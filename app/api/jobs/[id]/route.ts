@@ -11,7 +11,7 @@ const GST_TYPE_TO_TAX_MODE: Record<string, InvoiceTaxMode> = {
 
 const JOB_TYPES = ['2D Drawing', '3D STL', 'Computational', 'Monthly Retainer'];
 const GST_TYPES = ['intra', 'inter', 'none'];
-const STATUSES = ['Pending', 'Invoiced', 'Paid'];
+const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed'];
 
 // PATCH /api/jobs/[id]
 // Body can be a partial update (e.g. { status: 'Paid' } from a quick-action
@@ -45,8 +45,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   if (data.job_date !== undefined) update.job_date = data.job_date;
   if (data.notes !== undefined) update.notes = data.notes || null;
+  let statusChanged = false;
   if (data.status !== undefined) {
     if (!STATUSES.includes(data.status)) return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    statusChanged = data.status !== existing.status;
     update.status = data.status;
   }
 
@@ -72,6 +74,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { data: job, error } = await supabase.from('jobs').update(update).eq('id', id).select('*').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Log a dated history row every time the status actually changes (not
+  // on every PATCH -- a plain field edit that leaves status untouched
+  // shouldn't add a spurious entry to the timeline). Supports a job going
+  // Submitted -> In Review -> Submitted -> In Review -> Completed with
+  // every date preserved, not just the latest one.
+  if (statusChanged) {
+    const note = typeof data.status_note === 'string' && data.status_note.trim() ? data.status_note.trim() : null;
+    await supabase.from('job_status_events').insert({ job_id: id, status: update.status, note });
+  }
+
   return NextResponse.json({ job });
 }
 

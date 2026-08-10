@@ -12,6 +12,7 @@ type Job = {
   cgst: number; sgst: number; igst: number; total: number;
   status: string; notes: string | null; invoice_id: string | null; deleted_at: string | null;
 };
+type StatusEvent = { id: string; status: string; note: string | null; created_at: string };
 
 const JOB_TYPES = ['2D Drawing', '3D STL', 'Computational', 'Monthly Retainer'];
 const GST_TYPES: { value: string; label: string }[] = [
@@ -20,7 +21,7 @@ const GST_TYPES: { value: string; label: string }[] = [
   { value: 'none', label: 'No GST (export/exempt)' },
 ];
 const GST_TYPE_TO_TAX_MODE: Record<string, InvoiceTaxMode> = { intra: 'intra', inter: 'interstate', none: 'intl' };
-const STATUSES = ['Pending', 'Invoiced', 'Paid'];
+const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed'];
 
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
@@ -62,6 +63,10 @@ export default function JobsClient() {
   const [editForm, setEditForm] = useState(EMPTY_FORM);
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState('');
+
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(null);
+  const [historyByJob, setHistoryByJob] = useState<Record<string, StatusEvent[]>>({});
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   async function loadJobs() {
     setLoading(true);
@@ -183,11 +188,42 @@ export default function JobsClient() {
     }
   }
 
+  async function loadHistory(jobId: string) {
+    setHistoryLoading(true);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/events`);
+      const json = await res.json();
+      setHistoryByJob(h => ({ ...h, [jobId]: json.events ?? [] }));
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
+
+  async function toggleHistory(jobId: string) {
+    if (expandedHistoryId === jobId) {
+      setExpandedHistoryId(null);
+      return;
+    }
+    setExpandedHistoryId(jobId);
+    if (!historyByJob[jobId]) await loadHistory(jobId);
+  }
+
+  function fmtDateTime(iso: string) {
+    return new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
   async function setStatus(job: Job, status: string) {
+    let status_note: string | undefined;
+    if (status === 'In Review') {
+      const entered = window.prompt('Reason sent back for review (optional):', '');
+      if (entered === null) return; // cancelled
+      status_note = entered.trim() || undefined;
+    }
     await fetch(`/api/jobs/${job.id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status, status_note }),
     });
     await loadJobs();
+    if (expandedHistoryId === job.id) await loadHistory(job.id);
   }
 
   async function softDelete(job: Job) {
@@ -216,7 +252,7 @@ export default function JobsClient() {
     return j.client_name.toLowerCase().includes(q) || j.job_type.toLowerCase().includes(q);
   });
 
-  const statusColor = (s: string) => s === 'Paid' ? '#3fb950' : s === 'Invoiced' ? '#58a6ff' : '#d4a72c';
+  const statusColor = (s: string) => s === 'Completed' ? '#3fb950' : s === 'In Review' ? '#E63946' : s === 'Submitted' ? '#58a6ff' : '#d4a72c';
 
   return (
     <div className={styles.page}>
@@ -371,9 +407,32 @@ export default function JobsClient() {
                         Mark {s}
                       </button>
                     ))}
+                    <button onClick={() => toggleHistory(j.id)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '5px 11px', fontSize: 11, cursor: 'pointer' }}>
+                      {expandedHistoryId === j.id ? 'Hide history' : 'History'}
+                    </button>
                     <button onClick={() => softDelete(j)} className={styles.deleteBtn} style={{ marginLeft: 'auto' }}>Delete</button>
                   </div>
                   {j.notes && <p style={{ fontSize: 12, color: '#777', marginTop: 8 }}>{j.notes}</p>}
+
+                  {expandedHistoryId === j.id && (
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #2a2a2a' }}>
+                      {historyLoading && !historyByJob[j.id] ? (
+                        <p style={{ fontSize: 12, color: '#666' }}>Loading history...</p>
+                      ) : (historyByJob[j.id] ?? []).length === 0 ? (
+                        <p style={{ fontSize: 12, color: '#666' }}>No history yet.</p>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {(historyByJob[j.id] ?? []).map(ev => (
+                            <div key={ev.id} style={{ display: 'flex', gap: 10, alignItems: 'baseline', fontSize: 12 }}>
+                              <span style={{ fontFamily: 'var(--mono)', color: statusColor(ev.status), minWidth: 90 }}>{ev.status}</span>
+                              <span style={{ color: '#666' }}>{fmtDateTime(ev.created_at)}</span>
+                              {ev.note && <span style={{ color: '#999', fontStyle: 'italic' }}>— {ev.note}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

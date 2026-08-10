@@ -77,5 +77,8 @@ export async function POST(request: NextRequest) {
   }).select('*').single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  await supabase.from('job_status_events').insert({ job_id: job.id, status: 'Pending' });
+
   return NextResponse.json({ job });
 }
