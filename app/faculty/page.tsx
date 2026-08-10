@@ -10,7 +10,7 @@ import styles from './faculty.module.css';
 
 const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
-  'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty at VIT Vellore, with workshops at IIT Kharagpur.';
+  'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty at VIT Vellore and ASADI, with workshops at IIT Kharagpur and NIT Tiruchirappalli.';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,7 +56,10 @@ const PERSON_JSON_LD = {
     'https://www.instagram.com/yaft_designs/',
     'https://www.youtube.com/@yaftdesigns',
   ],
-  affiliation: [{ '@type': 'Organization', name: 'VIT Vellore' }],
+  affiliation: [
+    { '@type': 'Organization', name: 'VIT Vellore' },
+    { '@type': 'Organization', name: 'ASADI - Asian School of Architecture and Design Innovation', url: 'https://www.asadi.edu.in' },
+  ],
 };
 
 const INTEREST_OPTIONS = [
@@ -102,11 +105,13 @@ export default async function FacultyPage() {
                 <h3>Yokes Marapa</h3>
                 <div className="faculty-role">Founder, YAFT Designs. Head of Design and Automation, VS-CRAFT Facades &amp; Roofing</div>
                 <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
-                <p>Visiting faculty at VIT Vellore, with prior workshops delivered at IIT Kharagpur. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
+                <p>Visiting faculty at VIT Vellore and ASADI (Asian School of Architecture and Design Innovation), with workshops delivered at IIT Kharagpur and NIT Tiruchirappalli. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
                 <div className="badge-row">
                   <span className="badge">ARTC: McNeel &amp; Associates</span>
                   <span className="badge">Visiting Faculty, VIT Vellore</span>
+                  <span className="badge">Visiting Faculty, ASADI</span>
                   <span className="badge">IIT Kharagpur Workshops</span>
+                  <span className="badge">NIT Trichy Workshops</span>
                 </div>
                 <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 20 }}>
                   <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/" target="_blank" rel="noopener" className="profile-link">LinkedIn →</a>
