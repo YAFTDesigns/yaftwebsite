@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeInvoiceTotals, getTaxMode } from './invoiceMath';
+import { computeInvoiceTotals, computeTaxFromMode, getTaxMode } from './invoiceMath';
 
 describe('getTaxMode', () => {
   it('treats Tamil Nadu as intra-state', () => {
@@ -104,5 +104,47 @@ describe('computeInvoiceTotals', () => {
   it('never produces a negative total for valid positive inputs', () => {
     const result = computeInvoiceTotals(oneItem, 'Tamil Nadu');
     expect(result.total).toBeGreaterThan(0);
+  });
+});
+
+describe('computeTaxFromMode', () => {
+  // Used by jobs, which store gst_type directly rather than deriving tax
+  // mode from a client state string. Must agree with computeInvoiceTotals
+  // for the same subtotal/mode, since both are meant to be the same rule.
+  it('applies CGST+SGST for intra mode', () => {
+    const result = computeTaxFromMode(10000, 'intra');
+    expect(result.cgst).toBe(900);
+    expect(result.sgst).toBe(900);
+    expect(result.igst).toBe(0);
+    expect(result.total).toBe(11800);
+  });
+
+  it('applies IGST for interstate mode', () => {
+    const result = computeTaxFromMode(10000, 'interstate');
+    expect(result.cgst).toBe(0);
+    expect(result.sgst).toBe(0);
+    expect(result.igst).toBe(1800);
+    expect(result.total).toBe(11800);
+  });
+
+  it('applies no tax for intl mode', () => {
+    const result = computeTaxFromMode(10000, 'intl');
+    expect(result.cgst).toBe(0);
+    expect(result.sgst).toBe(0);
+    expect(result.igst).toBe(0);
+    expect(result.total).toBe(10000);
+  });
+
+  it('agrees with computeInvoiceTotals for the same subtotal and mode', () => {
+    const viaItems = computeInvoiceTotals([{ qty: 2, rate: 5000 }], 'Tamil Nadu');
+    const viaMode = computeTaxFromMode(10000, 'intra');
+    expect(viaMode.total).toBe(viaItems.total);
+    expect(viaMode.cgst).toBe(viaItems.cgst);
+  });
+
+  it('handles a zero subtotal without producing NaN', () => {
+    const result = computeTaxFromMode(0, 'intra');
+    expect(result.total).toBe(0);
+    expect(Number.isNaN(result.total)).toBe(false);
   });
 });

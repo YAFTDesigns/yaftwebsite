@@ -25,6 +25,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </span>
             <Link href="/admin/enquiries">Enquiries</Link>
             <Link href="/admin/invoices">Invoices</Link>
+            <span className={styles.navItem}>
+              <Link href="/admin/jobs">Jobs</Link>
+              {counts.pendingJobs > 0 && (
+                <span className={styles.badge}>{counts.pendingJobs > 99 ? '99+' : counts.pendingJobs}</span>
+              )}
+            </span>
+            <Link href="/admin/clients">Clients</Link>
             <Link href="/admin/inbox" className={styles.navLink}>Inbox</Link>
             <span className={styles.navItem}>
               <Link href="/admin/emails">Emails</Link>

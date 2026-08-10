@@ -51,7 +51,13 @@ export function getTaxMode(clientState: string): InvoiceTaxMode {
 export function computeInvoiceTotals(items: InvoiceLineItem[], clientState: string): InvoiceTotals {
   const subtotal = (items ?? []).reduce((sum, item) => sum + (Number(item.rate) || 0) * (Number(item.qty) || 0), 0);
   const taxMode = getTaxMode(clientState);
+  return computeTaxFromMode(subtotal, taxMode);
+}
 
+// Same tax rule, keyed directly off an already-known tax mode rather than
+// derived from a client state string. Used by jobs, which store gst_type
+// directly per job instead of looking it up from a client's address.
+export function computeTaxFromMode(subtotal: number, taxMode: InvoiceTaxMode): InvoiceTotals {
   const cgst = taxMode === 'intra' ? subtotal * 0.09 : 0;
   const sgst = taxMode === 'intra' ? subtotal * 0.09 : 0;
   const igst = taxMode === 'interstate' ? subtotal * 0.18 : 0;
