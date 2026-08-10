@@ -1,5 +1,4 @@
 import { Resend } from 'resend';
-import { getAdminEmails } from './admin';
 
 const FROM_ADDRESS = 'YAFT Designs <notifications@yaftdesigns.com>';
 const REPLY_TO = 'yaftdesigns@gmail.com';
@@ -15,12 +14,13 @@ export function isEmailConfigured(): boolean {
 }
 
 // Who gets a copy of client-facing emails (invoices, etc.) so Yokes has a
-// record in his own inbox of what actually went out. Reuses ADMIN_EMAILS
-// (already set for the admin login allowlist) so there's one place to
-// manage it; falls back to the business reply-to address if that's unset.
+// record in his own inbox of what actually went out. Deliberately separate
+// from ADMIN_EMAILS (the login allowlist) -- that list includes personal
+// addresses used just for admin access, not necessarily where business
+// confirmations should land. Defaults to the business Gmail.
 export function getNotificationBcc(): string[] {
-  const admins = getAdminEmails();
-  return admins.length > 0 ? admins : [REPLY_TO];
+  const raw = process.env.INVOICE_NOTIFICATION_EMAIL ?? REPLY_TO;
+  return raw.split(',').map((e) => e.trim()).filter(Boolean);
 }
 
 export type EmailAttachment = { filename: string; content: string }; // content is base64
