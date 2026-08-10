@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
+import JobsSheetView from './JobsSheetView';
+import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
 
 type Client = { id: string; name: string; company_name: string | null };
 type Job = {
@@ -11,6 +13,7 @@ type Job = {
   qty: number; rate: number; gst_type: string;
   cgst: number; sgst: number; igst: number; total: number;
   status: string; notes: string | null; invoice_id: string | null; deleted_at: string | null;
+  status_date?: string | null;
 };
 type StatusEvent = { id: string; status: string; note: string | null; created_at: string };
 
@@ -45,7 +48,7 @@ function nextJobNo(jobs: Job[]): string {
 }
 
 export default function JobsClient() {
-  const [tab, setTab] = useState<'log' | 'all' | 'trash'>('log');
+  const [tab, setTab] = useState<'log' | 'all' | 'sheet' | 'trash'>('log');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [trashedJobs, setTrashedJobs] = useState<Job[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -253,7 +256,7 @@ export default function JobsClient() {
     return j.client_name.toLowerCase().includes(q) || j.job_type.toLowerCase().includes(q);
   });
 
-  const statusColor = (s: string) => s === 'Completed' ? '#3fb950' : s === 'Cancelled' ? '#E63946' : s === 'In Review' ? '#a371f7' : s === 'Submitted' ? '#58a6ff' : '#d4a72c';
+  const statusColor = (s: string) => STATUS_COLORS_HEX[s] ?? '#d4a72c';
 
   return (
     <div className={styles.page}>
@@ -267,8 +270,11 @@ export default function JobsClient() {
       <div className={styles.tabs} style={{ marginBottom: 28 }}>
         <button className={`${styles.tab} ${tab === 'log' ? styles.activeTab : ''}`} onClick={() => setTab('log')}>Log Job</button>
         <button className={`${styles.tab} ${tab === 'all' ? styles.activeTab : ''}`} onClick={() => setTab('all')}>All Jobs{jobs.length > 0 ? ` (${jobs.length})` : ''}</button>
+        <button className={`${styles.tab} ${tab === 'sheet' ? styles.activeTab : ''}`} onClick={() => setTab('sheet')}>Sheet View</button>
         <button className={`${styles.tab} ${tab === 'trash' ? styles.activeTab : ''}`} onClick={() => setTab('trash')}>Trash{trashedJobs.length > 0 ? ` (${trashedJobs.length})` : ''}</button>
       </div>
+
+      {tab === 'sheet' && <JobsSheetView jobs={jobs} />}
 
       {tab === 'log' && (
         <div style={{ maxWidth: 560 }}>

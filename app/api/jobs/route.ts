@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
+import { attachStatusDates } from '@/lib/jobStatusDates';
 
 // jobs.gst_type is stored as 'intra' | 'inter' | 'none' (DB check constraint),
 // which doesn't line up 1:1 with InvoiceTaxMode's 'intra' | 'interstate' |
@@ -31,7 +32,8 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ jobs: data ?? [] });
+  const jobs = await attachStatusDates(supabase, data ?? []);
+  return NextResponse.json({ jobs });
 }
 
 export async function POST(request: NextRequest) {

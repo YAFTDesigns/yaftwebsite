@@ -1,18 +1,14 @@
 import ExcelJS from 'exceljs';
+import { groupByMonth, monthLabel, revenueByType, revenueByMonth, STATUS_COLORS_HEX } from './jobsGrouping';
 
 const GST_LABEL: Record<string, string> = { intra: 'Intra-state (CGST+SGST)', inter: 'Inter-state (IGST)', none: 'No GST' };
 
-// Status cell background colors, shared between the exported sheet and the
-// admin UI's statusColor() -- red is reserved exclusively for Cancelled,
-// never reused for In Review, so the color always means the same thing
-// everywhere a job's status shows up.
-const STATUS_FILL: Record<string, string> = {
-  Completed: 'FF3FB950',   // green
-  Cancelled: 'FFE63946',   // red
-  'In Review': 'FFA371F7', // purple
-  Submitted: 'FF58A6FF',   // blue
-  Pending: 'FFD4A72C',     // orange
-};
+// Excel ARGB fills, derived from the single hex color source in
+// jobsGrouping.ts (strip '#', prepend full-opacity alpha) so the exported
+// sheet and every in-browser view stay in sync by construction.
+export const STATUS_FILL: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_COLORS_HEX).map(([status, hex]) => [status, `FF${hex.slice(1)}`])
+);
 
 export type JobRow = {
   job_no: string | null;
@@ -49,16 +45,6 @@ const COLUMNS = (hideClientColumn: boolean) => [
 ];
 
 const MONEY_COLS = ['rate', 'cgst', 'sgst', 'igst', 'total'];
-
-function monthKey(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function monthLabel(key: string): string {
-  const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
-}
 
 function fillJobsSheet(sheet: ExcelJS.Worksheet, jobs: JobRow[], hideClientColumn: boolean) {
   sheet.columns = COLUMNS(hideClientColumn);
@@ -124,14 +110,7 @@ export async function buildJobsWorkbook(
   const hideClientColumn = !!opts?.hideClientColumn;
   const includeSummary = opts?.includeSummary !== false;
 
-  // Group by month
-  const byMonth = new Map<string, JobRow[]>();
-  jobs.forEach((j) => {
-    const key = monthKey(j.job_date);
-    if (!byMonth.has(key)) byMonth.set(key, []);
-    byMonth.get(key)!.push(j);
-  });
-  const monthKeys = [...byMonth.keys()].sort().reverse(); // most recent month first
+  const byMonth = groupByMonth(jobs);
 
   if (includeSummary && jobs.length > 0) {
     const summary = wb.addWorksheet('Summary');
@@ -156,41 +135,30 @@ export async function buildJobsWorkbook(
       r += 1;
     };
 
-    // By job type -- sorted highest revenue first, directly answers "what earns me more"
     heading('Revenue by Job Type');
     tableHeader(['Job Type', 'Jobs', 'Total (INR)']);
-    const byType = new Map<string, { count: number; total: number }>();
-    jobs.forEach((j) => {
-      const cur = byType.get(j.job_type) ?? { count: 0, total: 0 };
-      cur.count += 1;
-      cur.total += Number(j.total);
-      byType.set(j.job_type, cur);
-    });
-    [...byType.entries()].sort((a, b) => b[1].total - a[1].total).forEach(([type, v]) => {
-      summary.getCell(r, 1).value = type;
-      summary.getCell(r, 2).value = v.count;
+    revenueByType(jobs).forEach((row) => {
+      summary.getCell(r, 1).value = row.type;
+      summary.getCell(r, 2).value = row.count;
       const cell = summary.getCell(r, 3);
-      cell.value = v.total;
+      cell.value = row.total;
       cell.numFmt = '#,##0.00';
       r += 1;
     });
     r += 2;
 
-    // By month -- most recent first, so trend is easy to scan
     heading('Revenue by Month');
     tableHeader(['Month', 'Jobs', 'Total (INR)']);
-    monthKeys.forEach((key) => {
-      const monthJobs = byMonth.get(key)!;
-      summary.getCell(r, 1).value = monthLabel(key);
-      summary.getCell(r, 2).value = monthJobs.length;
+    revenueByMonth(jobs).forEach((row) => {
+      summary.getCell(r, 1).value = row.label;
+      summary.getCell(r, 2).value = row.count;
       const cell = summary.getCell(r, 3);
-      cell.value = monthJobs.reduce((s, j) => s + Number(j.total), 0);
+      cell.value = row.total;
       cell.numFmt = '#,##0.00';
       r += 1;
     });
     r += 2;
 
-    // Grand total
     const grandCell = summary.getCell(r, 1);
     grandCell.value = 'GRAND TOTAL';
     grandCell.font = { bold: true };
@@ -201,11 +169,10 @@ export async function buildJobsWorkbook(
   }
 
   if (jobs.length === 0) {
-    // Nothing to segregate -- still give back a valid, non-empty workbook.
     const sheet = wb.addWorksheet('Jobs');
     fillJobsSheet(sheet, [], hideClientColumn);
   } else {
-    monthKeys.forEach((key) => {
+    [...byMonth.keys()].forEach((key) => {
       const sheet = wb.addWorksheet(monthLabel(key));
       fillJobsSheet(sheet, byMonth.get(key)!, hideClientColumn);
     });
