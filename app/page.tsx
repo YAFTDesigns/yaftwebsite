@@ -97,6 +97,7 @@ const JSON_LD = {
     'https://www.instagram.com/yaft_designs/',
     'https://www.youtube.com/@yaftdesigns',
     'https://www.rhino3d.com/training/sites/1650/',
+    'https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/',
   ],
   founder: {
     '@type': 'Person',
@@ -134,7 +135,7 @@ const FAQ_ITEMS = [
   { q: 'Do you sell Rhino software or licenses?', a: 'No. YAFT Designs is a training and consulting business only. For licenses, go directly to McNeel at rhino3d.com.' },
   { q: 'Is training online or in person?', a: 'Both. In-person sessions run from our Coimbatore base; remote sessions are available for individuals, teams, and institutions anywhere in the world.' },
   { q: 'Who are the courses for?', a: 'Architecture and design students, working professionals, and studio or contractor teams who need computational design skills.' },
-  { q: 'Can YAFT run a workshop at our institution?', a: "Yes, we've delivered workshops at IIT Kharagpur and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size." },
+  { q: 'Can YAFT run a workshop at our institution?', a: "Yes, we've delivered workshops at IIT Kharagpur and NIT Tiruchirappalli, and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size." },
   { q: 'Do you train students outside India?', a: 'Yes. We offer live online training to students and professionals across Australia, Singapore, Indonesia, Philippines, Japan, Hong Kong, Malaysia and beyond. Time zones are accommodated on request.' },
   { q: 'Can studios in Australia, Singapore or the Middle East hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across Asia Pacific and Middle East and the Middle East including UAE, Saudi Arabia, Qatar and Oman.' },
 ];
@@ -203,6 +204,7 @@ const LOCAL_BUSINESS_JSON_LD = {
     'https://www.instagram.com/yaft_designs/',
     'https://www.youtube.com/@yaftdesigns',
     'https://www.rhino3d.com/training/sites/1650/',
+    'https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/',
   ],
 };
 
