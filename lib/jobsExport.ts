@@ -2,6 +2,18 @@ import ExcelJS from 'exceljs';
 
 const GST_LABEL: Record<string, string> = { intra: 'Intra-state (CGST+SGST)', inter: 'Inter-state (IGST)', none: 'No GST' };
 
+// Status cell background colors in the exported sheet. Matches the badge
+// colors used in the admin UI (statusColor() in JobsClient.tsx) -- red is
+// reserved exclusively for Cancelled, never reused for In Review, so the
+// color always means the same thing everywhere the job shows up.
+const STATUS_FILL: Record<string, string> = {
+  Completed: 'FF3FB950',   // green
+  Cancelled: 'FFE63946',   // red
+  'In Review': 'FFA371F7', // purple
+  Submitted: 'FF58A6FF',   // blue
+  Pending: 'FFD4A72C',     // orange
+};
+
 export type JobRow = {
   job_no: string | null;
   job_date: string;
@@ -16,6 +28,7 @@ export type JobRow = {
   total: number | string;
   status: string;
   notes: string | null;
+  status_date?: string | null; // when the job last entered its current status
 };
 
 // Shared by the admin export (/api/jobs/export, all jobs, admin-gated) and
@@ -40,7 +53,8 @@ export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColum
     { header: 'SGST', key: 'sgst', width: 10 },
     { header: 'IGST', key: 'igst', width: 10 },
     { header: 'Total (INR)', key: 'total', width: 13 },
-    { header: 'Status', key: 'status', width: 11 },
+    { header: 'Status', key: 'status', width: 12 },
+    { header: 'Status Date', key: 'status_date', width: 14 },
     { header: 'Notes', key: 'notes', width: 30 },
   ];
   sheet.columns = columns;
@@ -64,11 +78,20 @@ export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColum
       igst: Number(j.igst),
       total: Number(j.total),
       status: j.status,
+      status_date: j.status_date ? new Date(j.status_date).toLocaleDateString('en-IN') : '',
       notes: j.notes || '',
     });
     moneyCols.forEach((key) => {
       row.getCell(key).numFmt = '#,##0.00';
     });
+
+    const fillColor = STATUS_FILL[j.status];
+    if (fillColor) {
+      const statusCell = row.getCell('status');
+      statusCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+      statusCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+      statusCell.alignment = { horizontal: 'center' };
+    }
   });
 
   if (jobs.length > 0) {
@@ -76,7 +99,7 @@ export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColum
       job_no: '', job_date: '', client_name: '', job_type: '', qty: '',
       rate: 'TOTAL', gst_type: '', cgst: '', sgst: '', igst: '',
       total: jobs.reduce((s, j) => s + Number(j.total), 0),
-      status: '', notes: '',
+      status: '', status_date: '', notes: '',
     });
     totalRow.font = { bold: true };
     totalRow.getCell('total').numFmt = '#,##0.00';

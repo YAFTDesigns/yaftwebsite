@@ -11,7 +11,7 @@ const GST_TYPE_TO_TAX_MODE: Record<string, InvoiceTaxMode> = {
 
 const JOB_TYPES = ['2D Drawing', '3D STL', 'Computational', 'Monthly Retainer'];
 const GST_TYPES = ['intra', 'inter', 'none'];
-const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed'];
+const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed', 'Cancelled'];
 
 // PATCH /api/jobs/[id]
 // Body can be a partial update (e.g. { status: 'Paid' } from a quick-action

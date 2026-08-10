@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { buildJobsWorkbook } from '@/lib/jobsExport';
+import { buildJobsWorkbook, type JobRow } from '@/lib/jobsExport';
+import { attachStatusDates } from '@/lib/jobStatusDates';
 
 // GET /api/jobs/export?status=Pending  (status omitted or 'all' = everything, excluding trash)
 export async function GET(request: NextRequest) {
@@ -17,7 +18,8 @@ export async function GET(request: NextRequest) {
   const { data: jobs, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const buffer = await buildJobsWorkbook(jobs ?? []);
+  const rows: JobRow[] = await attachStatusDates(supabase, jobs ?? []);
+  const buffer = await buildJobsWorkbook(rows);
   const dateStamp = new Date().toISOString().slice(0, 10);
   const filenameSuffix = status && status !== 'all' ? `_${status}` : '';
 

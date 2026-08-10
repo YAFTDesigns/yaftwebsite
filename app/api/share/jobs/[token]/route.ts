@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
-import { buildJobsWorkbook } from '@/lib/jobsExport';
+import { buildJobsWorkbook, type JobRow } from '@/lib/jobsExport';
+import { attachStatusDates } from '@/lib/jobStatusDates';
 
 // GET /api/share/jobs/[token]
 // Deliberately public -- no admin auth. The token itself is the
@@ -40,9 +41,11 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  const rows: JobRow[] = await attachStatusDates(supabase, jobs ?? []);
+
   // Client column is redundant on a sheet that's already scoped to one
   // client, so it's dropped for a cleaner sheet than the admin export.
-  const buffer = await buildJobsWorkbook(jobs ?? [], { hideClientColumn: true, sheetTitle: 'Jobs' });
+  const buffer = await buildJobsWorkbook(rows, { hideClientColumn: true, sheetTitle: 'Jobs' });
   const safeClientName = client.name.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || 'Client';
   const dateStamp = new Date().toISOString().slice(0, 10);
 

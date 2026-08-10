@@ -21,7 +21,7 @@ const GST_TYPES: { value: string; label: string }[] = [
   { value: 'none', label: 'No GST (export/exempt)' },
 ];
 const GST_TYPE_TO_TAX_MODE: Record<string, InvoiceTaxMode> = { intra: 'intra', inter: 'interstate', none: 'intl' };
-const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed'];
+const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed', 'Cancelled'];
 
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
@@ -214,9 +214,10 @@ export default function JobsClient() {
 
   async function setStatus(job: Job, status: string) {
     let status_note: string | undefined;
-    if (status === 'In Review') {
-      const entered = window.prompt('Reason sent back for review (optional):', '');
-      if (entered === null) return; // cancelled
+    if (status === 'In Review' || status === 'Cancelled') {
+      const label = status === 'In Review' ? 'Reason sent back for review (optional):' : 'Reason for cancelling (optional):';
+      const entered = window.prompt(label, '');
+      if (entered === null) return; // cancelled the prompt itself
       status_note = entered.trim() || undefined;
     }
     await fetch(`/api/jobs/${job.id}`, {
@@ -252,7 +253,7 @@ export default function JobsClient() {
     return j.client_name.toLowerCase().includes(q) || j.job_type.toLowerCase().includes(q);
   });
 
-  const statusColor = (s: string) => s === 'Completed' ? '#3fb950' : s === 'In Review' ? '#E63946' : s === 'Submitted' ? '#58a6ff' : '#d4a72c';
+  const statusColor = (s: string) => s === 'Completed' ? '#3fb950' : s === 'Cancelled' ? '#E63946' : s === 'In Review' ? '#a371f7' : s === 'Submitted' ? '#58a6ff' : '#d4a72c';
 
   return (
     <div className={styles.page}>
