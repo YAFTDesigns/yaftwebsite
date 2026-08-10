@@ -14,9 +14,10 @@ type Client = {
 
 const EMPTY_FORM = { name: '', company_name: '', gstin: '', address: '', phone: '', email: '', notes: '' };
 
-export default function ClientsClient() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ClientsClient({ initialClients }: { initialClients?: Client[] }) {
+  const hasInitialData = initialClients !== undefined;
+  const [clients, setClients] = useState<Client[]>(initialClients ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [showInactive, setShowInactive] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,7 +43,12 @@ export default function ClientsClient() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    // Server already fetched this on first render (see page.tsx) -- skip
+    // the redundant client-side re-fetch on initial mount.
+    if (hasInitialData) return;
+    load();
+  }, []);
 
   function setF(k: keyof typeof EMPTY_FORM, v: string) { setForm(f => ({ ...f, [k]: v })); }
 

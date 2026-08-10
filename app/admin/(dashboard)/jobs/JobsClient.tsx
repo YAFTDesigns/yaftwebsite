@@ -47,12 +47,19 @@ function nextJobNo(jobs: Job[]): string {
   return `GY${String(max + 1).padStart(4, '0')}`;
 }
 
-export default function JobsClient() {
+type InitialProps = {
+  initialJobs?: Job[];
+  initialTrash?: Job[];
+  initialClients?: Client[];
+};
+
+export default function JobsClient({ initialJobs, initialTrash, initialClients }: InitialProps) {
+  const hasInitialData = initialJobs !== undefined;
   const [tab, setTab] = useState<'log' | 'all' | 'sheet' | 'trash'>('log');
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [trashedJobs, setTrashedJobs] = useState<Job[]>([]);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs ?? []);
+  const [trashedJobs, setTrashedJobs] = useState<Job[]>(initialTrash ?? []);
+  const [clients, setClients] = useState<Client[]>(initialClients ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,7 +109,14 @@ export default function JobsClient() {
     } catch { /* ignore */ }
   }
 
-  useEffect(() => { loadJobs(); loadTrash(); loadClients(); }, []);
+  useEffect(() => {
+    // Server already fetched this on first render (see page.tsx) -- skip
+    // the redundant client-side re-fetch so there's no double network
+    // round trip on initial load. Subsequent refreshes after mutations
+    // still go through loadJobs()/loadTrash()/loadClients() as normal.
+    if (hasInitialData) return;
+    loadJobs(); loadTrash(); loadClients();
+  }, []);
 
   // Auto-suggest the next job number once jobs are loaded, but only when
   // the field is empty -- never clobbers something the user is mid-typing.

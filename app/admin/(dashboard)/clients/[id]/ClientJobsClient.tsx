@@ -22,11 +22,14 @@ const STATUS_COLOR: Record<string, string> = {
 
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
-export default function ClientJobsClient({ clientId }: { clientId: string }) {
+export default function ClientJobsClient({
+  clientId, initialClient, initialJobs,
+}: { clientId: string; initialClient?: Client; initialJobs?: Job[] }) {
   const router = useRouter();
-  const [client, setClient] = useState<Client | null>(null);
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const hasInitialData = initialClient !== undefined;
+  const [client, setClient] = useState<Client | null>(initialClient ?? null);
+  const [jobs, setJobs] = useState<Job[]>(initialJobs ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [view, setView] = useState<'bill' | 'sheet'>('bill');
@@ -35,15 +38,14 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
     setLoading(true);
     setLoadError('');
     try {
-      const [clientsRes, jobsRes] = await Promise.all([
-        fetch('/api/clients?all=1'),
+      const [clientRes, jobsRes] = await Promise.all([
+        fetch(`/api/clients/${clientId}`),
         fetch(`/api/jobs?client_id=${clientId}`),
       ]);
-      const clientsJson = await clientsRes.json();
+      const clientJson = await clientRes.json();
       const jobsJson = await jobsRes.json();
-      const found = (clientsJson.clients ?? []).find((c: Client) => c.id === clientId);
-      if (!found) throw new Error('Client not found');
-      setClient(found);
+      if (!clientRes.ok) throw new Error(clientJson?.error ?? 'Client not found');
+      setClient(clientJson.client);
       setJobs(jobsJson.jobs ?? []);
     } catch (err: any) {
       setLoadError(err?.message ?? 'Could not load client.');
@@ -52,7 +54,12 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
     }
   }
 
-  useEffect(() => { load(); }, [clientId]);
+  useEffect(() => {
+    // Server already fetched this on first render (see page.tsx) -- skip
+    // the redundant client-side re-fetch on initial mount.
+    if (hasInitialData) return;
+    load();
+  }, [clientId]);
 
   function toggle(jobId: string) {
     setSelected(s => {
