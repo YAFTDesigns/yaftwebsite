@@ -58,6 +58,11 @@ export default function JobsClient() {
   const [formError, setFormError] = useState('');
   const [done, setDone] = useState(false);
 
+  const [editingJob, setEditingJob] = useState<Job | null>(null);
+  const [editForm, setEditForm] = useState(EMPTY_FORM);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editError, setEditError] = useState('');
+
   async function loadJobs() {
     setLoading(true);
     setLoadError('');
@@ -103,6 +108,10 @@ export default function JobsClient() {
   const rateNum = parseFloat(form.rate) || 0;
   const preview = computeTaxFromMode(qtyNum * rateNum, GST_TYPE_TO_TAX_MODE[form.gst_type]);
 
+  const editQtyNum = parseFloat(editForm.qty) || 0;
+  const editRateNum = parseFloat(editForm.rate) || 0;
+  const editPreview = computeTaxFromMode(editQtyNum * editRateNum, GST_TYPE_TO_TAX_MODE[editForm.gst_type]);
+
   function pickClient(id: string) {
     const c = clients.find(cl => cl.id === id);
     setForm(f => ({ ...f, client_id: id, client_name: c ? c.name : f.client_name }));
@@ -129,6 +138,48 @@ export default function JobsClient() {
       setFormError(err?.message ?? 'Save failed');
     } finally {
       setSaving(false);
+    }
+  }
+
+  function openEditJob(job: Job) {
+    setEditingJob(job);
+    setEditForm({
+      job_no: job.job_no ?? '',
+      client_id: job.client_id ?? '',
+      client_name: job.client_name,
+      job_type: job.job_type,
+      job_date: job.job_date,
+      qty: String(job.qty),
+      rate: String(job.rate),
+      gst_type: job.gst_type,
+      notes: job.notes ?? '',
+    });
+    setEditError('');
+  }
+
+  function setEF(k: keyof typeof EMPTY_FORM, v: string) { setEditForm(f => ({ ...f, [k]: v })); }
+
+  async function saveEditJob() {
+    if (!editingJob) return;
+    if (!editForm.client_name.trim()) { setEditError('Client name is required.'); return; }
+    const qty = parseFloat(editForm.qty) || 0;
+    if (qty <= 0) { setEditError('Quantity must be greater than 0.'); return; }
+    setEditSaving(true);
+    setEditError('');
+    try {
+      const res = await fetch(`/api/jobs/${editingJob.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...editForm, qty, rate: parseFloat(editForm.rate) || 0 }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Save failed');
+      setEditingJob(null);
+      await loadJobs();
+    } catch (err: any) {
+      setEditError(err?.message ?? 'Save failed');
+    } finally {
+      setEditSaving(false);
     }
   }
 
@@ -312,6 +363,9 @@ export default function JobsClient() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                    <button onClick={() => openEditJob(j)} style={{ background: 'transparent', border: '1px solid var(--brass)', color: 'var(--brass)', borderRadius: 4, padding: '5px 11px', fontSize: 11, cursor: 'pointer' }}>
+                      Edit
+                    </button>
                     {STATUSES.filter(s => s !== j.status).map(s => (
                       <button key={s} onClick={() => setStatus(j, s)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '5px 11px', fontSize: 11, cursor: 'pointer' }}>
                         Mark {s}
@@ -349,6 +403,77 @@ export default function JobsClient() {
             ))}
           </div>
         )
+      )}
+
+      {editingJob && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', padding: '24px 16px', overflowY: 'auto' }}>
+          <div style={{ width: '100%', maxWidth: 480, background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: 24 }}>
+            <h3 style={{ fontSize: 16, color: '#fff', marginBottom: 16 }}>Edit job</h3>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Job order no.</label>
+              <input type="text" value={editForm.job_no} onChange={e => setEF('job_no', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13, fontFamily: 'var(--mono)' }} />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client name</label>
+              <input type="text" value={editForm.client_name} onChange={e => setEF('client_name', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Job type</label>
+                <select value={editForm.job_type} onChange={e => setEF('job_type', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }}>
+                  {JOB_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</label>
+                <input type="date" value={editForm.job_date} onChange={e => setEF('job_date', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }} />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quantity</label>
+                <input type="number" min="0" step="any" value={editForm.qty} onChange={e => setEF('qty', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rate (INR)</label>
+                <input type="number" min="0" step="any" value={editForm.rate} onChange={e => setEF('rate', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }} />
+              </div>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>GST</label>
+              <select value={editForm.gst_type} onChange={e => setEF('gst_type', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }}>
+                {GST_TYPES.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+              </select>
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notes</label>
+              <textarea value={editForm.notes} onChange={e => setEF('notes', e.target.value)} rows={2} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13, resize: 'vertical' }} />
+            </div>
+
+            <div style={{ background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 8, padding: '12px 14px', marginBottom: 16, fontSize: 13 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888', marginBottom: 4 }}><span>Subtotal</span><span>INR {fmt(editPreview.subtotal)}</span></div>
+              {editPreview.cgst > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888', marginBottom: 4 }}><span>CGST (9%)</span><span>INR {fmt(editPreview.cgst)}</span></div>}
+              {editPreview.sgst > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888', marginBottom: 4 }}><span>SGST (9%)</span><span>INR {fmt(editPreview.sgst)}</span></div>}
+              {editPreview.igst > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', color: '#888', marginBottom: 4 }}><span>IGST (18%)</span><span>INR {fmt(editPreview.igst)}</span></div>}
+              <div style={{ display: 'flex', justifyContent: 'space-between', color: '#fff', fontWeight: 700, marginTop: 8, paddingTop: 8, borderTop: '1px solid #2a2a2a' }}><span>Total</span><span>INR {fmt(editPreview.total)}</span></div>
+            </div>
+
+            {editError && <p style={{ fontSize: 12, color: '#E63946', marginBottom: 12 }}>{editError}</p>}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button onClick={() => setEditingJob(null)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#888', borderRadius: 6, padding: '9px 16px', fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEditJob} disabled={editSaving} style={{ background: 'var(--brass)', color: '#0a0a0a', border: 'none', borderRadius: 6, padding: '9px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: editSaving ? 0.6 : 1 }}>
+                {editSaving ? 'Saving...' : 'Save changes'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
