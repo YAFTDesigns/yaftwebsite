@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
-import { sendEmail, isEmailConfigured } from '@/lib/email';
+import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 
 // POST /api/admin/invoices/resend  { id }
 // Regenerates the PDF from the invoice's current (possibly just-edited)
@@ -75,6 +75,7 @@ export async function POST(request: NextRequest) {
       to: `${inv.client_name} <${inv.client_email}>`,
       subject,
       html: htmlBody,
+      bcc: getNotificationBcc(),
       attachments: [{
         filename: `${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${inv.invoice_no}_revised.pdf`,
         content: pdfBase64,

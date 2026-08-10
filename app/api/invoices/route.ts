@@ -5,7 +5,7 @@ import { rateLimit } from '@/lib/rateLimit';
 import { pushInvoiceToQueue } from '@/lib/queue';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
-import { sendEmail, isEmailConfigured } from '@/lib/email';
+import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
@@ -127,6 +127,7 @@ export async function POST(request: NextRequest) {
           to: `${data.client_name} <${data.client_email}>`,
           subject,
           html: htmlBody,
+          bcc: getNotificationBcc(),
           attachments: [{
             filename: `${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${data.invoice_no}.pdf`,
             content: pdfBase64,

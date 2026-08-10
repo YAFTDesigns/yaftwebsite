@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { getAdminEmails } from './admin';
 
 const FROM_ADDRESS = 'YAFT Designs <notifications@yaftdesigns.com>';
 const REPLY_TO = 'yaftdesigns@gmail.com';
@@ -13,6 +14,15 @@ export function isEmailConfigured(): boolean {
   return !!process.env.RESEND_API_KEY;
 }
 
+// Who gets a copy of client-facing emails (invoices, etc.) so Yokes has a
+// record in his own inbox of what actually went out. Reuses ADMIN_EMAILS
+// (already set for the admin login allowlist) so there's one place to
+// manage it; falls back to the business reply-to address if that's unset.
+export function getNotificationBcc(): string[] {
+  const admins = getAdminEmails();
+  return admins.length > 0 ? admins : [REPLY_TO];
+}
+
 export type EmailAttachment = { filename: string; content: string }; // content is base64
 
 /**
@@ -24,11 +34,13 @@ export async function sendEmail({
   subject,
   html,
   attachments,
+  bcc,
 }: {
   to: string;
   subject: string;
   html: string;
   attachments?: EmailAttachment[];
+  bcc?: string | string[];
 }): Promise<void> {
   const resend = getResendClient();
   const { error } = await resend.emails.send({
@@ -38,6 +50,7 @@ export async function sendEmail({
     html,
     attachments,
     replyTo: REPLY_TO,
+    ...(bcc ? { bcc } : {}),
   });
   if (error) throw new Error(error.message);
 }
