@@ -45,7 +45,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   // Client column is redundant on a sheet that's already scoped to one
   // client, so it's dropped for a cleaner sheet than the admin export.
-  const buffer = await buildJobsWorkbook(rows, { hideClientColumn: true, sheetTitle: 'Jobs' });
+  const buffer = await buildJobsWorkbook(rows, { hideClientColumn: true, includeSummary: false });
   const safeClientName = client.name.replace(/[^a-zA-Z0-9 _-]/g, '').trim() || 'Client';
   const dateStamp = new Date().toISOString().slice(0, 10);
 

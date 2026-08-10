@@ -2,10 +2,10 @@ import ExcelJS from 'exceljs';
 
 const GST_LABEL: Record<string, string> = { intra: 'Intra-state (CGST+SGST)', inter: 'Inter-state (IGST)', none: 'No GST' };
 
-// Status cell background colors in the exported sheet. Matches the badge
-// colors used in the admin UI (statusColor() in JobsClient.tsx) -- red is
-// reserved exclusively for Cancelled, never reused for In Review, so the
-// color always means the same thing everywhere the job shows up.
+// Status cell background colors, shared between the exported sheet and the
+// admin UI's statusColor() -- red is reserved exclusively for Cancelled,
+// never reused for In Review, so the color always means the same thing
+// everywhere a job's status shows up.
 const STATUS_FILL: Record<string, string> = {
   Completed: 'FF3FB950',   // green
   Cancelled: 'FFE63946',   // red
@@ -31,38 +31,40 @@ export type JobRow = {
   status_date?: string | null; // when the job last entered its current status
 };
 
-// Shared by the admin export (/api/jobs/export, all jobs, admin-gated) and
-// the per-client share link (/api/share/jobs/[token], one client's jobs,
-// token-gated) so the two never drift into different-looking spreadsheets.
-export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColumn?: boolean; sheetTitle?: string }): Promise<Buffer> {
-  const wb = new ExcelJS.Workbook();
-  wb.creator = 'YAFT Designs';
-  wb.created = new Date();
+const COLUMNS = (hideClientColumn: boolean) => [
+  { header: 'Job No', key: 'job_no', width: 12 },
+  { header: 'Date', key: 'job_date', width: 12 },
+  ...(hideClientColumn ? [] : [{ header: 'Client', key: 'client_name', width: 26 }]),
+  { header: 'Job Type', key: 'job_type', width: 18 },
+  { header: 'Qty', key: 'qty', width: 8 },
+  { header: 'Rate (INR)', key: 'rate', width: 12 },
+  { header: 'GST Type', key: 'gst_type', width: 22 },
+  { header: 'CGST', key: 'cgst', width: 10 },
+  { header: 'SGST', key: 'sgst', width: 10 },
+  { header: 'IGST', key: 'igst', width: 10 },
+  { header: 'Total (INR)', key: 'total', width: 13 },
+  { header: 'Status', key: 'status', width: 12 },
+  { header: 'Status Date', key: 'status_date', width: 14 },
+  { header: 'Notes', key: 'notes', width: 30 },
+];
 
-  const sheet = wb.addWorksheet(opts?.sheetTitle ?? 'Jobs', { views: [{ state: 'frozen', ySplit: 1 }] });
+const MONEY_COLS = ['rate', 'cgst', 'sgst', 'igst', 'total'];
 
-  const columns = [
-    { header: 'Job No', key: 'job_no', width: 12 },
-    { header: 'Date', key: 'job_date', width: 12 },
-    ...(opts?.hideClientColumn ? [] : [{ header: 'Client', key: 'client_name', width: 26 }]),
-    { header: 'Job Type', key: 'job_type', width: 18 },
-    { header: 'Qty', key: 'qty', width: 8 },
-    { header: 'Rate (INR)', key: 'rate', width: 12 },
-    { header: 'GST Type', key: 'gst_type', width: 22 },
-    { header: 'CGST', key: 'cgst', width: 10 },
-    { header: 'SGST', key: 'sgst', width: 10 },
-    { header: 'IGST', key: 'igst', width: 10 },
-    { header: 'Total (INR)', key: 'total', width: 13 },
-    { header: 'Status', key: 'status', width: 12 },
-    { header: 'Status Date', key: 'status_date', width: 14 },
-    { header: 'Notes', key: 'notes', width: 30 },
-  ];
-  sheet.columns = columns;
+function monthKey(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
+function monthLabel(key: string): string {
+  const [y, m] = key.split('-').map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+}
+
+function fillJobsSheet(sheet: ExcelJS.Worksheet, jobs: JobRow[], hideClientColumn: boolean) {
+  sheet.columns = COLUMNS(hideClientColumn);
   sheet.getRow(1).font = { bold: true };
   sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8E8E8' } };
-
-  const moneyCols = ['rate', 'cgst', 'sgst', 'igst', 'total'];
+  sheet.views = [{ state: 'frozen', ySplit: 1 }];
 
   jobs.forEach((j) => {
     const row = sheet.addRow({
@@ -81,9 +83,7 @@ export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColum
       status_date: j.status_date ? new Date(j.status_date).toLocaleDateString('en-IN') : '',
       notes: j.notes || '',
     });
-    moneyCols.forEach((key) => {
-      row.getCell(key).numFmt = '#,##0.00';
-    });
+    MONEY_COLS.forEach((key) => { row.getCell(key).numFmt = '#,##0.00'; });
 
     const fillColor = STATUS_FILL[j.status];
     if (fillColor) {
@@ -103,6 +103,112 @@ export async function buildJobsWorkbook(jobs: JobRow[], opts?: { hideClientColum
     });
     totalRow.font = { bold: true };
     totalRow.getCell('total').numFmt = '#,##0.00';
+  }
+}
+
+// Shared by the admin export (/api/jobs/export, all jobs, admin-gated) and
+// the per-client share link (/api/share/jobs/[token], one client's jobs,
+// token-gated) so the two never drift into different-looking spreadsheets.
+//
+// Layout: an optional Summary sheet first (revenue by job type, revenue by
+// month -- "what earns me more"), then one sheet per calendar month found
+// in the data, most recent first, each with its own subtotal row.
+export async function buildJobsWorkbook(
+  jobs: JobRow[],
+  opts?: { hideClientColumn?: boolean; includeSummary?: boolean }
+): Promise<Buffer> {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'YAFT Designs';
+  wb.created = new Date();
+
+  const hideClientColumn = !!opts?.hideClientColumn;
+  const includeSummary = opts?.includeSummary !== false;
+
+  // Group by month
+  const byMonth = new Map<string, JobRow[]>();
+  jobs.forEach((j) => {
+    const key = monthKey(j.job_date);
+    if (!byMonth.has(key)) byMonth.set(key, []);
+    byMonth.get(key)!.push(j);
+  });
+  const monthKeys = [...byMonth.keys()].sort().reverse(); // most recent month first
+
+  if (includeSummary && jobs.length > 0) {
+    const summary = wb.addWorksheet('Summary');
+    summary.getColumn(1).width = 24;
+    summary.getColumn(2).width = 16;
+    summary.getColumn(3).width = 16;
+
+    let r = 1;
+    const heading = (text: string) => {
+      const cell = summary.getCell(`A${r}`);
+      cell.value = text;
+      cell.font = { bold: true, size: 13 };
+      r += 1;
+    };
+    const tableHeader = (cols: string[]) => {
+      cols.forEach((c, i) => {
+        const cell = summary.getCell(r, i + 1);
+        cell.value = c;
+        cell.font = { bold: true };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8E8E8' } };
+      });
+      r += 1;
+    };
+
+    // By job type -- sorted highest revenue first, directly answers "what earns me more"
+    heading('Revenue by Job Type');
+    tableHeader(['Job Type', 'Jobs', 'Total (INR)']);
+    const byType = new Map<string, { count: number; total: number }>();
+    jobs.forEach((j) => {
+      const cur = byType.get(j.job_type) ?? { count: 0, total: 0 };
+      cur.count += 1;
+      cur.total += Number(j.total);
+      byType.set(j.job_type, cur);
+    });
+    [...byType.entries()].sort((a, b) => b[1].total - a[1].total).forEach(([type, v]) => {
+      summary.getCell(r, 1).value = type;
+      summary.getCell(r, 2).value = v.count;
+      const cell = summary.getCell(r, 3);
+      cell.value = v.total;
+      cell.numFmt = '#,##0.00';
+      r += 1;
+    });
+    r += 2;
+
+    // By month -- most recent first, so trend is easy to scan
+    heading('Revenue by Month');
+    tableHeader(['Month', 'Jobs', 'Total (INR)']);
+    monthKeys.forEach((key) => {
+      const monthJobs = byMonth.get(key)!;
+      summary.getCell(r, 1).value = monthLabel(key);
+      summary.getCell(r, 2).value = monthJobs.length;
+      const cell = summary.getCell(r, 3);
+      cell.value = monthJobs.reduce((s, j) => s + Number(j.total), 0);
+      cell.numFmt = '#,##0.00';
+      r += 1;
+    });
+    r += 2;
+
+    // Grand total
+    const grandCell = summary.getCell(r, 1);
+    grandCell.value = 'GRAND TOTAL';
+    grandCell.font = { bold: true };
+    const grandTotal = summary.getCell(r, 3);
+    grandTotal.value = jobs.reduce((s, j) => s + Number(j.total), 0);
+    grandTotal.numFmt = '#,##0.00';
+    grandTotal.font = { bold: true };
+  }
+
+  if (jobs.length === 0) {
+    // Nothing to segregate -- still give back a valid, non-empty workbook.
+    const sheet = wb.addWorksheet('Jobs');
+    fillJobsSheet(sheet, [], hideClientColumn);
+  } else {
+    monthKeys.forEach((key) => {
+      const sheet = wb.addWorksheet(monthLabel(key));
+      fillJobsSheet(sheet, byMonth.get(key)!, hideClientColumn);
+    });
   }
 
   const arrayBuffer = await wb.xlsx.writeBuffer();
