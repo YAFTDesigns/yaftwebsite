@@ -88,6 +88,7 @@ export default function ClientJobsClient({ clientId }: { clientId: string }) {
       client_address: client.address || '',
       client_phone: client.phone || '',
       client_type: client.company_name ? 'company' : 'individual',
+      client_id: client.id,
       items,
       jobIds: selectedJobs.map(j => j.id),
     };

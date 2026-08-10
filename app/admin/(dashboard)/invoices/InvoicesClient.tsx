@@ -64,6 +64,40 @@ export default function InvoicesClient() {
   const [pendingJobIds, setPendingJobIds] = useState<string[]>([]);
   const [jobsLinked, setJobsLinked] = useState(false);
 
+  // Client picker for the create form: pick an existing client from the
+  // register and auto-fill name/email/company/GST/address/phone instead
+  // of retyping them, without having to go through the jobs->bill flow.
+  type ClientOption = {
+    id: string; name: string; company_name: string | null; gstin: string | null;
+    email: string | null; phone: string | null; address: string | null;
+  };
+  const [clientOptions, setClientOptions] = useState<ClientOption[]>([]);
+  const [selectedClientId, setSelectedClientId] = useState('');
+
+  useEffect(() => {
+    fetch('/api/clients?all=1')
+      .then(res => res.json())
+      .then(json => setClientOptions(json.clients ?? []))
+      .catch(() => {});
+  }, []);
+
+  function pickExistingClient(id: string) {
+    setSelectedClientId(id);
+    if (!id) return;
+    const c = clientOptions.find(opt => opt.id === id);
+    if (!c) return;
+    setForm(f => ({
+      ...f,
+      client_name: c.name,
+      client_email: c.email || f.client_email,
+      client_company: c.company_name || '',
+      client_gst: c.gstin || '',
+      client_address: c.address || f.client_address,
+      client_phone: c.phone || f.client_phone,
+      client_type: c.company_name ? 'company' : 'individual',
+    }));
+  }
+
   useEffect(() => {
     const raw = sessionStorage.getItem('yaftInvoicePrefill');
     if (!raw) return;
@@ -82,6 +116,7 @@ export default function InvoicesClient() {
       }));
       if (Array.isArray(payload.items) && payload.items.length > 0) setItems(payload.items);
       if (Array.isArray(payload.jobIds)) setPendingJobIds(payload.jobIds);
+      if (payload.client_id) setSelectedClientId(payload.client_id);
       setTab('create');
     } catch {
       // malformed payload, ignore and let the form start empty as usual
@@ -718,6 +753,26 @@ export default function InvoicesClient() {
               </div>
 
               <p style={{ ...sectionTitle, marginTop:8 }}>Client details</p>
+
+              <div>
+                <span style={lbl}>Use existing client (optional)</span>
+                <select
+                  style={inp}
+                  value={selectedClientId}
+                  onChange={e => pickExistingClient(e.target.value)}
+                >
+                  <option value="">— Type details manually below —</option>
+                  {clientOptions.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}{c.company_name ? ` (${c.company_name})` : ''}</option>
+                  ))}
+                </select>
+                {selectedClientId && (
+                  <p style={{ fontFamily:'var(--mono)', fontSize:10, color:'#666', marginTop:4 }}>
+                    Filled from client register — edit any field below if it needs adjusting for this invoice.
+                  </p>
+                )}
+              </div>
+
               <div style={{ display:'flex', gap:10 }}>
                 {['individual','company'].map(t => (
                   <button key={t} onClick={() => setF('client_type',t)} style={{
