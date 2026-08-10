@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ ok: true, pdf: pdfBase64 });
+    return NextResponse.json({ ok: true, pdf: pdfBase64, invoiceId: inv?.id ?? null });
   } catch (err) {
     console.error('Invoice error:', err);
     return NextResponse.json({ error: 'Failed to generate invoice' }, { status: 500 });

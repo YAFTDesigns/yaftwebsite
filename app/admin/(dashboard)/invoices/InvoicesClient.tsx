@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
@@ -31,6 +32,7 @@ const STATES = [
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function InvoicesClient() {
+  const router = useRouter();
   const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>([]);
@@ -55,6 +57,36 @@ export default function InvoicesClient() {
   const [done, setDone]       = useState(false);
   const [formError, setFormError] = useState('');
   const [pdfUrl, setPdfUrl]   = useState('');
+
+  // Handoff from a client's "Bill Selected Jobs" action on
+  // /admin/clients/[id]. Consumed once on mount, not re-applied on
+  // refresh -- sessionStorage key is cleared right after reading it.
+  const [pendingJobIds, setPendingJobIds] = useState<string[]>([]);
+  const [jobsLinked, setJobsLinked] = useState(false);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem('yaftInvoicePrefill');
+    if (!raw) return;
+    sessionStorage.removeItem('yaftInvoicePrefill');
+    try {
+      const payload = JSON.parse(raw);
+      setForm(f => ({
+        ...f,
+        client_name: payload.client_name ?? f.client_name,
+        client_email: payload.client_email ?? f.client_email,
+        client_company: payload.client_company ?? f.client_company,
+        client_gst: payload.client_gst ?? f.client_gst,
+        client_address: payload.client_address ?? f.client_address,
+        client_phone: payload.client_phone ?? f.client_phone,
+        client_type: payload.client_type ?? f.client_type,
+      }));
+      if (Array.isArray(payload.items) && payload.items.length > 0) setItems(payload.items);
+      if (Array.isArray(payload.jobIds)) setPendingJobIds(payload.jobIds);
+      setTab('create');
+    } catch {
+      // malformed payload, ignore and let the form start empty as usual
+    }
+  }, []);
 
   const { subtotal, cgst, sgst, igst, total: grandTotal, taxMode } = computeInvoiceTotals(items, form.client_state);
   const intra = taxMode === 'intra';
@@ -235,6 +267,24 @@ export default function InvoicesClient() {
       const blob = new Blob([Buffer.from(json.pdf, 'base64')], { type: 'application/pdf' });
       setPdfUrl(URL.createObjectURL(blob));
       setDone(true);
+
+      // Link the source jobs back to this invoice, so /admin/clients/[id]
+      // knows they're already billed and won't offer them for selection
+      // again. Best-effort: if this fails, the invoice itself still went
+      // out fine, it just means the jobs need linking by hand.
+      if (pendingJobIds.length > 0 && json.invoiceId) {
+        await Promise.all(
+          pendingJobIds.map(id =>
+            fetch(`/api/jobs/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ invoice_id: json.invoiceId }),
+            }).catch(() => {})
+          )
+        );
+        setJobsLinked(true);
+        setPendingJobIds([]);
+      }
     } catch (e: any) { setFormError(e.message ?? 'Something went wrong'); }
     setSending(false);
   }
@@ -605,6 +655,16 @@ export default function InvoicesClient() {
       {/* ── CREATE INVOICE ── */}
       {tab === 'create' && (
         <>
+          {pendingJobIds.length > 0 && (
+            <div style={{ background: '#1a1408', border: '1px solid var(--brass)', borderRadius: 8, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#d4b45a' }}>
+              Pre-filled from {pendingJobIds.length} selected job{pendingJobIds.length > 1 ? 's' : ''} — double-check the <strong>State</strong> field below is correct for this client (it's not stored on the job/client record, so it defaults to Tamil Nadu and affects GST calculation).
+            </div>
+          )}
+          {jobsLinked && (
+            <div style={{ background: '#0d1f11', border: '1px solid #3fb950', borderRadius: 8, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#7fd996' }}>
+              Invoice sent, and the source job{items.length > 1 ? 's have' : ' has'} been marked as billed.
+            </div>
+          )}
           {/* Invoice type selector */}
           <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:10, marginBottom:24 }}>
             {([

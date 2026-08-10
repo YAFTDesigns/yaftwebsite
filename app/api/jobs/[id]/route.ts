@@ -39,6 +39,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     update.client_name = client_name;
   }
   if (data.client_id !== undefined) update.client_id = data.client_id || null;
+  if (data.invoice_id !== undefined) update.invoice_id = data.invoice_id || null;
   if (data.job_type !== undefined) {
     if (!JOB_TYPES.includes(data.job_type)) return NextResponse.json({ error: 'Invalid job type' }, { status: 400 });
     update.job_type = data.job_type;

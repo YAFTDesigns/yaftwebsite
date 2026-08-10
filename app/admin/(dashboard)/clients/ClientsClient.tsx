@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 
 type Client = {
@@ -186,6 +187,7 @@ export default function ClientsClient() {
                   </p>
                 </div>
                 <div className={styles.actions} style={{ display: 'flex', gap: 8 }}>
+                  <Link href={`/admin/clients/${c.id}`} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, textDecoration: 'none', display: 'inline-block' }}>View jobs</Link>
                   <button onClick={() => openEdit(c)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Edit</button>
                   {c.share_token ? (
                     <>

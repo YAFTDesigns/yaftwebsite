@@ -23,9 +23,11 @@ export async function GET(request: NextRequest) {
   }
 
   const includeDeleted = request.nextUrl.searchParams.get('trash') === '1';
+  const clientId = request.nextUrl.searchParams.get('client_id');
   const supabase = getSupabaseAdmin();
   let query = supabase.from('jobs').select('*').order('job_date', { ascending: false });
   query = includeDeleted ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
+  if (clientId) query = query.eq('client_id', clientId);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
