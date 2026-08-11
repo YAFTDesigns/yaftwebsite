@@ -7,6 +7,10 @@ import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
+type ClientOption = {
+  id: string; name: string; company_name: string | null; gstin: string | null;
+  email: string | null; phone: string | null; address: string | null;
+};
 type Invoice = {
   id: string; created_at: string; invoice_no: string; date: string;
   client_name: string; client_email: string; client_state: string;
@@ -31,11 +35,13 @@ const STATES = [
 
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
-export default function InvoicesClient() {
+export default function InvoicesClient({
+  initialClientOptions, initialTrashedInvoices,
+}: { initialClientOptions?: ClientOption[]; initialTrashedInvoices?: Invoice[] } = {}) {
   const router = useRouter();
   const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>([]);
+  const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>(initialTrashedInvoices ?? []);
   const [loadError, setLoadError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const now = new Date();
@@ -67,14 +73,11 @@ export default function InvoicesClient() {
   // Client picker for the create form: pick an existing client from the
   // register and auto-fill name/email/company/GST/address/phone instead
   // of retyping them, without having to go through the jobs->bill flow.
-  type ClientOption = {
-    id: string; name: string; company_name: string | null; gstin: string | null;
-    email: string | null; phone: string | null; address: string | null;
-  };
-  const [clientOptions, setClientOptions] = useState<ClientOption[]>([]);
+  const [clientOptions, setClientOptions] = useState<ClientOption[]>(initialClientOptions ?? []);
   const [selectedClientId, setSelectedClientId] = useState('');
 
   useEffect(() => {
+    if (initialClientOptions !== undefined) return;
     fetch('/api/clients?all=1')
       .then(res => res.json())
       .then(json => setClientOptions(json.clients ?? []))
@@ -287,7 +290,10 @@ export default function InvoicesClient() {
 
   // Load trash count on mount too, so the tab badge is accurate
   // before the user ever visits the Trash tab themselves.
-  useEffect(() => { loadTrash(); }, []);
+  useEffect(() => {
+    if (initialTrashedInvoices !== undefined) return;
+    loadTrash();
+  }, []);
 
   async function generate() {
     setFormError(''); setSending(true); setDone(false); setPdfUrl('');

@@ -54,10 +54,11 @@ const STATUS_LABELS: Record<string, string> = {
   rejected: 'Rejected',
 };
 
-export default function AdminTestimonialsPage() {
-  const [items, setItems] = useState<Testimonial[]>([]);
-  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>('pending');
-  const [loading, setLoading] = useState(true);
+export default function AdminTestimonialsPage({ initialItems, initialFilter }: { initialItems?: Testimonial[]; initialFilter?: 'pending' | 'approved' | 'rejected' }) {
+  const hasInitialData = initialItems !== undefined;
+  const [items, setItems] = useState<Testimonial[]>(initialItems ?? []);
+  const [filter, setFilter] = useState<'pending' | 'approved' | 'rejected'>(initialFilter ?? 'pending');
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
@@ -74,7 +75,17 @@ export default function AdminTestimonialsPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, [filter]);
+  const [skippedInitialLoad, setSkippedInitialLoad] = useState(false);
+  useEffect(() => {
+    // Server already fetched the default filter on first render -- skip
+    // that one redundant client fetch, but still fetch on every
+    // subsequent filter change as normal.
+    if (hasInitialData && !skippedInitialLoad) {
+      setSkippedInitialLoad(true);
+      return;
+    }
+    load();
+  }, [filter]);
 
   useEffect(() => {
     const interval = setInterval(() => { load(); }, 20000);

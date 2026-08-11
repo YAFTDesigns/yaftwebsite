@@ -11,9 +11,10 @@ type Workshop = {
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/workshops/';
 
-export default function WorkshopsClient() {
-  const [workshops, setWorkshops] = useState<Workshop[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops?: Workshop[] }) {
+  const hasInitialData = initialWorkshops !== undefined;
+  const [workshops, setWorkshops] = useState<Workshop[]>(initialWorkshops ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<Record<string, string>>({});
@@ -34,7 +35,10 @@ export default function WorkshopsClient() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (hasInitialData) return;
+    load();
+  }, []);
 
   async function uploadPhoto(key: string, file: File) {
     const caption = (captionDraft[key] ?? '').trim();

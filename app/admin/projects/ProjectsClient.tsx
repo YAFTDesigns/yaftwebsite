@@ -73,9 +73,10 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--ink)', padding: '8px 10px', fontFamily: 'var(--mono)', fontSize: 13, width: '100%',
 };
 
-export default function AdminProjectsPage() {
-  const [items, setItems] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function AdminProjectsPage({ initialItems }: { initialItems?: Project[] }) {
+  const hasInitialData = initialItems !== undefined;
+  const [items, setItems] = useState<Project[]>(initialItems ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [creating, setCreating] = useState(false);
@@ -89,7 +90,10 @@ export default function AdminProjectsPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (hasInitialData) return;
+    load();
+  }, []);
 
   async function toggleActive(p: Project) {
     setBusyId(p.id);

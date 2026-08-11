@@ -33,9 +33,10 @@ const inputStyle: React.CSSProperties = {
   color: 'var(--ink)', padding: '8px 10px', fontFamily: 'var(--mono)', fontSize: 13, width: '100%',
 };
 
-export default function AdminCertificatesPage() {
-  const [items, setItems] = useState<Certificate[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function AdminCertificatesPage({ initialItems }: { initialItems?: Certificate[] }) {
+  const hasInitialData = initialItems !== undefined;
+  const [items, setItems] = useState<Certificate[]>(initialItems ?? []);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [creating, setCreating] = useState(false);
@@ -51,7 +52,10 @@ export default function AdminCertificatesPage() {
     setLoading(false);
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    if (hasInitialData) return;
+    load();
+  }, []);
 
   async function toggleRevoke(c: Certificate) {
     setBusyId(c.id);
