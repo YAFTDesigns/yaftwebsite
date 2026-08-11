@@ -58,9 +58,39 @@ export async function POST(request: NextRequest) {
   }
 
   const subject = `YAFT Designs — Invoices for ${label}`;
+
+  const invoiceRows = monthInvoices
+    .slice()
+    .sort((a, b) => ddmmyyyyToIso(a.date).localeCompare(ddmmyyyyToIso(b.date)))
+    .map((inv) => `
+    <tr>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:13px;">${inv.invoice_no}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:13px;">${inv.date}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:13px;">${inv.client_name}</td>
+      <td style="padding:7px 10px;border-bottom:1px solid #eee;font-size:13px;text-align:right;">${Number(inv.total).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+    </tr>`)
+    .join('');
+
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${recipientName},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Attached are all ${monthInvoices.length} invoice${monthInvoices.length > 1 ? 's' : ''} for <strong>${label}</strong>, with the GST breakdown for each. Total billed for the month: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Attached are all ${monthInvoices.length} invoice${monthInvoices.length > 1 ? 's' : ''} for <strong>${label}</strong>, with the GST breakdown for each in the sheet. Summary below, total billed for the month: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
+  <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
+    <thead>
+      <tr style="background:#f8f8f8;">
+        <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#888;">Invoice No</th>
+        <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#888;">Date</th>
+        <th style="padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#888;">Client</th>
+        <th style="padding:8px 10px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#888;">Total (INR)</th>
+      </tr>
+    </thead>
+    <tbody>${invoiceRows}</tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" style="padding:8px 10px;font-size:13px;font-weight:600;">Total</td>
+        <td style="padding:8px 10px;font-size:13px;font-weight:600;text-align:right;">${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+      </tr>
+    </tfoot>
+  </table>
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs &middot; Coimbatore, India</p>
 </div>`;
 
