@@ -1,0 +1,122 @@
+import ExcelJS from 'exceljs';
+import { computeInvoiceTotals, type InvoiceLineItem } from './invoiceMath';
+import { groupByMonth, monthLabel, type MinimalJob } from './jobsGrouping';
+
+// invoices.date is stored as free-text DD/MM/YYYY (e.g. "11/08/2026"),
+// not ISO. Handed directly to `new Date()`, JS reads that as MM/DD/YYYY
+// (November 8th, not August 11th) -- silently grouping invoices into
+// the wrong month sheet. Parsed explicitly here instead of trusting
+// the ambiguous native Date constructor.
+export function ddmmyyyyToIso(dateStr: string): string {
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(dateStr.trim());
+  if (!match) return dateStr; // already ISO or unrecognized -- pass through
+  const [, dd, mm, yyyy] = match;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+}
+
+export type InvoiceRow = {
+  invoice_no: string;
+  date: string;
+  client_name: string;
+  client_gst: string | null;
+  client_state: string | null;
+  invoice_type: string | null;
+  items: InvoiceLineItem[];
+  total: number | string;
+  advance: number | string;
+  balance: number | string;
+};
+
+const MONEY_COLS = ['subtotal', 'cgst', 'sgst', 'igst', 'total', 'advance', 'balance'];
+
+const COLUMNS = [
+  { header: 'Invoice No', key: 'invoice_no', width: 16 },
+  { header: 'Date', key: 'date', width: 12 },
+  { header: 'Client', key: 'client_name', width: 26 },
+  { header: 'GSTIN', key: 'client_gst', width: 18 },
+  { header: 'Type', key: 'invoice_type', width: 14 },
+  { header: 'Subtotal (INR)', key: 'subtotal', width: 13 },
+  { header: 'CGST', key: 'cgst', width: 10 },
+  { header: 'SGST', key: 'sgst', width: 10 },
+  { header: 'IGST', key: 'igst', width: 10 },
+  { header: 'Total (INR)', key: 'total', width: 13 },
+  { header: 'Advance (INR)', key: 'advance', width: 13 },
+  { header: 'Balance Due (INR)', key: 'balance', width: 15 },
+];
+
+function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
+  sheet.columns = COLUMNS;
+  sheet.getRow(1).font = { bold: true };
+  sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8E8E8' } };
+  sheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+  // Tax breakdown is recomputed here rather than trusting a stored value
+  // -- invoices only store the final total, never the CGST/SGST/IGST
+  // split, so this is the same computeInvoiceTotals() call that
+  // generated the original PDF, guaranteeing the sheet always agrees
+  // with what the client was actually sent. Computed once per invoice
+  // up front, reused for both its row and the sheet's totals row.
+  const withTotals = invoices.map((inv) => ({ inv, totals: computeInvoiceTotals(inv.items ?? [], inv.client_state ?? '') }));
+
+  withTotals.forEach(({ inv, totals }) => {
+    const row = sheet.addRow({
+      invoice_no: inv.invoice_no,
+      date: inv.date,
+      client_name: inv.client_name,
+      client_gst: inv.client_gst || '',
+      invoice_type: inv.invoice_type || '',
+      subtotal: totals.subtotal,
+      cgst: totals.cgst,
+      sgst: totals.sgst,
+      igst: totals.igst,
+      total: Number(inv.total),
+      advance: Number(inv.advance) || 0,
+      balance: Number(inv.balance) || 0,
+    });
+    MONEY_COLS.forEach((key) => { row.getCell(key).numFmt = '#,##0.00'; });
+
+    if (Number(inv.balance) > 0) {
+      row.getCell('balance').font = { color: { argb: 'FFE63946' }, bold: true };
+    }
+  });
+
+  if (withTotals.length > 0) {
+    const totalsRow = sheet.addRow({
+      invoice_no: '', date: '', client_name: '', client_gst: '', invoice_type: 'TOTAL',
+      subtotal: withTotals.reduce((s, { totals }) => s + totals.subtotal, 0),
+      cgst: withTotals.reduce((s, { totals }) => s + totals.cgst, 0),
+      sgst: withTotals.reduce((s, { totals }) => s + totals.sgst, 0),
+      igst: withTotals.reduce((s, { totals }) => s + totals.igst, 0),
+      total: withTotals.reduce((s, { inv }) => s + Number(inv.total), 0),
+      advance: withTotals.reduce((s, { inv }) => s + (Number(inv.advance) || 0), 0),
+      balance: withTotals.reduce((s, { inv }) => s + (Number(inv.balance) || 0), 0),
+    });
+    totalsRow.font = { bold: true };
+    MONEY_COLS.forEach((key) => { totalsRow.getCell(key).numFmt = '#,##0.00'; });
+  }
+}
+
+// One sheet per calendar month (most recent first), same layout Yokes'
+// jobs export already uses -- built specifically so a full month or
+// year of invoices can be handed to an auditor in one file, split the
+// way books are normally organized.
+export async function buildInvoicesWorkbook(invoices: InvoiceRow[]): Promise<Buffer> {
+  const wb = new ExcelJS.Workbook();
+  wb.creator = 'YAFT Designs';
+  wb.created = new Date();
+
+  const asMinimal: (InvoiceRow & MinimalJob)[] = invoices.map((inv) => ({ ...inv, job_date: ddmmyyyyToIso(inv.date), job_type: '', total: inv.total }));
+  const byMonth = groupByMonth(asMinimal);
+
+  if (invoices.length === 0) {
+    fillInvoiceSheet(wb.addWorksheet('Invoices'), []);
+  } else {
+    [...byMonth.keys()].forEach((key) => {
+      const sheet = wb.addWorksheet(monthLabel(key));
+      fillInvoiceSheet(sheet, byMonth.get(key)! as InvoiceRow[]);
+    });
+  }
+
+  const arrayBuffer = await wb.xlsx.writeBuffer();
+  return Buffer.from(arrayBuffer);
+}

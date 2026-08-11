@@ -396,16 +396,22 @@ export default function InvoicesClient({
               </div>
 
               {/* search */}
-              <div style={{ marginBottom: 12 }}>
+              <div style={{ marginBottom: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                 <input
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search by client name, email, or invoice number..."
                   style={{
                     background:'#0d0d0d', border:'1px solid #2a2a2a', borderRadius:8,
-                    padding:'10px 14px', fontFamily:'var(--mono)', fontSize:13, color:'#fff', width:'100%',
+                    padding:'10px 14px', fontFamily:'var(--mono)', fontSize:13, color:'#fff', flex: 1,
                   }}
                 />
+                <a
+                  href="/api/admin/invoices/export"
+                  style={{ background: 'transparent', border: '1px solid var(--brass)', color: 'var(--brass)', borderRadius: 8, padding: '10px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                >
+                  ↓ Export to Excel
+                </a>
               </div>
 
               {(() => {
