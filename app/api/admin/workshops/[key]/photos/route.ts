@@ -54,24 +54,34 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   return NextResponse.json({ workshop: row, filename });
 }
 
-// DELETE /api/admin/workshops/[key]/photos?filename=xyz.jpg
-// Removes one photo from the array (storage object left in place --
-// harmless orphan, avoids a second failure mode if the delete races
-// with something else reading the array).
+// DELETE /api/admin/workshops/[key]/photos?index=0
+// Removes one photo by its position in the array. Identifying by
+// filename doesn't work for placeholder entries (added before the
+// upload feature existed) which have a caption but no filename --
+// those could never match a filename-based delete, so they were
+// permanently stuck. Storage object (if any) left in place -- harmless
+// orphan, avoids a second failure mode if the delete races with
+// something else reading the array.
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ key: string }> }) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const { key } = await params;
-  const filename = request.nextUrl.searchParams.get('filename');
-  if (!filename) return NextResponse.json({ error: 'filename query param is required' }, { status: 400 });
+  const indexParam = request.nextUrl.searchParams.get('index');
+  const index = indexParam !== null ? parseInt(indexParam, 10) : NaN;
+  if (!Number.isInteger(index) || index < 0) {
+    return NextResponse.json({ error: 'A valid index query param is required' }, { status: 400 });
+  }
 
   const supabase = getSupabaseAdmin();
   const { data: workshop, error: fetchErr } = await supabase.from('workshops').select('photos').eq('key', key).single();
   if (fetchErr || !workshop) return NextResponse.json({ error: 'Workshop not found' }, { status: 404 });
 
-  const existingPhotos: { filename: string; caption: string }[] = workshop.photos ?? [];
-  const updatedPhotos = existingPhotos.filter((p) => p.filename !== filename);
+  const existingPhotos: { filename?: string; caption: string }[] = workshop.photos ?? [];
+  if (index >= existingPhotos.length) {
+    return NextResponse.json({ error: 'Photo not found at that index' }, { status: 404 });
+  }
+  const updatedPhotos = existingPhotos.filter((_, i) => i !== index);
 
   const { data: row, error: updateErr } = await supabase
     .from('workshops')

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 
-type Photo = { filename: string; caption: string };
+type Photo = { filename?: string; caption: string };
 type Workshop = {
   id: string; key: string; num: string; place: string; title: string;
   role: string; description: string; photos: Photo[]; display_order: number; active: boolean;
@@ -64,9 +64,9 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
     }
   }
 
-  async function removePhoto(key: string, filename: string) {
+  async function removePhoto(key: string, index: number) {
     if (!confirm('Remove this photo from the workshop entry?')) return;
-    await fetch(`/api/admin/workshops/${key}/photos?filename=${encodeURIComponent(filename)}`, { method: 'DELETE' });
+    await fetch(`/api/admin/workshops/${key}/photos?index=${index}`, { method: 'DELETE' });
     await load();
   }
 
@@ -97,16 +97,22 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
               {w.description && <p style={{ fontSize: 12, color: '#777', marginTop: 8 }}>{w.description}</p>}
 
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 14 }}>
-                {w.photos.map(p => (
-                  <div key={p.filename} style={{ position: 'relative', width: 100 }}>
-                    <img
-                      src={`${SITE_IMAGE_BASE}${p.filename}`}
-                      alt={p.caption}
-                      style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid #2a2a2a', display: 'block' }}
-                    />
+                {w.photos.map((p, i) => (
+                  <div key={p.filename ?? `placeholder-${i}`} style={{ position: 'relative', width: 100 }}>
+                    {p.filename ? (
+                      <img
+                        src={`${SITE_IMAGE_BASE}${p.filename}`}
+                        alt={p.caption}
+                        style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 6, border: '1px solid #2a2a2a', display: 'block' }}
+                      />
+                    ) : (
+                      <div style={{ width: 100, height: 100, borderRadius: 6, border: '1px dashed #2a2a2a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444', fontSize: 22 }}>
+                        ▢
+                      </div>
+                    )}
                     <p style={{ fontSize: 10, color: '#777', marginTop: 4, lineHeight: 1.3 }}>{p.caption}</p>
                     <button
-                      onClick={() => removePhoto(w.key, p.filename)}
+                      onClick={() => removePhoto(w.key, i)}
                       style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.7)', border: 'none', color: '#E63946', borderRadius: 4, width: 20, height: 20, fontSize: 12, cursor: 'pointer' }}
                     >
                       ×
