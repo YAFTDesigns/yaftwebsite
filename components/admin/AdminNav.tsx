@@ -66,8 +66,6 @@ export default function AdminNav({ counts }: { counts: NavCounts }) {
           </span>
         );
       })}
-
-      <Link href="/admin/analytics">Analytics</Link>
     </nav>
   );
 }

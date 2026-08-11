@@ -15,7 +15,7 @@ export type NavCounts = {
 export function getNavGroups(counts: NavCounts): NavGroup[] {
   return [
     {
-      label: 'Pipeline',
+      label: 'Sales',
       links: [
         { href: '/admin/leads', label: 'Leads', badge: counts.newLeads },
         { href: '/admin/enquiries', label: 'Enquiries' },
@@ -25,21 +25,22 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     {
-      label: 'Content',
+      label: 'Marketing',
       links: [
         { href: '/admin/testimonials', label: 'Testimonials', badge: counts.pendingTestimonials },
         { href: '/admin/community', label: 'Community', badge: counts.pendingApprovals },
         { href: '/admin/projects', label: 'Projects' },
-        { href: '/admin/certificates', label: 'Certificates' },
         { href: '/admin/workshops', label: 'Workshops' },
       ],
     },
     {
-      label: 'Comms',
+      label: 'Admin',
       links: [
         { href: '/admin/inbox', label: 'Inbox' },
         { href: '/admin/emails', label: 'Emails', badge: counts.failedEmails },
         { href: '/admin/team', label: 'Team' },
+        { href: '/admin/certificates', label: 'Certificates' },
+        { href: '/admin/analytics', label: 'Analytics' },
       ],
     },
   ];
