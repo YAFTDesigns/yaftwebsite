@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import styles from '../testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 type Member = {
   id: string; name: string; role: string | null; email: string | null;
@@ -87,7 +87,6 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
           <h1 className={styles.title}>Team</h1>
           <p className={styles.sub}>Accountant, designers, and anyone else you need saved contact details for.</p>
         </div>
-        <a href="/admin" className={styles.back}>← Back to admin</a>
       </div>
 
       <div style={{ display: 'flex', gap: 16, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>

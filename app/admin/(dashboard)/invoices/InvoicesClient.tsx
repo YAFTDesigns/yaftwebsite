@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from '../../../admin/testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
 import { monthKey, monthLabel, ddmmyyyyToIso } from '@/lib/jobsGrouping';

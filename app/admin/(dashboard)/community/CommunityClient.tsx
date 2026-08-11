@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from '../../../admin/testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 
 const API = '/api/admin/community';

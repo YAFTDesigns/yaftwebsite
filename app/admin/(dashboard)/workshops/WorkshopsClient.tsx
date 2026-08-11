@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from '../testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 type Photo = { filename: string; caption: string };
 type Workshop = {
@@ -77,7 +77,6 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
           <h1 className={styles.title}>Workshops</h1>
           <p className={styles.sub}>Manage the institutional workshop entries shown on /services.</p>
         </div>
-        <a href="/admin" className={styles.back}>← Back to admin</a>
       </div>
 
       {loading ? (

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from '../testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 const API = '/api/admin/certificates';
 
@@ -95,7 +95,7 @@ export default function AdminCertificatesPage({ initialItems }: { initialItems?:
           <h1 className={styles.title}>Certificates</h1>
           <p className={styles.sub}>Issue and manage student certificates. Certificate IDs auto-generate as YAFT{'{'}YYYYMM{'}'}-{'{'}seq{'}'}. No PDF is stored, each one is generated fresh on download.</p>
         </div>
-        <a href="/admin" className={styles.back}>← Back to admin</a>
+
       </div>
 
       {/* Add new certificate */}

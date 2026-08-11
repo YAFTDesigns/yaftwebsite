@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from '../../../admin/testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
 import JobsSheetView from './JobsSheetView';
 import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';

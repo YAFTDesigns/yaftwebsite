@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from '../testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 const API = '/api/admin/projects';
 
@@ -146,7 +146,6 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
           <h1 className={styles.title}>Portfolio Projects</h1>
           <p className={styles.sub}>Manage case studies shown on /projects. Inactive projects are hidden from the public grid.</p>
         </div>
-        <a href="/admin" className={styles.back}>← Back to admin</a>
       </div>
 
       {/* Add new project */}

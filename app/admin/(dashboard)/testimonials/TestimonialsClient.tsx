@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from './testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 const API = '/api/admin/testimonials';
 
@@ -128,7 +128,6 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
         </div>
         <div style={{ display: "flex", gap: 16 }}>
           <a href="/admin/testimonials/analytics" className={styles.back}>View analytics →</a>
-          <a href="/admin" className={styles.back}>← Back to admin</a>
         </div>
       </div>
 

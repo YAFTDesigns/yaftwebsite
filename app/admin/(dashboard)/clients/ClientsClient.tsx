@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import styles from '../../../admin/testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 
 type Client = {
   id: string; created_at: string; updated_at: string;

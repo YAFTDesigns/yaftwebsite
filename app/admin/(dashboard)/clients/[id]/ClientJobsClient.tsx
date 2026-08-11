@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import styles from '../../../../admin/testimonials/testimonials.module.css';
+import styles from '@/components/admin/adminPage.module.css';
 import JobsSheetView from '../../jobs/JobsSheetView';
 
 type Client = {
