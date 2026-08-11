@@ -10,7 +10,7 @@ import styles from './faculty.module.css';
 
 const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
-  'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty at VIT Vellore, with workshops at IIT Kharagpur and NIT Tiruchirappalli.';
+  'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty (M.Arch, V-SPARC) at VIT Vellore, with workshops at IIT Kharagpur and NIT Tiruchirappalli.';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,7 +58,7 @@ const PERSON_JSON_LD = {
     'https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/',
   ],
   affiliation: [
-    { '@type': 'Organization', name: 'VIT Vellore' },
+    { '@type': 'Organization', name: 'VIT Vellore', url: 'https://vit.ac.in/schools/v-sparc' },
     { '@type': 'Organization', name: 'NIT Tiruchirappalli' },
   ],
 };
@@ -106,16 +106,17 @@ export default async function FacultyPage() {
                 <h3>Yokes Marapa</h3>
                 <div className="faculty-role">Founder, YAFT Designs. Head of Design and Automation, VS-CRAFT Facades &amp; Roofing</div>
                 <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
-                <p>Visiting faculty at VIT Vellore, with workshops delivered at IIT Kharagpur and NIT Tiruchirappalli, and occasional guest sessions at ASADI and SRM Chennai. At VIT, has run sessions spanning industrial robotics (with Tvasta) and KUKA robotics integration with Rhino and Grasshopper for the V-SPARC school. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
+                <p>Visiting faculty (M.Arch, V-SPARC) at VIT Vellore, with workshops delivered at IIT Kharagpur and NIT Tiruchirappalli, and occasional guest sessions at ASADI and SRM Chennai. At VIT, has run sessions spanning industrial robotics (with Tvasta) and KUKA robotics integration with Rhino and Grasshopper for the V-SPARC school. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
                 <div className="badge-row">
                   <span className="badge">ARTC: McNeel &amp; Associates</span>
-                  <span className="badge">Visiting Faculty, VIT Vellore</span>
+                  <span className="badge">Visiting Faculty, M.Arch — VIT V-SPARC</span>
                   <span className="badge">IIT Kharagpur Workshops</span>
                   <span className="badge">NIT Trichy Workshops</span>
                 </div>
                 <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 20 }}>
                   <a href="https://www.linkedin.com/in/yokes-marapa-791b06216/" target="_blank" rel="noopener" className="profile-link">LinkedIn →</a>
                   <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" className="profile-link">Rhino Trainer Listing →</a>
+                  <a href="https://vit.ac.in/schools/v-sparc" target="_blank" rel="noopener" className="profile-link">VIT V-SPARC Faculty Listing →</a>
                   <a href="https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/" target="_blank" rel="noopener" className="profile-link">Workshop on Food4Rhino →</a>
                 </div>
               </div>
