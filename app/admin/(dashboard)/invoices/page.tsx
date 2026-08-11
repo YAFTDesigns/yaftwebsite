@@ -10,14 +10,16 @@ export const dynamic = 'force-dynamic';
 // visit to this page.
 export default async function InvoicesPage() {
   const supabase = getSupabaseAdmin();
-  const [clientsRes, trashRes] = await Promise.all([
+  const [clientsRes, trashRes, teamRes] = await Promise.all([
     supabase.from('clients').select('id, name, company_name, gstin, email, phone, address').is('deleted_at', null).order('name', { ascending: true }),
     supabase.from('invoices').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+    supabase.from('team_members').select('id, name, role, email').eq('active', true).is('deleted_at', null).order('name', { ascending: true }),
   ]);
   return (
     <InvoicesClient
       initialClientOptions={clientsRes.data ?? []}
       initialTrashedInvoices={trashRes.data ?? []}
+      initialTeamOptions={teamRes.data ?? []}
     />
   );
 }

@@ -1,18 +1,12 @@
 import ExcelJS from 'exceljs';
 import { computeInvoiceTotals, type InvoiceLineItem } from './invoiceMath';
-import { groupByMonth, monthLabel, type MinimalJob } from './jobsGrouping';
+import { groupByMonth, monthLabel, ddmmyyyyToIso, type MinimalJob } from './jobsGrouping';
 
-// invoices.date is stored as free-text DD/MM/YYYY (e.g. "11/08/2026"),
-// not ISO. Handed directly to `new Date()`, JS reads that as MM/DD/YYYY
-// (November 8th, not August 11th) -- silently grouping invoices into
-// the wrong month sheet. Parsed explicitly here instead of trusting
-// the ambiguous native Date constructor.
-export function ddmmyyyyToIso(dateStr: string): string {
-  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(dateStr.trim());
-  if (!match) return dateStr; // already ISO or unrecognized -- pass through
-  const [, dd, mm, yyyy] = match;
-  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
-}
+// Re-exported so existing importers (the export API route, tests) keep
+// working -- the implementation itself now lives in jobsGrouping.ts,
+// which has no exceljs dependency, so client components can use the
+// date-parsing fix without bundling exceljs into the browser.
+export { ddmmyyyyToIso };
 
 export type InvoiceRow = {
   invoice_no: string;

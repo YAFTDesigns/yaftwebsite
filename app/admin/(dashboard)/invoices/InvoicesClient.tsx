@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import styles from '../../../admin/testimonials/testimonials.module.css';
 import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
+import { monthKey, monthLabel, ddmmyyyyToIso } from '@/lib/jobsGrouping';
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type ClientOption = {
   id: string; name: string; company_name: string | null; gstin: string | null;
   email: string | null; phone: string | null; address: string | null;
 };
+type TeamOption = { id: string; name: string; role: string | null; email: string | null };
 type Invoice = {
   id: string; created_at: string; invoice_no: string; date: string;
   client_name: string; client_email: string; client_state: string;
@@ -36,8 +38,8 @@ const STATES = [
 function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function InvoicesClient({
-  initialClientOptions, initialTrashedInvoices,
-}: { initialClientOptions?: ClientOption[]; initialTrashedInvoices?: Invoice[] } = {}) {
+  initialClientOptions, initialTrashedInvoices, initialTeamOptions,
+}: { initialClientOptions?: ClientOption[]; initialTrashedInvoices?: Invoice[]; initialTeamOptions?: TeamOption[] } = {}) {
   const router = useRouter();
   const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -83,6 +85,44 @@ export default function InvoicesClient({
       .then(json => setClientOptions(json.clients ?? []))
       .catch(() => {});
   }, []);
+
+  // "Email invoices to..." on the Sent tab: pick a month + a saved team
+  // contact (accountant, etc.), sends that month's invoices as an .xlsx
+  // attachment via /api/admin/invoices/email-monthly.
+  const [teamOptions, setTeamOptions] = useState<TeamOption[]>(initialTeamOptions ?? []);
+  useEffect(() => {
+    if (initialTeamOptions !== undefined) return;
+    fetch('/api/team')
+      .then(res => res.json())
+      .then(json => setTeamOptions(json.team ?? []))
+      .catch(() => {});
+  }, []);
+  const [emailMonth, setEmailMonth] = useState('');
+  const [emailRecipientId, setEmailRecipientId] = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailResult, setEmailResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  async function sendMonthlyInvoiceEmail() {
+    const recipient = teamOptions.find(t => t.id === emailRecipientId);
+    if (!emailMonth) { setEmailResult({ ok: false, text: 'Pick a month first.' }); return; }
+    if (!recipient?.email) { setEmailResult({ ok: false, text: 'Pick someone with an email on file.' }); return; }
+    setEmailSending(true);
+    setEmailResult(null);
+    try {
+      const res = await fetch('/api/admin/invoices/email-monthly', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ month: emailMonth, recipientEmail: recipient.email, recipientName: recipient.name }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Failed to send');
+      setEmailResult({ ok: true, text: `Sent ${json.count} invoice${json.count > 1 ? 's' : ''} to ${recipient.name}.` });
+    } catch (err: any) {
+      setEmailResult({ ok: false, text: err?.message ?? 'Failed to send' });
+    } finally {
+      setEmailSending(false);
+    }
+  }
 
   function pickExistingClient(id: string) {
     setSelectedClientId(id);
@@ -412,6 +452,46 @@ export default function InvoicesClient({
                 >
                   ↓ Export to Excel
                 </a>
+              </div>
+
+              {/* Email a month's invoices to a saved contact (accountant, etc.) */}
+              <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:16, marginBottom:24, display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Email invoices for</span>
+                <select
+                  value={emailMonth}
+                  onChange={e => setEmailMonth(e.target.value)}
+                  style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: 13 }}
+                >
+                  <option value="">Pick a month...</option>
+                  {[...new Set(invoices.map(inv => monthKey(ddmmyyyyToIso(inv.date))))]
+                    .sort()
+                    .reverse()
+                    .map(key => <option key={key} value={key}>{monthLabel(key)}</option>)}
+                </select>
+                <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>to</span>
+                <select
+                  value={emailRecipientId}
+                  onChange={e => setEmailRecipientId(e.target.value)}
+                  style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: 13 }}
+                >
+                  <option value="">Pick someone...</option>
+                  {teamOptions.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}{t.role ? ` — ${t.role}` : ''}{!t.email ? ' (no email on file)' : ''}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={sendMonthlyInvoiceEmail}
+                  disabled={emailSending}
+                  style={{ background: 'var(--brass)', color: '#0a0a0a', border: 'none', borderRadius: 6, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', opacity: emailSending ? 0.6 : 1 }}
+                >
+                  {emailSending ? 'Sending...' : 'Send →'}
+                </button>
+                {emailResult && (
+                  <span style={{ fontSize: 12, color: emailResult.ok ? '#3fb950' : '#E63946', width: '100%' }}>{emailResult.text}</span>
+                )}
+                {teamOptions.length === 0 && (
+                  <span style={{ fontSize: 12, color: '#666', width: '100%' }}>No one in your team directory yet — add someone at /admin/team.</span>
+                )}
               </div>
 
               {(() => {

@@ -39,6 +39,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       links: [
         { href: '/admin/inbox', label: 'Inbox' },
         { href: '/admin/emails', label: 'Emails', badge: counts.failedEmails },
+        { href: '/admin/team', label: 'Team' },
       ],
     },
   ];

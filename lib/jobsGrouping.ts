@@ -25,6 +25,19 @@ export function monthKey(dateStr: string): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// invoices.date is stored as free-text DD/MM/YYYY (e.g. "11/08/2026"),
+// not ISO. Handed directly to `new Date()`, JS reads that as MM/DD/YYYY
+// (November 8th, not August 11th) -- silently grouping into the wrong
+// month. Lives here (not in invoicesExport.ts, which pulls in exceljs)
+// so client components can use it without bundling exceljs into the
+// browser -- exceljs is a server-only, Node-oriented library.
+export function ddmmyyyyToIso(dateStr: string): string {
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(dateStr.trim());
+  if (!match) return dateStr; // already ISO or unrecognized -- pass through
+  const [, dd, mm, yyyy] = match;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+}
+
 export function monthLabel(key: string): string {
   const [y, m] = key.split('-').map(Number);
   return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
