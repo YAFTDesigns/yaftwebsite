@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 
@@ -77,11 +77,12 @@ function LogCard({ l }: { l: Log }) {
   );
 }
 
-export default function AdminEmailsClient() {
+export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[] } = {}) {
+  const hasInitialData = initialLogs !== undefined;
   const [tab, setTab]           = useState<'logs' | 'templates'>('logs');
-  const [logs, setLogs]         = useState<Log[]>([]);
+  const [logs, setLogs]         = useState<Log[]>(initialLogs ?? []);
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [loading, setLoading]   = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [editing, setEditing]   = useState<Template | null>(null);
   const [saving, setSaving]     = useState(false);
@@ -113,7 +114,12 @@ export default function AdminEmailsClient() {
     setLoading(false);
   }
 
+  const skippedInitialLoad = useRef(false);
   useEffect(() => {
+    if (hasInitialData && !skippedInitialLoad.current) {
+      skippedInitialLoad.current = true;
+      return;
+    }
     if (tab === 'logs') loadLogs();
     else loadTemplates();
   }, [tab]);

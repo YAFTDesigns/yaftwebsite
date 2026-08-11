@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 
 type Log = {
   id: string;
@@ -34,11 +34,12 @@ function formatDate(iso: string) {
   return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
 }
 
-export default function InboxClient() {
-  const [logs, setLogs]       = useState<Log[]>([]);
+export default function InboxClient({ initialLogs }: { initialLogs?: Log[] } = {}) {
+  const hasInitialData = initialLogs !== undefined;
+  const [logs, setLogs]       = useState<Log[]>(initialLogs ?? []);
   const [search, setSearch]   = useState('');
   const [query, setQuery]     = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [selected, setSelected] = useState<Log | null>(null);
   const [filter, setFilter]   = useState<string>('all');
 
@@ -51,9 +52,26 @@ export default function InboxClient() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetchLogs(''); }, [fetchLogs]);
-
   useEffect(() => {
+    // Server already fetched the unfiltered list on first render -- skip
+    // this one redundant call. The debounced search effect below still
+    // runs independently of this and will refresh once the person
+    // actually types something.
+    if (hasInitialData) return;
+    fetchLogs('');
+  }, [fetchLogs]);
+
+  const isFirstSearchEffect = useRef(true);
+  useEffect(() => {
+    if (isFirstSearchEffect.current) {
+      // This effect re-runs on mount even though `search` hasn't
+      // actually changed from its initial value, which previously
+      // fired a second, fully redundant fetchLogs('') ~350ms after
+      // the one above already ran (or after the server already
+      // provided the same data). Skip that one specific run.
+      isFirstSearchEffect.current = false;
+      return;
+    }
     const t = setTimeout(() => { setQuery(search); fetchLogs(search); }, 350);
     return () => clearTimeout(t);
   }, [search, fetchLogs]);

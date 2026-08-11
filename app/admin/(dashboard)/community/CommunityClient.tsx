@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 
@@ -77,18 +77,28 @@ type Partner = {
 type Section = 'student_work' | 'publications' | 'partners';
 type StatusFilter = 'pending' | 'approved' | 'rejected';
 
-export default function AdminCommunityPage() {
+type InitialProps = {
+  initialStudentWork?: StudentWork[];
+  initialCounts?: { sw_pending: number; pub_pending: number };
+  initialStatusBreakdown?: {
+    sw_approved: number; sw_pending_all: number; sw_rejected: number;
+    pub_approved: number; pub_pending_all: number; pub_rejected: number;
+  };
+};
+
+export default function AdminCommunityPage({ initialStudentWork, initialCounts, initialStatusBreakdown }: InitialProps) {
+  const hasInitialData = initialStudentWork !== undefined;
   const [section, setSection] = useState<Section>('student_work');
   const [filter, setFilter] = useState<StatusFilter>('pending');
-  const [studentWork, setStudentWork] = useState<StudentWork[]>([]);
+  const [studentWork, setStudentWork] = useState<StudentWork[]>(initialStudentWork ?? []);
   const [publications, setPublications] = useState<Publication[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [counts, setCounts] = useState({ sw_pending: 0, pub_pending: 0 });
-  const [statusBreakdown, setStatusBreakdown] = useState({
+  const [counts, setCounts] = useState(initialCounts ?? { sw_pending: 0, pub_pending: 0 });
+  const [statusBreakdown, setStatusBreakdown] = useState(initialStatusBreakdown ?? {
     sw_approved: 0, sw_pending_all: 0, sw_rejected: 0,
     pub_approved: 0, pub_pending_all: 0, pub_rejected: 0,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionError, setActionError] = useState('');
@@ -149,7 +159,12 @@ export default function AdminCommunityPage() {
     setLoading(false);
   }
 
+  const skippedInitialLoad = useRef(false);
   useEffect(() => {
+    if (hasInitialData && !skippedInitialLoad.current) {
+      skippedInitialLoad.current = true;
+      return;
+    }
     loadCounts();
     if (section === 'student_work') loadStudentWork();
     else if (section === 'publications') loadPublications();
