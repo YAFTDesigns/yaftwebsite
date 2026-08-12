@@ -82,7 +82,7 @@ async function getCounts() {
     safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).order('created_at', { ascending: false }).limit(5), []),
-    safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed'), null),
+    safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
     safe(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
   ]);
 
