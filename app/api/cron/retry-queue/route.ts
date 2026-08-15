@@ -6,6 +6,7 @@ import {
 } from '@/lib/queue';
 import { upsertLead } from '@/lib/leads';
 import { sendAdminAlert } from '@/lib/adminAlert';
+import { getErrorMessage } from '@/lib/errorMessage';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
@@ -48,10 +49,10 @@ async function runRetry() {
         });
       if (error) throw error;
       eProcessed++;
-    } catch (err: any) {
+    } catch (err) {
       await pushEnquiryToQueue(enq);
       eRequeued++;
-      enquiryErrors.push(`${enq.email}: ${err?.message ?? String(err)}`);
+      enquiryErrors.push(`${enq.email}: ${getErrorMessage(err)}`);
     }
   }
 
@@ -88,10 +89,10 @@ async function runRetry() {
         invoiceId: reinserted?.id, invoiceNo: inv.invoice_no, event: 'recovered',
         message: 'Recovered from retry queue',
       });
-    } catch (err: any) {
+    } catch (err) {
       await pushInvoiceToQueue(inv);
       iRequeued++;
-      const msg = err?.message ?? String(err);
+      const msg = getErrorMessage(err);
       invoiceErrors.push(`${inv.invoice_no} (${inv.client_email}): ${msg}`);
       await logInvoiceEvent({
         invoiceNo: inv.invoice_no, event: 'retry_failed',

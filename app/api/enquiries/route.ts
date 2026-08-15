@@ -4,6 +4,7 @@ import { upsertLead } from '@/lib/leads';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -24,16 +25,35 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseAdmin();
 
   try {
-    const leadId = await upsertLead(supabase, { email, name, source: 'contact_form', sessionId });
+    let leadId: string | null = null;
+    let enquiryId: string | null = null;
 
-    const { data: enquiryRow, error } = await supabase
-      .from('enquiries')
-      .insert({ lead_id: leadId, name, email, course_interest: interest || null, message })
-      .select('id')
-      .single();
-    if (error) throw error;
+    try {
+      leadId = await upsertLead(supabase, { email, name, source: 'contact_form', sessionId });
 
-    const enquiryId = enquiryRow?.id ?? null;
+      const { data: enquiryRow, error } = await supabase
+        .from('enquiries')
+        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message })
+        .select('id')
+        .single();
+      if (error) throw error;
+      enquiryId = enquiryRow?.id ?? null;
+    } catch (dbErr) {
+      // Supabase down or briefly unreachable -- don't lose the enquiry.
+      // Queue it for retry (picked up by /api/cron/retry-queue, same
+      // pattern already used for invoices), still send the confirmation
+      // email and tell the visitor it went through rather than showing
+      // them a failure for something that will resolve itself shortly.
+      console.error('enquiries insert failed, queueing for retry:', dbErr);
+      try {
+        await pushEnquiryToQueue({ name, email, message, interest: interest || null, queuedAt: new Date().toISOString() });
+      } catch (queueErr) {
+        // Both Supabase and the retry queue are unreachable -- genuinely
+        // nothing left to do but surface the failure to the visitor.
+        console.error('enquiry queue push also failed:', queueErr);
+        return NextResponse.json({ error: 'Could not save your enquiry. Please try again or email us directly.' }, { status: 502 });
+      }
+    }
 
     if (isEmailConfigured()) {
       let status = 'sent';
@@ -81,9 +101,9 @@ export async function POST(request: NextRequest) {
         const html = renderTemplate(tmpl?.body_html ?? defaultHtml, vars);
 
         await sendEmail({ to: `${name} <${email}>`, subject, html });
-      } catch (mailErr: any) {
+      } catch (mailErr) {
         status = 'failed';
-        errMsg = mailErr?.message ?? 'Unknown error';
+        errMsg = getErrorMessage(mailErr);
         console.error('Email send failed:', mailErr);
       }
 

@@ -8,7 +8,6 @@ const TOOL_LABEL: Record<string, string> = { rhino: 'Rhino3D', grasshopper: 'Gra
 const PLACEHOLDERS = [1, 2, 3, 4];
 const DESC_MAX = 300;
 const IMG_MAX_MB = 2;
-const IMG_MAX_BYTES = IMG_MAX_MB * 1024 * 1024;
 
 type Props = { studentWork: StudentWork[]; publications: Publication[]; partners: Partner[]; };
 type WorkForm = {
@@ -182,12 +181,12 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
             ))}
           </div>
 
-          {workDone && <p className={styles.successMsg}>Submitted! We'll review and feature it soon.</p>}
+          {workDone && <p className={styles.successMsg}>Submitted! We&apos;ll review and feature it soon.</p>}
 
           {!showWorkForm
             ? <div className={styles.submitRow}>
                 <button className={styles.submitBtn} onClick={() => setShowWorkForm(true)}>Submit your work →</button>
-                <p className={styles.submitNote}>Trained with YAFT? Share what you built. We'll feature it here.</p>
+                <p className={styles.submitNote}>Trained with YAFT? Share what you built. We&apos;ll feature it here.</p>
               </div>
             : <div className={styles.form}>
                 <p className={styles.formTitle}>Submit your project</p>
@@ -265,7 +264,7 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
             <div className={styles.pubPh}><span className={styles.pubPhYr}>——</span><p className={styles.pubPhText}>Research in computational design, BIM automation, or parametric fabrication welcome.</p></div>
           </div>
 
-          {pubDone && <p className={styles.successMsg}>Submitted! We'll review and publish it soon.</p>}
+          {pubDone && <p className={styles.successMsg}>Submitted! We&apos;ll review and publish it soon.</p>}
 
           {!showPubForm
             ? <div className={styles.submitRow} style={{ marginTop: 20 }}>

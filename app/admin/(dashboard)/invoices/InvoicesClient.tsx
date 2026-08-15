@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
 import { monthKey, monthLabel, ddmmyyyyToIso } from '@/lib/jobsGrouping';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type ClientOption = {
@@ -40,7 +40,6 @@ function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigi
 export default function InvoicesClient({
   initialClientOptions, initialTrashedInvoices, initialTeamOptions,
 }: { initialClientOptions?: ClientOption[]; initialTrashedInvoices?: Invoice[]; initialTeamOptions?: TeamOption[] } = {}) {
-  const router = useRouter();
   const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>(initialTrashedInvoices ?? []);
@@ -117,8 +116,8 @@ export default function InvoicesClient({
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Failed to send');
       setEmailResult({ ok: true, text: `Sent ${json.count} invoice${json.count > 1 ? 's' : ''} to ${recipient.name}.` });
-    } catch (err: any) {
-      setEmailResult({ ok: false, text: err?.message ?? 'Failed to send' });
+    } catch (err) {
+      setEmailResult({ ok: false, text: getErrorMessage(err) || 'Failed to send' });
     } finally {
       setEmailSending(false);
     }
@@ -236,8 +235,8 @@ export default function InvoicesClient({
       if (!res.ok) throw new Error(json.error ?? 'Resend failed');
       setSaveMsg('Saved & resent to client');
       setTimeout(() => setSaveMsg(''), 4000);
-    } catch (e: any) {
-      alert(`Saved, but resend failed: ${e.message ?? 'Unknown error'}`);
+    } catch (e) {
+      alert(`Saved, but resend failed: ${getErrorMessage(e)}`);
     }
     setResending(false);
   }
@@ -366,7 +365,7 @@ export default function InvoicesClient({
         setJobsLinked(true);
         setPendingJobIds([]);
       }
-    } catch (e: any) { setFormError(e.message ?? 'Something went wrong'); }
+    } catch (e) { setFormError(getErrorMessage(e) || 'Something went wrong'); }
     setSending(false);
   }
 
@@ -507,7 +506,7 @@ export default function InvoicesClient({
                 return q ? (
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20 }}>
                     <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888' }}>
-                      {filtered.length} invoice{filtered.length === 1 ? '' : 's'} match "{searchQuery}"
+                      {filtered.length} invoice{filtered.length === 1 ? '' : 's'} match &quot;{searchQuery}&quot;
                     </p>
                     {filtered.length > 0 && (
                       <button
@@ -533,7 +532,7 @@ export default function InvoicesClient({
                   : invoices;
 
                 if (filtered.length === 0) {
-                  return <p className={styles.empty}>No invoices match "{searchQuery}".</p>;
+                  return <p className={styles.empty}>No invoices match &quot;{searchQuery}&quot;.</p>;
                 }
 
                 // group by month/year based on created_at
@@ -784,7 +783,7 @@ export default function InvoicesClient({
         <>
           {pendingJobIds.length > 0 && (
             <div style={{ background: '#1a1408', border: '1px solid var(--brass)', borderRadius: 8, padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#d4b45a' }}>
-              Pre-filled from {pendingJobIds.length} selected job{pendingJobIds.length > 1 ? 's' : ''} — double-check the <strong>State</strong> field below is correct for this client (it's not stored on the job/client record, so it defaults to Tamil Nadu and affects GST calculation).
+              Pre-filled from {pendingJobIds.length} selected job{pendingJobIds.length > 1 ? 's' : ''} — double-check the <strong>State</strong> field below is correct for this client (it&apos;s not stored on the job/client record, so it defaults to Tamil Nadu and affects GST calculation).
             </div>
           )}
           {jobsLinked && (

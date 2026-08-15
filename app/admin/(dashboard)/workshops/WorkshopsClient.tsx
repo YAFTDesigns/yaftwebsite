@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Photo = { filename?: string; caption: string };
 type Workshop = {
@@ -70,8 +71,8 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
       if (!res.ok) throw new Error(json?.error ?? 'Upload failed');
       setCaptionDraft(d => ({ ...d, [key]: '' }));
       await load();
-    } catch (err: any) {
-      setUploadError(e => ({ ...e, [key]: err?.message ?? 'Upload failed' }));
+    } catch (err) {
+      setUploadError(e => ({ ...e, [key]: getErrorMessage(err) || 'Upload failed' }));
     } finally {
       setUploadingKey(null);
     }
@@ -103,8 +104,8 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowNewForm(false);
       await load();
-    } catch (err: any) {
-      setNewError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setNewError(getErrorMessage(err) || 'Save failed');
     } finally {
       setNewSaving(false);
     }
@@ -127,8 +128,8 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setEditingKey(null);
       await load();
-    } catch (err: any) {
-      setEditError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setEditError(getErrorMessage(err) || 'Save failed');
     } finally {
       setEditSaving(false);
     }
@@ -259,7 +260,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
             <h3 style={{ fontSize: 16, color: '#fff', marginBottom: 16 }}>New workshop entry</h3>
 
             <div style={{ marginBottom: 12 }}>
-              <label style={labelStyle}>Key (short, no spaces — e.g. "iim-b")</label>
+              <label style={labelStyle}>Key (short, no spaces — e.g. &quot;iim-b&quot;)</label>
               <input style={fieldStyle} value={newForm.key} onChange={e => setNewForm(f => ({ ...f, key: e.target.value }))} placeholder="e.g. iim-b" />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: 10, marginBottom: 12 }}>

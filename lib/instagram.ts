@@ -32,7 +32,11 @@ export async function getInstagramMedia(limit = 8): Promise<InstagramMedia[]> {
     const json = await res.json();
     const items = Array.isArray(json.data) ? json.data : [];
 
-    return items.map((item: any) => ({
+    type GraphMediaItem = {
+      id: string; caption?: string; media_type: string;
+      thumbnail_url?: string; media_url?: string; permalink: string; timestamp: string;
+    };
+    return items.map((item: GraphMediaItem) => ({
       id: item.id,
       caption: item.caption ?? null,
       mediaType: item.media_type,

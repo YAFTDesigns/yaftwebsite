@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '@/components/admin/adminPage.module.css';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Client = {
   id: string; created_at: string; updated_at: string;
@@ -13,6 +14,10 @@ type Client = {
 };
 
 const EMPTY_FORM = { name: '', company_name: '', gstin: '', address: '', phone: '', email: '', notes: '' };
+const FIELD_LABELS: Record<keyof typeof EMPTY_FORM, string> = {
+  name: 'Name *', company_name: 'Company', gstin: 'GSTIN',
+  phone: 'Phone', email: 'Email', address: 'Address', notes: 'Notes',
+};
 
 export default function ClientsClient({ initialClients }: { initialClients?: Client[] }) {
   const hasInitialData = initialClients !== undefined;
@@ -85,8 +90,8 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowForm(false);
       await load();
-    } catch (err: any) {
-      setFormError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setFormError(getErrorMessage(err) || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -117,8 +122,8 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
       await navigator.clipboard.writeText(fullUrl).catch(() => {});
       alert(`Share link copied to clipboard:\n\n${fullUrl}\n\nAnyone with this link can view/download ${c.name}'s job list, no login needed. Send it directly to the client.`);
       await load();
-    } catch (err: any) {
-      alert(err?.message ?? 'Failed to generate link');
+    } catch (err) {
+      alert(getErrorMessage(err) || 'Failed to generate link');
     } finally {
       setLinkBusyId(null);
     }
@@ -222,16 +227,13 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
           <div style={{ width: '100%', maxWidth: 460, margin: '0 16px', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: 24 }}>
             <h3 style={{ fontSize: 16, color: '#fff', marginBottom: 16 }}>{editId ? 'Edit client' : 'New client'}</h3>
 
-            {[
-              ['name', 'Name *'], ['company_name', 'Company'], ['gstin', 'GSTIN'],
-              ['phone', 'Phone'], ['email', 'Email'], ['address', 'Address'], ['notes', 'Notes'],
-            ].map(([key, label]) => (
+            {(Object.keys(EMPTY_FORM) as (keyof typeof EMPTY_FORM)[]).map((key) => (
               <div key={key} style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
+                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{FIELD_LABELS[key]}</label>
                 <input
                   type="text"
-                  value={(form as any)[key]}
-                  onChange={e => setF(key as keyof typeof EMPTY_FORM, e.target.value)}
+                  value={form[key]}
+                  onChange={e => setF(key, e.target.value)}
                   style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '8px 10px', color: '#ddd', fontSize: 13 }}
                 />
               </div>

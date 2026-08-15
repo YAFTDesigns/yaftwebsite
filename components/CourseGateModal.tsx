@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { storeCreds, getStoredCreds, requestSyllabusAccess } from '@/lib/syllabusAccess';
+import { storeCreds, requestSyllabusAccess } from '@/lib/syllabusAccess';
 import { track } from '@/lib/analytics';
 
 export const OPEN_COURSE_GATE_EVENT = 'yaft:open-course-gate';

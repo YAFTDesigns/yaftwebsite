@@ -15,7 +15,7 @@ async function apiGet(table: string, status?: string) {
   return { data: json.data ?? [], error: null };
 }
 
-async function apiPatch(table: string, id: string, updates: Record<string, any>) {
+async function apiPatch(table: string, id: string, updates: Record<string, unknown>) {
   const res = await fetch(API, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -79,21 +79,19 @@ type StatusFilter = 'pending' | 'approved' | 'rejected';
 
 type InitialProps = {
   initialStudentWork?: StudentWork[];
-  initialCounts?: { sw_pending: number; pub_pending: number };
   initialStatusBreakdown?: {
     sw_approved: number; sw_pending_all: number; sw_rejected: number;
     pub_approved: number; pub_pending_all: number; pub_rejected: number;
   };
 };
 
-export default function AdminCommunityPage({ initialStudentWork, initialCounts, initialStatusBreakdown }: InitialProps) {
+export default function AdminCommunityPage({ initialStudentWork, initialStatusBreakdown }: InitialProps) {
   const hasInitialData = initialStudentWork !== undefined;
   const [section, setSection] = useState<Section>('student_work');
   const [filter, setFilter] = useState<StatusFilter>('pending');
   const [studentWork, setStudentWork] = useState<StudentWork[]>(initialStudentWork ?? []);
   const [publications, setPublications] = useState<Publication[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [counts, setCounts] = useState(initialCounts ?? { sw_pending: 0, pub_pending: 0 });
   const [statusBreakdown, setStatusBreakdown] = useState(initialStatusBreakdown ?? {
     sw_approved: 0, sw_pending_all: 0, sw_rejected: 0,
     pub_approved: 0, pub_pending_all: 0, pub_rejected: 0,
@@ -112,7 +110,6 @@ export default function AdminCommunityPage({ initialStudentWork, initialCounts, 
       apiGet('publications', 'approved'),
       apiGet('publications', 'rejected'),
     ]);
-    setCounts({ sw_pending: sw.data.length, pub_pending: pub.data.length });
     setStatusBreakdown({
       sw_approved: swApproved.data.length,
       sw_pending_all: sw.data.length,

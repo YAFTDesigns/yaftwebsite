@@ -4,6 +4,7 @@ import { upsertLead } from '@/lib/leads';
 import { getCourseBySlug } from '@/lib/courses';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LINKEDIN_RE = /linkedin\.com\//i;
@@ -63,9 +64,9 @@ export async function POST(request: NextRequest) {
         const html = renderTemplate(tmpl?.body_html ?? `<p>Thanks for checking out ${course.title}.</p>`, vars);
 
         await sendEmail({ to: email, subject, html });
-      } catch (mailErr: any) {
+      } catch (mailErr) {
         status = 'failed';
-        errMsg = mailErr?.message ?? 'Unknown error';
+        errMsg = getErrorMessage(mailErr);
         console.error('syllabus confirmation send failed:', mailErr);
       }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type PageResult = {
   name: string;
@@ -69,8 +70,8 @@ export default function SiteStatus() {
             ? `${total} recovered`
             : 'Nothing was queued'
       );
-    } catch (e: any) {
-      setRetryMsg(`Failed: ${e.message ?? 'Unknown error'}`);
+    } catch (e) {
+      setRetryMsg(`Failed: ${getErrorMessage(e)}`);
     } finally {
       setRetrying(false);
       check();

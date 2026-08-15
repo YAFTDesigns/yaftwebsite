@@ -23,7 +23,6 @@ export default async function CommunityPage() {
   return (
     <CommunityClient
       initialStudentWork={swPending.data ?? []}
-      initialCounts={{ sw_pending: swPending.data?.length ?? 0, pub_pending: pubPendingCount.count ?? 0 }}
       initialStatusBreakdown={{
         sw_approved: swApprovedCount.count ?? 0,
         sw_pending_all: swPending.data?.length ?? 0,

@@ -5,6 +5,7 @@ import styles from '@/components/admin/adminPage.module.css';
 import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
 import JobsSheetView from './JobsSheetView';
 import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Client = { id: string; name: string; company_name: string | null };
 type Job = {
@@ -156,8 +157,8 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
       setDone(true);
       setTimeout(() => setDone(false), 2500);
       await loadJobs();
-    } catch (err: any) {
-      setFormError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setFormError(getErrorMessage(err) || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -198,8 +199,8 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setEditingJob(null);
       await loadJobs();
-    } catch (err: any) {
-      setEditError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setEditError(getErrorMessage(err) || 'Save failed');
     } finally {
       setEditSaving(false);
     }

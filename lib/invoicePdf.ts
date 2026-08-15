@@ -1,5 +1,23 @@
 import path from 'path';
-import { computeInvoiceTotals } from './invoiceMath';
+import { computeInvoiceTotals, type InvoiceLineItem } from './invoiceMath';
+
+export type InvoicePdfData = {
+  invoice_no: string;
+  date: string;
+  invoice_type?: string;
+  client_name: string;
+  client_email?: string;
+  client_type?: string;
+  client_company?: string | null;
+  client_pan?: string | null;
+  client_gst?: string | null;
+  client_state: string;
+  client_address?: string | null;
+  client_phone?: string | null;
+  items: InvoiceLineItem[];
+  advance?: number;
+  balance?: number;
+};
 
 const ART_BADGE_PATH = path.join(process.cwd(), 'public', 'assets', 'logos', 'art-badge.png');
 const PAID_STAMP_PATH = path.join(process.cwd(), 'public', 'assets', 'images', 'paid-in-full.png');
@@ -27,7 +45,7 @@ function amountInWords(n: number): string {
   return parts.join(' ') + ' Rupees Only';
 }
 
-export async function generatePDF(data: any): Promise<Buffer> {
+export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
   const { default: PDFDocument } = await import('pdfkit');
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: 'A4', margin: 0 });
@@ -145,12 +163,12 @@ export async function generatePDF(data: any): Promise<Buffer> {
 
     // Data rows
     let ry = tableTop + 18;
-    data.items.forEach((item: any, idx: number) => {
+    data.items.forEach((item: InvoiceLineItem, idx: number) => {
       const total = item.rate * item.qty;
       doc.rect(M, ry, W-2*M, 18).stroke('#aaaaaa');
       doc.font('Helvetica').fontSize(8).fillColor('#000000');
       doc.text(String(idx+1), cols[0]+3, ry+5, { width: colW[0]-6, align: 'center' });
-      doc.text(item.desc, cols[1]+3, ry+5, { width: colW[1]-6 });
+      doc.text(item.desc ?? '', cols[1]+3, ry+5, { width: colW[1]-6 });
       if (showHrs) {
         doc.text(String(item.hrs), cols[2]+3, ry+5, { width: colW[2]-6, align: 'center' });
         doc.text(item.qty.toFixed(2), cols[3]+3, ry+5, { width: colW[3]-6, align: 'center' });

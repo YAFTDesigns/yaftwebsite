@@ -38,7 +38,6 @@ export default function InboxClient({ initialLogs }: { initialLogs?: Log[] } = {
   const hasInitialData = initialLogs !== undefined;
   const [logs, setLogs]       = useState<Log[]>(initialLogs ?? []);
   const [search, setSearch]   = useState('');
-  const [query, setQuery]     = useState('');
   const [loading, setLoading] = useState(!hasInitialData);
   const [selected, setSelected] = useState<Log | null>(null);
   const [filter, setFilter]   = useState<string>('all');
@@ -72,7 +71,7 @@ export default function InboxClient({ initialLogs }: { initialLogs?: Log[] } = {
       isFirstSearchEffect.current = false;
       return;
     }
-    const t = setTimeout(() => { setQuery(search); fetchLogs(search); }, 350);
+    const t = setTimeout(() => { fetchLogs(search); }, 350);
     return () => clearTimeout(t);
   }, [search, fetchLogs]);
 

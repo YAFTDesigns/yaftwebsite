@@ -32,7 +32,7 @@ export type SafeResult<T> = {
 };
 
 export async function safeQuery<T>(
-  promise: PromiseLike<PostgrestResponse<any> | PostgrestSingleResponse<any>>,
+  promise: PromiseLike<PostgrestResponse<unknown> | PostgrestSingleResponse<unknown>>,
   fallback: T,
   label: string
 ): Promise<SafeResult<T>> {
@@ -43,9 +43,10 @@ export async function safeQuery<T>(
       return { data: fallback, error: res.error.message ?? 'Query failed' };
     }
     return { data: (res.data as T) ?? fallback, error: null };
-  } catch (err: any) {
-    console.error(`[safeQuery:${label}] threw:`, err?.message ?? err);
-    return { data: fallback, error: err?.message ?? 'Unexpected error' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[safeQuery:${label}] threw:`, message);
+    return { data: fallback, error: message };
   }
 }
 
@@ -54,7 +55,7 @@ export async function safeQuery<T>(
  * returning a number instead of an array.
  */
 export async function safeCount(
-  promise: PromiseLike<PostgrestResponse<any> | PostgrestSingleResponse<any>>,
+  promise: PromiseLike<PostgrestResponse<unknown> | PostgrestSingleResponse<unknown>>,
   label: string
 ): Promise<SafeResult<number>> {
   try {
@@ -64,8 +65,9 @@ export async function safeCount(
       return { data: 0, error: res.error.message ?? 'Query failed' };
     }
     return { data: res.count ?? 0, error: null };
-  } catch (err: any) {
-    console.error(`[safeCount:${label}] threw:`, err?.message ?? err);
-    return { data: 0, error: err?.message ?? 'Unexpected error' };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[safeCount:${label}] threw:`, message);
+    return { data: 0, error: message };
   }
 }

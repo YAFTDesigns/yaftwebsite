@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+
 export default function GlobalError({
   error,
   reset,
@@ -7,6 +9,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // This is the root-level error boundary -- whatever lands here is
+    // serious enough to have taken down the whole page. Previously the
+    // error object was received but never logged anywhere, so a real
+    // failure here would leave zero trace beyond "something broke".
+    console.error('[global-error]', error);
+  }, [error]);
+
   return (
     <html>
       <body style={{ background: '#080808', color: '#fff', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', textAlign: 'center', padding: '24px' }}>

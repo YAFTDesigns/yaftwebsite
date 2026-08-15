@@ -6,6 +6,7 @@ import { pushInvoiceToQueue } from '@/lib/queue';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
@@ -133,9 +134,9 @@ export async function POST(request: NextRequest) {
             content: pdfBase64,
           }],
         });
-      } catch (mailErr: any) {
+      } catch (mailErr) {
         status = 'failed';
-        errMsg = mailErr?.message ?? 'Unknown error';
+        errMsg = getErrorMessage(mailErr);
         console.error('Invoice email send failed:', mailErr);
       }
 

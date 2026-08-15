@@ -3,13 +3,20 @@ import SiteStatus from '@/components/admin/SiteStatus';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
-import { computeInvoiceTotals } from '@/lib/invoiceMath';
+import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
 const SOURCES = ['syllabus_gate', 'contact_form', 'whatsapp_gate'] as const;
 const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// Matches the exact columns each query below actually selects -- not
+// the full invoices/enquiries row shape, just what this page reads.
+type InvoiceMonthRow = { total: number; advance: number; balance: number; items: InvoiceLineItem[]; client_state: string };
+type InvoiceSixMonthRow = { total: number; items: InvoiceLineItem[]; client_state: string; created_at: string };
+type RecentEnquiryRow = { name: string; email: string; course_interest: string | null; created_at: string };
+type RecentInvoiceRow = { invoice_no: string; client_name: string; total: number; balance: number; created_at: string };
 
 function startOfMonth() {
   const d = new Date();
@@ -38,7 +45,7 @@ function sixMonthsAgoStart() {
 // dashboard — changing it carries real risk for no functional gain.
 // Wraps a Supabase query so a missing table / RLS error / network blip
 // degrades to an empty result instead of crashing the whole dashboard.
-async function safe<T>(promise: PromiseLike<{ data: T | null; count?: number | null; error?: any }>, fallback: T) {
+async function safe<T>(promise: PromiseLike<{ data: T | null; count?: number | null; error?: { message?: string } | null }>, fallback: T) {
   try {
     const res = await promise;
     if (res.error) {
@@ -77,13 +84,13 @@ async function getCounts() {
     ),
     safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
-    safe(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart), []),
+    safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart), []),
     safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
-    safe(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
-    safe(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).order('created_at', { ascending: false }).limit(5), []),
+    safe<RecentEnquiryRow[]>(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
+    safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
-    safe(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
+    safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -92,7 +99,7 @@ async function getCounts() {
   // overstate actual earnings. total already includes tax (see
   // lib/invoiceMath.ts), so subtotal is recomputed from items rather
   // than relying on a stored pre-tax figure (no such column exists).
-  const invoiceBreakdowns = invoiceRows.map((r: any) => computeInvoiceTotals(r.items ?? [], r.client_state ?? ''));
+  const invoiceBreakdowns = invoiceRows.map((r) => computeInvoiceTotals(r.items ?? [], r.client_state ?? ''));
   const revenueThisMonth = invoiceBreakdowns.reduce((sum, b) => sum + b.subtotal, 0);
   const taxThisMonth = invoiceBreakdowns.reduce((sum, b) => sum + (b.cgst + b.sgst + b.igst), 0);
   const outstandingBalance = invoiceRows.reduce((sum, r) => sum + (r.balance ?? 0), 0);
@@ -104,11 +111,11 @@ async function getCounts() {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const label = MONTH_LABELS[d.getMonth()];
     const sum = (sixMonthInvoices.data ?? [])
-      .filter((r: any) => {
+      .filter((r) => {
         const rd = new Date(r.created_at);
         return rd.getFullYear() === d.getFullYear() && rd.getMonth() === d.getMonth();
       })
-      .reduce((s: number, r: any) => s + computeInvoiceTotals(r.items ?? [], r.client_state ?? '').subtotal, 0);
+      .reduce((s, r) => s + computeInvoiceTotals(r.items ?? [], r.client_state ?? '').subtotal, 0);
     monthlyTotals.push({ label, value: sum });
   }
 
@@ -254,7 +261,7 @@ export default async function AdminOverviewPage() {
           {counts.recentEnquiries.length === 0
             ? <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-soft)' }}>No enquiries yet.</p>
             : <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {counts.recentEnquiries.map((e: any, i: number) => (
+                {counts.recentEnquiries.map((e, i: number) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: i < counts.recentEnquiries.length - 1 ? '1px solid var(--line)' : 'none', paddingBottom: 10 }}>
                     <div>
                       <p style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{e.name}</p>
@@ -274,7 +281,7 @@ export default async function AdminOverviewPage() {
           {counts.recentInvoices.length === 0
             ? <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-soft)' }}>No invoices yet.</p>
             : <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {counts.recentInvoices.map((inv: any, i: number) => (
+                {counts.recentInvoices.map((inv, i: number) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: i < counts.recentInvoices.length - 1 ? '1px solid var(--line)' : 'none', paddingBottom: 10 }}>
                     <div>
                       <p style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{inv.client_name}</p>

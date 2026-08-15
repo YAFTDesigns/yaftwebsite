@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { PostgrestResponse } from '@supabase/supabase-js';
 import { safeQuery, safeCount } from './safeQuery';
 
 // These tests exist because every admin Server Component originally
@@ -8,10 +9,18 @@ import { safeQuery, safeCount } from './safeQuery';
 // production. safeQuery() is the single shared fix; these tests make
 // sure it can never silently regress back to the unsafe pattern.
 
+// Real PostgrestResponse requires several fields (status, statusText,
+// etc.) that safeQuery/safeCount never actually read -- this mock only
+// includes what they do read, cast through `unknown` rather than `any`
+// since it's deliberately a partial shape, not an unknown one.
+function mockResponse(partial: { data: unknown; error: { message: string } | null; count?: number | null }) {
+  return Promise.resolve(partial as unknown as PostgrestResponse<unknown>);
+}
+
 describe('safeQuery', () => {
   it('returns real data and no error on success', async () => {
     const result = await safeQuery(
-      Promise.resolve({ data: [1, 2, 3], error: null } as any),
+      mockResponse({ data: [1, 2, 3], error: null }),
       [],
       'success-case'
     );
@@ -21,10 +30,10 @@ describe('safeQuery', () => {
 
   it('degrades to the fallback on a Postgrest error, preserving the message', async () => {
     const result = await safeQuery(
-      Promise.resolve({
+      mockResponse({
         data: null,
         error: { message: 'relation "x" does not exist' },
-      } as any),
+      }),
       [],
       'pg-error-case'
     );
@@ -44,7 +53,7 @@ describe('safeQuery', () => {
 
   it('falls back to the provided default when data is null with no error', async () => {
     const result = await safeQuery(
-      Promise.resolve({ data: null, error: null } as any),
+      mockResponse({ data: null, error: null }),
       'default',
       'null-data-case'
     );
@@ -64,7 +73,7 @@ describe('safeQuery', () => {
 describe('safeCount', () => {
   it('returns the count on success', async () => {
     const result = await safeCount(
-      Promise.resolve({ data: null, error: null, count: 42 } as any),
+      mockResponse({ data: null, error: null, count: 42 }),
       'count-success'
     );
     expect(result.data).toBe(42);
@@ -73,11 +82,11 @@ describe('safeCount', () => {
 
   it('returns 0 and the error message on failure, not a thrown exception', async () => {
     const result = await safeCount(
-      Promise.resolve({
+      mockResponse({
         data: null,
         error: { message: 'permission denied' },
         count: null,
-      } as any),
+      }),
       'count-failure'
     );
     expect(result.data).toBe(0);
@@ -86,7 +95,7 @@ describe('safeCount', () => {
 
   it('returns 0 when count is null with no error, not undefined or NaN', async () => {
     const result = await safeCount(
-      Promise.resolve({ data: null, error: null, count: null } as any),
+      mockResponse({ data: null, error: null, count: null }),
       'count-null'
     );
     expect(result.data).toBe(0);

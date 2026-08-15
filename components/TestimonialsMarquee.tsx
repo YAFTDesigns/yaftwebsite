@@ -72,7 +72,11 @@ export default function TestimonialsMarquee() {
       .then(r => r.json())
       .then(({ data }) => {
         if (data && data.length > 0) {
-          const fromDb: Testimonial[] = data.map((t: any) => ({
+          const fromDb: Testimonial[] = data.map((t: {
+            quote: string; name: string; role: string; institution: string | null;
+            linkedin_url: string | null; instagram_url: string | null;
+            show_social: boolean | null; photo_url: string | null; rating: number | null;
+          }) => ({
             quote: t.quote,
             name: t.name,
             title: t.institution ? `${t.role}, ${t.institution}` : t.role,

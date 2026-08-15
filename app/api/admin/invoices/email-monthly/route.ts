@@ -5,6 +5,7 @@ import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { buildInvoicesWorkbook, ddmmyyyyToIso, type InvoiceRow } from '@/lib/invoicesExport';
 import { monthKey, monthLabel } from '@/lib/jobsGrouping';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -108,9 +109,9 @@ export async function POST(request: NextRequest) {
         content: buffer.toString('base64'),
       }],
     });
-  } catch (mailErr: any) {
+  } catch (mailErr) {
     status = 'failed';
-    errMsg = mailErr?.message ?? 'Unknown error';
+    errMsg = getErrorMessage(mailErr);
     console.error('[invoices/email-monthly] send failed:', mailErr);
   }
 

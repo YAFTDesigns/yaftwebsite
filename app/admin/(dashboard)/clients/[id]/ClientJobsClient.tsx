@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from '@/components/admin/adminPage.module.css';
 import JobsSheetView from '../../jobs/JobsSheetView';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Client = {
   id: string; name: string; company_name: string | null; gstin: string | null;
@@ -47,8 +48,8 @@ export default function ClientJobsClient({
       if (!clientRes.ok) throw new Error(clientJson?.error ?? 'Client not found');
       setClient(clientJson.client);
       setJobs(jobsJson.jobs ?? []);
-    } catch (err: any) {
-      setLoadError(err?.message ?? 'Could not load client.');
+    } catch (err) {
+      setLoadError(getErrorMessage(err) || 'Could not load client.');
     } finally {
       setLoading(false);
     }

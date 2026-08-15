@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
+import { getErrorMessage } from '@/lib/errorMessage';
 
 type Member = {
   id: string; name: string; role: string | null; email: string | null;
@@ -9,6 +10,10 @@ type Member = {
 };
 
 const EMPTY_FORM = { name: '', role: '', email: '', phone: '', salary: '', notes: '' };
+const FIELD_LABELS: Record<keyof typeof EMPTY_FORM, string> = {
+  name: 'Name *', role: 'Role (e.g. Accountant, Designer)', email: 'Email',
+  phone: 'Phone', salary: 'Salary (INR, optional)', notes: 'Notes',
+};
 
 function fmtSalary(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 0 }); }
 
@@ -60,8 +65,8 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowForm(false);
       await load();
-    } catch (err: any) {
-      setFormError(err?.message ?? 'Save failed');
+    } catch (err) {
+      setFormError(getErrorMessage(err) || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -137,20 +142,20 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
           <div style={{ width: '100%', maxWidth: 460, margin: '0 16px', background: '#111', border: '1px solid #2a2a2a', borderRadius: 8, padding: 24 }}>
             <h3 style={{ fontSize: 16, color: '#fff', marginBottom: 16 }}>{editId ? 'Edit person' : 'Add person'}</h3>
 
-            {[
-              ['name', 'Name *'], ['role', 'Role (e.g. Accountant, Designer)'],
-              ['email', 'Email'], ['phone', 'Phone'], ['salary', 'Salary (INR, optional)'], ['notes', 'Notes'],
-            ].map(([key, label]) => (
-              <div key={key} style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
-                <input
-                  type={key === 'salary' ? 'number' : 'text'}
-                  value={(form as any)[key]}
-                  onChange={e => setF(key as keyof typeof EMPTY_FORM, e.target.value)}
-                  style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '8px 10px', color: '#ddd', fontSize: 13 }}
-                />
-              </div>
-            ))}
+            {(Object.keys(EMPTY_FORM) as (keyof typeof EMPTY_FORM)[]).map((key) => {
+              const label = FIELD_LABELS[key];
+              return (
+                <div key={key} style={{ marginBottom: 12 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
+                  <input
+                    type={key === 'salary' ? 'number' : 'text'}
+                    value={form[key]}
+                    onChange={e => setF(key, e.target.value)}
+                    style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '8px 10px', color: '#ddd', fontSize: 13 }}
+                  />
+                </div>
+              );
+            })}
 
             {formError && <p style={{ fontSize: 12, color: '#E63946', marginBottom: 12 }}>{formError}</p>}
 
