@@ -92,6 +92,7 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
 
   useEffect(() => {
     if (hasInitialData) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
   }, []);
 

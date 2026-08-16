@@ -57,6 +57,7 @@ export default function InboxClient({ initialLogs }: { initialLogs?: Log[] } = {
     // runs independently of this and will refresh once the person
     // actually types something.
     if (hasInitialData) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     fetchLogs('');
   }, [fetchLogs]);
 

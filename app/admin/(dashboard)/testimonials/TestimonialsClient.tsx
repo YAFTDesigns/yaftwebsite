@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 
 const API = '/api/admin/testimonials';
@@ -75,15 +75,16 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
     setLoading(false);
   }
 
-  const [skippedInitialLoad, setSkippedInitialLoad] = useState(false);
+  const skippedInitialLoad = useRef(false);
   useEffect(() => {
     // Server already fetched the default filter on first render -- skip
     // that one redundant client fetch, but still fetch on every
     // subsequent filter change as normal.
-    if (hasInitialData && !skippedInitialLoad) {
-      setSkippedInitialLoad(true);
+    if (hasInitialData && !skippedInitialLoad.current) {
+      skippedInitialLoad.current = true;
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
   }, [filter]);
 

@@ -146,6 +146,7 @@ export default function InvoicesClient({
     sessionStorage.removeItem('yaftInvoicePrefill');
     try {
       const payload = JSON.parse(raw);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes React state with sessionStorage (external system) on mount, not a cascading-render bug
       setForm(f => ({
         ...f,
         client_name: payload.client_name ?? f.client_name,
@@ -322,9 +323,11 @@ export default function InvoicesClient({
   }
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- fetch on tab change, not a cascading-render bug */
     if (tab === 'sent') loadInvoices();
     if (tab === 'trash') loadTrash();
     if (tab === 'log') loadLogs();
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [tab]);
 
   // Load trash count on mount too, so the tab badge is accurate

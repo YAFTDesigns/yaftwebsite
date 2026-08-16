@@ -18,6 +18,11 @@ export default function WhatsAppButton() {
     if (!allowed) return;
     // Only the homepage has a hero section to watch; other allowed pages
     // (courses, services) show the button immediately.
+    /* eslint-disable react-hooks/set-state-in-effect -- this effect
+       exists specifically to synchronize the button's visibility with
+       the DOM (which page we're on, whether a hero section element
+       exists), the documented legitimate use of useEffect, not an
+       accidental cascading-render bug. */
     if (pathname !== '/') {
       setPastHero(true);
       return;
@@ -28,6 +33,7 @@ export default function WhatsAppButton() {
       return;
     }
     setPastHero(false);
+    /* eslint-enable react-hooks/set-state-in-effect */
     const observer = new IntersectionObserver(
       ([entry]) => setPastHero(!entry.isIntersecting),
       { threshold: 0 }

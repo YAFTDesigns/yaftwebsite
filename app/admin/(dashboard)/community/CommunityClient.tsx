@@ -163,6 +163,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
       return;
     }
     loadCounts();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount/filter-change, not a cascading-render bug
     if (section === 'student_work') loadStudentWork();
     else if (section === 'publications') loadPublications();
     else loadPartners();

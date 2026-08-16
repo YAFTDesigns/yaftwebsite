@@ -52,6 +52,7 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
     // Server already fetched this on first render (see page.tsx) -- skip
     // the redundant client-side re-fetch on initial mount.
     if (hasInitialData) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
   }, []);
 

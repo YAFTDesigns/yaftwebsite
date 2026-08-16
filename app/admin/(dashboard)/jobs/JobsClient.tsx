@@ -116,12 +116,14 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     // round trip on initial load. Subsequent refreshes after mutations
     // still go through loadJobs()/loadTrash()/loadClients() as normal.
     if (hasInitialData) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     loadJobs(); loadTrash(); loadClients();
   }, []);
 
   // Auto-suggest the next job number once jobs are loaded, but only when
   // the field is empty -- never clobbers something the user is mid-typing.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- synchronizes the suggested job number with the current jobs list, not a cascading-render bug
     setForm(f => f.job_no ? f : { ...f, job_no: nextJobNo(jobs) });
   }, [jobs]);
 

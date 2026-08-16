@@ -120,6 +120,7 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
       skippedInitialLoad.current = true;
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount/tab-change, not a cascading-render bug
     if (tab === 'logs') loadLogs();
     else loadTemplates();
   }, [tab]);

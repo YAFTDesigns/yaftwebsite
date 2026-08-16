@@ -37,6 +37,7 @@ export default function SiteStatus() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- periodic health check against the site's own status endpoints, not a cascading-render bug
     check();
     const interval = setInterval(check, 60_000); // re-check every 60s
     return () => clearInterval(interval);
