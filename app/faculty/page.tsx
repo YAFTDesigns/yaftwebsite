@@ -146,6 +146,7 @@ export default async function FacultyPage() {
                   View Certificate →
                 </summary>
                 <div style={{ marginTop: 16, border: '1px solid var(--line)', padding: 4, background: 'var(--paper)', maxWidth: 640 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- hidden inside a collapsed <details>, document scan not a photo, LCP/lazy-loading benefit is negligible */}
                   <img
                     src="/assets/docs/Yokes_Marapa_ART_Certificate.jpg"
                     alt="Authorized Rhino Trainer Certificate: Yokes Marapa, McNeel South Asia, May 2024"

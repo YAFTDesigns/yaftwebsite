@@ -334,9 +334,7 @@ export default function InvoicesClient({
   // before the user ever visits the Trash tab themselves.
   useEffect(() => {
     if (initialTrashedInvoices !== undefined) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     loadTrash();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadTrash intentionally omitted: recreated every render, including it would re-fetch on every render
   }, [initialTrashedInvoices]);
 
   async function generate() {

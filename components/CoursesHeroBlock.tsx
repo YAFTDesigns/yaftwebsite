@@ -67,6 +67,7 @@ export default function CoursesHeroBlock() {
             onMouseEnter={() => onEnter('rhino')}
             onMouseLeave={onLeave}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- fills a CSS-sized hover box without explicit dimensions; fill mode needs a verified position:relative parent not confirmed here */}
             <img src="/assets/logos/rhino-logo.png" alt="Rhino3D" />
           </div>
           <span className={styles.dot}>●</span>
@@ -75,6 +76,7 @@ export default function CoursesHeroBlock() {
             onMouseEnter={() => onEnter('gh')}
             onMouseLeave={onLeave}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- fills a CSS-sized hover box without explicit dimensions; fill mode needs a verified position:relative parent not confirmed here */}
             <img src="/assets/logos/grasshopper-logo.jpg" alt="Grasshopper" />
           </div>
           <span className={styles.dot}>●</span>
@@ -83,6 +85,7 @@ export default function CoursesHeroBlock() {
             onMouseEnter={() => onEnter('rir')}
             onMouseLeave={onLeave}
           >
+            {/* eslint-disable-next-line @next/next/no-img-element -- fills a CSS-sized hover box without explicit dimensions; fill mode needs a verified position:relative parent not confirmed here */}
             <img src="/assets/logos/rhino-inside-revit-logo.png" alt="Rhino.Inside.Revit" />
           </div>
         </div>

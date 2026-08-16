@@ -152,7 +152,10 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
             {studentWork.map(s => (
               <div key={s.id} className={styles.scard}>
                 <div className={styles.scardImg} style={{ background: '#111' }}>
-                  {s.image_url ? <img src={s.image_url} alt={s.project_title} /> : <span className={styles.phIcon}>◈</span>}
+                  {s.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- user-submitted Supabase Storage URL, CSS-sized container without explicit dimensions
+                    <img src={s.image_url} alt={s.project_title} />
+                  ) : <span className={styles.phIcon}>◈</span>}
                   <span className={`${styles.toolBadge} ${styles[s.tool] ?? ''}`}>{TOOL_LABEL[s.tool] ?? s.tool}</span>
                 </div>
                 <div className={styles.scardBody}>
@@ -246,7 +249,10 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
               <div key={p.id} className={styles.pubCard}>
                 <div className={styles.pubAccent} />
                 <div className={styles.pubInner}>
-                  {p.author_photo_url && <img className={styles.pubPhoto} src={p.author_photo_url} alt={p.author_name} />}
+                  {p.author_photo_url && (
+                    // eslint-disable-next-line @next/next/no-img-element -- user-submitted Supabase Storage URL, CSS-sized container without explicit dimensions
+                    <img className={styles.pubPhoto} src={p.author_photo_url} alt={p.author_name} />
+                  )}
                   <div className={styles.pubContent}>
                     <div className={styles.pubMetaRow}>
                       <span className={styles.pubYear}>{p.pub_month} {p.pub_year}</span>
@@ -296,7 +302,10 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
           {partners.map(p => (
             <div key={p.id} className={styles.pcard}>
               <div className={styles.pcardLogo}>
-                {p.logo_url ? <img src={p.logo_url} alt={p.name} /> : <span className={styles.pcardInitial}>{p.name[0]}</span>}
+                {p.logo_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- partner-submitted logo URL, CSS-sized container without explicit dimensions
+                  <img src={p.logo_url} alt={p.name} />
+                ) : <span className={styles.pcardInitial}>{p.name[0]}</span>}
               </div>
               <div className={styles.pcardBody}>
                 <p className={styles.pcardName}>{p.name}</p>

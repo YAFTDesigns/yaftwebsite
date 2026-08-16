@@ -204,6 +204,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
                 {w.photos.map((p, i) => (
                   <div key={p.filename ?? `placeholder-${i}`} style={{ position: 'relative', width: 100 }}>
                     {p.filename ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- admin-only tool, fixed 100x100 thumbnail, not a public/LCP-relevant page
                       <img
                         src={`${SITE_IMAGE_BASE}${p.filename}`}
                         alt={p.caption}

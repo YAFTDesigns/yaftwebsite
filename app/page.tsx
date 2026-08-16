@@ -291,6 +291,7 @@ export default async function HomePage() {
                         slug={c.dbSlug!}
                         className={styles.courseCardVisual}
                       >
+                        {/* eslint-disable-next-line @next/next/no-img-element -- fills a CSS-sized container (courseCardVisual) without explicit dimensions; fill mode needs a verified position:relative parent not confirmed here */}
                         <img src={c.img} alt={c.alt} draggable="false" />
                         <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
                         <div className={styles.glassOverlay}></div>
@@ -298,6 +299,7 @@ export default async function HomePage() {
                       </CourseVisualLink>
                     ) : (
                       <Link href="/courses" className={styles.courseCardVisual} aria-label={`View ${c.title}`}>
+                        {/* eslint-disable-next-line @next/next/no-img-element -- fills a CSS-sized container (courseCardVisual) without explicit dimensions; fill mode needs a verified position:relative parent not confirmed here */}
                         <img src={c.img} alt={c.alt} draggable="false" />
                         <div className={styles.liveBadge}><span className={styles.liveDot}></span>Live</div>
                         <div className={styles.glassOverlay}></div>

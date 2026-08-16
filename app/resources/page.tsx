@@ -102,6 +102,7 @@ export default async function ResourcesPage() {
                 <a key={i} href={b.url} target="_blank" rel="noopener" className={styles.bookCard}>
                   <div className={styles.bookCover}>
                     {b.cover_url
+                      // eslint-disable-next-line @next/next/no-img-element -- external book cover URLs from arbitrary publisher domains, not in next.config remotePatterns
                       ? <img src={b.cover_url} alt={b.title} />
                       : <div className={styles.bookCoverPh}><span>📖</span></div>
                     }

@@ -84,7 +84,6 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
       skippedInitialLoad.current = true;
       return;
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `load` intentionally omitted: recreated every render, including it would re-fetch on every render instead of only on filter change
   }, [filter, hasInitialData]);

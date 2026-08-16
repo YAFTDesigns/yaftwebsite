@@ -124,6 +124,7 @@ export default function TestimonialForm({ source }: { source?: string }) {
               title="Upload a photo"
             >
               {photoPreview
+                // eslint-disable-next-line @next/next/no-img-element -- photoPreview is a client-side blob: object URL before upload, next/image cannot optimize blob URLs
                 ? <img src={photoPreview} alt="Preview" className={styles.photoImg} />
                 : <span className={styles.photoInitials}>{form.name ? initials(form.name) : '+'}</span>
               }
