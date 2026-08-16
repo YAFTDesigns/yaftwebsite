@@ -52,7 +52,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
   useEffect(() => {
     if (hasInitialData) return;
     load();
-  }, []);
+  }, [hasInitialData]);
 
   async function uploadPhoto(key: string, file: File) {
     const caption = (captionDraft[key] ?? '').trim();

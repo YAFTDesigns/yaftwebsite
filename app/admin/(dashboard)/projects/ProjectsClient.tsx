@@ -94,7 +94,7 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
     if (hasInitialData) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
-  }, []);
+  }, [hasInitialData]);
 
   async function toggleActive(p: Project) {
     setBusyId(p.id);

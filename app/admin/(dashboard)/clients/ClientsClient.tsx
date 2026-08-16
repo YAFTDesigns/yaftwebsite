@@ -54,7 +54,7 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
     if (hasInitialData) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
-  }, []);
+  }, [hasInitialData]);
 
   function setF(k: keyof typeof EMPTY_FORM, v: string) { setForm(f => ({ ...f, [k]: v })); }
 

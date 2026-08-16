@@ -83,7 +83,7 @@ export default function InvoicesClient({
       .then(res => res.json())
       .then(json => setClientOptions(json.clients ?? []))
       .catch(() => {});
-  }, []);
+  }, [initialClientOptions]);
 
   // "Email invoices to..." on the Sent tab: pick a month + a saved team
   // contact (accountant, etc.), sends that month's invoices as an .xlsx
@@ -95,7 +95,7 @@ export default function InvoicesClient({
       .then(res => res.json())
       .then(json => setTeamOptions(json.team ?? []))
       .catch(() => {});
-  }, []);
+  }, [initialTeamOptions]);
   const [emailMonth, setEmailMonth] = useState('');
   const [emailRecipientId, setEmailRecipientId] = useState('');
   const [emailSending, setEmailSending] = useState(false);
@@ -334,8 +334,10 @@ export default function InvoicesClient({
   // before the user ever visits the Trash tab themselves.
   useEffect(() => {
     if (initialTrashedInvoices !== undefined) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     loadTrash();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadTrash intentionally omitted: recreated every render, including it would re-fetch on every render
+  }, [initialTrashedInvoices]);
 
   async function generate() {
     setFormError(''); setSending(true); setDone(false); setPdfUrl('');

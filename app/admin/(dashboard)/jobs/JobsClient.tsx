@@ -118,7 +118,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     if (hasInitialData) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     loadJobs(); loadTrash(); loadClients();
-  }, []);
+  }, [hasInitialData]);
 
   // Auto-suggest the next job number once jobs are loaded, but only when
   // the field is empty -- never clobbers something the user is mid-typing.

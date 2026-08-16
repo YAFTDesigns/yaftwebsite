@@ -86,11 +86,13 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
-  }, [filter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `load` intentionally omitted: recreated every render, including it would re-fetch on every render instead of only on filter change
+  }, [filter, hasInitialData]);
 
   useEffect(() => {
     const interval = setInterval(() => { load(); }, 20000);
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `load` intentionally omitted: recreated every render, including it would reset the interval on every render instead of only on filter change
   }, [filter]);
 
   async function updateStatus(id: string, status: 'approved' | 'rejected') {

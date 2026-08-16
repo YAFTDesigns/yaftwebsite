@@ -167,6 +167,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
     if (section === 'student_work') loadStudentWork();
     else if (section === 'publications') loadPublications();
     else loadPartners();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load* functions and hasInitialData intentionally omitted: they're recreated every render / never change, including them would re-fetch on every render instead of only on section/filter change
   }, [section, filter]);
 
   async function updateSW(id: string, status: 'approved' | 'rejected') {

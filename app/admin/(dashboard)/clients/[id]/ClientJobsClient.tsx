@@ -61,7 +61,8 @@ export default function ClientJobsClient({
     if (hasInitialData) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
     load();
-  }, [clientId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `load` is intentionally omitted: it's recreated every render, including it would re-fetch on every render instead of only when clientId changes
+  }, [clientId, hasInitialData]);
 
   function toggle(jobId: string) {
     setSelected(s => {

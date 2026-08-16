@@ -123,6 +123,7 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount/tab-change, not a cascading-render bug
     if (tab === 'logs') loadLogs();
     else loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadLogs/loadTemplates/hasInitialData intentionally omitted: recreated every render / never changes, including them would re-fetch on every render instead of only on tab change
   }, [tab]);
 
   async function saveTemplate() {
