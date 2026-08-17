@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
       { source: '/faculty.html', destination: '/faculty', permanent: true },
       { source: '/resources.html', destination: '/resources', permanent: true },
       { source: '/projects.html', destination: '/projects', permanent: true },
+      // Every canonical tag, OG tag, and metadataBase in this app points
+      // to https://www.yaftdesigns.com -- but nothing was actually
+      // enforcing that at the domain level, so the bare yaftdesigns.com
+      // served identical content with no redirect between the two.
+      // Google saw two live URLs for every page and picked its own
+      // canonical instead of respecting the declared one (Search
+      // Console: "Duplicate, Google chose different canonical than
+      // user"). This forces the bare domain to redirect to www,
+      // matching what every page already claims as canonical.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'yaftdesigns.com' }],
+        destination: 'https://www.yaftdesigns.com/:path*',
+        permanent: true,
+      },
     ];
   },
   images: {
