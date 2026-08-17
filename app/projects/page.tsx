@@ -75,16 +75,30 @@ type ProjectRow = {
 };
 
 export default async function ProjectsPage() {
-  const [{ data }, instagramMedia] = await Promise.all([
-    getSupabaseAdmin()
-      .from('portfolio_projects')
-      .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
-      .eq('active', true)
-      .order('display_order'),
-    getInstagramMedia(8),
-  ]);
+  // A transient Supabase failure previously crashed this entire public
+  // page with an unhandled 500. getSupabaseAdmin() itself can throw
+  // synchronously (before any query even runs) if the client can't be
+  // constructed, so the whole call -- including building the client --
+  // needs to be inside the try, not just the query chain. Wrapped in an
+  // async function that never rejects, so it can still run in parallel
+  // with the Instagram fetch (which already handles its own errors)
+  // instead of falling back to a slower sequential await.
+  async function fetchProjects(): Promise<ProjectRow[]> {
+    try {
+      const res = await getSupabaseAdmin()
+        .from('portfolio_projects')
+        .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
+        .eq('active', true)
+        .order('display_order');
+      if (res.error) console.error('[projects] portfolio_projects query failed:', res.error.message);
+      return (res.data as ProjectRow[] | null) ?? [];
+    } catch (err) {
+      console.error('[projects] portfolio_projects query threw:', err);
+      return [];
+    }
+  }
 
-  const rows = (data as ProjectRow[] | null) ?? [];
+  const [rows, instagramMedia] = await Promise.all([fetchProjects(), getInstagramMedia(8)]);
 
   const gridProjects: PortfolioProject[] = rows.map(p => ({
     slug: p.slug,

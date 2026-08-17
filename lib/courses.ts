@@ -47,14 +47,28 @@ function toCourse(row: CourseRow): Course {
 
 export async function getCourses(): Promise<Course[]> {
   const supabase = getSupabasePublic();
-  const { data, error } = await supabase
-    .from('courses')
-    .select(COLUMNS)
-    .eq('active', true)
-    .order('created_at');
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select(COLUMNS)
+      .eq('active', true)
+      .order('created_at');
 
-  if (error) throw error;
-  return (data ?? []).map(toCourse);
+    if (error) {
+      console.error('[courses] getCourses query failed:', error.message);
+      return [];
+    }
+    return (data ?? []).map(toCourse);
+  } catch (err) {
+    // A transient Supabase failure previously crashed /courses (and every
+    // page that lists courses) with an unhandled 500 -- confirmed via a
+    // local resilience test that simulated the DB being unreachable.
+    // /courses already has FALLBACK_COURSES ready for an empty result;
+    // this is what lets that fallback actually run instead of the whole
+    // page going down over one flaky query.
+    console.error('[courses] getCourses query threw:', err);
+    return [];
+  }
 }
 
 export async function getCourseBySlug(slug: string): Promise<Course | undefined> {

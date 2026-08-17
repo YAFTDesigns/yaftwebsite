@@ -93,9 +93,21 @@ const INTEREST_OPTIONS = [
 ];
 
 export default async function ServicesPage() {
-  const { data } = await getSupabaseAdmin()
-    .from('workshops').select('key, num, place, title, role, description, photos').eq('active', true).order('display_order');
-  const workshops: (WorkshopGroup & { place: string; num: string; description: string })[] = (data ?? []).map(w => ({
+  // A transient Supabase failure previously crashed this entire public
+  // page with an unhandled 500 -- confirmed via a local resilience test
+  // that simulated the DB being unreachable. Wrapped so the page still
+  // renders (just without the workshop gallery) instead of going down
+  // entirely over one flaky query.
+  let data: { key: string; num: string; place: string; title: string; role: string; description: string; photos: unknown }[] = [];
+  try {
+    const res = await getSupabaseAdmin()
+      .from('workshops').select('key, num, place, title, role, description, photos').eq('active', true).order('display_order');
+    if (res.error) console.error('[services] workshops query failed:', res.error.message);
+    data = res.data ?? [];
+  } catch (err) {
+    console.error('[services] workshops query threw:', err);
+  }
+  const workshops: (WorkshopGroup & { place: string; num: string; description: string })[] = data.map(w => ({
     key: w.key,
     num: w.num,
     place: w.place,

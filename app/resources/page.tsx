@@ -49,13 +49,27 @@ const INTEREST_OPTIONS = [
 ];
 
 export default async function ResourcesPage() {
-  const supabase = getSupabaseAdmin();
-  const [{ data: booksData }, { data: videosData }] = await Promise.all([
-    supabase.from('books').select('title, author, description, tag, url, cover_url').eq('active', true).order('display_order'),
-    supabase.from('videos').select('youtube_id, title, channel').eq('active', true).order('display_order'),
-  ]);
-  const books = booksData ?? [];
-  const videos: VideoItem[] = (videosData ?? []).map(v => ({ id: v.youtube_id, title: v.title, meta: v.channel }));
+  // A transient Supabase failure previously crashed this entire public
+  // page with an unhandled 500. getSupabaseAdmin() itself can throw
+  // synchronously (before any query even runs) if the client can't be
+  // constructed -- confirmed via a local resilience test -- so building
+  // the client has to be inside the try too, not just the queries.
+  let books: { title: string; author: string; description: string; tag: string; url: string; cover_url: string | null }[] = [];
+  let videosData: { youtube_id: string; title: string; channel: string }[] = [];
+  try {
+    const supabase = getSupabaseAdmin();
+    const [booksRes, videosRes] = await Promise.all([
+      supabase.from('books').select('title, author, description, tag, url, cover_url').eq('active', true).order('display_order'),
+      supabase.from('videos').select('youtube_id, title, channel').eq('active', true).order('display_order'),
+    ]);
+    if (booksRes.error) console.error('[resources] books query failed:', booksRes.error.message);
+    if (videosRes.error) console.error('[resources] videos query failed:', videosRes.error.message);
+    books = booksRes.data ?? [];
+    videosData = videosRes.data ?? [];
+  } catch (err) {
+    console.error('[resources] books/videos query threw:', err);
+  }
+  const videos: VideoItem[] = videosData.map((v) => ({ id: v.youtube_id, title: v.title, meta: v.channel }));
   return (
     <>
       <SiteHeader active="/resources" />

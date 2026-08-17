@@ -73,9 +73,19 @@ const INTEREST_OPTIONS = [
 ];
 
 export default async function FacultyPage() {
-  const { data } = await getSupabaseAdmin()
-    .from('mentors').select('name, role, bio, photo_key, linkedin_url').eq('type', 'guest').eq('active', true).order('display_order');
-  const mentors = data ?? [];
+  // A transient Supabase failure previously crashed this entire public
+  // page with an unhandled 500. Wrapped so the page still renders (just
+  // without the guest mentors section) instead of going down entirely
+  // over one flaky query.
+  let mentors: { name: string; role: string; bio: string; photo_key: string | null; linkedin_url: string | null }[] = [];
+  try {
+    const res = await getSupabaseAdmin()
+      .from('mentors').select('name, role, bio, photo_key, linkedin_url').eq('type', 'guest').eq('active', true).order('display_order');
+    if (res.error) console.error('[faculty] mentors query failed:', res.error.message);
+    mentors = res.data ?? [];
+  } catch (err) {
+    console.error('[faculty] mentors query threw:', err);
+  }
   return (
     <>
       <SiteHeader active="/faculty" />
