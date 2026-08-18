@@ -7,6 +7,7 @@ import { getErrorMessage } from '@/lib/errorMessage';
 type Member = {
   id: string; name: string; role: string | null; email: string | null;
   phone: string | null; salary: number | null; notes: string | null; active: boolean;
+  share_token: string | null;
 };
 
 const EMPTY_FORM = { name: '', role: '', email: '', phone: '', salary: '', notes: '' };
@@ -83,6 +84,36 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
     await load();
   }
 
+  const [linkBusyId, setLinkBusyId] = useState<string | null>(null);
+
+  async function getShareLink(m: Member) {
+    setLinkBusyId(m.id);
+    try {
+      const res = await fetch(`/api/team/${m.id}/share-link`, { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Failed to generate link');
+      const fullUrl = `${window.location.origin}${json.url}`;
+      await navigator.clipboard.writeText(fullUrl).catch(() => {});
+      alert(`Job sheet link copied to clipboard:\n\n${fullUrl}\n\nAnyone with this link can view/download the full job list (no pricing shown) -- job no, client, type, status, notes only. No login needed. Send it directly to ${m.name}.`);
+      await load();
+    } catch (err) {
+      alert(getErrorMessage(err) || 'Failed to generate link');
+    } finally {
+      setLinkBusyId(null);
+    }
+  }
+
+  async function revokeShareLink(m: Member) {
+    if (!confirm(`Revoke the job sheet link for "${m.name}"? The old link will stop working immediately. You can generate a new one anytime.`)) return;
+    setLinkBusyId(m.id);
+    try {
+      await fetch(`/api/team/${m.id}/share-link`, { method: 'DELETE' });
+      await load();
+    } finally {
+      setLinkBusyId(null);
+    }
+  }
+
   const visible = team.filter(m => showInactive || m.active);
 
   return (
@@ -123,8 +154,18 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
                     <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#666', marginTop: 4 }}>Salary: INR {fmtSalary(m.salary)}</p>
                   )}
                 </div>
-                <div className={styles.actions} style={{ display: 'flex', gap: 8 }}>
+                <div className={styles.actions} style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button onClick={() => openEdit(m)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Edit</button>
+                  {m.share_token ? (
+                    <>
+                      <button onClick={() => getShareLink(m)} disabled={linkBusyId === m.id} style={{ background: 'transparent', border: '1px solid #25D366', color: '#25D366', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Copy job sheet link</button>
+                      <button onClick={() => revokeShareLink(m)} disabled={linkBusyId === m.id} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#888', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>Revoke</button>
+                    </>
+                  ) : (
+                    <button onClick={() => getShareLink(m)} disabled={linkBusyId === m.id} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>
+                      {linkBusyId === m.id ? 'Generating...' : 'Get job sheet link'}
+                    </button>
+                  )}
                   <button onClick={() => toggleActive(m)} style={{ background: 'transparent', border: '1px solid #2a2a2a', color: '#aaa', borderRadius: 4, padding: '6px 12px', fontSize: 11, cursor: 'pointer' }}>
                     {m.active ? 'Deactivate' : 'Reactivate'}
                   </button>
