@@ -12,10 +12,11 @@ export const dynamic = 'force-dynamic';
 export default async function JobsPage() {
   const supabase = getSupabaseAdmin();
 
-  const [jobsRes, trashRes, clientsRes] = await Promise.all([
+  const [jobsRes, trashRes, clientsRes, teamRes] = await Promise.all([
     supabase.from('jobs').select('*').is('deleted_at', null).order('job_date', { ascending: false }),
     supabase.from('jobs').select('*').not('deleted_at', 'is', null).order('job_date', { ascending: false }),
     supabase.from('clients').select('*').eq('active', true).is('deleted_at', null).order('name', { ascending: true }),
+    supabase.from('team_members').select('id, name, role').eq('active', true).is('deleted_at', null).order('name', { ascending: true }),
   ]);
 
   const [jobsWithDates, trashWithDates] = await Promise.all([
@@ -28,6 +29,7 @@ export default async function JobsPage() {
       initialJobs={jobsWithDates}
       initialTrash={trashWithDates}
       initialClients={clientsRes.data ?? []}
+      initialTeam={teamRes.data ?? []}
     />
   );
 }

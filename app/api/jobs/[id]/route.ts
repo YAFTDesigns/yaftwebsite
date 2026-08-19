@@ -40,6 +40,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   if (data.client_id !== undefined) update.client_id = data.client_id || null;
   if (data.invoice_id !== undefined) update.invoice_id = data.invoice_id || null;
+  if (data.designer_id !== undefined) {
+    if (!data.designer_id) return NextResponse.json({ error: 'A designer must be assigned' }, { status: 400 });
+    update.designer_id = data.designer_id;
+    update.designer_name = data.designer_name ? String(data.designer_name).trim() : null;
+  }
   if (data.job_type !== undefined) {
     if (!JOB_TYPES.includes(data.job_type)) return NextResponse.json({ error: 'Invalid job type' }, { status: 400 });
     update.job_type = data.job_type;

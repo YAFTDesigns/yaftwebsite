@@ -8,6 +8,7 @@ import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
 
 type Client = { id: string; name: string; company_name: string | null };
+type TeamOption = { id: string; name: string; role: string | null };
 type Job = {
   id: string; created_at: string; job_date: string; job_no: string | null;
   client_id: string | null; client_name: string; job_type: string;
@@ -15,6 +16,7 @@ type Job = {
   cgst: number; sgst: number; igst: number; total: number;
   status: string; notes: string | null; invoice_id: string | null; deleted_at: string | null;
   status_date?: string | null;
+  designer_id: string | null; designer_name: string | null;
 };
 type StatusEvent = { id: string; status: string; note: string | null; created_at: string };
 
@@ -32,7 +34,7 @@ function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigi
 const EMPTY_FORM = {
   job_no: '', client_id: '', client_name: '', job_type: JOB_TYPES[0],
   job_date: new Date().toISOString().slice(0, 10),
-  qty: '1', rate: '0', gst_type: 'intra', notes: '',
+  qty: '1', rate: '0', gst_type: 'intra', notes: '', designer_id: '',
 };
 
 // Next sequential job order number, e.g. GY0001 -> GY0002. Looks at every
@@ -52,14 +54,16 @@ type InitialProps = {
   initialJobs?: Job[];
   initialTrash?: Job[];
   initialClients?: Client[];
+  initialTeam?: TeamOption[];
 };
 
-export default function JobsClient({ initialJobs, initialTrash, initialClients }: InitialProps) {
+export default function JobsClient({ initialJobs, initialTrash, initialClients, initialTeam }: InitialProps) {
   const hasInitialData = initialJobs !== undefined;
   const [tab, setTab] = useState<'log' | 'all' | 'sheet' | 'trash'>('log');
   const [jobs, setJobs] = useState<Job[]>(initialJobs ?? []);
   const [trashedJobs, setTrashedJobs] = useState<Job[]>(initialTrash ?? []);
   const [clients, setClients] = useState<Client[]>(initialClients ?? []);
+  const [team, setTeam] = useState<TeamOption[]>(initialTeam ?? []);
   const [loading, setLoading] = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -110,6 +114,14 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     } catch { /* ignore */ }
   }
 
+  async function loadTeam() {
+    try {
+      const res = await fetch('/api/team');
+      const json = await res.json();
+      setTeam(json.team ?? []);
+    } catch { /* ignore */ }
+  }
+
   useEffect(() => {
     // Server already fetched this on first render (see page.tsx) -- skip
     // the redundant client-side re-fetch so there's no double network
@@ -117,7 +129,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     // still go through loadJobs()/loadTrash()/loadClients() as normal.
     if (hasInitialData) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch on mount unless server already provided the data, not a cascading-render bug
-    loadJobs(); loadTrash(); loadClients();
+    loadJobs(); loadTrash(); loadClients(); loadTeam();
   }, [hasInitialData]);
 
   // Auto-suggest the next job number once jobs are loaded, but only when
@@ -142,16 +154,22 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     setForm(f => ({ ...f, client_id: id, client_name: c ? c.name : f.client_name }));
   }
 
+  function pickDesigner(id: string) {
+    setForm(f => ({ ...f, designer_id: id }));
+  }
+
   async function submitJob() {
     if (!form.client_name.trim()) { setFormError('Client name is required.'); return; }
     if (qtyNum <= 0) { setFormError('Quantity must be greater than 0.'); return; }
+    if (!form.designer_id) { setFormError('A designer must be assigned.'); return; }
     setSaving(true);
     setFormError('');
     try {
+      const designer = team.find(t => t.id === form.designer_id);
       const res = await fetch('/api/jobs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, qty: qtyNum, rate: rateNum }),
+        body: JSON.stringify({ ...form, qty: qtyNum, rate: rateNum, designer_name: designer?.name ?? null }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
@@ -178,6 +196,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
       rate: String(job.rate),
       gst_type: job.gst_type,
       notes: job.notes ?? '',
+      designer_id: job.designer_id ?? '',
     });
     setEditError('');
   }
@@ -189,13 +208,15 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
     if (!editForm.client_name.trim()) { setEditError('Client name is required.'); return; }
     const qty = parseFloat(editForm.qty) || 0;
     if (qty <= 0) { setEditError('Quantity must be greater than 0.'); return; }
+    if (!editForm.designer_id) { setEditError('A designer must be assigned.'); return; }
     setEditSaving(true);
     setEditError('');
     try {
+      const designer = team.find(t => t.id === editForm.designer_id);
       const res = await fetch(`/api/jobs/${editingJob.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...editForm, qty, rate: parseFloat(editForm.rate) || 0 }),
+        body: JSON.stringify({ ...editForm, qty, rate: parseFloat(editForm.rate) || 0, designer_name: designer?.name ?? null }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
@@ -325,6 +346,21 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
             />
           </div>
 
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Designer *</label>
+            <select
+              value={form.designer_id}
+              onChange={e => pickDesigner(e.target.value)}
+              style={{ width: '100%', background: '#0a0a0a', border: `1px solid ${form.designer_id ? '#2a2a2a' : '#E63946'}`, borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }}
+            >
+              <option value="">— Assign a designer —</option>
+              {team.map(t => <option key={t.id} value={t.id}>{t.name}{t.role ? ` — ${t.role}` : ''}</option>)}
+            </select>
+            {team.length === 0 && (
+              <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#666', marginTop: 4 }}>No one in your team directory yet — add someone at /admin/team.</p>
+            )}
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Job type</label>
@@ -416,6 +452,9 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
                       <p className={styles.cardName}>{j.job_no ? `${j.job_no} · ` : ''}{j.client_name}</p>
                       <p className={styles.cardRole}>{j.job_type} · {j.qty} × INR {fmt(j.rate)}</p>
                       <p className={styles.cardCourse}>{j.job_date} · {j.gst_type === 'none' ? 'No GST' : j.gst_type === 'intra' ? 'Intra-state' : 'Inter-state'}</p>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: j.designer_name ? '#999' : '#E63946', marginTop: 4 }}>
+                        {j.designer_name ? `Designer: ${j.designer_name}` : 'No designer assigned'}
+                      </p>
                     </div>
                     <div className={styles.cardMeta} style={{ textAlign: 'right' }}>
                       <p className={styles.cardDate} style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>INR {fmt(j.total)}</p>
@@ -501,6 +540,18 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients }
             <div style={{ marginBottom: 14 }}>
               <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client name</label>
               <input type="text" value={editForm.client_name} onChange={e => setEF('client_name', e.target.value)} style={{ width: '100%', background: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }} />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: 'block', fontSize: 11, color: '#777', marginBottom: 4, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Designer *</label>
+              <select
+                value={editForm.designer_id}
+                onChange={e => setEF('designer_id', e.target.value)}
+                style={{ width: '100%', background: '#0a0a0a', border: `1px solid ${editForm.designer_id ? '#2a2a2a' : '#E63946'}`, borderRadius: 6, padding: '9px 10px', color: '#ddd', fontSize: 13 }}
+              >
+                <option value="">— Assign a designer —</option>
+                {team.map(t => <option key={t.id} value={t.id}>{t.name}{t.role ? ` — ${t.role}` : ''}</option>)}
+              </select>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>

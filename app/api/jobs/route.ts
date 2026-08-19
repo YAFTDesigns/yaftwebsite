@@ -51,12 +51,15 @@ export async function POST(request: NextRequest) {
   const gst_type = String(data.gst_type ?? 'intra');
   const qty = Number(data.qty);
   const rate = Number(data.rate);
+  const designer_id = data.designer_id ? String(data.designer_id) : null;
+  const designer_name = data.designer_name ? String(data.designer_name).trim() : null;
 
   if (!client_name) return NextResponse.json({ error: 'Client name is required' }, { status: 400 });
   if (!JOB_TYPES.includes(job_type)) return NextResponse.json({ error: 'Invalid job type' }, { status: 400 });
   if (!GST_TYPES.includes(gst_type)) return NextResponse.json({ error: 'Invalid GST type' }, { status: 400 });
   if (!Number.isFinite(qty) || qty <= 0) return NextResponse.json({ error: 'Quantity must be a positive number' }, { status: 400 });
   if (!Number.isFinite(rate) || rate < 0) return NextResponse.json({ error: 'Rate must be a non-negative number' }, { status: 400 });
+  if (!designer_id) return NextResponse.json({ error: 'A designer must be assigned' }, { status: 400 });
 
   const subtotal = qty * rate;
   const taxMode = GST_TYPE_TO_TAX_MODE[gst_type];
@@ -78,6 +81,8 @@ export async function POST(request: NextRequest) {
     total,
     status: 'Pending',
     notes: data.notes || null,
+    designer_id,
+    designer_name,
   }).select('*').single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
