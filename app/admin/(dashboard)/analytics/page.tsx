@@ -1,9 +1,20 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import BarChart from '@/components/admin/BarChart';
+import LineChart from '@/components/admin/LineChart';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
+
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function sixMonthsAgoStart() {
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - 5);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
 
 const FUNNEL_STEPS = ['page_view', 'course_gate_open', 'course_gate_unlock', 'enquiry_submit'] as const;
 const FUNNEL_LABELS: Record<(typeof FUNNEL_STEPS)[number], string> = {
@@ -22,7 +33,9 @@ const WA_FUNNEL_LABELS: Record<(typeof WA_FUNNEL_STEPS)[number], string> = {
 async function getAnalytics() {
   const supabase = getSupabaseAdmin();
 
-  const [funnelRes, courseRes, sourceRes] = await Promise.all([
+  const TREND_EVENTS = ['page_view', 'course_gate_open', 'course_gate_unlock', 'enquiry_submit'] as const;
+
+  const [funnelRes, courseRes, sourceRes, trendRes] = await Promise.all([
     safeQuery<{ event_type: string; sessions: number }[]>(
       supabase.from('analytics_funnel_counts').select('event_type, sessions'),
       [],
@@ -38,6 +51,18 @@ async function getAnalytics() {
       [],
       'analytics traffic sources'
     ),
+    // Raw rows rather than a view, same approach the Overview page
+    // already uses for its 6-month invoice trend -- current volume
+    // (a few thousand rows over 6 months) is trivial to aggregate in
+    // JS, not worth a new SQL view for.
+    safeQuery<{ event_type: string; created_at: string }[]>(
+      supabase.from('analytics_events').select('event_type, created_at')
+        .in('event_type', TREND_EVENTS)
+        .eq('is_internal', false)
+        .gte('created_at', sixMonthsAgoStart()),
+      [],
+      'analytics 6-month trend'
+    ),
   ]);
 
   const byEventType: Record<string, number> = {};
@@ -49,13 +74,31 @@ async function getAnalytics() {
   const bySource: Record<string, number> = {};
   for (const row of sourceRes.data) bySource[row.source] = row.sessions;
 
-  const errors = [funnelRes.error, courseRes.error, sourceRes.error].filter(Boolean) as string[];
+  // Build a 6-month trend per event type -- same month-bucketing
+  // pattern as the Overview page's revenue trend.
+  const now = new Date();
+  const monthlyByEvent: Record<string, { label: string; value: number }[]> = {};
+  for (const eventType of TREND_EVENTS) monthlyByEvent[eventType] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const label = MONTH_LABELS[d.getMonth()];
+    for (const eventType of TREND_EVENTS) {
+      const count = trendRes.data.filter((r) => {
+        if (r.event_type !== eventType) return false;
+        const rd = new Date(r.created_at);
+        return rd.getFullYear() === d.getFullYear() && rd.getMonth() === d.getMonth();
+      }).length;
+      monthlyByEvent[eventType].push({ label, value: count });
+    }
+  }
 
-  return { byEventType, byCourse, bySource, error: errors.length > 0 ? errors.join('; ') : null };
+  const errors = [funnelRes.error, courseRes.error, sourceRes.error, trendRes.error].filter(Boolean) as string[];
+
+  return { byEventType, byCourse, bySource, monthlyByEvent, error: errors.length > 0 ? errors.join('; ') : null };
 }
 
 export default async function AdminAnalyticsPage() {
-  const { byEventType, byCourse, bySource, error } = await getAnalytics();
+  const { byEventType, byCourse, bySource, monthlyByEvent, error } = await getAnalytics();
 
   const funnelItems = FUNNEL_STEPS.map((step) => ({ label: FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
   const waFunnelItems = WA_FUNNEL_STEPS.map((step) => ({ label: WA_FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
@@ -77,6 +120,26 @@ export default async function AdminAnalyticsPage() {
           </p>
         </div>
       )}
+
+      <div className={`eyebrow ${styles.eyebrowSpaced}`}>MONTHLY TREND</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 32 }}>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Page views</h2>
+          <LineChart points={monthlyByEvent.page_view ?? []} color="var(--blueprint)" />
+        </div>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Syllabus modal opens</h2>
+          <LineChart points={monthlyByEvent.course_gate_open ?? []} color="var(--brass)" />
+        </div>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Syllabus unlocks</h2>
+          <LineChart points={monthlyByEvent.course_gate_unlock ?? []} color="#3fb950" />
+        </div>
+        <div className={styles.panel}>
+          <h2 className={styles.panelTitle}>Enquiries</h2>
+          <LineChart points={monthlyByEvent.enquiry_submit ?? []} color="#E63946" />
+        </div>
+      </div>
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>FUNNEL</div>
       <div className={styles.panel}>
