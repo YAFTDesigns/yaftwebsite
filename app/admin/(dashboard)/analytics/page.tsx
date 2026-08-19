@@ -5,12 +5,18 @@ import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
-const FUNNEL_STEPS = ['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit'] as const;
+const FUNNEL_STEPS = ['page_view', 'course_gate_open', 'course_gate_unlock', 'enquiry_submit'] as const;
 const FUNNEL_LABELS: Record<(typeof FUNNEL_STEPS)[number], string> = {
   page_view: 'Page view',
-  syllabus_modal_open: 'Syllabus modal open',
-  syllabus_unlock: 'Syllabus unlock',
+  course_gate_open: 'Syllabus modal open',
+  course_gate_unlock: 'Syllabus unlock',
   enquiry_submit: 'Enquiry submit',
+};
+
+const WA_FUNNEL_STEPS = ['whatsapp_gate_open', 'whatsapp_click'] as const;
+const WA_FUNNEL_LABELS: Record<(typeof WA_FUNNEL_STEPS)[number], string> = {
+  whatsapp_gate_open: 'WhatsApp gate shown',
+  whatsapp_click: 'WhatsApp opened',
 };
 
 async function getAnalytics() {
@@ -52,6 +58,7 @@ export default async function AdminAnalyticsPage() {
   const { byEventType, byCourse, bySource, error } = await getAnalytics();
 
   const funnelItems = FUNNEL_STEPS.map((step) => ({ label: FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
+  const waFunnelItems = WA_FUNNEL_STEPS.map((step) => ({ label: WA_FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
   const topCourses = Object.entries(byCourse)
     .sort((a, b) => b[1] - a[1])
     .map(([slug, count]) => ({ label: slug, value: count }));
@@ -78,6 +85,19 @@ export default async function AdminAnalyticsPage() {
           Unique sessions reaching each step, not raw event counts.
         </p>
         <BarChart items={funnelItems} />
+      </div>
+
+      <div className={`eyebrow ${styles.eyebrowSpaced}`}>WHATSAPP</div>
+      <div className={styles.panel}>
+        <h2 className={styles.panelTitle}>Gate shown → WhatsApp opened</h2>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', marginBottom: 14 }}>
+          Unique sessions reaching each step, same as the funnel above. Recently added -- history is limited until more data comes in.
+        </p>
+        {waFunnelItems.every(i => i.value === 0) ? (
+          <p className={styles.empty}>No WhatsApp gate activity yet.</p>
+        ) : (
+          <BarChart items={waFunnelItems} color="#25D366" />
+        )}
       </div>
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>TRAFFIC SOURCES</div>

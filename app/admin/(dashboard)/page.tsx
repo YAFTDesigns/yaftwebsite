@@ -75,7 +75,7 @@ async function getCounts() {
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('syllabus_requests').select('id', { count: 'exact', head: true }), null),
-    safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'syllabus_unlock'), null),
+    safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'course_gate_unlock'), null),
     safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_click'), null),
     Promise.all(
       SOURCES.map((source) =>
