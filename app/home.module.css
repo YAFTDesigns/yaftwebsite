@@ -362,6 +362,20 @@
   z-index:0;
 }
 .portraitCutout { height:100%; max-height:400px; object-fit:contain; object-position:bottom; position:relative; z-index:1; filter: grayscale(100%) contrast(1.05); }
+.portraitLabel {
+  position:absolute; top:40%; right:-6px;
+  transform:translateY(calc(-50% + 70px));
+  z-index:2; white-space:nowrap; pointer-events:none; text-align:right;
+  font-family:'Archivo', sans-serif; font-variation-settings:'wght' 800, 'wdth' 125;
+  font-size:52px; line-height:0.95; letter-spacing:-0.01em; color:#fff;
+  opacity:0;
+  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease;
+}
+.portraitLabelVisible { transform:translateY(-50%); opacity:1; }
+.portraitLabelSettled {
+  transform:translateY(-50%); opacity:0.65; z-index:0;
+  transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.6s ease, z-index 0s 0.35s;
+}
 
 .testiHeading {
   font-family: var(--display);
@@ -407,5 +421,6 @@
   .testiSection { flex-direction:column-reverse; }
   .portraitBlock { flex:0 0 auto; width:100%; max-width:280px; }
   .portraitFrame { height:340px; overflow:hidden; }
+  .portraitLabel { font-size:44px; }
   .portraitBackdrop { top:-40px; right:-10px; width:170px; height:440px; }
 }

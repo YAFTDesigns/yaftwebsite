@@ -16,6 +16,7 @@ import CourseGateButton from '@/components/CourseGateButton';
 import CourseGateModal from '@/components/CourseGateModal';
 import { COURSE_DETAIL_PAGES } from './courses/courseNav';
 import TestimonialRotator from '@/components/TestimonialRotator';
+import PortraitLabelReveal from '@/components/PortraitLabelReveal';
 import { getPartners, getFeaturedTestimonials } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
@@ -377,6 +378,7 @@ export default async function HomePage() {
               <div className={styles.portraitBlock}>
                 <div className={styles.portraitFrame}>
                   <div className={styles.portraitBackdrop}></div>
+                  <PortraitLabelReveal>LEAD<br />MENTOR</PortraitLabelReveal>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/assets/images/profile-cutout.png" alt="Yokes Marapa" className={styles.portraitCutout} loading="lazy" decoding="async" />
                 </div>
