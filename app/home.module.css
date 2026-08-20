@@ -366,7 +366,7 @@
   position:absolute; top:62%; right:-40px;
   transform:translateY(calc(-50% + 70px));
   z-index:2; white-space:nowrap; pointer-events:none; text-align:right;
-  font-family:'Archivo', sans-serif; font-variation-settings:'wght' 800, 'wdth' 125;
+  font-family:'Ancizar Sans', 'Archivo', sans-serif; font-weight:900;
   font-size:40px; line-height:0.95; letter-spacing:-0.01em; color:#fff;
   opacity:0;
   transition: transform 0.7s cubic-bezier(0.16,1,0.3,1), opacity 0.5s ease;
