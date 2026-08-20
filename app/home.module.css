@@ -417,6 +417,6 @@
   .testiSection { flex-direction:column-reverse; }
   .portraitBlock { flex:0 0 auto; width:100%; max-width:280px; }
   .portraitFrame { height:340px; overflow:hidden; }
-  .portraitLabel { font-size:32px; right:-20px; }
+  .portraitLabel { font-size:26px; right:4px; }
   .portraitBackdrop { top:-40px; right:-10px; width:170px; height:440px; }
 }
