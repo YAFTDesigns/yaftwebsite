@@ -56,7 +56,7 @@ export default function InvoicesClient({
     invoice_no: autoInvNo, date: today, client_name:'', client_email:'',
     client_type:'individual', client_pan:'', client_gst:'',
     client_company:'', client_state:'Tamil Nadu',
-    client_address:'', client_phone:'',
+    client_address:'', client_phone:'', schedule_note:'',
   });
   const [items, setItems] = useState<Item[]>([{ desc:'', hrs:0, qty:1, rate:0 }]);
   const [advance, setAdvance] = useState(0);
@@ -380,6 +380,7 @@ export default function InvoicesClient({
       client_type: 'individual', client_pan: 'TESTPAN001',
       client_gst: '', client_company: '', client_state: 'Tamil Nadu',
       client_address: '123 Test Street, Coimbatore, Tamil Nadu - 641001', client_phone: '+91 90000 00000',
+      schedule_note: '',
     });
     setItems([{ desc: invoiceType === 'consultancy' ? 'Computational Design Consulting' : 'Rhino3D for Architecture', hrs: 10, qty: 1, rate: 5000 }]);
     setAdvance(0);
@@ -913,6 +914,21 @@ export default function InvoicesClient({
                   <input style={{ ...inp, background:'#0a0a0a', color: balance>0 ? '#E63946' : '#555' }} value={fmt(balance)} readOnly />
                 </div>
               </div>
+
+              {invoiceType === 'proforma' && (
+                <div>
+                  <span style={lbl}>Training Schedule (shown in the proforma email under &quot;Schedule&quot;)</span>
+                  <textarea
+                    style={{ ...inp, minHeight:70 }}
+                    value={form.schedule_note}
+                    onChange={e=>setF('schedule_note',e.target.value)}
+                    placeholder={'e.g. 3 sessions/week (Mon, Wed, Fri), 3 hrs/session (~10 hrs/week)'}
+                  />
+                  <p style={{ fontFamily:'var(--mono)', fontSize:10, color:'#666', marginTop:4 }}>
+                    The 50% advance-to-book banner and the recording policy ({form.client_type==='company' ? 'all attendees may record' : 'participant may record for personal reference only'}) are added automatically — no need to type those here.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* RIGHT — items + totals */}
