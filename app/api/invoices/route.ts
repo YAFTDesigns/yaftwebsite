@@ -6,6 +6,7 @@ import { pushInvoiceToQueue } from '@/lib/queue';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
+import { computeInvoiceTotals } from '@/lib/invoiceMath';
 import { getErrorMessage } from '@/lib/errorMessage';
 
 export async function POST(request: NextRequest) {
@@ -99,12 +100,45 @@ export async function POST(request: NextRequest) {
       const advance = data.advance || 0;
       const balance = data.balance || 0;
 
+      // Same computeInvoiceTotals() the PDF and Excel export already
+      // use, recomputed from items+client_state rather than trusting
+      // the client-sent grand_total as an opaque number -- single
+      // source of truth for the tax breakdown, and it's what makes
+      // the email match the PDF exactly instead of the email only
+      // ever showing a lump total with no CGST/SGST/IGST visible.
+      const taxTotals = computeInvoiceTotals(data.items ?? [], data.client_state ?? '');
+
+      // Line items shown in the email body itself, not just the PDF
+      // attachment -- built directly from data.items (the same array
+      // the PDF uses), so whatever's typed into the form is what shows
+      // up here, nothing re-typed or summarized separately.
+      const itemRows = ((data.items ?? []) as { desc?: string; qty: number; rate: number }[])
+        .map((item) => `
+    <tr>
+      <td style="padding:7px 12px;border-bottom:1px solid #eee;">${item.desc || '—'}</td>
+      <td style="padding:7px 12px;border-bottom:1px solid #eee;text-align:center;">${item.qty}</td>
+      <td style="padding:7px 12px;border-bottom:1px solid #eee;text-align:right;">${fmt(item.rate)}</td>
+      <td style="padding:7px 12px;border-bottom:1px solid #eee;text-align:right;">${fmt(item.qty * item.rate)}</td>
+    </tr>`).join('');
+
       const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${data.client_name},</p>
   <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${isProformaEmail ? 'Please find attached your proforma invoice from YAFT Designs. This is for your reference and is not a tax document.' : 'Please find attached your invoice for YAFT Designs training. Thank you for training with us.'}</p>
-  <table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:24px;">
+  <table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:16px;">
     <tr style="background:#f8f8f8;"><td style="padding:8px 12px;color:#888;">Invoice No</td><td style="padding:8px 12px;font-weight:600;">${data.invoice_no}</td></tr>
     <tr><td style="padding:8px 12px;color:#888;">Date</td><td style="padding:8px 12px;">${data.date}</td></tr>
+  </table>
+  ${itemRows ? `<table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:16px;">
+    <thead>
+      <tr style="background:#f8f8f8;"><th style="padding:7px 12px;text-align:left;color:#888;font-weight:600;">Description</th><th style="padding:7px 12px;text-align:center;color:#888;font-weight:600;">Qty</th><th style="padding:7px 12px;text-align:right;color:#888;font-weight:600;">Rate (INR)</th><th style="padding:7px 12px;text-align:right;color:#888;font-weight:600;">Amount (INR)</th></tr>
+    </thead>
+    <tbody>${itemRows}</tbody>
+  </table>` : ''}
+  <table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:24px;">
+    <tr><td style="padding:8px 12px;color:#888;">Subtotal</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.subtotal)}</td></tr>
+    ${taxTotals.cgst > 0 ? `<tr><td style="padding:8px 12px;color:#888;">CGST 9%</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.cgst)}</td></tr>` : ''}
+    ${taxTotals.sgst > 0 ? `<tr><td style="padding:8px 12px;color:#888;">SGST 9%</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.sgst)}</td></tr>` : ''}
+    ${taxTotals.igst > 0 ? `<tr><td style="padding:8px 12px;color:#888;">IGST 18%</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.igst)}</td></tr>` : ''}
     <tr style="background:#f8f8f8;"><td style="padding:8px 12px;color:#888;">Total Amount</td><td style="padding:8px 12px;font-weight:600;">INR ${fmt(data.grand_total)}</td></tr>
     ${advance > 0 ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(advance)}</td></tr>` : ''}
     ${balance > 0 ? `<tr style="background:#fff3f3;"><td style="padding:8px 12px;color:#888;">Balance Due</td><td style="padding:8px 12px;font-weight:600;color:#E63946;">INR ${fmt(balance)}</td></tr>` : ''}
