@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
-import { buildInvoicesWorkbook, ddmmyyyyToIso, type InvoiceRow } from '@/lib/invoicesExport';
+import { buildInvoicesWorkbook, ddmmyyyyToIso, isConfirmedRevenue, type InvoiceRow } from '@/lib/invoicesExport';
 import { monthKey, monthLabel } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
 
@@ -51,7 +51,13 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = await buildInvoicesWorkbook(monthInvoices);
-  const grandTotal = monthInvoices.reduce((s, i) => s + Number(i.total), 0);
+
+  // Same confirmed/pending split the workbook itself now uses --
+  // otherwise the email's own summary text and total would disagree
+  // with the attached spreadsheet's monthly revenue figure.
+  const confirmedInvoices = monthInvoices.filter(isConfirmedRevenue);
+  const pendingCount = monthInvoices.length - confirmedInvoices.length;
+  const grandTotal = confirmedInvoices.reduce((s, i) => s + Number(i.total), 0);
   const label = monthLabel(month);
 
   if (!isEmailConfigured()) {
@@ -60,7 +66,7 @@ export async function POST(request: NextRequest) {
 
   const subject = `YAFT Designs — Invoices for ${label}`;
 
-  const invoiceRows = monthInvoices
+  const invoiceRows = confirmedInvoices
     .slice()
     .sort((a, b) => ddmmyyyyToIso(a.date).localeCompare(ddmmyyyyToIso(b.date)))
     .map((inv) => `
@@ -74,7 +80,7 @@ export async function POST(request: NextRequest) {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${recipientName},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Attached are all ${monthInvoices.length} invoice${monthInvoices.length > 1 ? 's' : ''} for <strong>${label}</strong>, with the GST breakdown for each in the sheet. Summary below, total billed for the month: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Attached are ${confirmedInvoices.length} invoice${confirmedInvoices.length > 1 ? 's' : ''} for <strong>${label}</strong>, with the GST breakdown for each in the sheet. Summary below, total billed for the month: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.${pendingCount > 0 ? ` ${pendingCount} proforma quote${pendingCount > 1 ? 's' : ''} from this month ${pendingCount > 1 ? 'are' : 'is'} also attached on a separate "Pending Proforma" sheet -- not counted in the total above since no advance has been received yet.` : ''}</p>
   <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
     <thead>
       <tr style="background:#f8f8f8;">
@@ -131,5 +137,5 @@ export async function POST(request: NextRequest) {
   if (status === 'failed') {
     return NextResponse.json({ error: errMsg ?? 'Failed to send email' }, { status: 500 });
   }
-  return NextResponse.json({ ok: true, count: monthInvoices.length, total: grandTotal });
+  return NextResponse.json({ ok: true, count: confirmedInvoices.length, pendingCount, total: grandTotal });
 }

@@ -94,21 +94,41 @@ function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
 // jobs export already uses -- built specifically so a full month or
 // year of invoices can be handed to an auditor in one file, split the
 // way books are normally organized.
+//
+// Unconfirmed proforma quotes (invoice_type 'proforma' with no advance
+// received) are deliberately excluded from every month's revenue sheet
+// and totals -- a quote nobody has paid toward isn't revenue. They're
+// not dropped from the workbook entirely though: they land on their
+// own "Pending Proforma" sheet at the end, still fully visible and
+// tracked, just clearly separated from confirmed revenue so an
+// auditor can't mistake one for the other.
+export function isConfirmedRevenue(inv: InvoiceRow): boolean {
+  return inv.invoice_type !== 'proforma' || Number(inv.advance) > 0;
+}
+
 export async function buildInvoicesWorkbook(invoices: InvoiceRow[]): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'YAFT Designs';
   wb.created = new Date();
 
-  const asMinimal: (InvoiceRow & MinimalJob)[] = invoices.map((inv) => ({ ...inv, job_date: ddmmyyyyToIso(inv.date), job_type: '', total: inv.total }));
+  const confirmed = invoices.filter(isConfirmedRevenue);
+  const pendingProforma = invoices.filter((inv) => !isConfirmedRevenue(inv));
+
+  const asMinimal: (InvoiceRow & MinimalJob)[] = confirmed.map((inv) => ({ ...inv, job_date: ddmmyyyyToIso(inv.date), job_type: '', total: inv.total }));
   const byMonth = groupByMonth(asMinimal);
 
-  if (invoices.length === 0) {
+  if (confirmed.length === 0) {
     fillInvoiceSheet(wb.addWorksheet('Invoices'), []);
   } else {
     [...byMonth.keys()].forEach((key) => {
       const sheet = wb.addWorksheet(monthLabel(key));
       fillInvoiceSheet(sheet, byMonth.get(key)! as InvoiceRow[]);
     });
+  }
+
+  if (pendingProforma.length > 0) {
+    const sheet = wb.addWorksheet('Pending Proforma (Not in Revenue)');
+    fillInvoiceSheet(sheet, pendingProforma);
   }
 
   const arrayBuffer = await wb.xlsx.writeBuffer();

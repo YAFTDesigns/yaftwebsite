@@ -115,7 +115,7 @@ export default function InvoicesClient({
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Failed to send');
-      setEmailResult({ ok: true, text: `Sent ${json.count} invoice${json.count > 1 ? 's' : ''} to ${recipient.name}.` });
+      setEmailResult({ ok: true, text: `Sent ${json.count} invoice${json.count > 1 ? 's' : ''} to ${recipient.name}.${json.pendingCount > 0 ? ` (${json.pendingCount} pending proforma also attached, not counted in the total.)` : ''}` });
     } catch (err) {
       setEmailResult({ ok: false, text: getErrorMessage(err) || 'Failed to send' });
     } finally {
