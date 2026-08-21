@@ -51,15 +51,15 @@ async function getAnalytics() {
       [],
       'analytics traffic sources'
     ),
-    // Raw rows rather than a view, same approach the Overview page
-    // already uses for its 6-month invoice trend -- current volume
-    // (a few thousand rows over 6 months) is trivial to aggregate in
-    // JS, not worth a new SQL view for.
-    safeQuery<{ event_type: string; created_at: string }[]>(
-      supabase.from('analytics_events').select('event_type, created_at')
+    // Aggregated at the DB level via analytics_monthly_event_counts
+    // (GROUP BY month, event_type) rather than raw rows -- the raw-row
+    // approach previously used here hit Supabase's default 1000-row
+    // cap (this window genuinely returns 2,481+ raw events) and was
+    // silently truncating the trend, undercounting recent months.
+    safeQuery<{ month: string; event_type: string; events: number }[]>(
+      supabase.from('analytics_monthly_event_counts').select('month, event_type, events')
         .in('event_type', TREND_EVENTS)
-        .eq('is_internal', false)
-        .gte('created_at', sixMonthsAgoStart()),
+        .gte('month', sixMonthsAgoStart().slice(0, 7)),
       [],
       'analytics 6-month trend'
     ),
@@ -74,21 +74,19 @@ async function getAnalytics() {
   const bySource: Record<string, number> = {};
   for (const row of sourceRes.data) bySource[row.source] = row.sessions;
 
-  // Build a 6-month trend per event type -- same month-bucketing
-  // pattern as the Overview page's revenue trend.
+  // Build a 6-month trend per event type -- same month range as the
+  // Overview page's revenue trend, but the counts themselves come
+  // straight from the view's pre-aggregated rows.
   const now = new Date();
   const monthlyByEvent: Record<string, { label: string; value: number }[]> = {};
   for (const eventType of TREND_EVENTS) monthlyByEvent[eventType] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const label = MONTH_LABELS[d.getMonth()];
+    const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     for (const eventType of TREND_EVENTS) {
-      const count = trendRes.data.filter((r) => {
-        if (r.event_type !== eventType) return false;
-        const rd = new Date(r.created_at);
-        return rd.getFullYear() === d.getFullYear() && rd.getMonth() === d.getMonth();
-      }).length;
-      monthlyByEvent[eventType].push({ label, value: count });
+      const row = trendRes.data.find((r) => r.month === monthKey && r.event_type === eventType);
+      monthlyByEvent[eventType].push({ label, value: row?.events ?? 0 });
     }
   }
 
