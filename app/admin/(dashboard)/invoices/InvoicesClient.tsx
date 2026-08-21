@@ -22,6 +22,7 @@ type Invoice = {
   items: Item[]; invoice_type: string;
   total: number; advance: number; balance: number; status: string;
   deleted_at: string | null;
+  scheduled_send_at: string | null; email_sent_at: string | null; send_cancelled: boolean;
 };
 
 const COURSES = [
@@ -40,7 +41,7 @@ function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigi
 export default function InvoicesClient({
   initialClientOptions, initialTrashedInvoices, initialTeamOptions,
 }: { initialClientOptions?: ClientOption[]; initialTrashedInvoices?: Invoice[]; initialTeamOptions?: TeamOption[] } = {}) {
-  const [tab, setTab] = useState<'create'|'sent'|'trash'|'log'>('create');
+  const [tab, setTab] = useState<'create'|'sent'|'scheduled'|'trash'|'log'>('create');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [trashedInvoices, setTrashedInvoices] = useState<Invoice[]>(initialTrashedInvoices ?? []);
   const [loadError, setLoadError] = useState('');
@@ -60,6 +61,8 @@ export default function InvoicesClient({
   });
   const [items, setItems] = useState<Item[]>([{ desc:'', hrs:0, qty:1, rate:0 }]);
   const [advance, setAdvance] = useState(0);
+  const [sendMode, setSendMode] = useState<'now' | 'schedule'>('now');
+  const [scheduledSendAt, setScheduledSendAt] = useState('');
   const [sending, setSending] = useState(false);
   const [done, setDone]       = useState(false);
   const [formError, setFormError] = useState('');
@@ -179,6 +182,7 @@ export default function InvoicesClient({
   const [saving,  setSaving]    = useState(false);
   const [saveMsg, setSaveMsg]   = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   async function patchInvoice(body: object) {
     const res = await fetch('/api/admin/invoices', {
@@ -271,6 +275,15 @@ export default function InvoicesClient({
     setDeletingId(null);
   }
 
+  async function cancelScheduledSend(id: string) {
+    if (!confirm('Cancel this scheduled send? The email will not go out.')) return;
+    setCancellingId(id);
+    const json = await patchInvoice({ action: 'cancel_scheduled_send', id });
+    if (json.error) alert(`Could not cancel: ${json.error}`);
+    await loadInvoices();
+    setCancellingId(null);
+  }
+
   async function permanentlyDeleteInvoice(id: string) {
     if (!confirm('Permanently delete this invoice? This CANNOT be undone — it will be gone forever, not recoverable from trash.')) return;
     setDeletingId(id);
@@ -299,6 +312,20 @@ export default function InvoicesClient({
     }
   }
 
+  // Derived, not a separate fetch -- a scheduled invoice is just a
+  // regular active invoice with scheduled_send_at set and not yet
+  // sent/cancelled, already present in `invoices` once loaded.
+  const scheduledInvoices = invoices.filter(
+    (inv) => inv.scheduled_send_at && !inv.email_sent_at && !inv.send_cancelled
+  );
+  // Everything else -- the Sent tab shouldn't imply something has
+  // gone out when it's actually still waiting on its scheduled time.
+  const sentInvoices = invoices.filter((inv) => !scheduledInvoices.includes(inv));
+  // Computed once here (reusing the component's own `now`) rather than
+  // calling Date.now() inline inside a JSX prop, which React's purity
+  // lint rule flags as an impure call during render.
+  const minScheduleDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
   async function loadTrash() {
     const res = await fetch('/api/admin/invoices?trash=true');
     const json = await res.json().catch(() => ({}));
@@ -325,6 +352,7 @@ export default function InvoicesClient({
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- fetch on tab change, not a cascading-render bug */
     if (tab === 'sent') loadInvoices();
+    if (tab === 'scheduled') loadInvoices();
     if (tab === 'trash') loadTrash();
     if (tab === 'log') loadLogs();
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -339,11 +367,18 @@ export default function InvoicesClient({
 
   async function generate() {
     setFormError(''); setSending(true); setDone(false); setPdfUrl('');
+    if (sendMode === 'schedule') {
+      if (!scheduledSendAt) { setFormError('Pick a date and time to schedule for.'); setSending(false); return; }
+      if (new Date(scheduledSendAt).getTime() <= Date.now()) { setFormError('Scheduled time must be in the future.'); setSending(false); return; }
+    }
     try {
       const res = await fetch('/api/invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, items, grand_total: grandTotal, advance, balance, invoice_type: invoiceType }),
+        body: JSON.stringify({
+          ...form, items, grand_total: grandTotal, advance, balance, invoice_type: invoiceType,
+          scheduled_send_at: sendMode === 'schedule' ? new Date(scheduledSendAt).toISOString() : null,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
@@ -410,6 +445,7 @@ export default function InvoicesClient({
       <div className={styles.tabs} style={{ marginBottom: 28 }}>
         <button className={`${styles.tab} ${tab==='create'?styles.activeTab:''}`} onClick={() => setTab('create')}>Create Invoice</button>
         <button className={`${styles.tab} ${tab==='sent'?styles.activeTab:''}`} onClick={() => setTab('sent')}>Sent Invoices</button>
+        <button className={`${styles.tab} ${tab==='scheduled'?styles.activeTab:''}`} onClick={() => setTab('scheduled')}>Scheduled{scheduledInvoices.length > 0 ? ` (${scheduledInvoices.length})` : ''}</button>
         <button className={`${styles.tab} ${tab==='trash'?styles.activeTab:''}`} onClick={() => setTab('trash')}>Trash{trashedInvoices.length > 0 ? ` (${trashedInvoices.length})` : ''}</button>
         <button className={`${styles.tab} ${tab==='log'?styles.activeTab:''}`} onClick={() => setTab('log')}>Log</button>
       </div>
@@ -500,12 +536,12 @@ export default function InvoicesClient({
               {(() => {
                 const q = searchQuery.trim().toLowerCase();
                 const filtered = q
-                  ? invoices.filter(inv =>
+                  ? sentInvoices.filter(inv =>
                       inv.client_name.toLowerCase().includes(q) ||
                       inv.client_email.toLowerCase().includes(q) ||
                       inv.invoice_no.toLowerCase().includes(q)
                     )
-                  : invoices;
+                  : sentInvoices;
 
                 return q ? (
                   <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20 }}>
@@ -528,12 +564,12 @@ export default function InvoicesClient({
               {(() => {
                 const q = searchQuery.trim().toLowerCase();
                 const filtered = q
-                  ? invoices.filter(inv =>
+                  ? sentInvoices.filter(inv =>
                       inv.client_name.toLowerCase().includes(q) ||
                       inv.client_email.toLowerCase().includes(q) ||
                       inv.invoice_no.toLowerCase().includes(q)
                     )
-                  : invoices;
+                  : sentInvoices;
 
                 if (filtered.length === 0) {
                   return <p className={styles.empty}>No invoices match &quot;{searchQuery}&quot;.</p>;
@@ -732,6 +768,44 @@ export default function InvoicesClient({
                       onClick={() => permanentlyDeleteInvoice(inv.id)}
                     >
                       Delete forever
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+      )}
+
+      {/* ── SCHEDULED ── */}
+      {tab === 'scheduled' && (
+        scheduledInvoices.length === 0
+          ? <p className={styles.empty}>No invoices waiting to be sent.</p>
+          : <div className={styles.list}>
+              {scheduledInvoices.map(inv => (
+                <div key={inv.id} className={styles.card}>
+                  <div className={styles.cardTop}>
+                    <div>
+                      <p className={styles.cardName}>{inv.client_name}</p>
+                      <p className={styles.cardRole}>{inv.client_email}</p>
+                      <p className={styles.cardCourse}>
+                        {inv.invoice_type === 'proforma' ? 'Proforma' : 'Invoice'} #{inv.invoice_no} · {inv.date} · {inv.client_state}
+                      </p>
+                      {inv.scheduled_send_at && (
+                        <p style={{ fontSize:12, fontFamily:'var(--mono)', color:'var(--brass)', marginTop:6 }}>
+                          Sends {new Date(inv.scheduled_send_at).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                        </p>
+                      )}
+                    </div>
+                    <div className={styles.cardMeta} style={{ textAlign:'right' }}>
+                      <p className={styles.cardDate} style={{ fontWeight:700, fontSize:14, color:'#888' }}>INR {fmt(inv.total)}</p>
+                    </div>
+                  </div>
+                  <div className={styles.actions}>
+                    <button
+                      className={styles.deleteBtn}
+                      disabled={cancellingId === inv.id}
+                      onClick={() => cancelScheduledSend(inv.id)}
+                    >
+                      {cancellingId === inv.id ? 'Cancelling...' : 'Cancel scheduled send'}
                     </button>
                   </div>
                 </div>
@@ -980,12 +1054,43 @@ export default function InvoicesClient({
             </div>
           </div>
 
+          {/* Send timing */}
+          <div style={{ marginTop:24, background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:16 }}>
+            <p style={{ ...sectionTitle, marginBottom:10 }}>When to send</p>
+            <div style={{ display:'flex', gap:10, marginBottom: sendMode === 'schedule' ? 12 : 0 }}>
+              {(['now', 'schedule'] as const).map(m => (
+                <button key={m} onClick={() => setSendMode(m)} style={{
+                  fontFamily:'var(--mono)', fontSize:12, padding:'6px 16px', borderRadius:6,
+                  border:'1px solid', cursor:'pointer',
+                  borderColor: sendMode===m ? 'var(--brass)' : '#2a2a2a',
+                  background:  sendMode===m ? '#1a0808' : 'transparent',
+                  color:       sendMode===m ? 'var(--brass)' : '#888',
+                }}>{m === 'now' ? 'Send now' : 'Schedule for later'}</button>
+              ))}
+            </div>
+            {sendMode === 'schedule' && (
+              <div>
+                <span style={lbl}>Send at</span>
+                <input
+                  type="datetime-local"
+                  style={inp}
+                  value={scheduledSendAt}
+                  onChange={e => setScheduledSendAt(e.target.value)}
+                  min={minScheduleDateTime}
+                />
+                <p style={{ fontFamily:'var(--mono)', fontSize:10, color:'#666', marginTop:4 }}>
+                  The invoice is created now with a real invoice number, but the email won&apos;t go out until this time. You can cancel it anytime before then from the Scheduled tab.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Actions */}
           <div style={{ marginTop:28, display:'flex', gap:12, alignItems:'center', flexWrap:'wrap' }}>
             <button onClick={generate} disabled={sending} style={{
               fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)',
               border:'none', padding:'11px 24px', borderRadius:6, cursor:'pointer', opacity:sending?0.6:1,
-            }}>{sending ? 'Generating...' : invoiceType === 'proforma' ? 'Generate & Send Proforma →' : 'Generate & Send PDF →'}</button>
+            }}>{sending ? 'Generating...' : sendMode === 'schedule' ? 'Generate & Schedule →' : invoiceType === 'proforma' ? 'Generate & Send Proforma →' : 'Generate & Send PDF →'}</button>
 
             {pdfUrl && (
               <a href={pdfUrl} download={`YAFT_Invoice_${form.invoice_no}.pdf`} style={{
@@ -993,7 +1098,13 @@ export default function InvoicesClient({
                 border:'1px solid var(--brass)', padding:'10px 20px', borderRadius:6, textDecoration:'none',
               }}>Download PDF</a>
             )}
-            {done  && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ {invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} sent to {form.client_email}</p>}
+            {done && (
+              <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>
+                {sendMode === 'schedule'
+                  ? `✓ ${invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} created — will send to ${form.client_email} on ${scheduledSendAt ? new Date(scheduledSendAt).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : ''}`
+                  : `✓ ${invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} sent to ${form.client_email}`}
+              </p>
+            )}
             {formError && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#e55' }}>{formError}</p>}
           </div>
         </>

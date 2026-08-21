@@ -9,7 +9,10 @@ export type InvoiceLogEvent =
   | 'payment_updated'
   | 'resent'
   | 'deleted'
-  | 'restored';
+  | 'restored'
+  | 'scheduled_sent'
+  | 'scheduled_send_failed'
+  | 'send_cancelled';
 
 /**
  * Records an invoice lifecycle event. Never throws -- logging must not

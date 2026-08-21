@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
 }
 
 // PATCH /api/admin/invoices
+// { action: 'cancel_scheduled_send', id }
 // { action: 'update_payment', id, advance }
 // { action: 'update_details', id, client_name, client_email, client_type,
 //   client_company, client_pan, client_gst, client_state, client_address,
@@ -44,6 +45,24 @@ export async function PATCH(request: NextRequest) {
   if (!body?.action) return NextResponse.json({ error: 'Missing action' }, { status: 400 });
 
   const supabase = getSupabaseAdmin();
+
+  if (body.action === 'cancel_scheduled_send') {
+    const { id } = body;
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    const { data: inv, error: fetchErr } = await supabase
+      .from('invoices').select('invoice_no, scheduled_send_at, email_sent_at').eq('id', id).single();
+    if (fetchErr || !inv) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+    if (!inv.scheduled_send_at) return NextResponse.json({ error: 'This invoice was never scheduled' }, { status: 400 });
+    if (inv.email_sent_at) return NextResponse.json({ error: 'Already sent — too late to cancel' }, { status: 400 });
+
+    const { error } = await supabase.from('invoices').update({ send_cancelled: true }).eq('id', id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await logInvoiceEvent({
+      invoiceId: id, invoiceNo: inv.invoice_no, event: 'send_cancelled',
+      message: `Scheduled send cancelled (was set for ${new Date(inv.scheduled_send_at).toLocaleString('en-IN')})`,
+    });
+    return NextResponse.json({ ok: true });
+  }
 
   if (body.action === 'update_payment') {
     const { id, advance } = body;
