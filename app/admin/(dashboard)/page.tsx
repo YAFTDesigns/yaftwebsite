@@ -59,6 +59,17 @@ async function safe<T>(promise: PromiseLike<{ data: T | null; count?: number | n
   }
 }
 
+// Proforma invoices are quotes, not committed revenue -- they
+// shouldn't inflate the month's invoice count, the recent-activity
+// feed, or the 6-month trend until money has actually moved. Every
+// invoices query below that feeds a stat/chart on this page includes
+// .or('invoice_type.neq.proforma,advance.gt.0'): keep the row if it's
+// not a proforma at all, OR if an advance has been recorded on it
+// (meaning the client has actually paid something, so it's real).
+// A proforma still sitting at advance=0 is excluded until that
+// changes. This does NOT affect /admin/invoices itself -- proforma
+// quotes still show up there normally, this only keeps unconfirmed
+// quotes off the summary dashboard.
 async function getCounts() {
   const supabase = getSupabaseAdmin();
   const weekStart = startOfWeek();
@@ -84,13 +95,13 @@ async function getCounts() {
     ),
     safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
-    safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart), []),
+    safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart).or('invoice_type.neq.proforma,advance.gt.0'), []),
     safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
     safe<RecentEnquiryRow[]>(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
-    safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).order('created_at', { ascending: false }).limit(5), []),
+    safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).or('invoice_type.neq.proforma,advance.gt.0').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
-    safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart), []),
+    safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart).or('invoice_type.neq.proforma,advance.gt.0'), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
