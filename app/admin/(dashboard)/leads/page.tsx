@@ -42,28 +42,33 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   // (see lib/leads.ts) -- only present for leads who identified
   // themselves after session-linking shipped. Older leads won't have
   // any tagged events, which the UI shows as "no data" rather than 0.
+  //
+  // Queries the lead_time_on_site view (aggregated at the DB level:
+  // min/max/count per lead_id) rather than fetching raw analytics_events
+  // rows. This used to pull every raw event ordered oldest-first with
+  // no limit -- once the table passed Supabase's default 1000-row cap,
+  // the newest events (including live, current leads) were silently
+  // dropped and showed "No data yet" despite the data existing. The
+  // view returns at most one row per lead, which the row cap can't
+  // realistically catch up to the way raw-row fetching eventually would.
   const timeOnSite: Record<string, TimeOnSite> = {};
   const leadIds = result.data.map((l) => l.id);
   if (leadIds.length > 0) {
-    const { data: events, error: eventsError } = await supabase
-      .from('analytics_events')
-      .select('lead_id, created_at')
-      .in('lead_id', leadIds)
-      .order('created_at', { ascending: true });
+    const { data: rows, error: eventsError } = await supabase
+      .from('lead_time_on_site')
+      .select('lead_id, first_event, last_event, event_count')
+      .in('lead_id', leadIds);
 
     if (eventsError) {
-      console.error('[leads] failed to load analytics_events for time-on-site:', eventsError);
+      console.error('[leads] failed to load lead_time_on_site for time-on-site:', eventsError);
     } else {
-      const byLead = new Map<string, string[]>();
-      for (const row of events ?? []) {
-        const id = row.lead_id as string;
-        if (!byLead.has(id)) byLead.set(id, []);
-        byLead.get(id)!.push(row.created_at as string);
-      }
-      for (const [id, timestamps] of byLead) {
-        const first = new Date(timestamps[0]).getTime();
-        const last = new Date(timestamps[timestamps.length - 1]).getTime();
-        timeOnSite[id] = { seconds: Math.round((last - first) / 1000), pageViews: timestamps.length };
+      for (const row of rows ?? []) {
+        const first = new Date(row.first_event as string).getTime();
+        const last = new Date(row.last_event as string).getTime();
+        timeOnSite[row.lead_id as string] = {
+          seconds: Math.round((last - first) / 1000),
+          pageViews: row.event_count as number,
+        };
       }
     }
   }
