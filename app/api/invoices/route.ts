@@ -148,9 +148,19 @@ export async function POST(request: NextRequest) {
     <p style="font-size:13px;color:#333;line-height:1.7;margin:0 0 10px;white-space:pre-line;">${data.schedule_note}</p>
     <p style="font-size:12px;color:#777;line-height:1.6;margin:0;">${data.client_type === 'company' ? 'Sessions may be screen-recorded by all attendees for internal reference.' : 'Sessions may be screen-recorded by the participant for personal reference only.'}</p>
   </div>` : ''}
-  ${isProformaEmail ? `<div style="background:#1a0808;border:1px solid #E63946;border-radius:8px;padding:16px;margin-bottom:24px;">
+  ${isProformaEmail ? `<div style="background:#1a0808;border:1px solid #E63946;border-radius:8px;padding:16px;margin-bottom:16px;">
     <p style="font-size:13px;font-weight:600;color:#E63946;margin:0 0 6px;">To book your slot</p>
     <p style="font-size:13px;color:#ddd;line-height:1.7;margin:0;">Pay 50% advance to confirm. Dates and schedule are finalized only after the advance is received.</p>
+  </div>` : ''}
+  ${isProformaEmail ? `<div style="background:#f8f8f8;border-radius:8px;padding:16px;margin-bottom:24px;">
+    <p style="font-size:12px;font-weight:600;color:#111;text-transform:uppercase;letter-spacing:0.04em;margin:0 0 8px;">Billing details needed</p>
+    <p style="font-size:13px;color:#333;line-height:1.7;margin:0 0 8px;">To issue the final invoice, please share the following:</p>
+    <ul style="font-size:13px;color:#333;line-height:1.9;margin:0;padding-left:20px;">
+      <li>GST Number (or PAN, if not GST registered)</li>
+      <li>Billing address</li>
+      <li>Mobile number</li>
+      <li>Email ID for billing</li>
+    </ul>
   </div>` : ''}
   <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
