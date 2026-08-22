@@ -791,7 +791,7 @@ export default function InvoicesClient({
                       </p>
                       {inv.scheduled_send_at && (
                         <p style={{ fontSize:12, fontFamily:'var(--mono)', color:'var(--brass)', marginTop:6 }}>
-                          Sends {new Date(inv.scheduled_send_at).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+                          Sends {new Date(inv.scheduled_send_at).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })} IST
                         </p>
                       )}
                     </div>
@@ -1070,7 +1070,7 @@ export default function InvoicesClient({
             </div>
             {sendMode === 'schedule' && (
               <div>
-                <span style={lbl}>Send at</span>
+                <span style={lbl}>Send at (your device&apos;s local time — IST for you)</span>
                 <input
                   type="datetime-local"
                   style={inp}
@@ -1101,7 +1101,7 @@ export default function InvoicesClient({
             {done && (
               <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>
                 {sendMode === 'schedule'
-                  ? `✓ ${invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} created — will send to ${form.client_email} on ${scheduledSendAt ? new Date(scheduledSendAt).toLocaleString('en-IN', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : ''}`
+                  ? `✓ ${invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} created — will send to ${form.client_email} on ${scheduledSendAt ? new Date(scheduledSendAt).toLocaleString('en-IN', { timeZone:'Asia/Kolkata', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : ''} IST`
                   : `✓ ${invoiceType === 'proforma' ? 'Proforma' : 'Invoice'} sent to ${form.client_email}`}
               </p>
             )}
