@@ -121,7 +121,7 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
       if (!res.ok) throw new Error(json?.error ?? 'Failed to generate link');
       const fullUrl = `${window.location.origin}${json.url}`;
       await navigator.clipboard.writeText(fullUrl).catch(() => {});
-      alert(`Share link copied to clipboard:\n\n${fullUrl}\n\nAnyone with this link can view/download ${c.name}'s job list, no login needed. Send it directly to the client.`);
+      alert(`Share link copied to clipboard:\n\n${fullUrl}\n\nOpens as a page ${c.name} can just glance at -- job list with pricing, same as before. A "Download as Excel" link is on the page too, for anyone who wants the file. No login needed. Send it directly to the client.`);
       await load();
     } catch (err) {
       alert(getErrorMessage(err) || 'Failed to generate link');

@@ -25,7 +25,10 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ token, url: `/api/share/jobs/${token}` });
+  // Points at the page view, not the raw Excel API route -- matches
+  // the same change made for team job-sheet links. The Excel download
+  // is still available, just as a link *within* that page.
+  return NextResponse.json({ token, url: `/client-jobs/${token}` });
 }
 
 // DELETE /api/clients/[id]/share-link — revoke: clears the token, so the
