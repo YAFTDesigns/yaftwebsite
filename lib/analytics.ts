@@ -2,6 +2,25 @@ const SESSION_KEY = 'yaftSessionId';
 const SOURCE_KEY = 'yaftSessionSource';
 const INTERNAL_KEY = 'yaftInternalTraffic';
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
+// Which of our own event types are worth GA4 knowing about as real
+// events (as opposed to just page views) -- deliberately a small,
+// curated set of actual business actions, not every internal event
+// type. Once these are firing, mark them as "Key events" in the GA4
+// admin UI (Admin > Events) to get GA4's own conversion reporting --
+// that step can't be done from code, it's a one-time toggle on
+// Google's side.
+const GA4_EVENT_NAMES: Partial<Record<Parameters<typeof track>[0], string>> = {
+  enquiry_submit: 'generate_lead',
+  course_gate_unlock: 'syllabus_unlock',
+  whatsapp_click: 'whatsapp_click',
+};
+
 // Founder/team browsers can mark themselves as internal once, via
 // ?internal=1 in the URL (any page). Persists in localStorage until
 // cleared with ?internal=0. Internal traffic is still recorded (so
@@ -83,6 +102,20 @@ export function track(
       navigator.sendBeacon('/api/analytics/event', new Blob([payload], { type: 'application/json' }));
     } else {
       fetch('/api/analytics/event', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true }).catch(() => {});
+    }
+
+    // Mirror the events GA4 actually cares about into gtag too. Only
+    // fires when GA4 has genuinely loaded (real production domain,
+    // per ProductionOnlyAnalytics) and never for internal/team
+    // traffic, so this can't pollute GA4's conversion numbers the
+    // same way the old NODE_ENV-only gate polluted them with preview
+    // deployments.
+    const ga4EventName = GA4_EVENT_NAMES[eventType];
+    if (ga4EventName && window.gtag && !isInternalTraffic()) {
+      window.gtag('event', ga4EventName, {
+        course_slug: extra.courseSlug,
+        page: extra.page,
+      });
     }
   } catch {
     // analytics must never break the page
