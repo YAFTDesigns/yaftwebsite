@@ -183,6 +183,8 @@ export default function InvoicesClient({
   const [saveMsg, setSaveMsg]   = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [sendingNow, setSendingNow] = useState(false);
+  const [sendNowMsg, setSendNowMsg] = useState('');
 
   async function patchInvoice(body: object) {
     const res = await fetch('/api/admin/invoices', {
@@ -282,6 +284,31 @@ export default function InvoicesClient({
     if (json.error) alert(`Could not cancel: ${json.error}`);
     await loadInvoices();
     setCancellingId(null);
+  }
+
+  // The actual cron only checks once a day (Vercel Hobby plan limit),
+  // so waiting for it isn't a practical way to test or to push out a
+  // time-sensitive invoice sooner. This calls the exact same
+  // send-due-invoices logic on demand instead of waiting for the
+  // scheduled cron tick, same pattern as SiteStatus's "Retry now" for
+  // the enquiry/invoice retry queue.
+  async function sendDueNow() {
+    setSendingNow(true); setSendNowMsg('');
+    try {
+      const res = await fetch('/api/cron/send-scheduled-invoices', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Failed');
+      setSendNowMsg(
+        json.checked === 0
+          ? 'Nothing due yet -- only invoices past their scheduled time are sent, regardless of when this runs.'
+          : `Checked ${json.checked}, sent ${json.sent}${json.failed > 0 ? `, ${json.failed} failed -- check the Log tab` : ''}.`
+      );
+    } catch (e) {
+      setSendNowMsg(`Failed: ${getErrorMessage(e)}`);
+    } finally {
+      setSendingNow(false);
+      await loadInvoices();
+    }
   }
 
   async function permanentlyDeleteInvoice(id: string) {
@@ -777,9 +804,27 @@ export default function InvoicesClient({
 
       {/* ── SCHEDULED ── */}
       {tab === 'scheduled' && (
-        scheduledInvoices.length === 0
-          ? <p className={styles.empty}>No invoices waiting to be sent.</p>
-          : <div className={styles.list}>
+        <div>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:20, flexWrap:'wrap' }}>
+            <button
+              onClick={sendDueNow}
+              disabled={sendingNow}
+              style={{
+                fontFamily:'var(--mono)', fontSize:12, color:'var(--brass)', background:'transparent',
+                border:'1px solid var(--brass)', padding:'8px 16px', borderRadius:6, cursor:'pointer', opacity: sendingNow ? 0.6 : 1,
+              }}
+            >
+              {sendingNow ? 'Checking...' : 'Send due invoices now'}
+            </button>
+            <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#666' }}>
+              Only sends invoices whose scheduled time has already passed -- this doesn&apos;t change any timing, it just checks right now instead of waiting for the once-daily automatic check.
+            </span>
+          </div>
+          {sendNowMsg && <p style={{ fontFamily:'var(--mono)', fontSize:12, color: sendNowMsg.startsWith('Failed') ? '#e55' : '#4caf50', marginBottom:16 }}>{sendNowMsg}</p>}
+
+          {scheduledInvoices.length === 0
+            ? <p className={styles.empty}>No invoices waiting to be sent.</p>
+            : <div className={styles.list}>
               {scheduledInvoices.map(inv => (
                 <div key={inv.id} className={styles.card}>
                   <div className={styles.cardTop}>
@@ -810,7 +855,8 @@ export default function InvoicesClient({
                   </div>
                 </div>
               ))}
-            </div>
+            </div>}
+        </div>
       )}
 
       {/* ── LOG ── */}
