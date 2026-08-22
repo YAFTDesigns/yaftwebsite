@@ -1,12 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
-import { Analytics } from "@vercel/analytics/next";
-import AnalyticsTracker from "@/components/AnalyticsTracker";
+import ProductionOnlyAnalytics from "@/components/ProductionOnlyAnalytics";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WhatsAppGateModal from "@/components/WhatsAppGateModal";
 import "./globals.css";
-
-const GA_MEASUREMENT_ID = "G-XDVDJC7X24";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.yaftdesigns.com"),
@@ -54,23 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            <Script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4-init" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', '${GA_MEASUREMENT_ID}');`}
-            </Script>
-            <AnalyticsTracker />
-            <Analytics />
-          </>
-        )}
+        <ProductionOnlyAnalytics />
         {children}
         <WhatsAppButton />
         <WhatsAppGateModal />
