@@ -1,0 +1,128 @@
+.page {
+  min-height: 100vh;
+  background: #0a0a0a;
+  color: #ddd;
+  padding: 32px 20px 64px;
+  font-family: var(--mono, monospace);
+}
+
+.header {
+  max-width: 1100px;
+  margin: 0 auto 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #E63946;
+  margin: 0 0 6px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 6px;
+  font-family: var(--display, sans-serif);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #888;
+  margin: 0;
+}
+
+.downloadLink {
+  font-size: 12px;
+  color: var(--brass, #C9A227);
+  border: 1px solid var(--brass, #C9A227);
+  padding: 9px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.downloadLink:hover {
+  background: rgba(201, 162, 39, 0.08);
+}
+
+.tableWrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow-x: auto;
+  border: 1px solid #1e1e1e;
+  border-radius: 10px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 14px;
+  background: #111;
+  color: #888;
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #1e1e1e;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #161616;
+  vertical-align: top;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: #0f0f0f;
+}
+
+.mono {
+  font-family: var(--mono, monospace);
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.notes {
+  color: #999;
+  max-width: 280px;
+}
+
+.unassigned {
+  color: #E63946;
+  font-style: italic;
+}
+
+.statusPill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 5px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.empty, .error {
+  max-width: 1100px;
+  margin: 0 auto;
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  padding: 60px 20px;
+}

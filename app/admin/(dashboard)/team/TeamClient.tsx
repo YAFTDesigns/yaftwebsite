@@ -94,7 +94,7 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
       if (!res.ok) throw new Error(json?.error ?? 'Failed to generate link');
       const fullUrl = `${window.location.origin}${json.url}`;
       await navigator.clipboard.writeText(fullUrl).catch(() => {});
-      alert(`Job sheet link copied to clipboard:\n\n${fullUrl}\n\nAnyone with this link can view/download the full job list (no pricing shown) -- job no, client, type, status, notes only. No login needed. Send it directly to ${m.name}.`);
+      alert(`Job sheet link copied to clipboard:\n\n${fullUrl}\n\nOpens as a page they can just glance at (no pricing shown -- job no, client, type, status, notes only). An "Download as Excel" link is on the page too, for anyone who wants the file. No login needed. Send it directly to ${m.name}.`);
       await load();
     } catch (err) {
       alert(getErrorMessage(err) || 'Failed to generate link');

@@ -24,7 +24,11 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ token, url: `/api/share/team-jobs/${token}` });
+  // Points at the page view, not the raw Excel API route -- designers
+  // said they'd rather glance at a page than download a file. The
+  // Excel download is still available, just as a link *within* that
+  // page for anyone who wants the actual file.
+  return NextResponse.json({ token, url: `/team-jobs/${token}` });
 }
 
 // DELETE /api/team/[id]/share-link — revoke, same pattern as clients.
