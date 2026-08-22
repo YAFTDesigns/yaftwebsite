@@ -1079,7 +1079,7 @@ export default function InvoicesClient({
                   min={minScheduleDateTime}
                 />
                 <p style={{ fontFamily:'var(--mono)', fontSize:10, color:'#666', marginTop:4 }}>
-                  The invoice is created now with a real invoice number, but the email won&apos;t go out until this time. You can cancel it anytime before then from the Scheduled tab.
+                  The invoice is created now with a real invoice number. Sends are checked once daily, so expect it to go out sometime within 24 hours after this time, not to the minute. You can cancel it anytime before then from the Scheduled tab.
                 </p>
               </div>
             )}
