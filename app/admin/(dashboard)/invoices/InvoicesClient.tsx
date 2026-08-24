@@ -288,17 +288,21 @@ export default function InvoicesClient({
     setCancellingId(null);
   }
 
+  const [convertPickerFor, setConvertPickerFor] = useState<string | null>(null);
+  const [convertType, setConvertType] = useState<'training' | 'consultancy'>('training');
+
   async function convertToInvoice(inv: Invoice) {
-    if (!confirm(`Convert proforma ${inv.invoice_no} into a real invoice? This creates a new numbered invoice with the same details and emails it to the client. The original proforma stays on record.`)) return;
+    if (!confirm(`Convert proforma ${inv.invoice_no} into a ${convertType === 'training' ? 'Training' : 'Consultancy'} invoice? This creates a new numbered invoice with the same details and emails it to the client. The original proforma stays on record.`)) return;
     setConvertingId(inv.id);
-    const json = await patchInvoice({ action: 'convert_to_invoice', id: inv.id });
+    const json = await patchInvoice({ action: 'convert_to_invoice', id: inv.id, invoice_type: convertType });
     if (json.error) {
       alert(`Could not convert: ${json.error}`);
     } else {
-      alert(`Converted to ${json.newInvoiceNo} and emailed to ${inv.client_email}.`);
+      alert(`Converted to ${json.newInvoiceNo} (${convertType}) and emailed to ${inv.client_email}.`);
     }
     await loadInvoices();
     setConvertingId(null);
+    setConvertPickerFor(null);
   }
 
   // The actual cron only checks once a day (Vercel Hobby plan limit),
@@ -678,13 +682,38 @@ export default function InvoicesClient({
                         {editInv?.id === inv.id ? 'Cancel' : 'Edit invoice →'}
                       </button>
                       {inv.invoice_type === 'proforma' && !inv.converted_to_invoice_id && inv.advance > 0 && (
-                        <button
-                          className={styles.approveBtn}
-                          disabled={convertingId === inv.id}
-                          onClick={() => convertToInvoice(inv)}
-                        >
-                          {convertingId === inv.id ? 'Converting...' : 'Convert to Invoice →'}
-                        </button>
+                        convertPickerFor === inv.id ? (
+                          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                            <select
+                              value={convertType}
+                              onChange={e => setConvertType(e.target.value as 'training' | 'consultancy')}
+                              style={{ fontFamily:'var(--mono)', fontSize:12, background:'#0a0a0a', border:'1px solid var(--brass)', color:'var(--brass)', borderRadius:6, padding:'8px 10px' }}
+                            >
+                              <option value="training">Training</option>
+                              <option value="consultancy">Consultancy</option>
+                            </select>
+                            <button
+                              className={styles.approveBtn}
+                              disabled={convertingId === inv.id}
+                              onClick={() => convertToInvoice(inv)}
+                            >
+                              {convertingId === inv.id ? 'Converting...' : 'Confirm →'}
+                            </button>
+                            <button
+                              onClick={() => setConvertPickerFor(null)}
+                              style={{ fontFamily:'var(--mono)', fontSize:12, background:'transparent', border:'none', color:'#666', cursor:'pointer' }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className={styles.approveBtn}
+                            onClick={() => { setConvertPickerFor(inv.id); setConvertType('training'); }}
+                          >
+                            Convert to Invoice →
+                          </button>
+                        )
                       )}
                       {inv.invoice_type === 'proforma' && inv.converted_to_invoice_id && (
                         <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#4caf50', padding:'8px 4px', display:'inline-block' }}>
