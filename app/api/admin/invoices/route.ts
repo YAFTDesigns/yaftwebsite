@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
+import { sendInvoiceEmail, type InvoiceForEmail } from '@/lib/invoiceEmail';
 
 // GET /api/admin/invoices?trash=true   — list active or trashed invoices
 // GET /api/admin/invoices?log=true     — list invoice event log (newest first)
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/invoices
 // { action: 'cancel_scheduled_send', id }
+// { action: 'convert_to_invoice', id, invoice_type? }
 // { action: 'update_payment', id, advance }
 // { action: 'update_details', id, client_name, client_email, client_type,
 //   client_company, client_pan, client_gst, client_state, client_address,
@@ -62,6 +64,91 @@ export async function PATCH(request: NextRequest) {
       message: `Scheduled send cancelled (was set for ${new Date(inv.scheduled_send_at).toLocaleString('en-IN')})`,
     });
     return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === 'convert_to_invoice') {
+    const { id, invoice_type } = body;
+    if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+
+    const { data: proforma, error: fetchErr } = await supabase
+      .from('invoices').select('*').eq('id', id).single();
+    if (fetchErr || !proforma) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+    if (proforma.invoice_type !== 'proforma') {
+      return NextResponse.json({ error: 'Only proforma quotes can be converted' }, { status: 400 });
+    }
+    if (proforma.converted_to_invoice_id) {
+      return NextResponse.json({ error: 'Already converted' }, { status: 400 });
+    }
+    if (!(Number(proforma.advance) > 0)) {
+      return NextResponse.json({ error: 'No advance recorded yet -- record the advance first, then convert' }, { status: 400 });
+    }
+
+    // Invoice numbers are only ever manually tracked in the create
+    // form's UI, never computed server-side -- there's no admin
+    // typing a sequence number during an automatic conversion, so
+    // this generates its own non-colliding number: highest existing
+    // sequence for the current month's real (non-PF) invoices, plus one.
+    const now = new Date();
+    const mmyyyy = String(now.getMonth() + 1).padStart(2, '0') + now.getFullYear();
+    const { data: monthInvoices } = await supabase
+      .from('invoices')
+      .select('invoice_no')
+      .like('invoice_no', `YAFT-${mmyyyy}-%`);
+    const usedSeqs = (monthInvoices ?? [])
+      .map((r) => parseInt(r.invoice_no.split('-').pop() ?? '0', 10))
+      .filter((n) => !Number.isNaN(n));
+    const nextSeq = String((usedSeqs.length ? Math.max(...usedSeqs) : 0) + 1).padStart(2, '0');
+    const newInvoiceNo = `YAFT-${mmyyyy}-${nextSeq}`;
+
+    const { data: newInvoice, error: insertErr } = await supabase.from('invoices').insert({
+      invoice_no: newInvoiceNo,
+      date: proforma.date,
+      client_name: proforma.client_name,
+      client_email: proforma.client_email,
+      client_type: proforma.client_type,
+      client_company: proforma.client_company,
+      client_pan: proforma.client_pan,
+      client_gst: proforma.client_gst,
+      client_state: proforma.client_state,
+      client_address: proforma.client_address,
+      client_phone: proforma.client_phone,
+      items: proforma.items,
+      total: proforma.total,
+      advance: proforma.advance,
+      balance: proforma.balance,
+      invoice_type: invoice_type || 'training',
+      status: 'sent',
+      email_sent_at: new Date().toISOString(),
+    }).select('id').single();
+
+    if (insertErr || !newInvoice) {
+      return NextResponse.json({ error: insertErr?.message ?? 'Failed to create invoice' }, { status: 500 });
+    }
+
+    const { error: linkErr } = await supabase
+      .from('invoices').update({ converted_to_invoice_id: newInvoice.id }).eq('id', id);
+    if (linkErr) console.error('[convert_to_invoice] failed to link proforma to new invoice:', linkErr);
+
+    await logInvoiceEvent({
+      invoiceId: id, invoiceNo: proforma.invoice_no, event: 'converted',
+      message: `Converted to invoice ${newInvoiceNo}`,
+    });
+    await logInvoiceEvent({
+      invoiceId: newInvoice.id, invoiceNo: newInvoiceNo, event: 'created',
+      message: `Converted from proforma ${proforma.invoice_no}, INR ${Number(proforma.total).toLocaleString('en-IN')}`,
+    });
+
+    // Sent using the NEW invoice number/type, not the proforma's --
+    // this is what makes the email say "Invoice" instead of "Proforma"
+    // and skip the proforma-only schedule/advance-banner/billing-details
+    // blocks, since invoice_type here is the real one, not 'proforma'.
+    const result = await sendInvoiceEmail({
+      ...(proforma as InvoiceForEmail),
+      invoice_no: newInvoiceNo,
+      invoice_type: invoice_type || 'training',
+    });
+
+    return NextResponse.json({ ok: true, newInvoiceId: newInvoice.id, newInvoiceNo, emailStatus: result.status });
   }
 
   if (body.action === 'update_payment') {

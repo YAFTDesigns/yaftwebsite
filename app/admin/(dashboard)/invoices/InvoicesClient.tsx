@@ -23,6 +23,7 @@ type Invoice = {
   total: number; advance: number; balance: number; status: string;
   deleted_at: string | null;
   scheduled_send_at: string | null; email_sent_at: string | null; send_cancelled: boolean;
+  converted_to_invoice_id: string | null;
 };
 
 const COURSES = [
@@ -183,6 +184,7 @@ export default function InvoicesClient({
   const [saveMsg, setSaveMsg]   = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
   const [sendingNow, setSendingNow] = useState(false);
   const [sendNowMsg, setSendNowMsg] = useState('');
 
@@ -284,6 +286,19 @@ export default function InvoicesClient({
     if (json.error) alert(`Could not cancel: ${json.error}`);
     await loadInvoices();
     setCancellingId(null);
+  }
+
+  async function convertToInvoice(inv: Invoice) {
+    if (!confirm(`Convert proforma ${inv.invoice_no} into a real invoice? This creates a new numbered invoice with the same details and emails it to the client. The original proforma stays on record.`)) return;
+    setConvertingId(inv.id);
+    const json = await patchInvoice({ action: 'convert_to_invoice', id: inv.id });
+    if (json.error) {
+      alert(`Could not convert: ${json.error}`);
+    } else {
+      alert(`Converted to ${json.newInvoiceNo} and emailed to ${inv.client_email}.`);
+    }
+    await loadInvoices();
+    setConvertingId(null);
   }
 
   // The actual cron only checks once a day (Vercel Hobby plan limit),
@@ -501,6 +516,22 @@ export default function InvoicesClient({
                 />
               </div>
 
+              {(() => {
+                const allProforma = invoices.filter(i => i.invoice_type === 'proforma');
+                const converted = allProforma.filter(i => i.converted_to_invoice_id);
+                if (allProforma.length === 0) return null;
+                const pct = Math.round((converted.length / allProforma.length) * 100);
+                return (
+                  <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
+                    <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', letterSpacing:'.06em', textTransform:'uppercase', marginBottom:8 }}>Proforma conversion rate</p>
+                    <p style={{ fontFamily:'var(--mono)', fontSize:22, color:'#fff', fontWeight:700 }}>
+                      {converted.length} <span style={{ color:'#666', fontSize:14, fontWeight:400 }}>of</span> {allProforma.length} <span style={{ color:'#666', fontSize:14, fontWeight:400 }}>converted to real invoices</span>
+                    </p>
+                    <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888', marginTop:2 }}>{pct}%</p>
+                  </div>
+                );
+              })()}
+
               {/* search */}
               <div style={{ marginBottom: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
                 <input
@@ -646,6 +677,20 @@ export default function InvoicesClient({
                       >
                         {editInv?.id === inv.id ? 'Cancel' : 'Edit invoice →'}
                       </button>
+                      {inv.invoice_type === 'proforma' && !inv.converted_to_invoice_id && inv.advance > 0 && (
+                        <button
+                          className={styles.approveBtn}
+                          disabled={convertingId === inv.id}
+                          onClick={() => convertToInvoice(inv)}
+                        >
+                          {convertingId === inv.id ? 'Converting...' : 'Convert to Invoice →'}
+                        </button>
+                      )}
+                      {inv.invoice_type === 'proforma' && inv.converted_to_invoice_id && (
+                        <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#4caf50', padding:'8px 4px', display:'inline-block' }}>
+                          ✓ Converted
+                        </span>
+                      )}
                       <button
                         className={styles.deleteBtn}
                         disabled={deletingId === inv.id}

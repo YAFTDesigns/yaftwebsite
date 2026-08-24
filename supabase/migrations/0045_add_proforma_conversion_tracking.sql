@@ -1,0 +1,12 @@
+-- Lets a proforma quote be formally converted into a real invoice once
+-- an advance is received, while keeping the original proforma on
+-- record rather than mutating or replacing it -- Yokes wants to be
+-- able to track how many proforma quotes actually convert.
+--
+-- Set on the ORIGINAL proforma once converted, pointing at the id of
+-- the new real invoice created from it. Null means "never converted"
+-- (either still a live quote, or the quote never went anywhere).
+-- ON DELETE SET NULL: if the converted invoice is ever hard-deleted,
+-- the proforma just reverts to looking unconverted rather than being
+-- blocked or orphaned.
+alter table invoices add column if not exists converted_to_invoice_id uuid references invoices(id) on delete set null;

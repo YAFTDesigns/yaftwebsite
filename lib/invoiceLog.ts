@@ -12,7 +12,8 @@ export type InvoiceLogEvent =
   | 'restored'
   | 'scheduled_sent'
   | 'scheduled_send_failed'
-  | 'send_cancelled';
+  | 'send_cancelled'
+  | 'converted';
 
 /**
  * Records an invoice lifecycle event. Never throws -- logging must not
