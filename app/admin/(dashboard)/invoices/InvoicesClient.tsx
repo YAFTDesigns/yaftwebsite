@@ -292,13 +292,13 @@ export default function InvoicesClient({
   const [convertType, setConvertType] = useState<'training' | 'consultancy'>('training');
 
   async function convertToInvoice(inv: Invoice) {
-    if (!confirm(`Convert proforma ${inv.invoice_no} into a ${convertType === 'training' ? 'Training' : 'Consultancy'} invoice? This creates a new numbered invoice with the same details and emails it to the client. The original proforma stays on record.`)) return;
+    if (!confirm(`Convert proforma ${inv.invoice_no} into a ${convertType === 'training' ? 'Training' : 'Consultancy'} invoice? This creates and saves a new numbered invoice with the same details. It will NOT be emailed automatically -- you'll send it manually from the new invoice's card once you're ready. The original proforma stays on record.`)) return;
     setConvertingId(inv.id);
     const json = await patchInvoice({ action: 'convert_to_invoice', id: inv.id, invoice_type: convertType });
     if (json.error) {
       alert(`Could not convert: ${json.error}`);
     } else {
-      alert(`Converted to ${json.newInvoiceNo} (${convertType}) and emailed to ${inv.client_email}.`);
+      alert(`Saved as ${json.newInvoiceNo} (${convertType}) -- not sent yet. Find it in Sent Invoices and use "Save changes" then "Send" when you're ready to email it to the client.`);
     }
     await loadInvoices();
     setConvertingId(null);
@@ -671,7 +671,9 @@ export default function InvoicesClient({
                         {inv.advance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#555', marginTop:3 }}>Advance: INR {fmt(inv.advance)}</p>}
                         {inv.balance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#E63946', marginTop:2 }}>Balance: INR {fmt(inv.balance)}</p>}
                         {inv.balance === 0 && inv.advance > 0 && <p style={{ fontSize:11, fontFamily:'var(--mono)', color:'#4caf50', marginTop:2 }}>Fully paid</p>}
-                        <p style={{ fontSize:10, fontFamily:'var(--mono)', color:'#4caf50', marginTop:4 }}>✓ Sent</p>
+                        {inv.email_sent_at
+                          ? <p style={{ fontSize:10, fontFamily:'var(--mono)', color:'#4caf50', marginTop:4 }}>✓ Sent</p>
+                          : <p style={{ fontSize:10, fontFamily:'var(--mono)', color:'var(--brass)', marginTop:4 }}>Saved, not sent yet</p>}
                       </div>
                     </div>
                     <div className={styles.actions}>
@@ -814,7 +816,7 @@ export default function InvoicesClient({
                           {saving ? 'Saving...' : 'Save changes'}
                         </button>
                         <button onClick={saveAndResend} disabled={saving || resending} style={{ fontFamily:'var(--mono)', fontSize:12, color:'#fff', background:'var(--brass)', border:'none', padding:'9px 20px', borderRadius:6, cursor:'pointer', opacity:(saving||resending)?0.6:1 }}>
-                          {resending ? 'Resending...' : 'Save & resend PDF to client →'}
+                          {resending ? (editInv?.email_sent_at ? 'Resending...' : 'Sending...') : editInv?.email_sent_at ? 'Save & resend PDF to client →' : 'Save & send PDF to client →'}
                         </button>
                         {saveMsg && <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#4caf50' }}>✓ {saveMsg}</p>}
                       </div>

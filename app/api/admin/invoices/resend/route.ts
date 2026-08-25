@@ -4,11 +4,19 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { generatePDF } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
+import { sendInvoiceEmail, type InvoiceForEmail } from '@/lib/invoiceEmail';
 
 // POST /api/admin/invoices/resend  { id }
 // Regenerates the PDF from the invoice's current (possibly just-edited)
-// database row and re-emails it to the client. Used after editing an
-// already-sent invoice, so the client gets the corrected version.
+// database row and emails it to the client.
+//
+// Branches on whether this invoice has ever actually been sent
+// (email_sent_at). A converted-but-not-yet-sent invoice (see
+// convert_to_invoice in ../route.ts, which deliberately saves without
+// sending) needs a genuine first send -- "Invoice X" wording via the
+// same shared sendInvoiceEmail() every other first send uses, not
+// "Revised Invoice X, replacing the version sent earlier" below, which
+// would be actively wrong for something that was never sent before.
 export async function POST(request: NextRequest) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -24,6 +32,40 @@ export async function POST(request: NextRequest) {
   const { data: inv, error: fetchErr } = await supabase.from('invoices').select('*').eq('id', id).single();
   if (fetchErr || !inv) {
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
+  }
+
+  if (!inv.email_sent_at) {
+    try {
+      const result = await sendInvoiceEmail({
+        invoice_no: inv.invoice_no,
+        date: inv.date,
+        client_name: inv.client_name,
+        client_email: inv.client_email,
+        client_type: inv.client_type,
+        client_company: inv.client_company,
+        client_pan: inv.client_pan,
+        client_gst: inv.client_gst,
+        client_state: inv.client_state,
+        client_address: inv.client_address,
+        client_phone: inv.client_phone,
+        items: inv.items,
+        advance: inv.advance,
+        balance: inv.balance,
+        grand_total: inv.total,
+        invoice_type: inv.invoice_type || 'training',
+        schedule_note: inv.schedule_note,
+      } as InvoiceForEmail);
+
+      await supabase.from('invoices').update({ email_sent_at: new Date().toISOString(), status: 'sent' }).eq('id', id);
+      await logInvoiceEvent({
+        invoiceId: id, invoiceNo: inv.invoice_no, event: 'created',
+        message: `First send: PDF generated and emailed to ${inv.client_email}`,
+      });
+      return NextResponse.json({ ok: true, pdf: result.pdfBase64 });
+    } catch (err) {
+      console.error('[invoice-resend] first send failed:', err);
+      return NextResponse.json({ error: 'Failed to send invoice' }, { status: 500 });
+    }
   }
 
   const pdfData = {

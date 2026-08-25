@@ -3,7 +3,6 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
-import { sendInvoiceEmail, type InvoiceForEmail } from '@/lib/invoiceEmail';
 
 // GET /api/admin/invoices?trash=true   — list active or trashed invoices
 // GET /api/admin/invoices?log=true     — list invoice event log (newest first)
@@ -117,8 +116,8 @@ export async function PATCH(request: NextRequest) {
       advance: proforma.advance,
       balance: proforma.balance,
       invoice_type: invoice_type || 'training',
-      status: 'sent',
-      email_sent_at: new Date().toISOString(),
+      status: 'draft',
+      email_sent_at: null,
     }).select('id').single();
 
     if (insertErr || !newInvoice) {
@@ -131,24 +130,19 @@ export async function PATCH(request: NextRequest) {
 
     await logInvoiceEvent({
       invoiceId: id, invoiceNo: proforma.invoice_no, event: 'converted',
-      message: `Converted to invoice ${newInvoiceNo}`,
+      message: `Converted to invoice ${newInvoiceNo} (not yet sent -- awaiting manual send)`,
     });
     await logInvoiceEvent({
       invoiceId: newInvoice.id, invoiceNo: newInvoiceNo, event: 'created',
-      message: `Converted from proforma ${proforma.invoice_no}, INR ${Number(proforma.total).toLocaleString('en-IN')}`,
+      message: `Converted from proforma ${proforma.invoice_no}, INR ${Number(proforma.total).toLocaleString('en-IN')} -- saved only, not emailed yet`,
     });
 
-    // Sent using the NEW invoice number/type, not the proforma's --
-    // this is what makes the email say "Invoice" instead of "Proforma"
-    // and skip the proforma-only schedule/advance-banner/billing-details
-    // blocks, since invoice_type here is the real one, not 'proforma'.
-    const result = await sendInvoiceEmail({
-      ...(proforma as InvoiceForEmail),
-      invoice_no: newInvoiceNo,
-      invoice_type: invoice_type || 'training',
-    });
-
-    return NextResponse.json({ ok: true, newInvoiceId: newInvoice.id, newInvoiceNo, emailStatus: result.status });
+    // Deliberately NOT sent here. Conversion only creates and saves the
+    // real invoice record -- Yokes wants to review it and trigger the
+    // actual send manually (via "Save & resend PDF to client" on the
+    // new invoice), not have it go out automatically the moment a
+    // proforma is converted.
+    return NextResponse.json({ ok: true, newInvoiceId: newInvoice.id, newInvoiceNo });
   }
 
   if (body.action === 'update_payment') {
