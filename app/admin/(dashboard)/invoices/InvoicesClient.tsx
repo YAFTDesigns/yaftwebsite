@@ -683,6 +683,17 @@ export default function InvoicesClient({
                       >
                         {editInv?.id === inv.id ? 'Cancel' : 'Edit invoice →'}
                       </button>
+                      <a
+                        href={`/api/admin/invoices/${inv.id}/pdf`}
+                        title="Download PDF (does not send anything)"
+                        style={{
+                          fontFamily:'var(--mono)', fontSize:12, color:'#888', background:'transparent',
+                          border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 12px',
+                          textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6,
+                        }}
+                      >
+                        ↓ PDF
+                      </a>
                       {inv.invoice_type === 'proforma' && !inv.converted_to_invoice_id && inv.advance > 0 && (
                         convertPickerFor === inv.id ? (
                           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -921,6 +932,17 @@ export default function InvoicesClient({
                     </div>
                   </div>
                   <div className={styles.actions}>
+                    <a
+                      href={`/api/admin/invoices/${inv.id}/pdf`}
+                      title="Download PDF (does not send anything)"
+                      style={{
+                        fontFamily:'var(--mono)', fontSize:12, color:'#888', background:'transparent',
+                        border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 12px',
+                        textDecoration:'none', display:'inline-flex', alignItems:'center', gap:6,
+                      }}
+                    >
+                      ↓ PDF
+                    </a>
                     <button
                       className={styles.deleteBtn}
                       disabled={cancellingId === inv.id}
