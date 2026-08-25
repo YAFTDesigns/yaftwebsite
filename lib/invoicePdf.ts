@@ -131,7 +131,16 @@ export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
     }
     if (data.client_address) {
       String(data.client_address).split('\n').forEach((line: string) => {
-        doc.text(line, M, by, { width: 260 }); by += 16;
+        // PDFKit auto-wraps text that's longer than the given width,
+        // but doesn't report back how many visual lines that produced --
+        // advancing by a fixed 16pt regardless caused the next field
+        // (phone number) to overlap whenever an address wrapped to more
+        // than one line. heightOfString() gives the actual rendered
+        // height for this exact width, so the cursor advances by
+        // however much space the wrapped text really took.
+        const lineHeight = doc.heightOfString(line, { width: 260 });
+        doc.text(line, M, by, { width: 260 });
+        by += lineHeight + 4;
       });
     }
     if (data.client_phone) {
