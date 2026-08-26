@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
-import type { LabScript } from './page';
+import type { LabScript, LabCategory } from './page';
 import styles from './labs.module.css';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
@@ -12,7 +12,7 @@ function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 0 });
 }
 
-export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
+export default function LabsPageClient({ scripts, categories }: { scripts: LabScript[]; categories: LabCategory[] }) {
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -22,19 +22,15 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
     return scripts.filter(s => s.title.toLowerCase().includes(q) || s.description.toLowerCase().includes(q));
   }, [scripts, query]);
 
-  // Grouped and numbered by tool, same "1. Category / 1.1 Item" scheme
-  // as the reference site -- tool order is alphabetical for stability
-  // (doesn't reshuffle every time a script's display_order changes),
-  // item order within a tool follows display_order as already set in
-  // the admin.
+  // Grouped by the real, editable category records -- numbering
+  // follows each category's own display_order (set and reorderable in
+  // admin), not derived from free text. Only categories with at least
+  // one matching script show up, so search naturally hides empty ones.
   const grouped = useMemo(() => {
-    const byTool = new Map<string, LabScript[]>();
-    for (const s of filtered) {
-      if (!byTool.has(s.tool)) byTool.set(s.tool, []);
-      byTool.get(s.tool)!.push(s);
-    }
-    return Array.from(byTool.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [filtered]);
+    return categories
+      .map(cat => ({ cat, items: filtered.filter(s => s.category_id === cat.id) }))
+      .filter(g => g.items.length > 0);
+  }, [categories, filtered]);
 
   const selected = scripts.find(s => s.id === selectedId) ?? null;
 
@@ -43,7 +39,7 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
       <SiteHeader active="/labs" />
 
       <main id="top">
-        <section className={styles.hero}>
+        <section className={`page-hero ${styles.hero}`}>
           <video
             className={styles.bgVideo}
             autoPlay muted loop playsInline
@@ -54,13 +50,13 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
           </video>
           <div className={styles.bgFade} />
 
-          <div className={styles.heroContent}>
-            <p className={styles.eyebrow}>YAFT Designs</p>
-            <h1 className={styles.h1}>YAFT Labs</h1>
-            <p className={styles.tagline}>Small Grasshopper and Rhino scripts, straight from our reels and live projects. Free to grab, ready to build on.</p>
+          <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="eyebrow">YAFT LABS</div>
+            <h1>YAFT Labs</h1>
+            <p className="lede">Small Grasshopper and Rhino scripts, straight from our reels and live projects. Free to grab, ready to build on.</p>
             <div className={styles.statRow}>
               <span className={styles.stat}>{scripts.length} script{scripts.length === 1 ? '' : 's'} and growing</span>
-              {scripts.every(s => s.price === 0) && <span className={styles.statMuted}>All free right now</span>}
+              {scripts.length > 0 && scripts.every(s => s.price === 0) && <span className={styles.statMuted}>All free right now</span>}
             </div>
           </div>
         </section>
@@ -81,9 +77,9 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
                 {grouped.length === 0 ? (
                   <p className={styles.sidebarEmpty}>No matches.</p>
                 ) : (
-                  grouped.map(([tool, items], catIdx) => (
-                    <div key={tool} className={styles.sidebarCategory}>
-                      <p className={styles.sidebarCategoryLabel}>{catIdx + 1}. {tool}</p>
+                  grouped.map(({ cat, items }, catIdx) => (
+                    <div key={cat.id} className={styles.sidebarCategory}>
+                      <p className={styles.sidebarCategoryLabel}>{catIdx + 1}. {cat.name}</p>
                       {items.map((s, itemIdx) => (
                         <button
                           key={s.id}
@@ -103,9 +99,13 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
                   <div className={styles.detail}>
                     <button onClick={() => setSelectedId(null)} className={styles.detailBack}>← Back to all scripts</button>
                     <div className={styles.detailImageWrap}>
-                      {selected.thumbnail_path ? (
+                      {(selected.detail_image_path || selected.thumbnail_path) ? (
                         // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, full-size detail image, not a next/image candidate here
-                        <img src={`${SITE_IMAGE_BASE}${selected.thumbnail_path}`} alt={selected.title} className={styles.detailImage} />
+                        <img
+                          src={`${SITE_IMAGE_BASE}${selected.detail_image_path ?? selected.thumbnail_path}`}
+                          alt={selected.title}
+                          className={styles.detailImage}
+                        />
                       ) : (
                         <div className={styles.detailImagePlaceholder} />
                       )}
@@ -115,7 +115,7 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
                         {selected.price > 0 ? `INR ${fmt(selected.price)}` : 'Free'}
                       </span>
                       <h2 className={styles.detailTitle}>{selected.title}</h2>
-                      <p className={styles.detailMeta}>{selected.tool} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
+                      <p className={styles.detailMeta}>{categories.find(c => c.id === selected.category_id)?.name ?? 'Uncategorized'} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
                       <p className={styles.detailDesc}>{selected.description}</p>
                       <a href={`/api/labs/${selected.id}/download`} className={styles.downloadBtn}>
                         Download {selected.price > 0 ? `(INR ${fmt(selected.price)})` : ''} →
@@ -134,14 +134,12 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
                         ) : (
                           <div className={styles.thumbPlaceholder} />
                         )}
-                        <div className={styles.cardFade} />
                         <span className={`${styles.priceBadge} ${s.price > 0 ? styles.priceBadgePaid : styles.priceBadgeFree}`}>
                           {s.price > 0 ? `INR ${fmt(s.price)}` : 'Free'}
                         </span>
-                        <div className={styles.cardContent}>
+                        <div className={styles.cardHoverFade} />
+                        <div className={styles.cardHoverContent}>
                           <p className={styles.cardTitle}>{s.title}</p>
-                          <p className={styles.cardDesc}>{s.description}</p>
-                          <p className={styles.cardMeta}>{s.tool} · {s.download_count} download{s.download_count === 1 ? '' : 's'}</p>
                         </div>
                       </button>
                     ))}
@@ -157,4 +155,3 @@ export default function LabsPageClient({ scripts }: { scripts: LabScript[] }) {
     </>
   );
 }
-

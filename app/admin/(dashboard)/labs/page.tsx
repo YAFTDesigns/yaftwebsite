@@ -5,6 +5,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function LabsPage() {
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase.from('lab_scripts').select('*').order('display_order');
-  return <LabsClient initialScripts={data ?? []} />;
+  const [{ data: scripts }, { data: categories }] = await Promise.all([
+    supabase.from('lab_scripts').select('*').order('display_order'),
+    supabase.from('lab_categories').select('*').order('display_order'),
+  ]);
+  return <LabsClient initialScripts={scripts ?? []} initialCategories={categories ?? []} />;
 }

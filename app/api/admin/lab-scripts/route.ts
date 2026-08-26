@@ -13,10 +13,9 @@ export async function GET() {
   return NextResponse.json({ scripts: data ?? [] });
 }
 
-// POST /api/admin/lab-scripts  { title, description, tool, price? }
-// Creates a new script entry with no file/thumbnail yet -- those are
-// uploaded separately via /api/admin/lab-scripts/[id]/file and
-// /api/admin/lab-scripts/[id]/thumbnail once the row exists.
+// POST /api/admin/lab-scripts  { title, description, category_id, price? }
+// Creates a new script entry with no file/thumbnail/detail image yet
+// -- those are uploaded separately once the row exists.
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 20, windowMs: 60000 });
   if (limited) return limited;
@@ -28,26 +27,32 @@ export async function POST(request: NextRequest) {
 
   const title = String(data.title ?? '').trim();
   const description = String(data.description ?? '').trim();
-  const tool = String(data.tool ?? 'Grasshopper').trim();
+  const categoryId = String(data.category_id ?? '').trim();
   const price = Number(data.price ?? 0);
 
   if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 });
   if (!description) return NextResponse.json({ error: 'Description is required' }, { status: 400 });
+  if (!categoryId) return NextResponse.json({ error: 'Category is required' }, { status: 400 });
   if (!Number.isFinite(price) || price < 0) return NextResponse.json({ error: 'Price must be 0 or a positive number' }, { status: 400 });
 
   const supabase = getSupabaseAdmin();
-  const { count } = await supabase.from('lab_scripts').select('id', { count: 'exact', head: true });
+  const { data: category, error: catErr } = await supabase.from('lab_categories').select('name').eq('id', categoryId).single();
+  if (catErr || !category) return NextResponse.json({ error: 'Category not found' }, { status: 400 });
+
+  const { count } = await supabase.from('lab_scripts').select('id', { count: 'exact', head: true }).eq('category_id', categoryId);
   const nextOrder = (count ?? 0) + 1;
 
+  // tool kept in sync with the chosen category's name -- legacy
+  // display field, category_id is the real source of truth now.
   const { data: row, error } = await supabase.from('lab_scripts').insert({
-    title, description, tool, price, display_order: nextOrder, active: true,
+    title, description, category_id: categoryId, tool: category.name, price, display_order: nextOrder, active: true,
   }).select('*').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   return NextResponse.json({ script: row });
 }
 
-// PATCH /api/admin/lab-scripts  { id, title?, description?, tool?, price?, active? }
+// PATCH /api/admin/lab-scripts  { id, title?, description?, category_id?, price?, active? }
 export async function PATCH(request: NextRequest) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -55,14 +60,19 @@ export async function PATCH(request: NextRequest) {
   const data = await request.json().catch(() => null);
   if (!data?.id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
+  const supabase = getSupabaseAdmin();
   const update: Record<string, unknown> = {};
   if (data.title !== undefined) update.title = String(data.title).trim();
   if (data.description !== undefined) update.description = String(data.description).trim();
-  if (data.tool !== undefined) update.tool = String(data.tool).trim();
+  if (data.category_id !== undefined) {
+    const { data: category, error: catErr } = await supabase.from('lab_categories').select('name').eq('id', data.category_id).single();
+    if (catErr || !category) return NextResponse.json({ error: 'Category not found' }, { status: 400 });
+    update.category_id = data.category_id;
+    update.tool = category.name;
+  }
   if (data.price !== undefined) update.price = Number(data.price);
   if (data.active !== undefined) update.active = !!data.active;
 
-  const supabase = getSupabaseAdmin();
   const { data: row, error } = await supabase.from('lab_scripts').update(update).eq('id', data.id).select('*').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ script: row });

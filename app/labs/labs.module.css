@@ -29,41 +29,6 @@
   background: linear-gradient(to right, rgba(10,8,6,0.97) 0%, rgba(10,8,6,0.9) 42%, rgba(10,8,6,0.5) 65%, rgba(10,8,6,0.15) 85%);
 }
 
-.heroContent {
-  position: relative;
-  z-index: 2;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  width: 100%;
-}
-
-.eyebrow {
-  color: #E63946;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin: 0 0 12px;
-  font-family: var(--mono);
-}
-
-.h1 {
-  color: #fff;
-  font-size: clamp(32px, 5vw, 46px);
-  font-weight: 700;
-  margin: 0 0 14px;
-  max-width: 560px;
-  line-height: 1.15;
-}
-
-.tagline {
-  color: #999;
-  font-size: 15px;
-  line-height: 1.7;
-  margin: 0 0 24px;
-  max-width: 440px;
-}
-
 .statRow {
   display: flex;
   gap: 10px;
@@ -270,13 +235,19 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .card {
   position: relative;
-  height: 240px;
+  aspect-ratio: 2 / 3;
   border-radius: 10px;
   overflow: hidden;
   background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
@@ -296,18 +267,17 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .thumb {
+  transform: scale(1.04);
 }
 
 .thumbPlaceholder {
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-}
-
-.cardFade {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0.1) 75%);
 }
 
 .priceBadge {
@@ -333,33 +303,43 @@
   color: var(--brass);
 }
 
-.cardContent {
+/* Image-only by default -- the gradient and title only appear on
+   hover/focus, sliding up from the bottom, rather than sitting
+   permanently over the thumbnail. */
+.cardHoverFade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 55%, rgba(0,0,0,0) 100%);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.cardHoverContent {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 2;
-  padding: 16px;
+  padding: 14px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.card:hover .cardHoverFade,
+.card:focus-visible .cardHoverFade,
+.card:hover .cardHoverContent,
+.card:focus-visible .cardHoverContent {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .cardTitle {
   color: #fff;
-  font-size: 14px;
-  font-weight: 600;
-  margin: 0 0 5px;
-}
-
-.cardDesc {
-  color: #ccc;
-  font-size: 11px;
-  line-height: 1.5;
-  margin: 0 0 10px;
-}
-
-.cardMeta {
-  color: var(--brass);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   margin: 0;
-  font-family: var(--mono);
+  line-height: 1.4;
 }
