@@ -102,8 +102,15 @@ function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
 // own "Pending Proforma" sheet at the end, still fully visible and
 // tracked, just clearly separated from confirmed revenue so an
 // auditor can't mistake one for the other.
+// Whether an invoice counts as confirmed revenue -- shared with the
+// email summary so the two can never disagree about what's "billed".
+// Proforma quotes never count here, regardless of advance status --
+// the "Convert to Invoice" action is the one true signal that a
+// proforma became real, and that creates a genuine training/
+// consultancy invoice row, which naturally passes this check on its
+// own since it isn't type 'proforma' at all.
 export function isConfirmedRevenue(inv: InvoiceRow): boolean {
-  return inv.invoice_type !== 'proforma' || Number(inv.advance) > 0;
+  return inv.invoice_type !== 'proforma';
 }
 
 export async function buildInvoicesWorkbook(invoices: InvoiceRow[]): Promise<Buffer> {
