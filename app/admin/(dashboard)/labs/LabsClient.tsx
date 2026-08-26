@@ -21,6 +21,8 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
   const [formError, setFormError] = useState('');
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ title: '', description: '' });
   const [newCategoryName, setNewCategoryName] = useState('');
   const [catBusy, setCatBusy] = useState(false);
 
@@ -109,6 +111,32 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     });
     await load();
     setBusyId(null);
+  }
+
+  function startEdit(s: Script) {
+    setEditingId(s.id);
+    setEditForm({ title: s.title, description: s.description });
+  }
+
+  async function saveEdit(id: string) {
+    if (!editForm.title.trim()) { alert('Title cannot be empty.'); return; }
+    if (!editForm.description.trim()) { alert('Description cannot be empty.'); return; }
+    setBusyId(id);
+    try {
+      const res = await fetch('/api/admin/lab-scripts', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, title: editForm.title, description: editForm.description }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error ?? 'Save failed');
+      setEditingId(null);
+      await load();
+    } catch (err) {
+      alert(getErrorMessage(err) || 'Save failed');
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function toggleActive(s: Script) {
@@ -235,22 +263,52 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
           {scripts.map(s => (
             <div key={s.id} className={styles.card}>
               <div className={styles.cardTop}>
-                <div>
-                  <p className={styles.cardName}>{s.title} {!s.active && <span style={{ color:'#666', fontSize:11 }}>(hidden)</span>}</p>
-                  <p className={styles.cardRole}>
-                    <select
-                      value={s.category_id ?? ''}
-                      onChange={e => updateScriptCategory(s.id, e.target.value)}
-                      disabled={busyId === s.id}
-                      style={{ background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:4, padding:'2px 6px', color:'#aaa', fontSize:12, fontFamily:'var(--mono)' }}
-                    >
-                      {!s.category_id && <option value="">Uncategorized</option>}
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
-                    {' · '}{s.price > 0 ? `INR ${s.price}` : 'Free'} · {s.download_count} downloads
-                  </p>
-                  <p className={styles.cardCourse}>{s.description}</p>
+                <div style={{ flex: 1 }}>
+                  {editingId === s.id ? (
+                    <div style={{ marginBottom: 4 }}>
+                      <input
+                        value={editForm.title}
+                        onChange={e => setEditForm(f => ({ ...f, title: e.target.value }))}
+                        style={{ width:'100%', background:'#0a0a0a', border:'1px solid var(--brass)', borderRadius:6, padding:'8px 10px', color:'#fff', fontSize:14, fontWeight:600, marginBottom:8, boxSizing:'border-box' }}
+                      />
+                      <textarea
+                        value={editForm.description}
+                        onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                        style={{ width:'100%', minHeight:60, background:'#0a0a0a', border:'1px solid var(--brass)', borderRadius:6, padding:'8px 10px', color:'#ddd', fontSize:13, marginBottom:8, boxSizing:'border-box' }}
+                      />
+                      <div style={{ display:'flex', gap:8 }}>
+                        <button onClick={() => saveEdit(s.id)} disabled={busyId === s.id} style={{ fontFamily:'var(--mono)', fontSize:11, color:'#fff', background:'var(--brass)', border:'none', borderRadius:6, padding:'6px 14px', cursor:'pointer' }}>
+                          {busyId === s.id ? 'Saving...' : 'Save'}
+                        </button>
+                        <button onClick={() => setEditingId(null)} disabled={busyId === s.id} style={{ fontFamily:'var(--mono)', fontSize:11, color:'#888', background:'transparent', border:'1px solid #2a2a2a', borderRadius:6, padding:'6px 14px', cursor:'pointer' }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className={styles.cardName}>{s.title} {!s.active && <span style={{ color:'#666', fontSize:11 }}>(hidden)</span>}</p>
+                      <p className={styles.cardRole}>
+                        <select
+                          value={s.category_id ?? ''}
+                          onChange={e => updateScriptCategory(s.id, e.target.value)}
+                          disabled={busyId === s.id}
+                          style={{ background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:4, padding:'2px 6px', color:'#aaa', fontSize:12, fontFamily:'var(--mono)' }}
+                        >
+                          {!s.category_id && <option value="">Uncategorized</option>}
+                          {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                        {' · '}{s.price > 0 ? `INR ${s.price}` : 'Free'} · {s.download_count} downloads
+                      </p>
+                      <p className={styles.cardCourse}>{s.description}</p>
+                    </>
+                  )}
                 </div>
+                {editingId !== s.id && (
+                  <button onClick={() => startEdit(s)} style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'6px 14px', cursor:'pointer', height:'fit-content' }}>
+                    Edit
+                  </button>
+                )}
               </div>
               <div style={{ display:'flex', gap:10, flexWrap:'wrap', marginTop:12, alignItems:'center' }}>
                 <label style={{ fontFamily:'var(--mono)', fontSize:11, color: s.file_path ? '#4caf50' : '#E63946', border:'1px solid #2a2a2a', borderRadius:6, padding:'7px 12px', cursor:'pointer' }}>
