@@ -91,7 +91,6 @@ export default function SiteHeader({ active }: { active?: string }) {
           </div>
 
           <Link href="/faculty" className={active === '/faculty' ? 'active' : undefined} onClick={() => setOpen(false)}>Faculty</Link>
-          <Link href="/labs" className={active === '/labs' ? 'active' : undefined} onClick={() => setOpen(false)}>YAFT Labs</Link>
 
           {/* Resources dropdown */}
           <div className="nav-dropdown" ref={resourcesRef}>
@@ -115,6 +114,8 @@ export default function SiteHeader({ active }: { active?: string }) {
               </div>
             )}
           </div>
+
+          <Link href="/labs" className={active === '/labs' ? 'active' : undefined} onClick={() => setOpen(false)}>YAFT Labs</Link>
 
           <a href="#contact" className="cta-btn" onClick={() => setOpen(false)}>Enquire</a>
           <a href={RHINO_DIRECTORY_URL} target="_blank" rel="noopener">
