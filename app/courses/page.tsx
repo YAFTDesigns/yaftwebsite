@@ -8,6 +8,7 @@ import CourseGateButton from '@/components/CourseGateButton';
 import CourseVisualLink from '@/components/CourseVisualLink';
 import { COURSE_DETAIL_PAGES } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
+import ContourCanvas from '@/components/ContourCanvas';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
@@ -215,15 +216,7 @@ export default async function CoursesPage() {
         <section>
           <div className="wrap">
             <div className={styles.labsBanner}>
-              <video
-                className={styles.labsBannerVideo}
-                autoPlay muted loop playsInline
-                poster="/assets/video/labs-hero-poster.jpg"
-              >
-                <source src="/assets/video/labs-hero.webm" type="video/webm" />
-                <source src="/assets/video/labs-hero.mp4" type="video/mp4" />
-              </video>
-              <div className={styles.labsBannerFade} />
+              <ContourCanvas />
               <div className={styles.labsBannerRow}>
                 <div className={styles.labsBannerContent}>
                   <p className={styles.labsBannerLabel}>Not ready to enquire yet?</p>
