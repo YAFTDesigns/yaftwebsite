@@ -215,11 +215,22 @@ export default async function CoursesPage() {
         <section>
           <div className="wrap">
             <div className={styles.labsBanner}>
-              <div>
-                <p className={styles.labsBannerLabel}>Not ready to enquire yet?</p>
-                <p className={styles.labsBannerText}>Grab a few free Grasshopper &amp; Rhino scripts from YAFT Labs first, see how we work before committing to a course.</p>
+              <video
+                className={styles.labsBannerVideo}
+                autoPlay muted loop playsInline
+                poster="/assets/video/labs-hero-poster.jpg"
+              >
+                <source src="/assets/video/labs-hero.webm" type="video/webm" />
+                <source src="/assets/video/labs-hero.mp4" type="video/mp4" />
+              </video>
+              <div className={styles.labsBannerFade} />
+              <div className={styles.labsBannerRow}>
+                <div className={styles.labsBannerContent}>
+                  <p className={styles.labsBannerLabel}>Not ready to enquire yet?</p>
+                  <p className={styles.labsBannerText}>Grab a few free Grasshopper &amp; Rhino scripts from YAFT Labs first, see how we work before committing to a course.</p>
+                </div>
+                <a href="/labs" className={styles.labsBannerLink}>Browse YAFT Labs →</a>
               </div>
-              <a href="/labs" className={styles.labsBannerLink}>Browse YAFT Labs →</a>
             </div>
           </div>
         </section>
