@@ -8,7 +8,6 @@ import CourseGateButton from '@/components/CourseGateButton';
 import CourseVisualLink from '@/components/CourseVisualLink';
 import { COURSE_DETAIL_PAGES } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
-import ContourCanvas from '@/components/ContourCanvas';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
@@ -208,21 +207,6 @@ export default async function CoursesPage() {
                 <span className="num">REQ 03</span>
                 <h3>Payment terms</h3>
                 <p>60% advance to confirm your seat, 40% on commencement. Group batches carry a student discount where noted, ask when you enquire.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <div className="wrap">
-            <div className={styles.labsBanner}>
-              <ContourCanvas />
-              <div className={styles.labsBannerRow}>
-                <div className={styles.labsBannerContent}>
-                  <p className={styles.labsBannerLabel}>Not ready to enquire yet?</p>
-                  <p className={styles.labsBannerText}>Grab a few free Grasshopper &amp; Rhino scripts from YAFT Labs first, see how we work before committing to a course.</p>
-                </div>
-                <a href="/labs" className={styles.labsBannerLink}>Browse YAFT Labs →</a>
               </div>
             </div>
           </div>
