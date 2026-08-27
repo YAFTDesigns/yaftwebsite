@@ -1,0 +1,13 @@
+-- Fixes a real bug Yokes hit: thumbnail_path and detail_image_path
+-- upsert-overwrite the same storage path on every re-upload, so the
+-- public image URL never changes even when the file content does --
+-- browsers cache that URL and keep showing the old image after a
+-- replace or a swap.
+--
+-- updated_at gets set to now() explicitly (not relying on a trigger)
+-- whenever thumbnail_path or detail_image_path change, in the two
+-- upload routes and the swap action. The public page appends it as a
+-- cache-busting query param on the image URLs, so the browser only
+-- re-fetches when the image has genuinely changed, not on every page
+-- load.
+alter table lab_scripts add column if not exists updated_at timestamptz not null default now();

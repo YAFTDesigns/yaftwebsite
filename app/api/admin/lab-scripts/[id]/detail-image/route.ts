@@ -37,7 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (uploadErr) return NextResponse.json({ error: uploadErr.message }, { status: 500 });
 
   const { data: row, error: updateErr } = await supabase
-    .from('lab_scripts').update({ detail_image_path: path }).eq('id', id).select('*').single();
+    .from('lab_scripts').update({ detail_image_path: path, updated_at: new Date().toISOString() }).eq('id', id).select('*').single();
   if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 });
 
   return NextResponse.json({ script: row });

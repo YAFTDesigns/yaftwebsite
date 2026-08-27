@@ -78,6 +78,7 @@ export async function PATCH(request: NextRequest) {
   if (data.active !== undefined) update.active = !!data.active;
   if (data.thumbnail_path !== undefined) update.thumbnail_path = data.thumbnail_path;
   if (data.detail_image_path !== undefined) update.detail_image_path = data.detail_image_path;
+  if (data.thumbnail_path !== undefined || data.detail_image_path !== undefined) update.updated_at = new Date().toISOString();
 
   const { data: row, error } = await supabase.from('lab_scripts').update(update).eq('id', data.id).select('*').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

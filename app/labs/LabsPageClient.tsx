@@ -162,7 +162,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                       {(selected.detail_image_path || selected.thumbnail_path) ? (
                         // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, full-size detail image, not a next/image candidate here
                         <img
-                          src={`${SITE_IMAGE_BASE}${selected.detail_image_path ?? selected.thumbnail_path}`}
+                          src={`${SITE_IMAGE_BASE}${selected.detail_image_path ?? selected.thumbnail_path}?v=${new Date(selected.updated_at).getTime()}`}
                           alt={selected.title}
                           className={styles.detailImage}
                         />
@@ -190,7 +190,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                       <button key={s.id} onClick={() => selectScript(s.id)} className={styles.card}>
                         {s.thumbnail_path ? (
                           // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, card-sized background image, not a next/image candidate here
-                          <img src={`${SITE_IMAGE_BASE}${s.thumbnail_path}`} alt={s.title} className={styles.thumb} />
+                          <img src={`${SITE_IMAGE_BASE}${s.thumbnail_path}?v=${new Date(s.updated_at).getTime()}`} alt={s.title} className={styles.thumb} />
                         ) : (
                           <div className={styles.thumbPlaceholder} />
                         )}
