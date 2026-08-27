@@ -8,6 +8,7 @@ type Category = { id: string; name: string; display_order: number };
 type Script = {
   id: string; title: string; description: string; tool: string; category_id: string | null;
   price: number; file_path: string | null; thumbnail_path: string | null; detail_image_path: string | null;
+  youtube_url: string | null;
   download_count: number; view_count: number; active: boolean; display_order: number;
 };
 
@@ -211,6 +212,17 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     setBusyId(null);
   }
 
+  async function saveYoutubeUrl(id: string, url: string) {
+    setBusyId(id);
+    await fetch('/api/admin/lab-scripts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, youtube_url: url }),
+    });
+    await load();
+    setBusyId(null);
+  }
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>YAFT Labs</h1>
@@ -369,6 +381,17 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
                   {s.active ? 'Hide from site' : 'Show on site'}
                 </button>
                 <button onClick={() => deleteScript(s.id)} disabled={busyId === s.id} className={styles.deleteBtn}>Delete</button>
+              </div>
+              <div style={{ marginTop:10 }}>
+                <span style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777' }}>YouTube video URL (optional -- shown instead of the detail image if set)</span>
+                <input
+                  type="text"
+                  defaultValue={s.youtube_url ?? ''}
+                  placeholder="https://youtube.com/watch?v=..."
+                  onBlur={e => e.target.value.trim() !== (s.youtube_url ?? '') && saveYoutubeUrl(s.id, e.target.value)}
+                  disabled={busyId === s.id}
+                  style={{ display:'block', width:'100%', maxWidth:400, background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'7px 10px', color:'#ddd', fontSize:12, marginTop:4, boxSizing:'border-box' }}
+                />
               </div>
             </div>
           ))}

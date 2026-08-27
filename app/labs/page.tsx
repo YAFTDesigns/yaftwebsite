@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 export type LabScript = {
   id: string; title: string; description: string; category_id: string | null;
   price: number; file_path: string | null; thumbnail_path: string | null; detail_image_path: string | null;
+  youtube_url: string | null;
   download_count: number; view_count: number; updated_at: string;
 };
 
@@ -21,7 +22,7 @@ export default async function LabsPage() {
   const [scriptsRes, categoriesRes] = await Promise.all([
     supabase
       .from('lab_scripts')
-      .select('id, title, description, category_id, price, file_path, thumbnail_path, detail_image_path, download_count, view_count, updated_at')
+      .select('id, title, description, category_id, price, file_path, thumbnail_path, detail_image_path, youtube_url, download_count, view_count, updated_at')
       .eq('active', true)
       .not('file_path', 'is', null)
       .order('display_order'),

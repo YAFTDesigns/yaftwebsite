@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ script: row });
 }
 
-// PATCH /api/admin/lab-scripts  { id, title?, description?, category_id?, price?, active?, thumbnail_path?, detail_image_path? }
+// PATCH /api/admin/lab-scripts  { id, title?, description?, category_id?, price?, active?, thumbnail_path?, detail_image_path?, youtube_url? }
 // thumbnail_path/detail_image_path are settable here specifically so
 // the admin UI can swap them (send each the other's current value) --
 // not exposed as a general-purpose way to set arbitrary storage paths,
@@ -78,7 +78,8 @@ export async function PATCH(request: NextRequest) {
   if (data.active !== undefined) update.active = !!data.active;
   if (data.thumbnail_path !== undefined) update.thumbnail_path = data.thumbnail_path;
   if (data.detail_image_path !== undefined) update.detail_image_path = data.detail_image_path;
-  if (data.thumbnail_path !== undefined || data.detail_image_path !== undefined) update.updated_at = new Date().toISOString();
+  if (data.youtube_url !== undefined) update.youtube_url = String(data.youtube_url).trim() || null;
+  if (data.thumbnail_path !== undefined || data.detail_image_path !== undefined || data.youtube_url !== undefined) update.updated_at = new Date().toISOString();
 
   const { data: row, error } = await supabase.from('lab_scripts').update(update).eq('id', data.id).select('*').single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

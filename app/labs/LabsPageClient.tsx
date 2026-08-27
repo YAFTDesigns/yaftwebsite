@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import type { LabScript, LabCategory } from './page';
+import { getYouTubeVideoId } from '@/lib/youtube';
 import styles from './labs.module.css';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
@@ -159,16 +160,31 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                   <div className={styles.detail}>
                     <button onClick={() => setSelectedId(null)} className={styles.detailBack}>← Back to all scripts</button>
                     <div className={styles.detailImageWrap}>
-                      {(selected.detail_image_path || selected.thumbnail_path) ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, full-size detail image, not a next/image candidate here
-                        <img
-                          src={`${SITE_IMAGE_BASE}${selected.detail_image_path ?? selected.thumbnail_path}?v=${new Date(selected.updated_at).getTime()}`}
-                          alt={selected.title}
-                          className={styles.detailImage}
-                        />
-                      ) : (
-                        <div className={styles.detailImagePlaceholder} />
-                      )}
+                      {(() => {
+                        const youtubeId = getYouTubeVideoId(selected.youtube_url ?? '');
+                        if (youtubeId) {
+                          return (
+                            <iframe
+                              className={styles.detailVideo}
+                              src={`https://www.youtube.com/embed/${youtubeId}`}
+                              title={selected.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          );
+                        }
+                        if (selected.detail_image_path || selected.thumbnail_path) {
+                          return (
+                            // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, full-size detail image, not a next/image candidate here
+                            <img
+                              src={`${SITE_IMAGE_BASE}${selected.detail_image_path ?? selected.thumbnail_path}?v=${new Date(selected.updated_at).getTime()}`}
+                              alt={selected.title}
+                              className={styles.detailImage}
+                            />
+                          );
+                        }
+                        return <div className={styles.detailImagePlaceholder} />;
+                      })()}
                     </div>
                     <div className={styles.detailBody}>
                       <span className={`${styles.priceBadge} ${selected.price > 0 ? styles.priceBadgePaid : styles.priceBadgeFree}`}>
