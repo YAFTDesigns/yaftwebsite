@@ -127,6 +127,18 @@ export default async function CoursesPage() {
           </div>
         </section>
 
+        <section>
+          <div className="wrap">
+            <div className={styles.labsBanner}>
+              <div>
+                <p className={styles.labsBannerLabel}>Not ready to enquire yet?</p>
+                <p className={styles.labsBannerText}>Grab a few free Grasshopper &amp; Rhino scripts from YAFT Labs first, see how we work before committing to a course.</p>
+              </div>
+              <a href="/labs" className={styles.labsBannerLink}>Browse YAFT Labs →</a>
+            </div>
+          </div>
+        </section>
+
         <section id="courses">
           <div className="wrap">
             <div className="section-head">

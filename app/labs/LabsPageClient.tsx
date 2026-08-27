@@ -225,6 +225,18 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
             </div>
           )}
         </section>
+
+        <section className={styles.coursesCta}>
+          <div className="wrap">
+            <div className={styles.coursesCtaInner}>
+              <div>
+                <p className={styles.coursesCtaLabel}>Want to go deeper?</p>
+                <p className={styles.coursesCtaText}>These are quick, standalone scripts. If you want to actually learn the workflow behind them, structured and instructor-led, check out our courses.</p>
+              </div>
+              <a href="/courses" className={styles.coursesCtaLink}>Browse courses →</a>
+            </div>
+          </div>
+        </section>
       </main>
 
       <SiteFooter />
