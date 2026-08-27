@@ -14,22 +14,30 @@ const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/obj
 // Fixed, not random-on-every-render, so the layout doesn't jump around
 // on re-renders (e.g. when a search filter changes state elsewhere on
 // the page).
-const PLUS_MARKS = [
-  { x: 4, y: 15, size: 14, delay: 0 },
-  { x: 14, y: 32, size: 10, delay: 2.4 },
-  { x: 22, y: 12, size: 8, delay: 4.8 },
-  { x: 8, y: 48, size: 16, delay: 1.2 },
-  { x: 27, y: 55, size: 10, delay: 3.6 },
-  { x: 18, y: 70, size: 12, delay: 5.4 },
-  { x: 40, y: 20, size: 8, delay: 0.6 },
-  { x: 48, y: 42, size: 10, delay: 2.9 },
-  { x: 44, y: 65, size: 8, delay: 4.2 },
-  { x: 60, y: 15, size: 10, delay: 1.8 },
-  { x: 65, y: 58, size: 8, delay: 3.3 },
-  { x: 34, y: 78, size: 12, delay: 5.9 },
-  { x: 3, y: 78, size: 10, delay: 0.9 },
-  { x: 55, y: 78, size: 8, delay: 4.5 },
-];
+// A real evenly-spaced grid rather than hand-picked scattered points --
+// generated so "equally spaced" is guaranteed by construction, and the
+// density is just two numbers to tune. Percentages are centered within
+// each cell (e.g. 10 columns -> cell centers at 5%, 15%, 25%...95% of
+// the grid's own span), so the grid has even margins on both edges
+// instead of points sitting flush against the boundary.
+//
+// Horizontal span capped at 72% of the hero width, not the full 100% --
+// past that point the fade gradient has mostly faded out and the video
+// is clearly visible, where plus-marks would sit awkwardly on top of
+// the actual geometry image instead of reading as background texture.
+const PLUS_GRID_COLS = 10;
+const PLUS_GRID_ROWS = 6;
+const PLUS_GRID_MAX_X = 72;
+const PLUS_MARKS = Array.from({ length: PLUS_GRID_COLS * PLUS_GRID_ROWS }, (_, i) => {
+  const col = i % PLUS_GRID_COLS;
+  const row = Math.floor(i / PLUS_GRID_COLS);
+  return {
+    x: ((col + 0.5) / PLUS_GRID_COLS) * PLUS_GRID_MAX_X,
+    y: ((row + 0.5) / PLUS_GRID_ROWS) * 100,
+    size: 9,
+    delay: (i % 12) * 0.6,
+  };
+});
 
 function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 0 });
