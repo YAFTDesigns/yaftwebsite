@@ -24,6 +24,7 @@ export default async function LabsPage() {
       .from('lab_scripts')
       .select('id, title, description, category_id, price, file_path, thumbnail_path, detail_image_path, youtube_url, download_count, view_count, updated_at')
       .eq('active', true)
+      .is('deleted_at', null)
       .not('file_path', 'is', null)
       .order('display_order'),
     supabase.from('lab_categories').select('id, name, display_order').order('display_order'),

@@ -10,6 +10,7 @@ type Script = {
   price: number; file_path: string | null; thumbnail_path: string | null; detail_image_path: string | null;
   youtube_url: string | null;
   download_count: number; view_count: number; active: boolean; display_order: number;
+  deleted_at: string | null;
 };
 
 const EMPTY_FORM = { title: '', description: '', category_id: '', price: '0' };
@@ -36,6 +37,31 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     const cJson = await cRes.json();
     setScripts(sJson.scripts ?? []);
     setCategories(cJson.categories ?? []);
+  }
+
+  const [viewingTrash, setViewingTrash] = useState(false);
+  const [trashedScripts, setTrashedScripts] = useState<Script[]>([]);
+
+  async function loadTrash() {
+    const res = await fetch('/api/admin/lab-scripts?trash=true');
+    const json = await res.json();
+    setTrashedScripts(json.scripts ?? []);
+  }
+
+  async function toggleTrashView() {
+    if (!viewingTrash) await loadTrash();
+    setViewingTrash(v => !v);
+  }
+
+  async function restoreScript(id: string) {
+    setBusyId(id);
+    await fetch('/api/admin/lab-scripts', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    await Promise.all([load(), loadTrash()]);
+    setBusyId(null);
   }
 
   async function addCategory() {
@@ -174,7 +200,7 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
   }
 
   async function deleteScript(id: string) {
-    if (!confirm('Delete this script? This removes the listing (the uploaded files stay in storage).')) return;
+    if (!confirm('Move this script to Trash? It will disappear from the public site, but you can restore it from the Trash view.')) return;
     setBusyId(id);
     await fetch('/api/admin/lab-scripts', {
       method: 'DELETE',
@@ -305,7 +331,37 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
         {formError && <p style={{ color:'#e55', fontSize:12, fontFamily:'var(--mono)', marginTop:10 }}>{formError}</p>}
       </div>
 
-      {scripts.length === 0 ? (
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
+        <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'var(--brass)', textTransform:'uppercase', letterSpacing:'.05em' }}>
+          {viewingTrash ? 'Trash' : 'Scripts'}
+        </p>
+        <button onClick={toggleTrashView} style={{ fontFamily:'var(--mono)', fontSize:11, color:'#aaa', background:'transparent', border:'1px solid #2a2a2a', borderRadius:6, padding:'6px 14px', cursor:'pointer' }}>
+          {viewingTrash ? '← Back to scripts' : `View Trash${trashedScripts.length > 0 ? ` (${trashedScripts.length})` : ''}`}
+        </button>
+      </div>
+
+      {viewingTrash ? (
+        trashedScripts.length === 0 ? (
+          <p className={styles.empty}>Trash is empty.</p>
+        ) : (
+          <div className={styles.list}>
+            {trashedScripts.map(s => (
+              <div key={s.id} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <div>
+                    <p className={styles.cardName}>{s.title}</p>
+                    <p className={styles.cardRole}>{categories.find(c => c.id === s.category_id)?.name ?? 'Uncategorized'} · Deleted {s.deleted_at ? new Date(s.deleted_at).toLocaleDateString('en-IN') : ''}</p>
+                    <p className={styles.cardCourse}>{s.description}</p>
+                  </div>
+                </div>
+                <button onClick={() => restoreScript(s.id)} disabled={busyId === s.id} style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'7px 14px', cursor:'pointer', marginTop:10 }}>
+                  {busyId === s.id ? 'Restoring...' : '↺ Restore'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )
+      ) : scripts.length === 0 ? (
         <p className={styles.empty}>No scripts yet -- add one above.</p>
       ) : (
         <div className={styles.list}>

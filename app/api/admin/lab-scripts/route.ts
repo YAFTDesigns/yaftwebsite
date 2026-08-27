@@ -3,12 +3,16 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  const trash = new URL(request.url).searchParams.get('trash') === 'true';
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase.from('lab_scripts').select('*').order('display_order');
+  const query = supabase.from('lab_scripts').select('*').order('display_order');
+  const { data, error } = trash
+    ? await query.not('deleted_at', 'is', null)
+    : await query.is('deleted_at', null);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ scripts: data ?? [] });
 }
@@ -87,6 +91,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 // DELETE /api/admin/lab-scripts  { id }
+// Soft delete -- sets deleted_at rather than removing the row, so it
+// stays recoverable via the Trash view (action: 'restore' below).
 export async function DELETE(request: NextRequest) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -95,7 +101,25 @@ export async function DELETE(request: NextRequest) {
   if (!data?.id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from('lab_scripts').delete().eq('id', data.id);
+  const { error } = await supabase.from('lab_scripts').update({ deleted_at: new Date().toISOString() }).eq('id', data.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
+
+// PUT /api/admin/lab-scripts  { id }
+// Restores a soft-deleted script -- clears deleted_at. Separate verb
+// from PATCH since PATCH already handles a wide set of partial field
+// updates; keeping restore as its own explicit action avoids it being
+// triggered by accident through a generic partial-update call.
+export async function PUT(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const data = await request.json().catch(() => null);
+  if (!data?.id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from('lab_scripts').update({ deleted_at: null }).eq('id', data.id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
