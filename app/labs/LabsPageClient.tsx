@@ -34,6 +34,17 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
 
   const selected = scripts.find(s => s.id === selectedId) ?? null;
 
+  // Records a view the moment a script's detail is opened (either
+  // click path), separate from download_count. Fire-and-forget from
+  // the browser's perspective is fine here -- unlike a server-side
+  // route continuing work after its own response, this is a normal
+  // client fetch the browser tab keeps running regardless of whether
+  // the calling code awaits it.
+  function selectScript(id: string) {
+    setSelectedId(id);
+    fetch(`/api/labs/${id}/view`, { method: 'POST' }).catch(() => {});
+  }
+
   return (
     <>
       <SiteHeader active="/labs" />
@@ -83,7 +94,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                       {items.map((s, itemIdx) => (
                         <button
                           key={s.id}
-                          onClick={() => setSelectedId(s.id)}
+                          onClick={() => selectScript(s.id)}
                           className={`${styles.sidebarItem} ${selectedId === s.id ? styles.sidebarItemActive : ''}`}
                         >
                           {catIdx + 1}.{itemIdx + 1}. {s.title}
@@ -115,7 +126,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                         {selected.price > 0 ? `INR ${fmt(selected.price)}` : 'Free'}
                       </span>
                       <h2 className={styles.detailTitle}>{selected.title}</h2>
-                      <p className={styles.detailMeta}>{categories.find(c => c.id === selected.category_id)?.name ?? 'Uncategorized'} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
+                      <p className={styles.detailMeta}>{categories.find(c => c.id === selected.category_id)?.name ?? 'Uncategorized'} · {selected.view_count} view{selected.view_count === 1 ? '' : 's'} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
                       <p className={styles.detailDesc}>{selected.description}</p>
                       <a href={`/api/labs/${selected.id}/download`} className={styles.downloadBtn}>
                         Download {selected.price > 0 ? `(INR ${fmt(selected.price)})` : ''} →
@@ -127,7 +138,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                 ) : (
                   <div className={styles.grid}>
                     {filtered.map(s => (
-                      <button key={s.id} onClick={() => setSelectedId(s.id)} className={styles.card}>
+                      <button key={s.id} onClick={() => selectScript(s.id)} className={styles.card}>
                         {s.thumbnail_path ? (
                           // eslint-disable-next-line @next/next/no-img-element -- Supabase Storage URL, card-sized background image, not a next/image candidate here
                           <img src={`${SITE_IMAGE_BASE}${s.thumbnail_path}`} alt={s.title} className={styles.thumb} />

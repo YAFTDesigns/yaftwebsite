@@ -8,7 +8,7 @@ type Category = { id: string; name: string; display_order: number };
 type Script = {
   id: string; title: string; description: string; tool: string; category_id: string | null;
   price: number; file_path: string | null; thumbnail_path: string | null; detail_image_path: string | null;
-  download_count: number; active: boolean; display_order: number;
+  download_count: number; view_count: number; active: boolean; display_order: number;
 };
 
 const EMPTY_FORM = { title: '', description: '', category_id: '', price: '0' };
@@ -335,7 +335,7 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
                           {!s.category_id && <option value="">Uncategorized</option>}
                           {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
-                        {' · '}{s.price > 0 ? `INR ${s.price}` : 'Free'} · {s.download_count} downloads
+                        {' · '}{s.price > 0 ? `INR ${s.price}` : 'Free'} · {s.view_count} views · {s.download_count} downloads
                       </p>
                       <p className={styles.cardCourse}>{s.description}</p>
                     </>
