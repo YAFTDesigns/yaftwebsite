@@ -112,7 +112,6 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
           </div>
 
           <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
-            <div className="eyebrow">YAFT LABS</div>
             <h1>YAFT Labs</h1>
             <p className="lede">Small Grasshopper and Rhino scripts, straight from our reels and live projects. Free to grab, ready to build on.</p>
             <div className={styles.statRow}>
