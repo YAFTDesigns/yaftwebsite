@@ -138,7 +138,7 @@ const FAQ_ITEMS = [
   { q: 'Who are the courses for?', a: 'Architecture and design students, working professionals, and studio or contractor teams who need computational design skills.' },
   { q: 'Can YAFT run a workshop at our institution?', a: "Yes, we've delivered workshops at IIT Kharagpur and NIT Tiruchirappalli, and hold ongoing visiting faculty roles at VIT Vellore, CAT Trivandrum and ASADI. Reach out with your dates and group size." },
   { q: 'Do you train students outside India?', a: 'Yes. We offer live online training to students and professionals across Australia, Singapore, Indonesia, Philippines, Japan, Hong Kong, Malaysia and beyond. Time zones are accommodated on request.' },
-  { q: 'Can studios in Australia, Singapore or the Middle East hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across Asia Pacific and Middle East and the Middle East including UAE, Saudi Arabia, Qatar and Oman.' },
+  { q: 'Can studios in Australia, Singapore or the Middle East hire YAFT for consulting?', a: 'Yes. We provide computational design consulting, facade scripting, and BIM automation remotely for studios and contractors across Asia Pacific and the Middle East, including UAE, Saudi Arabia, Qatar and Oman.' },
 ];
 
 const FAQ_JSON_LD = {
