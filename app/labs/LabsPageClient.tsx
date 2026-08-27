@@ -8,6 +8,29 @@ import styles from './labs.module.css';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
 
+// Scattered positions for the hero's decorative plus-marks -- spread
+// mostly across the left/background area, avoiding the exact center
+// where the heading sits so they don't visually clash with the text.
+// Fixed, not random-on-every-render, so the layout doesn't jump around
+// on re-renders (e.g. when a search filter changes state elsewhere on
+// the page).
+const PLUS_MARKS = [
+  { x: 4, y: 15, size: 14, delay: 0 },
+  { x: 14, y: 32, size: 10, delay: 2.4 },
+  { x: 22, y: 12, size: 8, delay: 4.8 },
+  { x: 8, y: 48, size: 16, delay: 1.2 },
+  { x: 27, y: 55, size: 10, delay: 3.6 },
+  { x: 18, y: 70, size: 12, delay: 5.4 },
+  { x: 40, y: 20, size: 8, delay: 0.6 },
+  { x: 48, y: 42, size: 10, delay: 2.9 },
+  { x: 44, y: 65, size: 8, delay: 4.2 },
+  { x: 60, y: 15, size: 10, delay: 1.8 },
+  { x: 65, y: 58, size: 8, delay: 3.3 },
+  { x: 34, y: 78, size: 12, delay: 5.9 },
+  { x: 3, y: 78, size: 10, delay: 0.9 },
+  { x: 55, y: 78, size: 8, delay: 4.5 },
+];
+
 function fmt(n: number) {
   return n.toLocaleString('en-IN', { minimumFractionDigits: 0 });
 }
@@ -60,6 +83,25 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
             <source src="/assets/video/labs-hero.mp4" type="video/mp4" />
           </video>
           <div className={styles.bgFade} />
+
+          {/* Scattered plus-marks -- a light decorative texture so the
+              background empty space doesn't feel dead. Most sit still;
+              every 4th one gets a slow, staggered spin-burst (mostly
+              still, briefly rotates, repeats) rather than spinning
+              constantly, which would compete with the text for
+              attention instead of just adding ambient life. */}
+          <div className={styles.plusField} aria-hidden="true">
+            {PLUS_MARKS.map((p, i) => (
+              <svg
+                key={i}
+                className={i % 4 === 0 ? styles.plusSpin : styles.plusStill}
+                style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, animationDelay: `${p.delay}s` }}
+                viewBox="0 0 24 24"
+              >
+                <path d="M11 2h2v9h9v2h-9v9h-2v-9H2v-2h9V2z" fill="currentColor" />
+              </svg>
+            ))}
+          </div>
 
           <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
             <div className="eyebrow">YAFT LABS</div>

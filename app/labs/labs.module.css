@@ -29,6 +29,29 @@
   background: linear-gradient(to right, rgba(10,10,10,0.97) 0%, rgba(10,10,10,0.9) 42%, rgba(10,10,10,0.5) 65%, rgba(10,10,10,0.15) 85%);
 }
 
+.plusField {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.plusStill,
+.plusSpin {
+  position: absolute;
+  color: #3a3a3a;
+}
+
+@keyframes plusSpinBurst {
+  0%, 82% { transform: rotate(0deg); }
+  92% { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.plusSpin {
+  animation: plusSpinBurst 7s ease-in-out infinite;
+}
+
 .statRow {
   display: flex;
   gap: 10px;
