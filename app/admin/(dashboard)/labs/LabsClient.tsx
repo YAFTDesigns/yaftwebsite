@@ -68,6 +68,28 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     setCatBusy(false);
   }
 
+  // Swaps this category's display_order with its neighbor -- two PATCH
+  // calls to the existing endpoint, no new backend action needed since
+  // display_order was already settable.
+  async function moveCategory(index: number, direction: -1 | 1) {
+    const target = categories[index + direction];
+    const current = categories[index];
+    if (!target) return;
+    setCatBusy(true);
+    await Promise.all([
+      fetch('/api/admin/lab-categories', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: current.id, display_order: target.display_order }),
+      }),
+      fetch('/api/admin/lab-categories', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: target.id, display_order: current.display_order }),
+      }),
+    ]);
+    await load();
+    setCatBusy(false);
+  }
+
   async function deleteCategory(id: string) {
     if (!confirm('Delete this category? Scripts in it will become uncategorized, not deleted.')) return;
     setCatBusy(true);
@@ -178,6 +200,17 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     }
   }
 
+  async function swapImages(s: Script) {
+    setBusyId(s.id);
+    await fetch('/api/admin/lab-scripts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: s.id, thumbnail_path: s.detail_image_path, detail_image_path: s.thumbnail_path }),
+    });
+    await load();
+    setBusyId(null);
+  }
+
   return (
     <div className={styles.page}>
       <h1 className={styles.title}>YAFT Labs</h1>
@@ -190,6 +223,10 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
         {categories.map((c, i) => (
           <div key={c.id} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
             <span style={{ fontFamily:'var(--mono)', fontSize:12, color:'#666', width:20 }}>{i + 1}.</span>
+            <div style={{ display:'flex', flexDirection:'column', gap:1 }}>
+              <button onClick={() => moveCategory(i, -1)} disabled={catBusy || i === 0} title="Move up" style={{ fontFamily:'var(--mono)', fontSize:10, color: i === 0 ? '#333' : '#888', background:'transparent', border:'1px solid #2a2a2a', borderRadius:4, padding:'1px 6px', cursor: i === 0 ? 'default' : 'pointer', lineHeight:1.4 }}>▲</button>
+              <button onClick={() => moveCategory(i, 1)} disabled={catBusy || i === categories.length - 1} title="Move down" style={{ fontFamily:'var(--mono)', fontSize:10, color: i === categories.length - 1 ? '#333' : '#888', background:'transparent', border:'1px solid #2a2a2a', borderRadius:4, padding:'1px 6px', cursor: i === categories.length - 1 ? 'default' : 'pointer', lineHeight:1.4 }}>▼</button>
+            </div>
             <input
               defaultValue={c.name}
               onBlur={e => e.target.value.trim() && e.target.value !== c.name && renameCategory(c.id, e.target.value)}
@@ -323,6 +360,11 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
                   {uploadingId === s.id ? 'Uploading...' : s.detail_image_path ? '✓ Detail image (replace)' : 'Upload detail image (optional)'}
                   <input type="file" accept="image/*" hidden onChange={e => e.target.files?.[0] && uploadTo(`/api/admin/lab-scripts/${s.id}/detail-image`, s.id, e.target.files[0])} />
                 </label>
+                {(s.thumbnail_path || s.detail_image_path) && (
+                  <button onClick={() => swapImages(s)} disabled={busyId === s.id} title="Swap which image is the grid thumbnail vs. the detail image" style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'7px 12px', cursor:'pointer' }}>
+                    ⇄ Swap thumbnail/detail
+                  </button>
+                )}
                 <button onClick={() => toggleActive(s)} disabled={busyId === s.id} style={{ fontFamily:'var(--mono)', fontSize:11, color:'#aaa', background:'transparent', border:'1px solid #2a2a2a', borderRadius:6, padding:'7px 12px', cursor:'pointer' }}>
                   {s.active ? 'Hide from site' : 'Show on site'}
                 </button>
