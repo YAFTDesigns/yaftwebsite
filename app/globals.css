@@ -80,7 +80,7 @@ nav{
 .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
 .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
 .cta-btn{
-  font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+  font-family:var(--mono);font-size:13px;letter-spacing:.03em;line-height:1;
   background:var(--brass-dark);color:var(--ink);
   padding:10px 18px;border:1px solid var(--ink);
   transition:background .2s,color .2s;
