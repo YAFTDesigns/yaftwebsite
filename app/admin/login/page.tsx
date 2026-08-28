@@ -51,13 +51,13 @@ function AdminLoginForm() {
           <p className={styles.lede}>Sign in with your admin email and password.</p>
 
           <div className="field">
-            <label>Email</label>
-            <input type="email" name="email" placeholder="you@yaftdesigns.com" required />
+            <label htmlFor="loginEmail">Email</label>
+            <input type="email" name="email" id="loginEmail" placeholder="you@yaftdesigns.com" required />
           </div>
 
           <div className="field">
-            <label>Password</label>
-            <input type="password" name="password" required />
+            <label htmlFor="loginPassword">Password</label>
+            <input type="password" name="password" id="loginPassword" required />
           </div>
 
           {redirectError && <p className={styles.error}>{redirectError}</p>}
@@ -80,9 +80,10 @@ function AdminLoginForm() {
         <p className={styles.lede}>Enter your admin email — we&apos;ll send a magic link to sign in, no password needed.</p>
 
         <div className="field">
-          <label>Email</label>
+          <label htmlFor="magicLinkEmail">Email</label>
           <input
             type="email"
+            id="magicLinkEmail"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@yaftdesigns.com"

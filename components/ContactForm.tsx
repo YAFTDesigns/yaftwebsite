@@ -45,17 +45,17 @@ export default function ContactForm({ options }: ContactFormProps) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="field">
-        <label>Name</label>
-        <input type="text" name="name" placeholder="Your name" required />
+        <label htmlFor="contactName">Name</label>
+        <input type="text" name="name" id="contactName" placeholder="Your name" required />
       </div>
 
       <div className="field">
-        <label>Email</label>
-        <input type="email" name="email" placeholder="you@studio.com" required />
+        <label htmlFor="contactEmail">Email</label>
+        <input type="email" name="email" id="contactEmail" placeholder="you@studio.com" required />
       </div>
 
       <div className="field">
-        <label>Interested in</label>
+        <label htmlFor="interestSelect">Interested in</label>
         <select name="interest" id="interestSelect" defaultValue={options[0]}>
           {options.map((opt) => (
             <option key={opt} value={opt}>{opt}</option>
@@ -64,8 +64,8 @@ export default function ContactForm({ options }: ContactFormProps) {
       </div>
 
       <div className="field">
-        <label>Message</label>
-        <textarea name="message" rows={3} placeholder="Tell us about your goals or project" required></textarea>
+        <label htmlFor="contactMessage">Message</label>
+        <textarea name="message" id="contactMessage" rows={3} placeholder="Tell us about your goals or project" required></textarea>
       </div>
 
       {status === 'error' && (
