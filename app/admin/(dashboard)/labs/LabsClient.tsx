@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
+import BarChart from '@/components/admin/BarChart';
 import { getErrorMessage } from '@/lib/errorMessage';
 
 type Category = { id: string; name: string; display_order: number };
@@ -40,6 +41,7 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
   }
 
   const [viewingTrash, setViewingTrash] = useState(false);
+  const [statsExpanded, setStatsExpanded] = useState(false);
   const [trashedScripts, setTrashedScripts] = useState<Script[]>([]);
 
   async function loadTrash() {
@@ -253,6 +255,49 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
     <div className={styles.page}>
       <h1 className={styles.title}>YAFT Labs</h1>
       <p className={styles.sub}>Free (and future paid) Grasshopper/Rhino scripts for the public /labs page.</p>
+
+      {/* Views/downloads dashboard -- totals always visible, per-script
+          breakdown behind an expand toggle so the page isn't dominated
+          by two long bar charts when there are only a couple scripts. */}
+      <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: statsExpanded ? 20 : 0 }}>
+          <div style={{ display:'flex', gap:32 }}>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Total views</p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'#fff', fontWeight:700 }}>{scripts.reduce((sum, s) => sum + s.view_count, 0)}</p>
+            </div>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Total downloads</p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'#fff', fontWeight:700 }}>{scripts.reduce((sum, s) => sum + s.download_count, 0)}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setStatsExpanded(v => !v)}
+            style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'7px 14px', cursor:'pointer' }}
+          >
+            {statsExpanded ? '▲ Collapse' : '▼ View by script'}
+          </button>
+        </div>
+
+        {statsExpanded && scripts.length > 0 && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:28 }}>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:12 }}>Views by script</p>
+              <BarChart
+                items={[...scripts].sort((a, b) => b.view_count - a.view_count).map(s => ({ label: s.title, value: s.view_count }))}
+                color="var(--blueprint)"
+              />
+            </div>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:12 }}>Downloads by script</p>
+              <BarChart
+                items={[...scripts].sort((a, b) => b.download_count - a.download_count).map(s => ({ label: s.title, value: s.download_count }))}
+                color="var(--brass)"
+              />
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Categories */}
       <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
