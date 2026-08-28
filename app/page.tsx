@@ -258,15 +258,15 @@ export default async function HomePage() {
           <div className="wrap">
             <div className="notes-grid">
               <div className="note-card">
-                <h3>McNeel-recognized</h3>
+                <h2>McNeel-recognized</h2>
                 <p>YAFT Designs is an Authorized Rhino Training Center (ARTC), recognized directly by McNeel &amp; Associates, the makers of Rhino.</p>
               </div>
               <div className="note-card">
-                <h3>Academic ties</h3>
+                <h2>Academic ties</h2>
                 <p>Visiting faculty at VIT Vellore, with workshops delivered at IIT Kharagpur.</p>
               </div>
               <div className="note-card">
-                <h3>Fabrication-grade skills</h3>
+                <h2>Fabrication-grade skills</h2>
                 <p>Curriculum draws from live facade panel rationalization, unrolling, and documentation work running across five countries.</p>
               </div>
             </div>

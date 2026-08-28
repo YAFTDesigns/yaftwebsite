@@ -19,7 +19,7 @@
 
 .trackGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;margin-top:40px;}
 .trackCard{border-top:1px solid var(--line);padding-top:18px;}
-.trackCard .place{font-family:var(--mono);font-size:11px;color:var(--brass);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;}
+.trackCard .place{font-family:var(--mono);font-size:11px;color:var(--brass-dark);letter-spacing:.05em;text-transform:uppercase;display:block;margin-bottom:8px;}
 .trackCard h3{color:var(--ink);font-size:18px;margin-bottom:8px;}
 .trackCard p{color:var(--ink-soft);font-size:14.5px;}
 .trackCardLink{display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:.05em;color:var(--brass);text-decoration:none;}

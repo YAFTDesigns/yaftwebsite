@@ -81,13 +81,13 @@ nav{
 .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
 .cta-btn{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;line-height:1;
-  background:var(--brass-dark);color:var(--ink);
+  background:var(--brass-dark);color:var(--paper);
   padding:10px 18px;border:1px solid var(--ink);
   transition:background .2s,color .2s;
   white-space:nowrap;
   display:inline-flex;align-items:center;justify-content:center;text-align:center;
 }
-.cta-btn:hover{background:var(--brass);border-color:var(--brass);color:#fff;}
+.cta-btn:hover{background:var(--brass);border-color:var(--brass);color:var(--paper);}
 .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
 .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
 .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
@@ -191,7 +191,7 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 /* ===== BUTTONS ===== */
 .btn-primary{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;
-  background:var(--brass);color:#fff;padding:13px 24px;
+  background:var(--brass);color:var(--paper);padding:13px 24px;
   border:1px solid var(--brass);
   transition:background .2s;
 }
@@ -232,7 +232,7 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 .notes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
 .note-card{padding-top:18px;}
 .note-card .num{font-family:var(--mono);font-size:12px;color:var(--brass);display:block;margin-bottom:10px;}
-.note-card h3{font-size:19px;margin-bottom:8px;}
+.note-card h2{font-size:19px;margin-bottom:8px;}
 .note-card p{color:var(--ink-soft);font-size:15px;}
 .req-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
 .req-card{border-top:2px solid var(--line);padding-top:18px;}
@@ -283,7 +283,7 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 /* ===== FOOTER ===== */
 footer{padding:48px 0 32px;}
 .foot-bottom{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:20px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);}
-.foot-bottom .fcol h4{font-family:var(--mono);font-size:11px;color:var(--ink);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
+.foot-bottom .fcol h3{font-family:var(--mono);font-size:11px;color:var(--ink);text-transform:uppercase;margin-bottom:8px;letter-spacing:.05em;}
 .foot-bottom .fcol p{line-height:1.7;}
 
 /* ===== SYLLABUS GATE MODAL ===== */
