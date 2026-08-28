@@ -42,6 +42,12 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
 
   const [viewingTrash, setViewingTrash] = useState(false);
   const [statsExpanded, setStatsExpanded] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredScripts = scripts.filter(s => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return s.title.toLowerCase().includes(q) || s.description.toLowerCase().includes(q);
+  });
   const [trashedScripts, setTrashedScripts] = useState<Script[]>([]);
 
   async function loadTrash() {
@@ -385,6 +391,16 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
         </button>
       </div>
 
+      {!viewingTrash && (
+        <input
+          type="text"
+          placeholder="Search scripts by title or description..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          style={{ width:'100%', background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'9px 12px', color:'#ddd', fontSize:13, marginBottom:16, boxSizing:'border-box' }}
+        />
+      )}
+
       {viewingTrash ? (
         trashedScripts.length === 0 ? (
           <p className={styles.empty}>Trash is empty.</p>
@@ -406,11 +422,11 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
             ))}
           </div>
         )
-      ) : scripts.length === 0 ? (
-        <p className={styles.empty}>No scripts yet -- add one above.</p>
+      ) : filteredScripts.length === 0 ? (
+        <p className={styles.empty}>{scripts.length === 0 ? 'No scripts yet -- add one above.' : 'No scripts match that search.'}</p>
       ) : (
         <div className={styles.list}>
-          {scripts.map(s => (
+          {filteredScripts.map(s => (
             <div key={s.id} className={styles.card}>
               <div className={styles.cardTop}>
                 <div style={{ flex: 1 }}>

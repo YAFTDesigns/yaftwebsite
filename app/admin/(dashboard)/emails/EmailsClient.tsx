@@ -81,6 +81,12 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
   const hasInitialData = initialLogs !== undefined;
   const [tab, setTab]           = useState<'logs' | 'templates'>('logs');
   const [logs, setLogs]         = useState<Log[]>(initialLogs ?? []);
+  const [searchQuery, setSearchQuery] = useState('');
+  const filteredLogs = logs.filter(l => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return l.to_email.toLowerCase().includes(q) || l.to_name.toLowerCase().includes(q) || l.subject.toLowerCase().includes(q);
+  });
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading]   = useState(!hasInitialData);
   const [loadError, setLoadError] = useState('');
@@ -194,12 +200,24 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
 
       {/* EMAIL LOGS */}
       {!loading && tab === 'logs' && (
-        logs.length === 0
+        <>
+          {logs.length > 0 && (
+            <input
+              type="text"
+              placeholder="Search by recipient or subject..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              style={{ width:'100%', background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'9px 12px', color:'#ddd', fontSize:13, marginBottom:16, boxSizing:'border-box' }}
+            />
+          )}
+        {logs.length === 0
           ? <p className={styles.empty}>No emails sent yet.</p>
+          : filteredLogs.length === 0
+          ? <p className={styles.empty}>No emails match that search.</p>
           : (() => {
               const today = new Date().toDateString();
-              const todayLogs = logs.filter(l => new Date(l.created_at).toDateString() === today);
-              const prevLogs  = logs.filter(l => new Date(l.created_at).toDateString() !== today);
+              const todayLogs = filteredLogs.filter(l => new Date(l.created_at).toDateString() === today);
+              const prevLogs  = filteredLogs.filter(l => new Date(l.created_at).toDateString() !== today);
               return (
                 <div>
                   {todayLogs.length > 0 && (
@@ -221,6 +239,8 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
                 </div>
               );
             })()
+        }
+        </>
       )}
 
       {/* TEMPLATE EDITOR */}
