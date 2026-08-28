@@ -380,7 +380,7 @@ export default async function HomePage() {
                   <div className={styles.portraitBackdrop}></div>
                   <PortraitLabelReveal>LEAD<br />MENTOR</PortraitLabelReveal>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/images/profile-cutout.png" alt="Yokes Marapa" className={styles.portraitCutout} loading="lazy" decoding="async" />
+                  <img src="/assets/images/profile-cutout.png" alt="Yokes Marapa" className={styles.portraitCutout} width={700} height={871} loading="lazy" decoding="async" />
                 </div>
               </div>
             </div>
@@ -394,7 +394,7 @@ export default async function HomePage() {
                     {[...partners, ...partners].map((p, i) => (
                       <div className={styles.marqueeItem} key={`${p.id}-${i}`}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {p.logo_url && <img src={p.logo_url} alt={p.name} loading="lazy" decoding="async" />}
+                        {p.logo_url && <img src={p.logo_url} alt={p.name} width={100} height={48} loading="lazy" decoding="async" />}
                       </div>
                     ))}
                   </div>
