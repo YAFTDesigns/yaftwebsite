@@ -5,7 +5,7 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import FaqAccordion from '@/components/FaqAccordion';
-import Hero3D from '@/components/Hero3D';
+import Hero3DLoader from '@/components/Hero3DLoader';
 import CarouselDrag from '@/components/CarouselDrag';
 import ServicesCarousel from '@/components/ServicesCarousel';
 import CarouselProgress from '@/components/CarouselProgress';
@@ -239,7 +239,7 @@ export default async function HomePage() {
           className="hero"
           style={{ position: 'relative', overflow: 'hidden', borderBottom: '1px solid var(--line)', paddingBottom: 64, minHeight: '90vh', display: 'flex', alignItems: 'center' }}
         >
-          <Hero3D />
+          <Hero3DLoader />
 
           <div className="wrap" style={{ position: 'relative', zIndex: 10, pointerEvents: 'none', width: '100%' }}>
             <div style={{ maxWidth: 640, pointerEvents: 'auto' }}>
