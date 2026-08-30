@@ -28,24 +28,27 @@ export async function POST(request: NextRequest) {
   const quote = (formData.get('quote') as string | null)?.trim();
   if (!role || !quote) return NextResponse.json({ error: 'Role and testimonial are required.' }, { status: 400 });
 
+  const photoFile = formData.get('photo') as File | null;
+  if (!photoFile || photoFile.size === 0) {
+    return NextResponse.json({ error: 'A profile photo is required.' }, { status: 400 });
+  }
+  if (photoFile.size > 2 * 1024 * 1024) {
+    return NextResponse.json({ error: 'Photo must be under 2MB.' }, { status: 400 });
+  }
+
   const supabase = getSupabaseAdmin();
   let photo_url: string | null = null;
 
-  const photoFile = formData.get('photo') as File | null;
-  if (photoFile && photoFile.size > 0) {
-    if (photoFile.size > 2 * 1024 * 1024) {
-      return NextResponse.json({ error: 'Photo must be under 2MB.' }, { status: 400 });
-    }
-    const ext = photoFile.name.split('.').pop() ?? 'jpg';
-    const storagePath = `testimonials/${Date.now()}.${ext}`;
-    const bytes = await photoFile.arrayBuffer();
-    const { error: uploadErr } = await supabase.storage
-      .from('public-assets')
-      .upload(storagePath, Buffer.from(bytes), { contentType: photoFile.type, cacheControl: '3600', upsert: false });
-    if (!uploadErr) {
-      photo_url = supabase.storage.from('public-assets').getPublicUrl(storagePath).data.publicUrl;
-    }
+  const ext = photoFile.name.split('.').pop() ?? 'jpg';
+  const storagePath = `testimonials/${Date.now()}.${ext}`;
+  const bytes = await photoFile.arrayBuffer();
+  const { error: uploadErr } = await supabase.storage
+    .from('public-assets')
+    .upload(storagePath, Buffer.from(bytes), { contentType: photoFile.type, cacheControl: '3600', upsert: false });
+  if (uploadErr) {
+    return NextResponse.json({ error: 'Failed to upload photo. Please try again.' }, { status: 500 });
   }
+  photo_url = supabase.storage.from('public-assets').getPublicUrl(storagePath).data.publicUrl;
 
   const { error } = await supabase.from('testimonials').insert([{
     name: (formData.get('name') as string | null)?.trim() || 'Anonymous',

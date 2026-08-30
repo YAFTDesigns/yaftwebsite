@@ -19,6 +19,7 @@ function GoogleIcon({ className }: { className?: string }) {
 export default function TestimonialForm({ source }: { source?: string }) {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [formError, setFormError] = useState<string | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [rating, setRating] = useState<number>(0);
@@ -46,6 +47,7 @@ export default function TestimonialForm({ source }: { source?: string }) {
       alert('Photo must be under 2MB.');
       return;
     }
+    setFormError(null);
     setPhotoFile(file);
     const reader = new FileReader();
     reader.onload = () => setPhotoPreview(reader.result as string);
@@ -54,6 +56,8 @@ export default function TestimonialForm({ source }: { source?: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setFormError(null);
+    if (!photoFile) { setFormError('A profile photo is required, testimonials without one are too easy to mistake for fake.'); return; }
     if (!form.role || !form.quote) return;
     setStatus('submitting');
 
@@ -130,11 +134,11 @@ export default function TestimonialForm({ source }: { source?: string }) {
               }
             </div>
             <div>
-              <p className={styles.photoHint}>Profile photo</p>
+              <p className={styles.photoHint}>Profile photo <span className={styles.req}>*</span></p>
               <button type="button" className={styles.photoBtn} onClick={() => fileRef.current?.click()}>
                 {photoPreview ? 'Change photo' : 'Upload photo'}
               </button>
-              <p className={styles.photoNote}>JPG or PNG, max 2MB</p>
+              <p className={styles.photoNote}>JPG or PNG, max 2MB, required</p>
             </div>
             <input
               ref={fileRef}
@@ -278,6 +282,10 @@ export default function TestimonialForm({ source }: { source?: string }) {
           <p className={styles.notice}>
             Your testimonial will be reviewed before it appears on the site. Only your name, designation, photo, and quote are shown publicly. Your LinkedIn is kept private unless you opt in above.
           </p>
+
+          {formError && (
+            <p className={styles.errorMsg}>{formError}</p>
+          )}
 
           {status === 'error' && (
             <p className={styles.errorMsg}>Something went wrong. Please try again or email us directly.</p>
