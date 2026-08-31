@@ -349,18 +349,27 @@ footer{padding:48px 0 32px;}
   font-size: 14px;
   letter-spacing: 0.01em;
   color: var(--ink-soft);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  padding: 0;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
+  border-bottom: 2px solid transparent;
   transition: color 0.15s, border-color 0.15s;
+}
+.nav-drop-btn a {
+  color: inherit;
+  text-decoration: none;
 }
 .nav-drop-btn:hover { color: var(--ink); }
 .nav-drop-btn.active { color: var(--ink); border-bottom-color: var(--blueprint); }
+.nav-drop-caret {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 8px 6px;
+  display: flex;
+  align-items: center;
+}
 .nav-caret { font-size: 10px; opacity: 0.6; }
 
 .nav-drop-menu {

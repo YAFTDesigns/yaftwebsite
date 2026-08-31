@@ -13,6 +13,18 @@ export default function SiteHeader({ active }: { active?: string }) {
   const [hidden, setHidden] = useState(false);
   const projectsRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Small delay before closing on mouse-leave so moving the cursor from
+  // the label down into the menu doesn't snap it shut mid-transition.
+  function openOnHover(menu: 'projects' | 'resources') {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpenMenu(menu);
+  }
+  function closeOnHoverOut() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpenMenu(null), 200);
+  }
 
   // Auto-hide on scroll down, reveal instantly on scroll up. Stays visible
   // near the top of the page (within HIDE_AFTER px) so it doesn't
@@ -68,14 +80,26 @@ export default function SiteHeader({ active }: { active?: string }) {
           <Link href="/services" className={active === '/services' ? 'active' : undefined} onClick={() => setOpen(false)}>Services</Link>
 
           {/* Projects dropdown */}
-          <div className="nav-dropdown" ref={projectsRef}>
-            <button
-              className={`nav-drop-btn${isProjectsActive ? ' active' : ''}`}
-              onClick={() => setOpenMenu(v => v === 'projects' ? null : 'projects')}
-              aria-expanded={openMenu === 'projects'}
-            >
-              Projects <span className="nav-caret" aria-hidden>▾</span>
-            </button>
+          <div
+            className="nav-dropdown"
+            ref={projectsRef}
+            onMouseEnter={() => openOnHover('projects')}
+            onMouseLeave={closeOnHoverOut}
+          >
+            <span className={`nav-drop-btn${isProjectsActive ? ' active' : ''}`}>
+              <Link href="/projects" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                Projects
+              </Link>
+              <button
+                type="button"
+                className="nav-drop-caret"
+                onClick={() => setOpenMenu(v => v === 'projects' ? null : 'projects')}
+                aria-expanded={openMenu === 'projects'}
+                aria-label="Toggle Projects submenu"
+              >
+                <span className="nav-caret" aria-hidden>▾</span>
+              </button>
+            </span>
             {openMenu === 'projects' && (
               <div className="nav-drop-menu">
                 <Link href="/projects" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
@@ -93,14 +117,26 @@ export default function SiteHeader({ active }: { active?: string }) {
           <Link href="/faculty" className={active === '/faculty' ? 'active' : undefined} onClick={() => setOpen(false)}>Faculty</Link>
 
           {/* Resources dropdown */}
-          <div className="nav-dropdown" ref={resourcesRef}>
-            <button
-              className={`nav-drop-btn${isResourcesActive ? ' active' : ''}`}
-              onClick={() => setOpenMenu(v => v === 'resources' ? null : 'resources')}
-              aria-expanded={openMenu === 'resources'}
-            >
-              Resources <span className="nav-caret" aria-hidden>▾</span>
-            </button>
+          <div
+            className="nav-dropdown"
+            ref={resourcesRef}
+            onMouseEnter={() => openOnHover('resources')}
+            onMouseLeave={closeOnHoverOut}
+          >
+            <span className={`nav-drop-btn${isResourcesActive ? ' active' : ''}`}>
+              <Link href="/resources" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                Resources
+              </Link>
+              <button
+                type="button"
+                className="nav-drop-caret"
+                onClick={() => setOpenMenu(v => v === 'resources' ? null : 'resources')}
+                aria-expanded={openMenu === 'resources'}
+                aria-label="Toggle Resources submenu"
+              >
+                <span className="nav-caret" aria-hidden>▾</span>
+              </button>
+            </span>
             {openMenu === 'resources' && (
               <div className="nav-drop-menu">
                 <Link href="/resources" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
