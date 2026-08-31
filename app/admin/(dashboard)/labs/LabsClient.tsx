@@ -16,7 +16,9 @@ type Script = {
 
 const EMPTY_FORM = { title: '', description: '', category_id: '', price: '0' };
 
-export default function LabsClient({ initialScripts, initialCategories }: { initialScripts: Script[]; initialCategories: Category[] }) {
+type SourceBreakdown = { instagram: { views: number; downloads: number }; organic: { views: number; downloads: number } };
+
+export default function LabsClient({ initialScripts, initialCategories, sourceBreakdown }: { initialScripts: Script[]; initialCategories: Category[]; sourceBreakdown: SourceBreakdown }) {
   const [scripts, setScripts] = useState<Script[]>(initialScripts);
   const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [form, setForm] = useState({ ...EMPTY_FORM, category_id: initialCategories[0]?.id ?? '' });
@@ -267,7 +269,7 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
           by two long bar charts when there are only a couple scripts. */}
       <div style={{ background:'#111', border:'1px solid #1e1e1e', borderRadius:10, padding:20, marginBottom:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom: statsExpanded ? 20 : 0 }}>
-          <div style={{ display:'flex', gap:32 }}>
+          <div style={{ display:'flex', gap:32, flexWrap:'wrap' }}>
             <div>
               <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Total views</p>
               <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'#fff', fontWeight:700 }}>{scripts.reduce((sum, s) => sum + s.view_count, 0)}</p>
@@ -275,6 +277,16 @@ export default function LabsClient({ initialScripts, initialCategories }: { init
             <div>
               <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Total downloads</p>
               <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'#fff', fontWeight:700 }}>{scripts.reduce((sum, s) => sum + s.download_count, 0)}</p>
+            </div>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Instagram bio link</p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'var(--blueprint)', fontWeight:700 }}>{sourceBreakdown.instagram.views}<span style={{ fontSize:13, color:'#777', fontWeight:400 }}> views</span></p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#999', marginTop:2 }}>{sourceBreakdown.instagram.downloads} downloads</p>
+            </div>
+            <div>
+              <p style={{ fontFamily:'var(--mono)', fontSize:11, color:'#777', textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>Organic (everyone else)</p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:24, color:'var(--brass)', fontWeight:700 }}>{sourceBreakdown.organic.views}<span style={{ fontSize:13, color:'#777', fontWeight:400 }}> views</span></p>
+              <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#999', marginTop:2 }}>{sourceBreakdown.organic.downloads} downloads</p>
             </div>
           </div>
           <button

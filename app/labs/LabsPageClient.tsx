@@ -5,6 +5,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import type { LabScript, LabCategory } from './page';
 import { getYouTubeVideoId } from '@/lib/youtube';
+import { track } from '@/lib/analytics';
 import styles from './labs.module.css';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
@@ -75,6 +76,8 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
   function selectScript(id: string) {
     setSelectedId(id);
     fetch(`/api/labs/${id}/view`, { method: 'POST' }).catch(() => {});
+    const s = scripts.find(s => s.id === id);
+    track('lab_script_view', { meta: { scriptId: id, scriptTitle: s?.title } });
   }
 
   return (
@@ -193,7 +196,11 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                       <h2 className={styles.detailTitle}>{selected.title}</h2>
                       <p className={styles.detailMeta}>{categories.find(c => c.id === selected.category_id)?.name ?? 'Uncategorized'} · {selected.view_count} view{selected.view_count === 1 ? '' : 's'} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
                       <p className={styles.detailDesc}>{selected.description}</p>
-                      <a href={`/api/labs/${selected.id}/download`} className={styles.downloadBtn}>
+                      <a
+                        href={`/api/labs/${selected.id}/download`}
+                        className={styles.downloadBtn}
+                        onClick={() => track('lab_script_download', { meta: { scriptId: selected.id, scriptTitle: selected.title } })}
+                      >
                         Download {selected.price > 0 ? `(INR ${fmt(selected.price)})` : ''} →
                       </a>
                     </div>

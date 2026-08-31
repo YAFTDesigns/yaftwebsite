@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const LINKS = [
-  { href: '/labs', label: 'Free scripts', desc: 'Grasshopper & Rhino scripts from reels and projects, free to download' },
+  { href: '/labs?utm_source=instagram&utm_medium=bio_link', label: 'Free scripts', desc: 'Grasshopper & Rhino scripts from reels and projects, free to download' },
   { href: '/courses', label: 'Browse courses', desc: 'Rhino, Grasshopper, Rhino.Inside.Revit training' },
   { href: '/projects', label: 'See project work', desc: 'Facade engineering, BIM automation, real case studies' },
   { href: '/services#contact', label: 'Book a call', desc: 'Talk through a project or a training need' },

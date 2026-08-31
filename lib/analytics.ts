@@ -91,7 +91,7 @@ export function getSessionId(): string {
 }
 
 export function track(
-  eventType: 'page_view' | 'syllabus_modal_open' | 'syllabus_unlock' | 'enquiry_submit' | 'course_gate_open' | 'course_gate_unlock' | 'whatsapp_click' | 'whatsapp_gate_open',
+  eventType: 'page_view' | 'syllabus_modal_open' | 'syllabus_unlock' | 'enquiry_submit' | 'course_gate_open' | 'course_gate_unlock' | 'whatsapp_click' | 'whatsapp_gate_open' | 'lab_script_view' | 'lab_script_download',
   extra: { page?: string; courseSlug?: string; meta?: Record<string, unknown> } = {}
 ) {
   try {
