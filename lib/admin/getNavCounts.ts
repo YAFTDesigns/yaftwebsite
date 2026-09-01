@@ -14,7 +14,7 @@ export async function getNavCounts() {
   const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, newLeads, pendingJobs] =
     await Promise.all([
       safeCount(
-        supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
         'nav:testimonials'
       ),
       safeCount(

@@ -93,7 +93,7 @@ async function getCounts() {
         safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source), null)
       )
     ),
-    safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),
+    safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
     safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart).neq('invoice_type', 'proforma'), []),
     safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'), null),

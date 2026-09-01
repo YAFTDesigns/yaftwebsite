@@ -79,7 +79,8 @@ export async function getRandomTestimonial(): Promise<Testimonial | null> {
     const { data, error } = await getSupabasePublic()
       .from('testimonials')
       .select('id,name,role,institution,quote,rating')
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .is('deleted_at', null);
     if (error) throw error;
     if (!data || data.length === 0) return null;
     return data[Math.floor(Math.random() * data.length)];
@@ -93,7 +94,8 @@ export async function getFeaturedTestimonials(limit = 4): Promise<Testimonial[]>
     const { data, error } = await getSupabasePublic()
       .from('testimonials')
       .select('id,name,role,institution,quote,rating')
-      .eq('status', 'approved');
+      .eq('status', 'approved')
+      .is('deleted_at', null);
     if (error) throw error;
     if (!data || data.length === 0) return [];
     const shuffled = [...data];
@@ -119,6 +121,7 @@ export async function getTestimonialAggregate(): Promise<{ count: number; averag
       .from('testimonials')
       .select('rating')
       .eq('status', 'approved')
+      .is('deleted_at', null)
       .not('rating', 'is', null);
     if (error) throw error;
     if (!data || data.length === 0) return null;

@@ -35,6 +35,24 @@ async function apiDelete(id: string) {
   return { error: null };
 }
 
+async function apiGetTrash() {
+  const res = await fetch(`${API}?trash=true`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiRestore(id: string) {
+  const res = await fetch(API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
+
 type Testimonial = {
   id: string;
   name: string;
@@ -107,7 +125,7 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
   }
 
   async function deleteTestimonial(id: string) {
-    if (!confirm('Delete this testimonial permanently? This cannot be undone.')) return;
+    if (!confirm('Move this testimonial to Trash? You can restore it from the Trash view.')) return;
     setActionId(id);
     setActionError('');
     const { error } = await apiDelete(id);
@@ -117,6 +135,26 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
     }
     setActionId(null);
     load();
+  }
+
+  const [viewingTrash, setViewingTrash] = useState(false);
+  const [trashedItems, setTrashedItems] = useState<Testimonial[]>([]);
+
+  async function loadTrash() {
+    const { data } = await apiGetTrash();
+    setTrashedItems(data);
+  }
+
+  async function toggleTrashView() {
+    if (!viewingTrash) await loadTrash();
+    setViewingTrash(v => !v);
+  }
+
+  async function restore(id: string) {
+    setActionId(id);
+    await apiRestore(id);
+    await Promise.all([load(), loadTrash()]);
+    setActionId(null);
   }
 
   const pending = items.filter(i => i.status === 'pending').length;
@@ -146,6 +184,13 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
             )}
           </button>
         ))}
+        <button
+          className={styles.tab}
+          onClick={toggleTrashView}
+          style={{ marginLeft: 'auto' }}
+        >
+          {viewingTrash ? '← Back' : `Trash${trashedItems.length > 0 ? ` (${trashedItems.length})` : ''}`}
+        </button>
       </div>
 
       {loadError && (
@@ -166,6 +211,31 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
 
       {loading ? (
         <div className={styles.empty}>Loading...</div>
+      ) : viewingTrash ? (
+        trashedItems.length === 0 ? (
+          <div className={styles.empty}>Trash is empty.</div>
+        ) : (
+          <div className={styles.list}>
+            {trashedItems.map(t => (
+              <div key={t.id} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <div>
+                    <div className={styles.cardName}>{t.name}</div>
+                    <p style={{ fontFamily:'var(--mono)', fontSize:12, color:'#888' }}>{t.role}{t.institution ? ` · ${t.institution}` : ''}</p>
+                  </div>
+                </div>
+                <p style={{ color:'#aaa', fontSize:13, marginTop:8 }}>{t.quote}</p>
+                <button
+                  onClick={() => restore(t.id)}
+                  disabled={actionId === t.id}
+                  style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'7px 14px', cursor:'pointer', marginTop:10 }}
+                >
+                  ↺ Restore
+                </button>
+              </div>
+            ))}
+          </div>
+        )
       ) : items.length === 0 ? (
         <div className={styles.empty}>No {filter} testimonials.</div>
       ) : (

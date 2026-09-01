@@ -8,6 +8,6 @@ export const dynamic = 'force-dynamic';
 // filters (approved/rejected) still fetches client-side as before.
 export default async function TestimonialsPage() {
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase.from('testimonials').select('*').eq('status', 'pending').order('submitted_at', { ascending: false });
+  const { data } = await supabase.from('testimonials').select('*').eq('status', 'pending').is('deleted_at', null).order('submitted_at', { ascending: false });
   return <TestimonialsClient initialItems={data ?? []} initialFilter="pending" />;
 }
