@@ -18,7 +18,8 @@ async function getActiveProjectSlugs(): Promise<{ slug: string; updated: string 
     const { data, error } = await getSupabasePublic()
       .from('portfolio_projects')
       .select('slug, created_at')
-      .eq('active', true);
+      .eq('active', true)
+      .is('deleted_at', null);
     if (error || !data) return [];
     return data.map((p) => ({ slug: p.slug, updated: p.created_at ?? NOW }));
   } catch {

@@ -57,6 +57,24 @@ async function apiDelete(id: string) {
   return { error: null };
 }
 
+async function apiGetTrash() {
+  const res = await fetch(`${API}?trash=true`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiRestore(id: string) {
+  const res = await fetch(API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
+
 async function apiCreate(body: Record<string, unknown>) {
   const res = await fetch(API, {
     method: 'POST',
@@ -115,10 +133,30 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
   }
 
   async function remove(id: string) {
-    if (!confirm('Delete this project permanently?')) return;
+    if (!confirm('Move this project to Trash? It will disappear from the public site, but you can restore it from the Trash view.')) return;
     setBusyId(id);
     await apiDelete(id);
     await load();
+    setBusyId(null);
+  }
+
+  const [viewingTrash, setViewingTrash] = useState(false);
+  const [trashedItems, setTrashedItems] = useState<Project[]>([]);
+
+  async function loadTrash() {
+    const { data } = await apiGetTrash();
+    setTrashedItems(data);
+  }
+
+  async function toggleTrashView() {
+    if (!viewingTrash) await loadTrash();
+    setViewingTrash(v => !v);
+  }
+
+  async function restore(id: string) {
+    setBusyId(id);
+    await apiRestore(id);
+    await Promise.all([load(), loadTrash()]);
     setBusyId(null);
   }
 
@@ -169,12 +207,41 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
 
       {loading && <p>Loading…</p>}
       {error && <p style={{ color: 'var(--brass)' }}>{error}</p>}
-      {!loading && items.length === 0 && <div className={styles.empty}>No projects yet.</div>}
 
-      <div className={styles.list}>
-        {items.map(p => (
-          <div key={p.id} className={styles.card} style={{ opacity: p.active ? 1 : 0.55 }}>
-            <div className={styles.cardTop}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button onClick={toggleTrashView} style={{ fontFamily:'var(--mono)', fontSize: 12, color:'#aaa', background:'transparent', border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 14px', cursor:'pointer' }}>
+          {viewingTrash ? '← Back to projects' : `View Trash${trashedItems.length > 0 ? ` (${trashedItems.length})` : ''}`}
+        </button>
+      </div>
+
+      {viewingTrash ? (
+        trashedItems.length === 0 ? (
+          <div className={styles.empty}>Trash is empty.</div>
+        ) : (
+          <div className={styles.list}>
+            {trashedItems.map(p => (
+              <div key={p.id} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <span className={styles.cardName}>{p.title}</span>
+                  <span className={styles.cardMeta}>{p.category} · {p.location}</span>
+                </div>
+                <div className={styles.actions}>
+                  <button className={styles.approveBtn} disabled={busyId === p.id} onClick={() => restore(p.id)}>
+                    ↺ Restore
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <>
+          {!loading && items.length === 0 && <div className={styles.empty}>No projects yet.</div>}
+
+          <div className={styles.list}>
+            {items.map(p => (
+              <div key={p.id} className={styles.card} style={{ opacity: p.active ? 1 : 0.55 }}>
+                <div className={styles.cardTop}>
               <span className={styles.cardName}>{p.title}</span>
               <span className={styles.cardMeta}>{p.category} · {p.location}{p.client_or_collab ? ` · ${p.client_or_collab}` : ''}{p.year ? ` · ${p.year}` : ''}</span>
             </div>
@@ -201,7 +268,9 @@ export default function AdminProjectsPage({ initialItems }: { initialItems?: Pro
             </div>
           </div>
         ))}
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

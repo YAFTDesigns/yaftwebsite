@@ -89,6 +89,7 @@ export default async function ProjectsPage() {
         .from('portfolio_projects')
         .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery, featured')
         .eq('active', true)
+        .is('deleted_at', null)
         .order('display_order');
       if (res.error) console.error('[projects] portfolio_projects query failed:', res.error.message);
       return (res.data as ProjectRow[] | null) ?? [];

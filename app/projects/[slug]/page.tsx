@@ -42,6 +42,7 @@ async function getProject(slug: string): Promise<ProjectRow | null> {
     .select('slug, title, category, location, client_or_collab, year, summary, description, cover_image_path, gallery')
     .eq('slug', slug)
     .eq('active', true)
+    .is('deleted_at', null)
     .maybeSingle();
   if (error || !data) return null;
   return data as ProjectRow;
@@ -52,6 +53,7 @@ async function getOtherSlugs(): Promise<{ slug: string; title: string }[]> {
     .from('portfolio_projects')
     .select('slug, title')
     .eq('active', true)
+    .is('deleted_at', null)
     .order('display_order');
   return data ?? [];
 }
