@@ -35,6 +35,25 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
     setTeam(json.team ?? []);
   }
 
+  const [viewingTrash, setViewingTrash] = useState(false);
+  const [trashedTeam, setTrashedTeam] = useState<Member[]>([]);
+
+  async function loadTrash() {
+    const res = await fetch('/api/team?trash=true');
+    const json = await res.json();
+    setTrashedTeam(json.team ?? []);
+  }
+
+  async function toggleTrashView() {
+    if (!viewingTrash) await loadTrash();
+    setViewingTrash(v => !v);
+  }
+
+  async function restore(m: Member) {
+    await fetch(`/api/team/${m.id}`, { method: 'PUT' });
+    await Promise.all([load(), loadTrash()]);
+  }
+
   function setF(k: keyof typeof EMPTY_FORM, v: string) { setForm(f => ({ ...f, [k]: v })); }
 
   function openNew() {
@@ -79,7 +98,7 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
   }
 
   async function remove(m: Member) {
-    if (!confirm(`Remove "${m.name}" from the team directory?`)) return;
+    if (!confirm(`Move "${m.name}" to Trash? They'll disappear from the team directory, but you can restore them from the Trash view.`)) return;
     await fetch(`/api/team/${m.id}`, { method: 'DELETE' });
     await load();
   }
@@ -137,9 +156,32 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
           <input type="checkbox" checked={showSalary} onChange={e => setShowSalary(e.target.checked)} />
           Show salary
         </label>
+        <button onClick={toggleTrashView} style={{ fontFamily:'var(--mono)', fontSize: 12, color:'#aaa', background:'transparent', border:'1px solid #2a2a2a', borderRadius:6, padding:'8px 14px', cursor:'pointer' }}>
+          {viewingTrash ? '← Back to team' : `View Trash${trashedTeam.length > 0 ? ` (${trashedTeam.length})` : ''}`}
+        </button>
       </div>
 
-      {visible.length === 0 ? (
+      {viewingTrash ? (
+        trashedTeam.length === 0 ? (
+          <p className={styles.empty}>Trash is empty.</p>
+        ) : (
+          <div className={styles.list}>
+            {trashedTeam.map(m => (
+              <div key={m.id} className={styles.card}>
+                <div className={styles.cardTop}>
+                  <div>
+                    <p className={styles.cardName}>{m.name}</p>
+                    <p className={styles.cardRole}>{m.role || 'No role set'}</p>
+                  </div>
+                </div>
+                <button onClick={() => restore(m)} style={{ fontFamily:'var(--mono)', fontSize:11, color:'var(--brass)', background:'transparent', border:'1px solid var(--brass)', borderRadius:6, padding:'7px 14px', cursor:'pointer', marginTop:10 }}>
+                  ↺ Restore
+                </button>
+              </div>
+            ))}
+          </div>
+        )
+      ) : visible.length === 0 ? (
         <p className={styles.empty}>No one added yet.</p>
       ) : (
         <div className={styles.list}>
