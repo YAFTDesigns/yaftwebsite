@@ -278,7 +278,7 @@ export default async function HomePage() {
               </div>
               <div className="note-card">
                 <h2>Academic ties</h2>
-                <p>Visiting faculty at VIT Vellore, with workshops delivered at IIT Kharagpur.</p>
+                <p>Visiting faculty at VIT Vellore, with workshops delivered at IIT Kharagpur. 500+ students trained across 5+ colleges and personal programs.</p>
               </div>
               <div className="note-card">
                 <h2>Fabrication-grade skills</h2>

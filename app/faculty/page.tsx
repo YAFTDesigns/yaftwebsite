@@ -116,7 +116,17 @@ export default async function FacultyPage() {
                 <h3>Yokes Marapa</h3>
                 <div className="faculty-role">Founder, YAFT Designs. Head of Design and Automation, VS-CRAFT Facades &amp; Roofing</div>
                 <p>Splits time between training the next generation of computational designers and leading facade design and automation workflows on live international projects, work that spans India, Australia, Singapore, Hong Kong, and Oman.</p>
-                <p>Visiting faculty (M.Arch, V-SPARC) at VIT Vellore, with workshops delivered at IIT Kharagpur and NIT Tiruchirappalli, and occasional guest sessions at ASADI and SRM Chennai. At VIT, has run sessions spanning industrial robotics (with Tvasta) and KUKA robotics integration with Rhino and Grasshopper for the V-SPARC school. Works on BIM automation workflows, including Rhino.Inside.Revit.</p>
+                <p>Visiting faculty (M.Arch, V-SPARC) at VIT Vellore, with workshops delivered at IIT Kharagpur and NIT Tiruchirappalli, and occasional guest sessions at ASADI and SRM Chennai. At VIT, has run sessions spanning industrial robotics (with Tvasta) and KUKA robotics integration with Rhino and Grasshopper for the V-SPARC school. Works on BIM automation workflows, including Rhino.Inside.Revit. Has trained 500+ students across institutional and personal training programs, and conducted workshops at 5+ colleges.</p>
+                <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', margin: '18px 0' }}>
+                  <div>
+                    <span style={{ display: 'block', fontFamily: 'var(--display)', fontSize: 28, fontWeight: 700, color: 'var(--ink)' }}>500+</span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)' }}>Students trained</span>
+                  </div>
+                  <div>
+                    <span style={{ display: 'block', fontFamily: 'var(--display)', fontSize: 28, fontWeight: 700, color: 'var(--ink)' }}>5+</span>
+                    <span style={{ fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)' }}>Colleges, workshops conducted</span>
+                  </div>
+                </div>
                 <div className="badge-row">
                   <span className="badge">ARTC: McNeel &amp; Associates</span>
                   <span className="badge">Visiting Faculty, M.Arch — VIT V-SPARC</span>
