@@ -390,7 +390,7 @@ export default async function HomePage() {
             {testimonialAggregate && (
               <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', marginTop: -8, marginBottom: 8 }}>
                 {'★'.repeat(Math.round(testimonialAggregate.average))}{'☆'.repeat(5 - Math.round(testimonialAggregate.average))}
-                {' '}{testimonialAggregate.average.toFixed(1)} from {testimonialAggregate.count} review{testimonialAggregate.count === 1 ? '' : 's'}
+                {' '}{testimonialAggregate.average.toFixed(1)} rating
               </p>
             )}
             <p className={styles.testiSubheading}>What it&apos;s actually like to learn with us.</p>
