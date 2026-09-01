@@ -15,6 +15,25 @@ async function apiGet(table: string, status?: string) {
   return { data: json.data ?? [], error: null };
 }
 
+async function apiGetTrash(table: string) {
+  const params = new URLSearchParams({ table, trash: 'true' });
+  const res = await fetch(`${API}?${params.toString()}`);
+  const json = await res.json();
+  if (!res.ok) return { data: [], error: json.error ?? 'Request failed' };
+  return { data: json.data ?? [], error: null };
+}
+
+async function apiRestore(table: string, id: string) {
+  const res = await fetch(API, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ table, id }),
+  });
+  const json = await res.json();
+  if (!res.ok) return { error: json.error ?? 'Request failed' };
+  return { error: null };
+}
+
 async function apiPatch(table: string, id: string, updates: Record<string, unknown>) {
   const res = await fetch(API, {
     method: 'PATCH',
@@ -180,7 +199,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
   }
 
   async function deleteSW(id: string) {
-    if (!confirm('Delete this submission permanently?')) return;
+    if (!confirm('Move this submission to Trash? You can restore it from the Trash view.')) return;
     setActionId(id); setActionError('');
     const { error } = await apiDelete('student_work', id);
     if (error) { console.error('Failed to delete student work:', error); setActionError(error); }
@@ -199,7 +218,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
   }
 
   async function deletePub(id: string) {
-    if (!confirm('Delete this publication permanently?')) return;
+    if (!confirm('Move this publication to Trash? You can restore it from the Trash view.')) return;
     setActionId(id); setActionError('');
     const { error } = await apiDelete('publications', id);
     if (error) { console.error('Failed to delete publication:', error); setActionError(error); }
@@ -217,12 +236,46 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
   }
 
   async function deletePartner(id: string) {
-    if (!confirm('Delete this partner permanently?')) return;
+    if (!confirm('Move this partner to Trash? You can restore it from the Trash view.')) return;
     setActionId(id); setActionError('');
     const { error } = await apiDelete('partners', id);
     if (error) { console.error('Failed to delete partner:', error); setActionError(error); }
     await loadPartners();
     setActionId(null);
+  }
+
+  // Trash is scoped to whichever section is currently selected --
+  // reuses the existing section switcher rather than adding a
+  // separate table picker just for trash.
+  const [viewingTrash, setViewingTrash] = useState(false);
+  const [trashedItems, setTrashedItems] = useState<(StudentWork | Publication | Partner)[]>([]);
+
+  async function loadTrash() {
+    const { data } = await apiGetTrash(section);
+    setTrashedItems(data);
+  }
+
+  async function toggleTrashView() {
+    if (!viewingTrash) await loadTrash();
+    setViewingTrash(v => !v);
+  }
+
+  async function restoreItem(id: string) {
+    setActionId(id);
+    await apiRestore(section, id);
+    await loadTrash();
+    if (section === 'student_work') await loadStudentWork();
+    else if (section === 'publications') await loadPublications();
+    else await loadPartners();
+    await loadCounts();
+    setActionId(null);
+  }
+
+  // Switching sections while Trash is open would otherwise show stale
+  // trash data from the previous section -- exit trash view instead.
+  function switchSection(s: Section) {
+    setSection(s);
+    setViewingTrash(false);
   }
 
   const TOOL_MAP: Record<string, string> = { rhino: 'Rhino3D', grasshopper: 'Grasshopper', rir: 'RIR' };
@@ -264,14 +317,17 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
 
       {/* section tabs */}
       <div className={styles.tabs}>
-        <button className={`${styles.tab} ${section === 'student_work' ? styles.activeTab : ''}`} onClick={() => setSection('student_work')}>
+        <button className={`${styles.tab} ${section === 'student_work' ? styles.activeTab : ''}`} onClick={() => switchSection('student_work')}>
           Student Work
         </button>
-        <button className={`${styles.tab} ${section === 'publications' ? styles.activeTab : ''}`} onClick={() => setSection('publications')}>
+        <button className={`${styles.tab} ${section === 'publications' ? styles.activeTab : ''}`} onClick={() => switchSection('publications')}>
           Publications
         </button>
-        <button className={`${styles.tab} ${section === 'partners' ? styles.activeTab : ''}`} onClick={() => setSection('partners')}>
+        <button className={`${styles.tab} ${section === 'partners' ? styles.activeTab : ''}`} onClick={() => switchSection('partners')}>
           Partners
+        </button>
+        <button className={styles.tab} onClick={toggleTrashView} style={{ marginLeft: 'auto' }}>
+          {viewingTrash ? '← Back' : `Trash${trashedItems.length > 0 ? ` (${trashedItems.length})` : ''}`}
         </button>
       </div>
 
@@ -304,8 +360,33 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
 
       {loading && <p className={styles.empty}>Loading…</p>}
 
+      {!loading && viewingTrash && (
+        trashedItems.length === 0
+          ? <p className={styles.empty}>Trash is empty.</p>
+          : <div className={styles.list}>
+              {trashedItems.map(item => (
+                <div key={item.id} className={styles.card}>
+                  <div className={styles.cardTop}>
+                    <span className={styles.cardName}>
+                      {section === 'student_work' ? (item as StudentWork).project_title
+                        : section === 'publications' ? (item as Publication).title
+                        : (item as Partner).name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => restoreItem(item.id)}
+                    disabled={actionId === item.id}
+                    className={styles.approveBtn}
+                  >
+                    ↺ Restore
+                  </button>
+                </div>
+              ))}
+            </div>
+      )}
+
       {/* STUDENT WORK */}
-      {!loading && section === 'student_work' && (
+      {!loading && !viewingTrash && section === 'student_work' && (
         studentWork.length === 0
           ? <p className={styles.empty}>No {filter} submissions.</p>
           : <div className={styles.list}>
@@ -335,7 +416,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
       )}
 
       {/* PUBLICATIONS */}
-      {!loading && section === 'publications' && (
+      {!loading && !viewingTrash && section === 'publications' && (
         publications.length === 0
           ? <p className={styles.empty}>No {filter} publications.</p>
           : <div className={styles.list}>
@@ -365,7 +446,7 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
       )}
 
       {/* PARTNERS */}
-      {!loading && section === 'partners' && (
+      {!loading && !viewingTrash && section === 'partners' && (
         partners.length === 0
           ? <p className={styles.empty}>No partners found.</p>
           : <div className={styles.list}>

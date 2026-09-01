@@ -12,12 +12,12 @@ export default async function CommunityPage() {
   const supabase = getSupabaseAdmin();
 
   const [swPending, pubPendingCount, swApprovedCount, swRejectedCount, pubApprovedCount, pubRejectedCount] = await Promise.all([
-    supabase.from('student_work').select('*').eq('status', 'pending').order('created_at', { ascending: false }),
-    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-    supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
-    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
-    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
+    supabase.from('student_work').select('*').eq('status', 'pending').is('deleted_at', null).order('created_at', { ascending: false }),
+    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
+    supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'approved').is('deleted_at', null),
+    supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'rejected').is('deleted_at', null),
+    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'approved').is('deleted_at', null),
+    supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'rejected').is('deleted_at', null),
   ]);
 
   return (

@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isCommunityTable } from '@/lib/admin/communityTables';
 
-// GET /api/admin/community?table=student_work&status=pending
+// GET /api/admin/community?table=student_work&status=pending&trash=true
 // GET /api/admin/community?table=partners (no status filter — returns all)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const table = searchParams.get('table');
   const status = searchParams.get('status');
+  const trash = searchParams.get('trash') === 'true';
 
   if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
@@ -15,6 +16,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = getSupabaseAdmin();
   let query = supabase.from(table).select('*');
+  query = trash ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
 
   if (status) query = query.eq('status', status);
 
@@ -61,6 +63,8 @@ export async function PATCH(request: NextRequest) {
 }
 
 // DELETE /api/admin/community  { table, id }
+// Soft delete -- sets deleted_at rather than removing the row, so it
+// stays recoverable via the Trash view (PUT below restores it).
 export async function DELETE(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const table = body?.table;
@@ -74,10 +78,35 @@ export async function DELETE(request: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from(table).delete().eq('id', id);
+  const { error } = await supabase.from(table).update({ deleted_at: new Date().toISOString() }).eq('id', id);
 
   if (error) {
     console.error(`[community-api] DELETE ${table}/${id} failed:`, error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
+
+// PUT /api/admin/community  { table, id }
+// Restores a soft-deleted row -- clears deleted_at.
+export async function PUT(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+  const table = body?.table;
+  const id = body?.id;
+
+  if (!isCommunityTable(table)) {
+    return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });
+  }
+  if (typeof id !== 'string' || !id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from(table).update({ deleted_at: null }).eq('id', id);
+
+  if (error) {
+    console.error(`[community-api] PUT (restore) ${table}/${id} failed:`, error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

@@ -41,6 +41,7 @@ export async function getStudentWork(): Promise<StudentWork[]> {
       .from('student_work')
       .select('id,name,role,project_title,tool,category,description,image_url,portfolio_url')
       .eq('status', 'approved')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []).map(r => ({
@@ -56,6 +57,7 @@ export async function getPublications(): Promise<Publication[]> {
       .from('publications')
       .select('id,author_name,author_role,author_photo_url,title,magazine,pub_month,pub_year,description,article_url')
       .eq('status', 'approved')
+      .is('deleted_at', null)
       .order('pub_year', { ascending: false });
     if (error) throw error;
     return (data ?? []).map(r => ({
@@ -136,6 +138,7 @@ export async function getPartners(): Promise<Partner[]> {
       .from('partners')
       .select('id,name,description,logo_url,type,display_order')
       .eq('active', true)
+      .is('deleted_at', null)
       .order('display_order');
     if (error) throw error;
     return (data ?? []).map(r => ({

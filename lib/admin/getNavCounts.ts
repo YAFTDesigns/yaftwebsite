@@ -18,11 +18,11 @@ export async function getNavCounts() {
         'nav:testimonials'
       ),
       safeCount(
-        supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
         'nav:student_work'
       ),
       safeCount(
-        supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
         'nav:publications'
       ),
       safeCount(
