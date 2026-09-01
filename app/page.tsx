@@ -17,7 +17,7 @@ import CourseGateModal from '@/components/CourseGateModal';
 import { COURSE_DETAIL_PAGES } from './courses/courseNav';
 import TestimonialRotator from '@/components/TestimonialRotator';
 import PortraitLabelReveal from '@/components/PortraitLabelReveal';
-import { getPartners, getFeaturedTestimonials } from '@/lib/feature-wall';
+import { getPartners, getFeaturedTestimonials, getTestimonialAggregate } from '@/lib/feature-wall';
 import styles from './home.module.css';
 
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
@@ -212,10 +212,25 @@ const LOCAL_BUSINESS_JSON_LD = {
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [partners, testimonials] = await Promise.all([
+  const [partners, testimonials, testimonialAggregate] = await Promise.all([
     getPartners(),
     getFeaturedTestimonials(6),
+    getTestimonialAggregate(),
   ]);
+  // Only attach aggregateRating when real rated testimonials exist --
+  // never fabricate a rating for structured data.
+  const localBusinessJsonLd = testimonialAggregate
+    ? {
+        ...LOCAL_BUSINESS_JSON_LD,
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: testimonialAggregate.average,
+          reviewCount: testimonialAggregate.count,
+          bestRating: 5,
+          worstRating: 1,
+        },
+      }
+    : LOCAL_BUSINESS_JSON_LD;
   return (
     <>
       <SiteHeader active="/" />
@@ -230,7 +245,7 @@ export default async function HomePage() {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
       />
 
       <main id="top">
@@ -372,6 +387,12 @@ export default async function HomePage() {
         <section id="faculty">
           <div className="wrap">
             <h2 className={styles.testiHeading}>What our students actually say</h2>
+            {testimonialAggregate && (
+              <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', marginTop: -8, marginBottom: 8 }}>
+                {'★'.repeat(Math.round(testimonialAggregate.average))}{'☆'.repeat(5 - Math.round(testimonialAggregate.average))}
+                {' '}{testimonialAggregate.average.toFixed(1)} from {testimonialAggregate.count} review{testimonialAggregate.count === 1 ? '' : 's'}
+              </p>
+            )}
             <p className={styles.testiSubheading}>What it&apos;s actually like to learn with us.</p>
             <div className={styles.testiSection}>
               <TestimonialRotator testimonials={testimonials} />

@@ -105,6 +105,28 @@ export async function getFeaturedTestimonials(limit = 4): Promise<Testimonial[]>
   } catch { return []; }
 }
 
+// For the LocalBusiness aggregateRating structured-data field -- only
+// ever real, current numbers pulled straight from approved
+// testimonials, never a hardcoded snapshot. Google's own guidance is
+// explicit that marked-up rating data must match what's genuinely
+// true and visible; a static number would drift out of sync the
+// moment a new testimonial gets approved. Returns null when there's
+// no rated testimonial yet, so the caller can leave aggregateRating
+// out entirely rather than claim a rating that doesn't exist.
+export async function getTestimonialAggregate(): Promise<{ count: number; average: number } | null> {
+  try {
+    const { data, error } = await getSupabasePublic()
+      .from('testimonials')
+      .select('rating')
+      .eq('status', 'approved')
+      .not('rating', 'is', null);
+    if (error) throw error;
+    if (!data || data.length === 0) return null;
+    const sum = data.reduce((s, t) => s + Number(t.rating), 0);
+    return { count: data.length, average: Math.round((sum / data.length) * 10) / 10 };
+  } catch { return null; }
+}
+
 export async function getPartners(): Promise<Partner[]> {
   try {
     const { data, error } = await getSupabasePublic()
