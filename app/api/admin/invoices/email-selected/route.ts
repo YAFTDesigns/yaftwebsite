@@ -4,6 +4,7 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { buildInvoicesWorkbook, type InvoiceRow } from '@/lib/invoicesExport';
+import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -56,7 +57,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Email is not configured on the server' }, { status: 503 });
   }
 
-  const subject = `YAFT Designs — ${invoices.length} invoice${invoices.length > 1 ? 's' : ''}`;
+  // Derive the month from the actual invoice dates being sent, rather
+  // than trust a month the caller might claim -- if every selected
+  // invoice genuinely falls in one month (the normal case, since the
+  // widget filters to one month before you select from it), name it
+  // explicitly in the subject and body. If they don't all agree (not
+  // possible through the current UI, but this route doesn't assume
+  // that), fall back to generic wording rather than state something
+  // that isn't true of what's actually attached.
+  const monthKeys = new Set((invoices as InvoiceRow[]).map(inv => monthKey(ddmmyyyyToIso(inv.date))));
+  const singleMonthLabel = monthKeys.size === 1 ? monthLabel([...monthKeys][0]) : null;
+
+  const subject = singleMonthLabel
+    ? `YAFT Designs — Invoices for ${singleMonthLabel}`
+    : `YAFT Designs — ${invoices.length} invoice${invoices.length > 1 ? 's' : ''}`;
 
   const invoiceRows = (invoices as InvoiceRow[])
     .slice()
@@ -72,7 +86,7 @@ export async function POST(request: NextRequest) {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${recipientName},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">Attached are ${invoices.length} invoice${invoices.length > 1 ? 's' : ''}, with the GST breakdown for each in the sheet. Total: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${singleMonthLabel ? `These are the bills for <strong>${singleMonthLabel}</strong>. Attached` : 'Attached'} are ${invoices.length} invoice${invoices.length > 1 ? 's' : ''}, with the GST breakdown for each in the sheet. Total: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
   <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
     <thead>
       <tr style="background:#f8f8f8;">
@@ -103,7 +117,7 @@ export async function POST(request: NextRequest) {
       html,
       bcc: getNotificationBcc(),
       attachments: [{
-        filename: `YAFT_Invoices_selected.xlsx`,
+        filename: singleMonthLabel ? `YAFT_Invoices_${singleMonthLabel.replace(' ', '_')}.xlsx` : `YAFT_Invoices_selected.xlsx`,
         content: buffer.toString('base64'),
       }],
     });
