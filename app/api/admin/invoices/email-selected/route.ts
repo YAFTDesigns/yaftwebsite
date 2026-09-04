@@ -4,6 +4,7 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { buildInvoicesWorkbook, type InvoiceRow } from '@/lib/invoicesExport';
+import { generatePDF, type InvoicePdfData } from '@/lib/invoicePdf';
 import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
 
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseAdmin();
   const { data: invoices, error } = await supabase
     .from('invoices')
-    .select('invoice_no, date, client_name, client_gst, client_state, invoice_type, items, total, advance, balance')
+    .select('*')
     .in('id', invoiceIds)
     .is('deleted_at', null)
     .neq('invoice_type', 'proforma');
@@ -51,6 +52,43 @@ export async function POST(request: NextRequest) {
   }
 
   const buffer = await buildInvoicesWorkbook(invoices as InvoiceRow[]);
+
+  // Individual PDF bill per invoice, on top of the summary workbook --
+  // matches the exact field mapping and filename convention the
+  // existing single-invoice download route already uses, so a PDF
+  // sent from here looks identical to one downloaded from
+  // /admin/invoices directly. If any one invoice fails to render,
+  // fail the whole request rather than silently email an incomplete
+  // set with no indication a bill is missing.
+  let pdfAttachments: { filename: string; content: string }[];
+  try {
+    pdfAttachments = await Promise.all(
+      invoices.map(async (inv) => {
+        const pdfData: InvoicePdfData = {
+          invoice_no: inv.invoice_no,
+          date: inv.date,
+          invoice_type: inv.invoice_type || 'training',
+          client_name: inv.client_name,
+          client_email: inv.client_email,
+          client_type: inv.client_type,
+          client_company: inv.client_company,
+          client_pan: inv.client_pan,
+          client_gst: inv.client_gst,
+          client_state: inv.client_state,
+          client_address: inv.client_address,
+          client_phone: inv.client_phone,
+          items: inv.items ?? [],
+          advance: inv.advance,
+          balance: inv.balance,
+        };
+        const pdfBuffer = await generatePDF(pdfData);
+        return { filename: `YAFT_Invoice_${inv.invoice_no}.pdf`, content: pdfBuffer.toString('base64') };
+      })
+    );
+  } catch (pdfErr) {
+    console.error('[invoices/email-selected] PDF generation failed:', pdfErr);
+    return NextResponse.json({ error: 'Failed to generate one or more invoice PDFs' }, { status: 500 });
+  }
   const grandTotal = (invoices as InvoiceRow[]).reduce((s, i) => s + Number(i.total), 0);
 
   if (!isEmailConfigured()) {
@@ -86,7 +124,7 @@ export async function POST(request: NextRequest) {
 
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${recipientName},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${singleMonthLabel ? `These are the bills for <strong>${singleMonthLabel}</strong>. Attached` : 'Attached'} are ${invoices.length} invoice${invoices.length > 1 ? 's' : ''}, with the GST breakdown for each in the sheet. Total: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${singleMonthLabel ? `These are the bills for <strong>${singleMonthLabel}</strong>. Attached` : 'Attached'} are ${invoices.length} invoice${invoices.length > 1 ? 's' : ''} as individual PDF bills, plus a summary spreadsheet with the GST breakdown for each. Total: <strong>INR ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong>.</p>
   <table style="width:100%;border-collapse:collapse;margin:0 0 20px;">
     <thead>
       <tr style="background:#f8f8f8;">
@@ -116,10 +154,13 @@ export async function POST(request: NextRequest) {
       subject,
       html,
       bcc: getNotificationBcc(),
-      attachments: [{
-        filename: singleMonthLabel ? `YAFT_Invoices_${singleMonthLabel.replace(' ', '_')}.xlsx` : `YAFT_Invoices_selected.xlsx`,
-        content: buffer.toString('base64'),
-      }],
+      attachments: [
+        {
+          filename: singleMonthLabel ? `YAFT_Invoices_${singleMonthLabel.replace(' ', '_')}.xlsx` : `YAFT_Invoices_selected.xlsx`,
+          content: buffer.toString('base64'),
+        },
+        ...pdfAttachments,
+      ],
     });
   } catch (mailErr) {
     status = 'failed';
