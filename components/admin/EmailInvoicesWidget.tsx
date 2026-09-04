@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
 
 type SelectableInvoice = { id: string; invoice_no: string; date: string; client_name: string; total: number };
 type TeamOption = { id: string; name: string; email: string | null };
@@ -23,12 +24,34 @@ export default function EmailInvoicesWidget({
   invoices: SelectableInvoice[];
   accountants: TeamOption[];
 }) {
-  // Default to everything selected -- the common case is "send this
-  // month's bills", deselecting the odd one is the exception.
-  const [selected, setSelected] = useState<Set<string>>(new Set(invoices.map(i => i.id)));
+  // invoices.date is DD/MM/YYYY free text (see lib/jobsGrouping.ts) --
+  // always through ddmmyyyyToIso before any Date parsing, or DD/MM
+  // silently misreads as MM/DD.
+  const months = useMemo(() => {
+    const keys = new Set(invoices.map(inv => monthKey(ddmmyyyyToIso(inv.date))));
+    return Array.from(keys).sort().reverse();
+  }, [invoices]);
+
+  const [month, setMonth] = useState(months[0] ?? '');
+  const invoicesForMonth = useMemo(
+    () => invoices.filter(inv => monthKey(ddmmyyyyToIso(inv.date)) === month),
+    [invoices, month]
+  );
+
+  // Default to everything in the selected month -- the common case is
+  // "send this month's bills", deselecting the odd one is the
+  // exception. Re-derives whenever the month changes rather than
+  // carrying over a previous month's selection.
+  const [selected, setSelected] = useState<Set<string>>(new Set(invoicesForMonth.map(i => i.id)));
   const [accountantId, setAccountantId] = useState(accountants.find(a => a.email)?.id ?? '');
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  function changeMonth(m: string) {
+    setMonth(m);
+    setSelected(new Set(invoices.filter(inv => monthKey(ddmmyyyyToIso(inv.date)) === m).map(i => i.id)));
+    setStatus('idle');
+  }
 
   function toggle(id: string) {
     setSelected(prev => {
@@ -39,11 +62,11 @@ export default function EmailInvoicesWidget({
   }
 
   function toggleAll() {
-    setSelected(prev => prev.size === invoices.length ? new Set() : new Set(invoices.map(i => i.id)));
+    setSelected(prev => prev.size === invoicesForMonth.length ? new Set() : new Set(invoicesForMonth.map(i => i.id)));
   }
 
   const accountant = accountants.find(a => a.id === accountantId);
-  const selectedTotal = invoices.filter(i => selected.has(i.id)).reduce((s, i) => s + Number(i.total), 0);
+  const selectedTotal = invoicesForMonth.filter(i => selected.has(i.id)).reduce((s, i) => s + Number(i.total), 0);
 
   async function send() {
     if (selected.size === 0) { setError('Select at least one invoice.'); setStatus('error'); return; }
@@ -72,31 +95,45 @@ export default function EmailInvoicesWidget({
     return (
       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
         <h3 style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>Email invoices to accountant</h3>
-        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>No invoices this month yet.</p>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>No invoices in the last 12 months.</p>
       </div>
     );
   }
 
   return (
     <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8, flexWrap: 'wrap' }}>
         <h3 style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Email invoices to accountant</h3>
+        <select
+          value={month}
+          onChange={e => changeMonth(e.target.value)}
+          style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 6px', color: '#fff', fontSize: 11, fontFamily: 'var(--mono)' }}
+        >
+          {months.map(m => <option key={m} value={m}>{monthLabel(m)}</option>)}
+        </select>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
         <button onClick={toggleAll} style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--brass)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-          {selected.size === invoices.length ? 'Deselect all' : 'Select all'}
+          {selected.size === invoicesForMonth.length ? 'Deselect all' : 'Select all'}
         </button>
       </div>
 
-      <div style={{ maxHeight: 160, overflowY: 'auto', marginBottom: 10 }}>
-        {invoices.map(inv => (
-          <label key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', cursor: 'pointer' }}>
-            <input type="checkbox" checked={selected.has(inv.id)} onChange={() => toggle(inv.id)} />
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {inv.invoice_no} · {inv.client_name}
-            </span>
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#fff' }}>₹{fmt(Number(inv.total))}</span>
-          </label>
-        ))}
-      </div>
+      {invoicesForMonth.length === 0 ? (
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', marginBottom: 10 }}>No invoices for {monthLabel(month)}.</p>
+      ) : (
+        <div style={{ maxHeight: 160, overflowY: 'auto', marginBottom: 10 }}>
+          {invoicesForMonth.map(inv => (
+            <label key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', cursor: 'pointer' }}>
+              <input type="checkbox" checked={selected.has(inv.id)} onChange={() => toggle(inv.id)} />
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {inv.invoice_no} · {inv.client_name}
+              </span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#fff' }}>₹{fmt(Number(inv.total))}</span>
+            </label>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
         <select

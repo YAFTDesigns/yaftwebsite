@@ -40,6 +40,11 @@ function sixMonthsAgoStart() {
   return new Date(d.getFullYear(), d.getMonth() - 5, 1).toISOString();
 }
 
+function twelveMonthsAgoStart() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() - 11, 1).toISOString();
+}
+
 // NOTE: This duplicates the logic in lib/admin/safeQuery.ts, which was
 // extracted afterward as the shared utility for other admin pages
 // (Leads, Enquiries, Analytics). Left as its own local implementation
@@ -78,6 +83,7 @@ async function getCounts() {
   const weekStart = startOfWeek();
   const monthStart = startOfMonth();
   const sixMoStart = sixMonthsAgoStart();
+  const twelveMoStart = twelveMonthsAgoStart();
 
   const [
     leads, enquiries, syllabusRequests, unlocks, whatsappClicks, leadsBySource,
@@ -105,11 +111,12 @@ async function getCounts() {
     safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).neq('invoice_type', 'proforma').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
     safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart).neq('invoice_type', 'proforma'), []),
-    // Feeds the "Email invoices to accountant" widget -- this month's
-    // real invoices only (proformas excluded here too, matching the
-    // rest of this dashboard), with the actual id so the widget can
-    // send a hand-picked subset, not just a whole month at once.
-    safe<SelectableInvoiceRow[]>(supabase.from('invoices').select('id, invoice_no, date, client_name, total').is('deleted_at', null).neq('invoice_type', 'proforma').gte('created_at', monthStart).order('created_at', { ascending: false }), []),
+    // Feeds the "Email invoices to accountant" widget -- last 12
+    // months of real invoices (proformas excluded here too, matching
+    // the rest of this dashboard), with the actual id so the widget
+    // can send a hand-picked subset. Widened from "this month only" so
+    // the widget's own month filter has something to filter across.
+    safe<SelectableInvoiceRow[]>(supabase.from('invoices').select('id, invoice_no, date, client_name, total').is('deleted_at', null).neq('invoice_type', 'proforma').gte('created_at', twelveMoStart).order('created_at', { ascending: false }), []),
     safe<TeamOption[]>(supabase.from('team_members').select('id, name, email').eq('active', true).is('deleted_at', null).order('name', { ascending: true }), []),
   ]);
 
