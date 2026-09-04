@@ -19,7 +19,7 @@ type InvoiceSixMonthRow = { total: number; items: InvoiceLineItem[]; client_stat
 type RecentEnquiryRow = { name: string; email: string; course_interest: string | null; created_at: string };
 type RecentInvoiceRow = { invoice_no: string; client_name: string; total: number; balance: number; created_at: string };
 type SelectableInvoiceRow = { id: string; invoice_no: string; date: string; client_name: string; total: number };
-type TeamOption = { id: string; name: string; email: string | null };
+type TeamOption = { id: string; name: string; email: string | null; role: string | null };
 
 function startOfMonth() {
   const d = new Date();
@@ -117,7 +117,7 @@ async function getCounts() {
     // can send a hand-picked subset. Widened from "this month only" so
     // the widget's own month filter has something to filter across.
     safe<SelectableInvoiceRow[]>(supabase.from('invoices').select('id, invoice_no, date, client_name, total').is('deleted_at', null).neq('invoice_type', 'proforma').gte('created_at', twelveMoStart).order('created_at', { ascending: false }), []),
-    safe<TeamOption[]>(supabase.from('team_members').select('id, name, email').eq('active', true).is('deleted_at', null).order('name', { ascending: true }), []),
+    safe<TeamOption[]>(supabase.from('team_members').select('id, name, email, role').eq('active', true).is('deleted_at', null).order('name', { ascending: true }), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -174,7 +174,17 @@ async function getCounts() {
     recentEnquiries: recentEnquiries.data ?? [],
     recentInvoices: recentInvoices.data ?? [],
     selectableInvoices: selectableInvoices.data ?? [],
-    accountantOptions: accountantOptions.data ?? [],
+    // Excludes designers -- this feeds the "Email invoices to
+    // accountant" widget's recipient picker, and role is free text
+    // (not a fixed enum), so this checks for the substring rather
+    // than an exact match, catching "Designer", "UI Designer", etc.
+    // Filtered in JS rather than at the query level: a NOT ILIKE
+    // filter in SQL excludes NULL-role rows too (NOT NULL is NULL,
+    // not TRUE), which would have silently dropped anyone with no
+    // role set from the list -- not the intent here.
+    accountantOptions: (accountantOptions.data ?? []).filter(
+      (m) => !m.role || !m.role.toLowerCase().includes('designer')
+    ),
   };
 }
 
