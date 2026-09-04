@@ -3,6 +3,7 @@ import SiteStatus from '@/components/admin/SiteStatus';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
+import EmailInvoicesWidget from '@/components/admin/EmailInvoicesWidget';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 
@@ -17,6 +18,8 @@ type InvoiceMonthRow = { total: number; advance: number; balance: number; items:
 type InvoiceSixMonthRow = { total: number; items: InvoiceLineItem[]; client_state: string; created_at: string };
 type RecentEnquiryRow = { name: string; email: string; course_interest: string | null; created_at: string };
 type RecentInvoiceRow = { invoice_no: string; client_name: string; total: number; balance: number; created_at: string };
+type SelectableInvoiceRow = { id: string; invoice_no: string; date: string; client_name: string; total: number };
+type TeamOption = { id: string; name: string; email: string | null };
 
 function startOfMonth() {
   const d = new Date();
@@ -81,7 +84,7 @@ async function getCounts() {
     pendingTestimonials, enquiriesThisWeek,
     invoicesThisMonth, pendingStudentWork, pendingPublications,
     recentEnquiries, recentInvoices, failedEmails,
-    sixMonthInvoices,
+    sixMonthInvoices, selectableInvoices, accountantOptions,
   ] = await Promise.all([
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
@@ -102,6 +105,12 @@ async function getCounts() {
     safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).neq('invoice_type', 'proforma').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
     safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart).neq('invoice_type', 'proforma'), []),
+    // Feeds the "Email invoices to accountant" widget -- this month's
+    // real invoices only (proformas excluded here too, matching the
+    // rest of this dashboard), with the actual id so the widget can
+    // send a hand-picked subset, not just a whole month at once.
+    safe<SelectableInvoiceRow[]>(supabase.from('invoices').select('id, invoice_no, date, client_name, total').is('deleted_at', null).neq('invoice_type', 'proforma').gte('created_at', monthStart).order('created_at', { ascending: false }), []),
+    safe<TeamOption[]>(supabase.from('team_members').select('id, name, email').eq('active', true).is('deleted_at', null).order('name', { ascending: true }), []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -157,6 +166,8 @@ async function getCounts() {
     failedEmails: failedEmails.count ?? 0,
     recentEnquiries: recentEnquiries.data ?? [],
     recentInvoices: recentInvoices.data ?? [],
+    selectableInvoices: selectableInvoices.data ?? [],
+    accountantOptions: accountantOptions.data ?? [],
   };
 }
 
@@ -324,6 +335,7 @@ export default async function AdminOverviewPage() {
         <div className={styles.panel}>
           <h2 className={styles.panelTitle}>Leads by source</h2>
           <PieChart slices={counts.enquirySourceSlices} size={140} />
+          <EmailInvoicesWidget invoices={counts.selectableInvoices} accountants={counts.accountantOptions} />
         </div>
       </div>
 
