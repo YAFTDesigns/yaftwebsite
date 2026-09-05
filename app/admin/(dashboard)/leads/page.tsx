@@ -76,6 +76,12 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   return { leads: result.data, error: result.error, timeOnSite };
 }
 
+// Below 24h, a precise duration is a plausible single session and
+// genuinely informative. At or past 24h, it's virtually certain to be
+// someone who visited on separate days -- reporting that as "87h"
+// reads like one continuous sitting, which nobody does. Switch to
+// naming the actual span honestly instead of a duration that implies
+// something false about how the time was spent.
 function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
   const mins = Math.floor(seconds / 60);
@@ -83,7 +89,10 @@ function formatDuration(seconds: number): string {
   if (mins < 60) return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`;
   const hrs = Math.floor(mins / 60);
   const remMins = mins % 60;
-  return remMins > 0 ? `${hrs}h ${remMins}m` : `${hrs}h`;
+  if (hrs < 24) return remMins > 0 ? `${hrs}h ${remMins}m` : `${hrs}h`;
+  const days = Math.floor(hrs / 24);
+  const remHrs = hrs % 24;
+  return `Seen over ${days} day${days === 1 ? '' : 's'}${remHrs > 0 ? ` ${remHrs}h` : ''}`;
 }
 
 function formatSeen(iso: string): string {
