@@ -4,6 +4,7 @@ import { upsertLead } from '@/lib/leads';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
+import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,6 +39,15 @@ export async function POST(request: NextRequest) {
         .single();
       if (error) throw error;
       enquiryId = enquiryRow?.id ?? null;
+
+      // Fire-and-forget -- a push failure (no subscription yet, VAPID
+      // not configured, a stale endpoint) must never fail the actual
+      // enquiry submission for the visitor.
+      sendPushToAll({
+        title: 'New enquiry',
+        body: `${name}${interest ? ` — ${interest}` : ''}`,
+        url: '/admin/leads',
+      }).catch((pushErr) => console.error('enquiry push notification failed:', pushErr));
     } catch (dbErr) {
       // Supabase down or briefly unreachable -- don't lose the enquiry.
       // Queue it for retry (picked up by /api/cron/retry-queue, same

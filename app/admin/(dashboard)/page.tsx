@@ -4,6 +4,7 @@ import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
 import EmailInvoicesWidget from '@/components/admin/EmailInvoicesWidget';
+import PushNotificationToggle from '@/components/admin/PushNotificationToggle';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 
@@ -210,6 +211,7 @@ export default async function AdminOverviewPage() {
     <>
       <h1 className={styles.sectionTitle}>Overview</h1>
       <SiteStatus />
+      <PushNotificationToggle />
 
       {/* Needs attention — only shows if something is pending */}
       {(pendingTotal > 0 || counts.failedEmails > 0) && (
