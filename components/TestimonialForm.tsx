@@ -82,7 +82,7 @@ export default function TestimonialForm({ source }: { source?: string }) {
   }
 
   if (!open) return (
-    <div className={styles.triggerWrap}>
+    <div id="testimonial-form" className={styles.triggerWrap}>
       <button className={styles.trigger} onClick={() => setOpen(true)}>
         Share your experience
       </button>
