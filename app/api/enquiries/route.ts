@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
       let status = 'sent';
       let errMsg = null;
       let subject = '';
+      let resendEmailId: string | null = null;
 
       try {
         const { data: tmpl } = await supabase
@@ -110,7 +111,8 @@ export async function POST(request: NextRequest) {
 
         const html = renderTemplate(tmpl?.body_html ?? defaultHtml, vars);
 
-        await sendEmail({ to: `${name} <${email}>`, subject, html });
+        const result = await sendEmail({ to: `${name} <${email}>`, subject, html });
+        resendEmailId = result.id;
       } catch (mailErr) {
         status = 'failed';
         errMsg = getErrorMessage(mailErr);
@@ -125,6 +127,7 @@ export async function POST(request: NextRequest) {
         status,
         error: errMsg,
         enquiry_id: enquiryId,
+        resend_email_id: resendEmailId,
       });
     }
 

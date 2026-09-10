@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
       let status = 'sent';
       let errMsg = null;
       let subject = '';
+      let resendEmailId: string | null = null;
       try {
         const { data: tmpl } = await supabase
           .from('email_templates')
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
         subject = renderTemplate(tmpl?.subject ?? '{{course_title}} syllabus - YAFT Designs', vars);
         const html = renderTemplate(tmpl?.body_html ?? `<p>Thanks for checking out ${course.title}.</p>`, vars);
 
-        await sendEmail({ to: email, subject, html });
+        await sendEmail({ to: email, subject, html }).then((r) => { resendEmailId = r.id; });
       } catch (mailErr) {
         status = 'failed';
         errMsg = getErrorMessage(mailErr);
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
         template: 'syllabus_confirmation',
         status,
         error: errMsg,
+        resend_email_id: resendEmailId,
       });
     }
 

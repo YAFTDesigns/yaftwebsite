@@ -107,8 +107,9 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
 
   let status: 'sent' | 'failed' = 'sent';
   let errMsg: string | null = null;
+  let resendEmailId: string | null = null;
   try {
-    await sendEmail({
+    const result = await sendEmail({
       to: `${data.client_name} <${data.client_email}>`,
       subject,
       html: htmlBody,
@@ -118,6 +119,7 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
         content: pdfBase64,
       }],
     });
+    resendEmailId = result.id;
   } catch (mailErr) {
     status = 'failed';
     errMsg = getErrorMessage(mailErr);
@@ -133,6 +135,7 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
       template: isProformaEmail ? 'proforma_invoice' : 'invoice',
       status,
       error: errMsg,
+      resend_email_id: resendEmailId,
     });
   } catch (logErr) {
     console.error('[invoice] email_logs insert failed:', logErr);

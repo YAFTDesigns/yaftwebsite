@@ -147,9 +147,10 @@ export async function POST(request: NextRequest) {
 
   let status = 'sent';
   let errMsg: string | null = null;
+  let resendEmailId: string | null = null;
 
   try {
-    await sendEmail({
+    const result = await sendEmail({
       to: recipientEmail,
       subject,
       html,
@@ -162,6 +163,7 @@ export async function POST(request: NextRequest) {
         ...pdfAttachments,
       ],
     });
+    resendEmailId = result.id;
   } catch (mailErr) {
     status = 'failed';
     errMsg = getErrorMessage(mailErr);
@@ -176,6 +178,7 @@ export async function POST(request: NextRequest) {
       template: 'selected_invoices_export',
       status,
       error: errMsg,
+      resend_email_id: resendEmailId,
     });
   } catch (logErr) {
     console.error('[invoices/email-selected] email_logs insert failed:', logErr);

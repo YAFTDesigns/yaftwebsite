@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br><a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a></p>
 </div>`;
 
-    await sendEmail({
+    const { id: resendEmailId } = await sendEmail({
       to: `${inv.client_name} <${inv.client_email}>`,
       subject,
       html: htmlBody,
@@ -142,6 +142,7 @@ export async function POST(request: NextRequest) {
         template: isProformaEmail ? 'proforma_invoice_revision' : 'invoice_revision',
         status:   'sent',
         error:    null,
+        resend_email_id: resendEmailId,
       });
     } catch (logErr) {
       console.error('[invoice-resend] email_logs insert failed:', logErr);

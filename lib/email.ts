@@ -4,7 +4,7 @@ const FROM_ADDRESS = 'YAFT Designs <notifications@yaftdesigns.com>';
 const REPLY_TO = 'yaftdesigns@gmail.com';
 
 let client: Resend | null = null;
-function getResendClient(): Resend {
+export function getResendClient(): Resend {
   if (!client) client = new Resend(process.env.RESEND_API_KEY);
   return client;
 }
@@ -28,6 +28,9 @@ export type EmailAttachment = { filename: string; content: string }; // content 
 /**
  * Sends an email via Resend. Throws on failure -- callers are expected to
  * catch this themselves and log to email_logs, same pattern as before.
+ * Returns Resend's own email id so callers can store it alongside their
+ * email_logs row -- lets the bounce webhook match an event back to the
+ * exact send, rather than guessing by to_email + nearest timestamp.
  */
 export async function sendEmail({
   to,
@@ -41,9 +44,9 @@ export async function sendEmail({
   html: string;
   attachments?: EmailAttachment[];
   bcc?: string | string[];
-}): Promise<void> {
+}): Promise<{ id: string | null }> {
   const resend = getResendClient();
-  const { error } = await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: FROM_ADDRESS,
     to,
     subject,
@@ -53,6 +56,7 @@ export async function sendEmail({
     ...(bcc ? { bcc } : {}),
   });
   if (error) throw new Error(error.message);
+  return { id: data?.id ?? null };
 }
 
 export function renderTemplate(template: string, vars: Record<string, string>): string {
