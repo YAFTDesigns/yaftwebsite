@@ -8,6 +8,8 @@ const PAGES = [
   { name: 'Faculty',    path: '/faculty' },
   { name: 'Resources',  path: '/resources' },
   { name: 'Projects',   path: '/projects' },
+  { name: 'Labs',       path: '/labs' },
+  { name: 'Insights',   path: '/insights' },
 ];
 
 export const dynamic = 'force-dynamic';
