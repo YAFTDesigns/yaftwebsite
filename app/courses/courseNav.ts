@@ -14,6 +14,7 @@ export const COURSE_NAV_LIST = [
   { dbSlug: 'revit-rhino-inside',       title: 'Revit Architecture + Rhino.Inside', href: '/courses/revit-rhino-inside' },
   { dbSlug: 'rhino-aec-climate',        title: 'Rhino3D for AEC + Climate',         href: '/courses/rhino3d-aec-climate' },
   { dbSlug: 'rhino-industrial-design',  title: 'Rhino3D for Industrial Design',     href: '/courses/rhino3d-industrial-design' },
+  { dbSlug: 'rhino-wearables-footwear', title: 'Rhino3D for Wearables & Footwear',  href: '/courses/rhino-wearables-footwear' },
 ] as const;
 
 // Record form, kept for the existing call sites in /courses/page.tsx

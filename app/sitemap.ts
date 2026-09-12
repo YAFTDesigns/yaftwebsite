@@ -1,17 +1,10 @@
 import type { MetadataRoute } from 'next';
 import { INSIGHT_POSTS } from '@/lib/insights';
 import { getSupabasePublic } from '@/lib/supabase/public';
+import { COURSE_NAV_LIST } from './courses/courseNav';
 
 const BASE = 'https://www.yaftdesigns.com';
 const NOW = new Date().toISOString();
-
-const COURSE_SLUGS = [
-  'rhino3d-architecture',
-  'rhino3d-industrial-design',
-  'rhino3d-aec-climate',
-  'grasshopper-architecture',
-  'revit-rhino-inside',
-];
 
 async function getActiveProjectSlugs(): Promise<{ slug: string; updated: string }[]> {
   try {
@@ -33,8 +26,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: `${BASE}`,           lastModified: NOW, changeFrequency: 'weekly',  priority: 1.0 },
     { url: `${BASE}/courses`,   lastModified: NOW, changeFrequency: 'weekly',  priority: 0.9 },
-    ...COURSE_SLUGS.map((slug) => ({
-      url: `${BASE}/courses/${slug}`, lastModified: NOW, changeFrequency: 'monthly' as const, priority: 0.85,
+    ...COURSE_NAV_LIST.map(({ href }) => ({
+      url: `${BASE}${href}`, lastModified: NOW, changeFrequency: 'monthly' as const, priority: 0.85,
     })),
     { url: `${BASE}/services`,  lastModified: NOW, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE}/faculty`,   lastModified: NOW, changeFrequency: 'monthly', priority: 0.8 },
