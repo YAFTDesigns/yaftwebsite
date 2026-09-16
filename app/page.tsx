@@ -128,7 +128,7 @@ const HOME_COURSE_CARDS = [
   { title: 'Grasshopper for Computational Design', img: '/assets/images/courses/grasshopper-architecture.jpg', alt: 'Grasshopper', tag: 'Basic → Advanced', dbSlug: 'grasshopper-architecture' },
   { title: 'Rhino.Inside.Revit', img: '/assets/images/courses/revit-rhino-inside.jpg', alt: 'Rhino.Inside.Revit', tag: 'Advanced', dbSlug: 'revit-rhino-inside' },
   { title: 'Rhino3D for AEC & Climate Design', img: '/assets/images/courses/rhino-aec-climate.jpg', alt: 'AEC & Climate Design', tag: 'Intermediate', dbSlug: 'rhino-aec-climate' },
-  { title: 'Wearables & Product Design', img: '/assets/images/courses/rhino-wearables-footwear.jpg', alt: 'Wearables & Product Design', tag: 'All levels', dbSlug: null },
+  { title: 'Wearables & Product Design', img: '/assets/images/courses/rhino-wearables-footwear.jpg', alt: 'Wearables & Product Design', tag: 'All levels', dbSlug: 'rhino-wearables-footwear' },
   { title: 'Industrial Design', img: '/assets/images/courses/rhino-industrial-design.jpg', alt: 'Industrial Design', tag: 'All levels', dbSlug: 'rhino-industrial-design' },
 ] as const;
 
