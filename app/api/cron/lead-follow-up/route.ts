@@ -9,8 +9,8 @@ export const dynamic = 'force-dynamic';
 const FOLLOW_UP_TEMPLATE = 'lead_follow_up';
 const MIN_DAYS_SINCE_LAST_CONTACT = 3;
 
-function buildEmailHtml(name: string, courseInterest: string | null) {
-  const firstName = name.trim().split(/\s+/)[0] || name;
+function buildEmailHtml(name: string | null, courseInterest: string | null) {
+  const firstName = name ? (name.trim().split(/\s+/)[0] || name) : 'there';
   return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Hi ${firstName},</p>
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Just checking in, how have you been?</p>
@@ -57,7 +57,13 @@ async function runFollowUpCheck() {
   const results: string[] = [];
 
   for (const lead of candidates) {
-    if (!lead.name || !lead.email) continue;
+    // Only email requires a real value -- name doesn't, roughly 70%
+    // of leads have no name on file (syllabus/WhatsApp-gate captures
+    // just the email), and the original guard here required both,
+    // which meant this cron silently skipped every nameless lead
+    // since the day it was built. Every place below that uses the
+    // name now degrades gracefully instead.
+    if (!lead.email) continue;
 
     const { count: alreadyFollowedUp } = await supabase
       .from('email_logs')
@@ -77,15 +83,17 @@ async function runFollowUpCheck() {
       .limit(1)
       .maybeSingle();
 
-    const subject = `Hey ${lead.name.trim().split(/\s+/)[0]}, still thinking about it?`;
-    const html = buildEmailHtml(lead.name, lastEnquiry?.course_interest ?? null);
+    const displayName = lead.name?.trim() || null;
+    const firstName = displayName ? (displayName.split(/\s+/)[0] || displayName) : 'there';
+    const subject = `Hey ${firstName}, still thinking about it?`;
+    const html = buildEmailHtml(displayName, lastEnquiry?.course_interest ?? null);
 
     let status = 'sent';
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
 
     try {
-      const result = await sendEmail({ to: `${lead.name} <${lead.email}>`, subject, html, bcc: getNotificationBcc() });
+      const result = await sendEmail({ to: displayName ? `${displayName} <${lead.email}>` : lead.email, subject, html, bcc: getNotificationBcc() });
       resendEmailId = result.id;
       sent++;
     } catch (mailErr) {
@@ -96,7 +104,7 @@ async function runFollowUpCheck() {
 
     await supabase.from('email_logs').insert({
       to_email: lead.email,
-      to_name: lead.name,
+      to_name: displayName,
       subject,
       template: FOLLOW_UP_TEMPLATE,
       status,
