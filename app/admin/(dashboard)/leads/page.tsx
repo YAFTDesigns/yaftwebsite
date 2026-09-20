@@ -18,7 +18,7 @@ type Lead = {
 
 type TimeOnSite = { seconds: number; pageViews: number } | null;
 
-async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite> }> {
+async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite>; syllabusByLead: Record<string, string[]> }> {
   const supabase = getSupabaseAdmin();
   const result = await safeQuery<Lead[]>(
     supabase
@@ -75,7 +75,40 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
     }
   }
 
-  return { leads: result.data, error: result.error, timeOnSite };
+  // Which syllabus PDF(s) each lead has unlocked -- real, already-
+  // logged data (syllabus_requests, written every time someone
+  // completes the email/LinkedIn gate on a course page) that just
+  // wasn't surfaced here yet. Some leads request more than one
+  // course's syllabus (one has done it 7 times), so this is a
+  // deduped list per lead, not a single value.
+  const syllabusByLead: Record<string, string[]> = {};
+  if (leadIds.length > 0) {
+    const { data: syllabusRows, error: syllabusError } = await supabase
+      .from('syllabus_requests')
+      .select('lead_id, course_slug, courses(title)')
+      .in('lead_id', leadIds);
+
+    if (syllabusError) {
+      console.error('[leads] failed to load syllabus_requests:', syllabusError);
+    } else {
+      for (const row of syllabusRows ?? []) {
+        const leadId = row.lead_id as string;
+        // Supabase's nested-select for an embedded to-one relation can
+        // come back as either a single object or a one-item array
+        // depending on how the client infers the relationship without
+        // generated types -- handled defensively rather than assumed,
+        // since tsc itself flagged the array shape as a real
+        // possibility here, not just a style preference.
+        const coursesField = row.courses as { title: string } | { title: string }[] | null;
+        const courseRow = Array.isArray(coursesField) ? coursesField[0] : coursesField;
+        const title = courseRow?.title ?? (row.course_slug as string);
+        if (!syllabusByLead[leadId]) syllabusByLead[leadId] = [];
+        if (!syllabusByLead[leadId].includes(title)) syllabusByLead[leadId].push(title);
+      }
+    }
+  }
+
+  return { leads: result.data, error: result.error, timeOnSite, syllabusByLead };
 }
 
 // Below 24h, a precise duration is a plausible single session and
@@ -109,7 +142,7 @@ function formatSeen(iso: string): string {
 }
 
 export default async function AdminLeadsPage() {
-  const { leads, error, timeOnSite } = await getLeads();
+  const { leads, error, timeOnSite, syllabusByLead } = await getLeads();
 
   return (
     <>
@@ -133,6 +166,7 @@ export default async function AdminLeadsPage() {
               <th>Name</th>
               <th>LinkedIn</th>
               <th>Source</th>
+              <th>Syllabus accessed</th>
               <th>Time on site</th>
               <th>First seen</th>
               <th>Last seen</th>
@@ -154,6 +188,7 @@ export default async function AdminLeadsPage() {
                   )}
                 </td>
                 <td>{lead.source ?? '—'}</td>
+                <td>{syllabusByLead[lead.id]?.join(', ') || '—'}</td>
                 <td>
                   {timeOnSite[lead.id] ? (
                     <>
