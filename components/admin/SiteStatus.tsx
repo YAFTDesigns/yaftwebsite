@@ -96,20 +96,20 @@ export default function SiteStatus() {
             display: 'inline-block',
             boxShadow: loading ? 'none' : `0 0 6px ${overallColor}`,
           }} />
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: overallColor, letterSpacing: '0.08em' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: overallColor, letterSpacing: '0.08em' }}>
             {overallLabel}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {checkedAt && (
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#444' }}>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#444' }}>
               {new Date(checkedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           <button onClick={check} disabled={loading} style={{
             background: 'transparent', border: '1px solid #2a2a2a',
             color: '#555', borderRadius: 4, padding: '3px 10px',
-            fontSize: 10, fontFamily: 'var(--mono)', cursor: 'pointer',
+            fontSize: 11, fontFamily: 'var(--mono)', cursor: 'pointer',
             letterSpacing: '0.06em',
           }}>
             {loading ? '...' : '↺ Refresh'}
@@ -131,14 +131,14 @@ export default function SiteStatus() {
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  fontFamily: 'var(--mono)', fontSize: 10,
+                  fontFamily: 'var(--mono)', fontSize: 11,
                   color: r.status === 'up' ? '#666' : '#e53935',
                   textDecoration: 'none', letterSpacing: '0.04em',
                 }}
               >
                 {r.name}
               </a>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#333' }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#333' }}>
                 {r.ms}ms
               </span>
             </div>
@@ -155,24 +155,24 @@ export default function SiteStatus() {
             width: 6, height: 6, borderRadius: '50%',
             background: '#e5a935', display: 'inline-block', flexShrink: 0,
           }} />
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#e5a935', letterSpacing: '0.04em' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#e5a935', letterSpacing: '0.04em' }}>
             {queues.invoice > 0 && `${queues.invoice} invoice${queues.invoice > 1 ? 's' : ''} queued for retry`}
             {queues.invoice > 0 && queues.enquiry > 0 && ' · '}
             {queues.enquiry > 0 && `${queues.enquiry} enquir${queues.enquiry > 1 ? 'ies' : 'y'} queued for retry`}
           </span>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: '#555' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#555' }}>
             (auto-retries daily at 2am — a repeat failure sends an email alert)
           </span>
           <button onClick={runRetryNow} disabled={retrying} style={{
             background: 'transparent', border: '1px solid #e5a935',
             color: '#e5a935', borderRadius: 4, padding: '3px 10px',
-            fontSize: 10, fontFamily: 'var(--mono)', cursor: 'pointer',
+            fontSize: 11, fontFamily: 'var(--mono)', cursor: 'pointer',
             letterSpacing: '0.06em', opacity: retrying ? 0.6 : 1,
           }}>
             {retrying ? 'Running...' : 'Run retry now'}
           </button>
           {retryMsg && (
-            <span style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#888' }}>{retryMsg}</span>
+            <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888' }}>{retryMsg}</span>
           )}
         </div>
       )}

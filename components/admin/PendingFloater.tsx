@@ -40,7 +40,7 @@ export default function PendingFloater({
         style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 40,
           background: 'var(--brass)', color: '#fff', border: 'none', borderRadius: 999,
-          padding: '10px 18px', fontFamily: 'var(--mono)', fontSize: 12, cursor: 'pointer',
+          padding: '10px 18px', fontFamily: 'var(--mono)', fontSize: 13, cursor: 'pointer',
           boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
         }}
       >
@@ -59,7 +59,7 @@ export default function PendingFloater({
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         padding: '10px 14px', borderBottom: '1px solid #2a2a2a', background: '#1a0808',
       }}>
-        <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+        <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
           Pending ({totalPendingItems})
         </span>
         <button
@@ -74,12 +74,12 @@ export default function PendingFloater({
       <div style={{ padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 280, overflowY: 'auto' }}>
         {outstandingInvoices.length > 0 && (
           <div>
-            <a href="/admin/invoices/report" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textDecoration: 'none' }}>
+            <a href="/admin/invoices/report" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', textDecoration: 'none' }}>
               ₹{fmt(outstandingTotal)} outstanding, {outstandingInvoices.length} invoice{outstandingInvoices.length > 1 ? 's' : ''} →
             </a>
             <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
               {outstandingInvoices.map((inv) => (
-                <div key={inv.invoice_no} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 11, color: '#999' }}>
+                <div key={inv.invoice_no} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 12, color: '#999' }}>
                   <span>{inv.client_name}</span>
                   <span>₹{fmt(Number(inv.balance))}</span>
                 </div>
@@ -88,22 +88,22 @@ export default function PendingFloater({
           </div>
         )}
         {pendingTestimonials > 0 && (
-          <a href="/admin/testimonials" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', textDecoration: 'none' }}>
+          <a href="/admin/testimonials" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', textDecoration: 'none' }}>
             {pendingTestimonials} testimonial{pendingTestimonials > 1 ? 's' : ''} →
           </a>
         )}
         {pendingStudentWork > 0 && (
-          <a href="/admin/community" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', textDecoration: 'none' }}>
+          <a href="/admin/community" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', textDecoration: 'none' }}>
             {pendingStudentWork} student submission{pendingStudentWork > 1 ? 's' : ''} →
           </a>
         )}
         {pendingPublications > 0 && (
-          <a href="/admin/community" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', textDecoration: 'none' }}>
+          <a href="/admin/community" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', textDecoration: 'none' }}>
             {pendingPublications} publication{pendingPublications > 1 ? 's' : ''} →
           </a>
         )}
         {failedEmails > 0 && (
-          <a href="/admin/emails" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#e55', textDecoration: 'none' }}>
+          <a href="/admin/emails" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#e55', textDecoration: 'none' }}>
             {failedEmails} failed email{failedEmails > 1 ? 's' : ''} →
           </a>
         )}

@@ -94,8 +94,8 @@ export default function EmailInvoicesWidget({
   if (invoices.length === 0) {
     return (
       <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-        <h3 style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>Email invoices to accountant</h3>
-        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>No invoices in the last 12 months.</p>
+        <h3 style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>Email invoices to accountant</h3>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-soft)' }}>No invoices in the last 12 months.</p>
       </div>
     );
   }
@@ -103,33 +103,33 @@ export default function EmailInvoicesWidget({
   return (
     <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8, flexWrap: 'wrap' }}>
-        <h3 style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Email invoices to accountant</h3>
+        <h3 style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em' }}>Email invoices to accountant</h3>
         <select
           value={month}
           onChange={e => changeMonth(e.target.value)}
-          style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 6px', color: '#fff', fontSize: 11, fontFamily: 'var(--mono)' }}
+          style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '4px 6px', color: '#fff', fontSize: 12, fontFamily: 'var(--mono)' }}
         >
           {months.map(m => <option key={m} value={m}>{monthLabel(m)}</option>)}
         </select>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 6 }}>
-        <button onClick={toggleAll} style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--brass)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+        <button onClick={toggleAll} style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)', background: 'transparent', border: 'none', cursor: 'pointer' }}>
           {selected.size === invoicesForMonth.length ? 'Deselect all' : 'Select all'}
         </button>
       </div>
 
       {invoicesForMonth.length === 0 ? (
-        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', marginBottom: 10 }}>No invoices for {monthLabel(month)}.</p>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-soft)', marginBottom: 10 }}>No invoices for {monthLabel(month)}.</p>
       ) : (
         <div style={{ maxHeight: 160, overflowY: 'auto', marginBottom: 10 }}>
           {invoicesForMonth.map(inv => (
             <label key={inv.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', cursor: 'pointer' }}>
               <input type="checkbox" checked={selected.has(inv.id)} onChange={() => toggle(inv.id)} />
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {inv.invoice_no} · {inv.client_name}
               </span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#fff' }}>₹{fmt(Number(inv.total))}</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff' }}>₹{fmt(Number(inv.total))}</span>
             </label>
           ))}
         </div>
@@ -139,7 +139,7 @@ export default function EmailInvoicesWidget({
         <select
           value={accountantId}
           onChange={e => setAccountantId(e.target.value)}
-          style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '7px 8px', color: '#fff', fontSize: 12, flex: 1, minWidth: 120 }}
+          style={{ background: '#0d0d0d', border: '1px solid #2a2a2a', borderRadius: 6, padding: '7px 8px', color: '#fff', fontSize: 13, flex: 1, minWidth: 120 }}
         >
           <option value="">Pick accountant...</option>
           {accountants.map(a => (
@@ -149,18 +149,18 @@ export default function EmailInvoicesWidget({
         <button
           onClick={send}
           disabled={status === 'sending' || selected.size === 0}
-          style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', background: 'var(--brass)', border: 'none', borderRadius: 6, padding: '8px 14px', cursor: 'pointer', opacity: status === 'sending' ? 0.6 : 1 }}
+          style={{ fontFamily: 'var(--mono)', fontSize: 13, color: '#fff', background: 'var(--brass)', border: 'none', borderRadius: 6, padding: '8px 14px', cursor: 'pointer', opacity: status === 'sending' ? 0.6 : 1 }}
         >
           {status === 'sending' ? 'Sending...' : `Send (${selected.size})`}
         </button>
       </div>
 
-      <p style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#666', marginTop: 6 }}>
+      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#666', marginTop: 6 }}>
         {selected.size} invoice{selected.size === 1 ? '' : 's'} selected · ₹{fmt(selectedTotal)}
       </p>
 
-      {status === 'sent' && <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#4caf50', marginTop: 6 }}>Sent to {accountant?.name}.</p>}
-      {status === 'error' && <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#e55', marginTop: 6 }}>{error}</p>}
+      {status === 'sent' && <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#4caf50', marginTop: 6 }}>Sent to {accountant?.name}.</p>}
+      {status === 'error' && <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#e55', marginTop: 6 }}>{error}</p>}
     </div>
   );
 }

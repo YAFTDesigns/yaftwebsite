@@ -100,11 +100,11 @@ export default function PushNotificationToggle() {
 
   return (
     <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--line)' }}>
-      <h3 style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
+      <h3 style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#888', textTransform: 'uppercase', letterSpacing: '.05em', marginBottom: 8 }}>
         New enquiry notifications
       </h3>
       {status === 'denied' ? (
-        <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--ink-soft)' }}>
           Notifications are blocked for this site in your browser settings. Enable them there to turn this on.
         </p>
       ) : (
@@ -112,10 +112,10 @@ export default function PushNotificationToggle() {
           onClick={status === 'on' ? disable : enable}
           disabled={status === 'working'}
           style={{
-            fontFamily: 'var(--mono)', fontSize: 12,
-            color: status === 'on' ? '#4caf50' : '#fff',
-            background: status === 'on' ? 'transparent' : 'var(--brass)',
-            border: status === 'on' ? '1px solid #4caf50' : 'none',
+            fontFamily: 'var(--mono)', fontSize: 13,
+            color: status === 'on' ? '#4caf50' : 'var(--blueprint)',
+            background: 'transparent',
+            border: status === 'on' ? '1px solid #4caf50' : '1px solid var(--blueprint)',
             borderRadius: 6, padding: '8px 14px', cursor: 'pointer',
             opacity: status === 'working' ? 0.6 : 1,
           }}

@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import Link from 'next/link';
 import SiteStatus from '@/components/admin/SiteStatus';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
@@ -234,13 +235,25 @@ export default async function AdminOverviewPage() {
         outstandingInvoices={counts.outstandingInvoices}
       />
 
+      {/* Quick actions -- deliberately only 3, each a real, already-
+          existing flow (confirmed before building this: Create Invoice
+          is the default tab at /admin/invoices, Clients has a real Add
+          Client flow, Leads is a real page). No "New Student"/"New
+          Course" here -- neither has an actual admin page to link to,
+          and inventing one wasn't part of this pass. */}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 28, flexWrap: 'wrap' }}>
+        <Link href="/admin/invoices" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff', background: 'var(--brass)', border: 'none', borderRadius: 6, padding: '9px 16px', textDecoration: 'none' }}>+ New Invoice</Link>
+        <Link href="/admin/clients" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 16px', textDecoration: 'none' }}>+ New Client</Link>
+        <Link href="/admin/leads" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', background: 'transparent', border: '1px solid #2a2a2a', borderRadius: 6, padding: '9px 16px', textDecoration: 'none' }}>View Leads</Link>
+      </div>
+
       {/* Needs attention — only shows if something is pending */}
       {(pendingTotal > 0 || counts.failedEmails > 0) && (
         <div style={{
           background: '#1a0808', border: '1px solid var(--brass)', borderRadius: 8,
           padding: '14px 20px', marginBottom: 32, display: 'flex', gap: 24, alignItems: 'center', flexWrap: 'wrap',
         }}>
-          <span style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+          <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
             Needs attention
           </span>
           {counts.pendingTestimonials > 0 && (
@@ -327,14 +340,14 @@ export default async function AdminOverviewPage() {
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: i < counts.recentEnquiries.length - 1 ? '1px solid var(--line)' : 'none', paddingBottom: 10 }}>
                     <div>
                       <p style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{e.name}</p>
-                      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)' }}>{e.course_interest || 'General enquiry'}</p>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>{e.course_interest || 'General enquiry'}</p>
                     </div>
-                    <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>{timeAgo(e.created_at)}</p>
+                    <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', whiteSpace: 'nowrap' }}>{timeAgo(e.created_at)}</p>
                   </div>
                 ))}
               </div>
           }
-          <a href="/admin/enquiries" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textDecoration: 'none', display: 'inline-block', marginTop: 14 }}>View all →</a>
+          <a href="/admin/enquiries" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', textDecoration: 'none', display: 'inline-block', marginTop: 14 }}>View all →</a>
         </div>
 
         {/* Recent invoices */}
@@ -347,20 +360,20 @@ export default async function AdminOverviewPage() {
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', borderBottom: i < counts.recentInvoices.length - 1 ? '1px solid var(--line)' : 'none', paddingBottom: 10 }}>
                     <div>
                       <p style={{ fontFamily: 'var(--display)', fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{inv.client_name}</p>
-                      <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)' }}>{inv.invoice_no}</p>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>{inv.invoice_no}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontFamily: 'var(--mono)', fontSize: 12, fontWeight: 600 }}>₹{fmt(inv.total)}</p>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 600 }}>₹{fmt(inv.total)}</p>
                       {inv.balance > 0
-                        ? <p style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--brass)' }}>₹{fmt(inv.balance)} due</p>
-                        : <p style={{ fontFamily: 'var(--mono)', fontSize: 10, color: '#4caf50' }}>Paid</p>
+                        ? <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)' }}>₹{fmt(inv.balance)} due</p>
+                        : <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#4caf50' }}>Paid</p>
                       }
                     </div>
                   </div>
                 ))}
               </div>
           }
-          <a href="/admin/invoices" style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--brass)', textDecoration: 'none', display: 'inline-block', marginTop: 14 }}>View all →</a>
+          <a href="/admin/invoices" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', textDecoration: 'none', display: 'inline-block', marginTop: 14 }}>View all →</a>
         </div>
       </div>
 
