@@ -94,6 +94,39 @@
   color:var(--blueprint);border:1px solid var(--blueprint);padding:4px 10px;border-radius:3px;
 }
 
+/* Sticky-pinned services scroller (desktop/tablet only, >880px) --
+   the image column stays pinned via native position: sticky (no
+   scroll-hijacking JS) while the text column scrolls past it. Mobile
+   gets a completely separate, simpler markup below instead of trying
+   to force this layout into a narrow viewport. */
+.stickyScrollGrid{display:grid;grid-template-columns:1fr 1fr;gap:60px;}
+.stickyImageCol{position:relative;}
+.stickyImageFrame{
+  position:sticky;top:100px;height:480px;border-radius:4px;overflow:hidden;
+  background:var(--paper-2,#161616);
+}
+.stickyImage{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity .6s ease;
+}
+.stickyImageActive{opacity:1;}
+
+.scrollTextCol,.scrollTextColFull{display:flex;flex-direction:column;}
+.scrollTextColFull{grid-column:1/-1;}
+.scrollTextBlock{
+  min-height:60vh;display:flex;flex-direction:column;justify-content:center;
+  padding:40px 0;border-bottom:1px solid var(--line);
+}
+.scrollTextBlock:last-child{border-bottom:none;}
+.scrollTextBlock h3{font-size:26px;margin-bottom:14px;}
+.scrollTextBlock p{color:var(--ink-soft);font-size:15px;line-height:1.6;margin-bottom:18px;max-width:480px;}
+
+.mobileServicesList{display:none;}
+
+@media (max-width:880px){
+  .stickyScrollGrid{display:none;}
+  .mobileServicesList{display:block;border-top:1px solid var(--line);}
+}
 .workshopList{display:flex;flex-direction:column;}
 .workshopRow{padding:44px 0;border-bottom:1px solid var(--line);}
 .workshopRow:first-child{padding-top:0;}
