@@ -4,6 +4,7 @@ import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
+import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import s from '../course.module.css';
 
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ const COURSE_JSON_LD = {
   '@context': 'https://schema.org',
   '@type': 'Course',
   name: 'Grasshopper for Architecture',
-  description: 'A 6-day live workshop on parametric design in Grasshopper, covering data trees, attractors, surface mapping, and plugins like Ladybug, Kangaroo, and Galapagos.',
+  description: 'A 6-day live workshop on parametric design in Grasshopper, taught using the same attractor-driven paneling and facade-optimization techniques used on real live projects, covering data trees, surface mapping, and plugins like Ladybug, Kangaroo, and Galapagos.',
   provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
   url: 'https://www.yaftdesigns.com/courses/grasshopper-architecture',
   hasCourseInstance: [
@@ -38,7 +39,7 @@ export default function GrasshopperArchitecture() {
       <span className={s.tag}>Authorized Rhino Training Center</span>
       <h1 className={s.headline}>Grasshopper for Architecture</h1>
       <p className={s.subtitle}>Re-Imagining Parametric Design Workshop</p>
-      <p className={s.desc}>Grasshopper is a visual programming platform that lets you Generate, Manipulate and automate data. Participants are guided in developing skills on computational design and parametric approaches that lead to form finding and optimization through various parameters.</p>
+      <p className={s.desc}>Grasshopper is what turns a facade concept into fabrication-ready geometry. This course is built directly from real project work, the same attractor-driven paneling and climate-informed optimization techniques used on live facade projects across India, Australia, Singapore, Hong Kong, and Oman, so you learn parametric modeling the way it&apos;s actually used on real buildings, not as an abstract exercise.</p>
       <div className={s.badges}>
         <span className={s.badge}>6 days / 36 hours</span>
         <span className={s.badge}>Intermediate to advanced</span>
@@ -89,6 +90,10 @@ export default function GrasshopperArchitecture() {
       />
 
       <hr className={s.divider} />
+      <p className={s.sectionLabel}>What students say</p>
+      <TestimonialsMarquee />
+
+      <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 28,000 + GST<div className={s.feeUsd}>approx. $336</div></div></div>
@@ -113,7 +118,7 @@ export default function GrasshopperArchitecture() {
           <div>
             <p className={s.instructorName}>Yokes Marapa L S</p>
             <p className={s.instructorRole}>Founder and Training Manager, YAFT Designs. Authorized Rhino Trainer, McNeel &amp; Associates.</p>
-            <p className={s.instructorBio}>Computational designer and facade engineer with hands-on experience across international projects. Visiting faculty at VIT Vellore and ASADI College of Architecture. Conducted workshops at IIT Kharagpur. Lead trainer at YAFT Designs.</p>
+            <p className={s.instructorBio}>Computational designer and facade engineer with hands-on experience across international projects, including facade optimization using Ladybug climate analysis paired with robotic fabrication on KUKA arms, the same workflow taught in this course. Visiting faculty at VIT Vellore and ASADI College of Architecture. Conducted workshops at IIT Kharagpur. Lead trainer at YAFT Designs.</p>
           </div>
         </div>
 
