@@ -21,7 +21,13 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
         { href: '/admin/enquiries', label: 'Enquiries' },
         { href: '/admin/jobs', label: 'Jobs', badge: counts.pendingJobs },
         { href: '/admin/clients', label: 'Clients' },
+      ],
+    },
+    {
+      label: 'Accounting',
+      links: [
         { href: '/admin/invoices', label: 'Invoices' },
+        { href: '/admin/invoices/report', label: 'Financial Year Report' },
       ],
     },
     {
@@ -50,4 +56,33 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
   ];
+}
+
+/**
+ * Which single link is "current" for a given pathname -- always the
+ * most specific (longest) matching href, never more than one. Needed
+ * because Accounting introduced the first case of one link's href
+ * being a strict prefix of another's within the same group
+ * (/admin/invoices and /admin/invoices/report): naive per-link
+ * startsWith matching marked both as active simultaneously on the
+ * report page, which is wrong, only the actual current page should
+ * highlight. Centralized here (used by both AdminNav and AdminSubNav)
+ * rather than duplicated inline in each component, so they can't
+ * drift into different answers for the same pathname.
+ */
+export function findActiveLink(
+  groups: NavGroup[],
+  pathname: string
+): { group: NavGroup; link: NavLink } | null {
+  let best: { group: NavGroup; link: NavLink } | null = null;
+  for (const group of groups) {
+    for (const link of group.links) {
+      const matches = pathname === link.href || pathname.startsWith(link.href + '/');
+      if (!matches) continue;
+      if (!best || link.href.length > best.link.href.length) {
+        best = { group, link };
+      }
+    }
+  }
+  return best;
 }

@@ -3,24 +3,25 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from '../../app/admin/(dashboard)/admin.module.css';
-import { getNavGroups, type NavCounts } from '@/lib/admin/navGroups';
+import { getNavGroups, findActiveLink, type NavCounts } from '@/lib/admin/navGroups';
 
 // Always-visible row of the current section's sibling pages -- e.g. on
-// /admin/clients (part of Pipeline), shows Leads/Enquiries/Jobs/Clients/
-// Invoices right there, so switching between them never needs opening the
+// /admin/clients (part of Sales), shows Leads/Enquiries/Jobs/Clients
+// right there, so switching between them never needs opening the
 // AdminNav dropdown. Renders nothing on pages that aren't part of any
 // group (Overview, Analytics), where there's nothing to show anyway.
 export default function AdminSubNav({ counts }: { counts: NavCounts }) {
   const pathname = usePathname();
   const groups = getNavGroups(counts);
-  const activeGroup = groups.find((g) => g.links.some((l) => pathname === l.href || pathname.startsWith(l.href + '/')));
+  const active = findActiveLink(groups, pathname);
+  const activeGroup = active?.group ?? null;
 
   if (!activeGroup) return null;
 
   return (
     <div className={styles.subNav}>
       {activeGroup.links.map((link) => {
-        const isCurrent = pathname === link.href || pathname.startsWith(link.href + '/');
+        const isCurrent = link.href === active?.link.href;
         return (
           <Link
             key={link.href}

@@ -4,12 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import styles from '../../app/admin/(dashboard)/admin.module.css';
-import { getNavGroups, type NavCounts } from '@/lib/admin/navGroups';
+import { getNavGroups, findActiveLink, type NavCounts } from '@/lib/admin/navGroups';
 
 export default function AdminNav({ counts }: { counts: NavCounts }) {
   const pathname = usePathname();
   const groups = getNavGroups(counts);
-  const activeGroup = groups.find((g) => g.links.some((l) => pathname === l.href || pathname.startsWith(l.href + '/')));
+  const activeGroup = findActiveLink(groups, pathname)?.group ?? null;
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
