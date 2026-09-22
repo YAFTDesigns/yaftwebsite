@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
@@ -494,6 +495,7 @@ export default function InvoicesClient({
         <button className={`${styles.tab} ${tab==='scheduled'?styles.activeTab:''}`} onClick={() => setTab('scheduled')}>Scheduled{scheduledInvoices.length > 0 ? ` (${scheduledInvoices.length})` : ''}</button>
         <button className={`${styles.tab} ${tab==='trash'?styles.activeTab:''}`} onClick={() => setTab('trash')}>Trash{trashedInvoices.length > 0 ? ` (${trashedInvoices.length})` : ''}</button>
         <button className={`${styles.tab} ${tab==='log'?styles.activeTab:''}`} onClick={() => setTab('log')}>Log</button>
+        <Link href="/admin/invoices/report" className={styles.tab} style={{ textDecoration: 'none' }}>Financial Year Report →</Link>
       </div>
 
       {/* ── SENT INVOICES ── */}
