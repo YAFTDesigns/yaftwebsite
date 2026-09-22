@@ -133,6 +133,15 @@ export default async function FacultyPage() {
                   <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" className="profile-link">Rhino Trainer Listing →</a>
                   <a href="https://vit.ac.in/schools/v-sparc" target="_blank" rel="noopener" className="profile-link">VIT V-SPARC Faculty Listing →</a>
                   <a href="https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/" target="_blank" rel="noopener" className="profile-link">Workshop on Food4Rhino →</a>
+                  {/* Likely a temporary event site for the 2027 fest --
+                      Wix's bot-protection blocks automated checks from
+                      datacenter IPs (Vercel functions included) even
+                      with proper headers, confirmed by direct testing,
+                      so this can't be monitored automatically without
+                      producing constant false "down" alerts. Ask
+                      Claude to check it directly (web_fetch works fine
+                      here) every so often, and remove this link once
+                      the event site actually goes offline. */}
                   <a href="https://www.itiu2027iitkgp.com/guests-speakers" target="_blank" rel="noopener" className="profile-link">ITIU 2027, IIT Kharagpur →</a>
                 </div>
               </div>
