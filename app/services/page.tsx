@@ -4,7 +4,7 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import NextSteps from '@/components/NextSteps';
 import WorkshopGallery from '@/components/WorkshopGallery';
-import StickyServiceScroller from '@/components/StickyServiceScroller';
+import FadeInOnView from '@/components/FadeInOnView';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
@@ -196,20 +196,32 @@ export default async function ServicesPage() {
               <p className="note">Consulting and delivery work for studios and contractors who need outsourced computational design expertise.</p>
             </div>
             <div className={styles.servicesList}>
-              <StickyServiceScroller
-                services={SERVICES.map((svc) => {
-                  const img = serviceImageMap[svc.key];
-                  return {
-                    key: svc.key,
-                    num: svc.num,
-                    title: svc.title,
-                    description: svc.description,
-                    tags: svc.tags,
-                    imageUrl: resolveServiceImageUrl(img?.image_path ?? null),
-                    caption: img?.caption ?? null,
-                  };
-                })}
-              />
+              {SERVICES.map((svc, i) => {
+                const img = serviceImageMap[svc.key];
+                const imgUrl = resolveServiceImageUrl(img?.image_path ?? null);
+                const layoutClass = i % 2 === 0 ? styles.imageFirst : styles.contentFirst;
+                return (
+                  <FadeInOnView key={svc.key} className={`${styles.serviceBlock} ${layoutClass}`} delayMs={i % 2 === 0 ? 0 : 80}>
+                    {imgUrl ? (
+                      <div className={styles.serviceImageWrap}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imgUrl} alt={svc.title} />
+                        {img?.caption && <span className={styles.serviceImageCaption}>{img.caption}</span>}
+                      </div>
+                    ) : null}
+                    <div className={`${styles.serviceContent} ${imgUrl ? '' : styles.noImage}`}>
+                      <span className={styles.idx}>{svc.num}</span>
+                      <h3>{svc.title}</h3>
+                      <p>{svc.description}</p>
+                      <div className={styles.serviceTags}>
+                        {svc.tags.map((tag) => (
+                          <span key={tag} className={styles.serviceTag}>{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </FadeInOnView>
+                );
+              })}
             </div>
           </div>
         </section>
