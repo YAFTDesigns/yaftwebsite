@@ -5,6 +5,7 @@ import ContactForm from '@/components/ContactForm';
 import NextSteps from '@/components/NextSteps';
 import VideoGallery, { type VideoItem } from '@/components/VideoGallery';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { COURSE_INTEREST_OPTIONS } from '../courses/courseNav';
 import styles from './resources.module.css';
 
 const TITLE = 'Rhino3D & Grasshopper Learning Resources';
@@ -40,13 +41,7 @@ const RESOURCES_JSON_LD = {
   publisher: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
 };
 
-const INTEREST_OPTIONS = [
-  'Rhino3D for Architecture',
-  'Grasshopper for Computational Design',
-  'Rhino.Inside.Revit',
-  'Institutional workshop',
-  'Consulting project',
-];
+const INTEREST_OPTIONS = COURSE_INTEREST_OPTIONS;
 
 export default async function ResourcesPage() {
   // A transient Supabase failure previously crashed this entire public

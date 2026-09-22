@@ -6,7 +6,7 @@ import ContactForm from '@/components/ContactForm';
 import EnquireLink from '@/components/EnquireLink';
 import CourseGateButton from '@/components/CourseGateButton';
 import CourseVisualLink from '@/components/CourseVisualLink';
-import { COURSE_DETAIL_PAGES } from './courseNav';
+import { COURSE_DETAIL_PAGES, COURSE_INTEREST_OPTIONS } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
 import { getCourses } from '@/lib/courses';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
@@ -54,15 +54,7 @@ export const metadata: Metadata = {
 // Re-fetch from Supabase at most once every 5 minutes instead of only at build time.
 export const revalidate = 300;
 
-const INTEREST_OPTIONS = [
-  'Rhino3D for Architecture',
-  'Grasshopper for Computational Design',
-  'Rhino.Inside.Revit',
-  'Rhino3D for AEC & Climate',
-  'Wearables & Product Design',
-  'Industrial Design',
-  'Institutional workshop',
-];
+const INTEREST_OPTIONS = COURSE_INTEREST_OPTIONS;
 
 
 export default async function CoursesPage() {

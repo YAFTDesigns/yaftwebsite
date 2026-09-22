@@ -6,6 +6,7 @@ import ContactForm from '@/components/ContactForm';
 import NextSteps from '@/components/NextSteps';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
+import { COURSE_INTEREST_OPTIONS } from '../courses/courseNav';
 import styles from './faculty.module.css';
 
 const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
@@ -63,14 +64,7 @@ const PERSON_JSON_LD = {
   ],
 };
 
-const INTEREST_OPTIONS = [
-  'Rhino3D for Architecture',
-  'Grasshopper for Computational Design',
-  'Rhino.Inside.Revit',
-  'Wearables & Product Design',
-  'Institutional workshop',
-  'Consulting project',
-];
+const INTEREST_OPTIONS = COURSE_INTEREST_OPTIONS;
 
 export default async function FacultyPage() {
   // A transient Supabase failure previously crashed this entire public

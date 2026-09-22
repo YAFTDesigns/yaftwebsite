@@ -17,6 +17,30 @@ export const COURSE_NAV_LIST = [
   { dbSlug: 'rhino-wearables-footwear', title: 'Rhino3D for Wearables & Footwear',  href: '/courses/rhino-wearables-footwear' },
 ] as const;
 
+// Shared "Interested in" options for the contact form on every page
+// that offers course-level enquiry (Home, Courses, Resources,
+// Faculty -- the Services page is deliberately excluded, its form
+// asks about service types, not course names, a genuinely different
+// list, not a copy of this one that went stale).
+//
+// This exists because these 4 pages each used to define their own
+// separate INTEREST_OPTIONS array, and three of the four quietly
+// drifted out of sync with each other over time -- Resources was
+// missing 3 of the 6 real courses entirely, caught only because
+// Yokes asked directly whether a newly-added course would actually
+// show up here. One shared list now; add a course once, it's
+// correct everywhere that offers it.
+export const COURSE_INTEREST_OPTIONS = [
+  'Rhino3D for Architecture',
+  'Grasshopper for Computational Design',
+  'Rhino.Inside.Revit',
+  'Rhino3D for AEC & Climate',
+  'Wearables & Product Design',
+  'Industrial Design',
+  'Institutional workshop',
+  'Consulting project',
+];
+
 // Record form, kept for the existing call sites in /courses/page.tsx
 // that key off the db slug directly.
 export const COURSE_DETAIL_PAGES: Record<string, string> = Object.fromEntries(

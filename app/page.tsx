@@ -18,6 +18,7 @@ import { COURSE_DETAIL_PAGES } from './courses/courseNav';
 import TestimonialRotator from '@/components/TestimonialRotator';
 import PortraitLabelReveal from '@/components/PortraitLabelReveal';
 import { getPartners, getFeaturedTestimonials, getTestimonialAggregate } from '@/lib/feature-wall';
+import { COURSE_INTEREST_OPTIONS } from './courses/courseNav';
 import styles from './home.module.css';
 
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
@@ -114,14 +115,7 @@ const JSON_LD = {
   },
 };
 
-const INTEREST_OPTIONS = [
-  'Rhino3D for Architecture',
-  'Grasshopper for Computational Design',
-  'Rhino.Inside.Revit',
-  'Wearables & Product Design',
-  'Institutional workshop',
-  'Consulting project',
-];
+const INTEREST_OPTIONS = COURSE_INTEREST_OPTIONS;
 
 const HOME_COURSE_CARDS = [
   { title: 'Rhino3D for Architecture', img: '/assets/images/courses/rhino-architecture.jpg', alt: 'Rhino3D for Architecture', tag: 'Beginner → Inter', dbSlug: 'rhino-architecture' },
