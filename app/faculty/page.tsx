@@ -57,6 +57,7 @@ const PERSON_JSON_LD = {
     'https://www.instagram.com/yaft_designs/',
     'https://www.youtube.com/@yaftdesigns',
     'https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/',
+    'https://www.itiu2027iitkgp.com/guests-speakers',
   ],
   affiliation: [
     { '@type': 'Organization', name: 'VIT Vellore', url: 'https://vit.ac.in/schools/v-sparc' },
@@ -132,6 +133,7 @@ export default async function FacultyPage() {
                   <a href="https://www.rhino3d.com/training/sites/1650/" target="_blank" rel="noopener" className="profile-link">Rhino Trainer Listing →</a>
                   <a href="https://vit.ac.in/schools/v-sparc" target="_blank" rel="noopener" className="profile-link">VIT V-SPARC Faculty Listing →</a>
                   <a href="https://events.food4rhino.com/event/rhino-grasshopper-for-architecture/" target="_blank" rel="noopener" className="profile-link">Workshop on Food4Rhino →</a>
+                  <a href="https://www.itiu2027iitkgp.com/guests-speakers" target="_blank" rel="noopener" className="profile-link">ITIU 2027, IIT Kharagpur →</a>
                 </div>
               </div>
             </div>
