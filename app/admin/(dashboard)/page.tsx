@@ -5,6 +5,7 @@ import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
 import EmailInvoicesWidget from '@/components/admin/EmailInvoicesWidget';
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle';
+import PendingFloater from '@/components/admin/PendingFloater';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 
@@ -92,6 +93,7 @@ async function getCounts() {
     invoicesThisMonth, pendingStudentWork, pendingPublications,
     recentEnquiries, recentInvoices, failedEmails,
     sixMonthInvoices, selectableInvoices, accountantOptions,
+    allTimeOutstandingInvoices,
   ] = await Promise.all([
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
@@ -119,6 +121,17 @@ async function getCounts() {
     // the widget's own month filter has something to filter across.
     safe<SelectableInvoiceRow[]>(supabase.from('invoices').select('id, invoice_no, date, client_name, total').is('deleted_at', null).neq('invoice_type', 'proforma').gte('created_at', twelveMoStart).order('created_at', { ascending: false }), []),
     safe<TeamOption[]>(supabase.from('team_members').select('id, name, email, role').eq('active', true).is('deleted_at', null).order('name', { ascending: true }), []),
+    // All-time, not scoped to this month -- the "This month" outstanding
+    // stat above uses gte('created_at', monthStart), which genuinely
+    // misses an invoice with a real unpaid balance from a prior month
+    // (Yokes found this the hard way: Saravana Kumar's Aug invoice was
+    // invisible from a September check). Feeds the floating "who's
+    // pending" widget specifically so this can't get silently missed
+    // again just because it's from an earlier month.
+    safe<{ invoice_no: string; client_name: string; balance: number }[]>(
+      supabase.from('invoices').select('invoice_no, client_name, balance').is('deleted_at', null).neq('invoice_type', 'proforma').gt('balance', 0).order('balance', { ascending: false }),
+      []
+    ),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -186,6 +199,7 @@ async function getCounts() {
     accountantOptions: (accountantOptions.data ?? []).filter(
       (m) => !m.role || !m.role.toLowerCase().includes('designer')
     ),
+    outstandingInvoices: allTimeOutstandingInvoices.data ?? [],
   };
 }
 
@@ -212,6 +226,13 @@ export default async function AdminOverviewPage() {
       <h1 className={styles.sectionTitle}>Overview</h1>
       <SiteStatus />
       <PushNotificationToggle />
+      <PendingFloater
+        pendingTestimonials={counts.pendingTestimonials}
+        pendingStudentWork={counts.pendingStudentWork}
+        pendingPublications={counts.pendingPublications}
+        failedEmails={counts.failedEmails}
+        outstandingInvoices={counts.outstandingInvoices}
+      />
 
       {/* Needs attention — only shows if something is pending */}
       {(pendingTotal > 0 || counts.failedEmails > 0) && (
