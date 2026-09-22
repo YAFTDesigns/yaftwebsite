@@ -13,6 +13,22 @@ export default function AdminNav({ counts }: { counts: NavCounts }) {
 
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Same hover pattern as the public SiteHeader: opens immediately on
+  // mouse-enter, closes after a short delay on mouse-leave so moving
+  // the cursor from the trigger down into the menu doesn't snap it
+  // shut mid-transition. Click-to-toggle on the button itself (below)
+  // still works exactly as before, unchanged -- that's what makes this
+  // work on touch too, where hover never fires at all.
+  function openOnHover(label: string) {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpenGroup(label);
+  }
+  function closeOnHoverOut() {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpenGroup(null), 200);
+  }
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -38,7 +54,13 @@ export default function AdminNav({ counts }: { counts: NavCounts }) {
         const isOpen = openGroup === group.label;
         const isActive = activeGroup?.label === group.label;
         return (
-          <span key={group.label} className={styles.navItem} style={{ position: 'relative' }}>
+          <span
+            key={group.label}
+            className={styles.navItem}
+            style={{ position: 'relative' }}
+            onMouseEnter={() => openOnHover(group.label)}
+            onMouseLeave={closeOnHoverOut}
+          >
             <button
               type="button"
               onClick={() => setOpenGroup(isOpen ? null : group.label)}
