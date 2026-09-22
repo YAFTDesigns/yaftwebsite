@@ -4,6 +4,7 @@ import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import NextSteps from '@/components/NextSteps';
 import WorkshopGallery from '@/components/WorkshopGallery';
+import FadeInOnView from '@/components/FadeInOnView';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
@@ -200,7 +201,7 @@ export default async function ServicesPage() {
                 const imgUrl = resolveServiceImageUrl(img?.image_path ?? null);
                 const layoutClass = i % 2 === 0 ? styles.imageFirst : styles.contentFirst;
                 return (
-                  <div key={svc.key} className={`${styles.serviceBlock} ${layoutClass}`}>
+                  <FadeInOnView key={svc.key} className={`${styles.serviceBlock} ${layoutClass}`} delayMs={i % 2 === 0 ? 0 : 80}>
                     {imgUrl ? (
                       <div className={styles.serviceImageWrap}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -218,7 +219,7 @@ export default async function ServicesPage() {
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </FadeInOnView>
                 );
               })}
             </div>
