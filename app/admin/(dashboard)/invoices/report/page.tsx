@@ -149,8 +149,8 @@ export default async function FinancialYearReportPage({
               </tr>
             </thead>
             <tbody>
-              {byMonth.map((m) => (
-                <tr key={m.month} style={{ borderBottom: '1px solid #1a1a1a' }}>
+              {byMonth.map((m, i) => (
+                <tr key={m.month} style={{ borderBottom: '1px solid #1a1a1a', background: i % 2 === 1 ? 'var(--paper-2, #111)' : 'transparent' }}>
                   <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12 }}>{MONTH_NAMES[m.month]}</td>
                   <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12, textAlign: 'right', color: m.count ? '#fff' : '#444' }}>{m.count || '—'}</td>
                   <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12, textAlign: 'right', color: m.count ? '#fff' : '#444' }}>{m.total ? fmt(m.total) : '—'}</td>
