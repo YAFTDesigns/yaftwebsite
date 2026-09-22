@@ -56,6 +56,44 @@
 .serviceRow h3{font-size:19px;}
 .serviceRow p{color:var(--ink-soft);font-size:15px;}
 
+/* Alternating editorial image/content blocks -- replaces the old
+   text-only .serviceRow grid above (kept, unused, rather than risk
+   breaking something referencing it; nothing else in the codebase
+   uses it, confirmed before writing these new rules). Deliberately
+   1fr/1.1fr, not a forced 50/50, and min-height rather than a fixed
+   height -- content determines actual height, the image just fills
+   whatever that turns out to be via object-fit: cover. */
+.serviceBlock{
+  display:grid;grid-template-columns:1fr 1.1fr;gap:40px;
+  padding:48px 0;border-bottom:1px solid var(--line);align-items:stretch;
+}
+.serviceBlock:first-child{padding-top:0;}
+.serviceBlock.imageFirst .serviceImageWrap{order:1;}
+.serviceBlock.imageFirst .serviceContent{order:2;}
+.serviceBlock.contentFirst .serviceImageWrap{order:2;}
+.serviceBlock.contentFirst .serviceContent{order:1;}
+
+.serviceImageWrap{position:relative;min-height:320px;border-radius:4px;overflow:hidden;background:var(--paper-2,#161616);}
+.serviceImageWrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.serviceImageCaption{
+  position:absolute;bottom:0;left:0;right:0;padding:14px 16px;
+  background:linear-gradient(to top, rgba(0,0,0,.85), transparent);
+  font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.85);
+}
+
+.serviceContent{display:flex;flex-direction:column;justify-content:center;}
+.serviceContent .idx{font-family:var(--mono);color:var(--brass);font-size:13px;margin-bottom:8px;display:block;}
+.serviceContent h3{font-size:24px;margin-bottom:12px;}
+.serviceContent p{color:var(--ink-soft);font-size:15px;line-height:1.6;margin-bottom:18px;}
+.serviceContent.noImage{padding:12px 0;grid-column:1/-1;}
+.serviceContent.noImage h3{font-size:28px;}
+
+.serviceTags{display:flex;flex-wrap:wrap;gap:8px;}
+.serviceTag{
+  font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+  color:var(--blueprint);border:1px solid var(--blueprint);padding:4px 10px;border-radius:3px;
+}
+
 .workshopList{display:flex;flex-direction:column;}
 .workshopRow{padding:44px 0;border-bottom:1px solid var(--line);}
 .workshopRow:first-child{padding-top:0;}
@@ -88,4 +126,15 @@
   .workshopGallery, .workshopGallery.cols4{grid-template-columns:repeat(2,1fr);}
   .serviceRow{grid-template-columns:36px 1fr;}
   .serviceRow p{grid-column:2/3;}
+
+  /* Always image -> number/title -> description -> tags on mobile,
+     regardless of imageFirst/contentFirst -- alternating left/right
+     stops making sense as a single narrow column, so both variants
+     collapse to the same order here. */
+  .serviceBlock{grid-template-columns:1fr;gap:20px;padding:32px 0;}
+  .serviceBlock.imageFirst .serviceImageWrap,
+  .serviceBlock.contentFirst .serviceImageWrap{order:1;}
+  .serviceBlock.imageFirst .serviceContent,
+  .serviceBlock.contentFirst .serviceContent{order:2;}
+  .serviceImageWrap{min-height:220px;}
 }

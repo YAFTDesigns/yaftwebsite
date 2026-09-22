@@ -7,6 +7,7 @@ import WorkshopGallery from '@/components/WorkshopGallery';
 import Lightbox, { type WorkshopGroup } from '@/components/Lightbox';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
+import { resolveServiceImageUrl } from '@/lib/serviceImages';
 import styles from './services.module.css';
 
 const TITLE = 'BIM Consulting & Computational Design Services | India, Australia, Singapore, UAE';
@@ -92,6 +93,40 @@ const INTEREST_OPTIONS = [
   'Consulting project',
 ];
 
+// Tags pulled directly from language already in each service's own
+// description below, not invented -- e.g. "Grasshopper", "fabrication",
+// "panel typology" all appear verbatim in the existing copy.
+const SERVICES = [
+  {
+    key: 'parametric-facade',
+    num: '01',
+    title: 'Parametric facade fabrication',
+    description: 'Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper, built for fabrication, not just visualization.',
+    tags: ['Surface rationalization', 'Panel typology', 'Double-curved geometry', 'Grasshopper', 'Fabrication'],
+  },
+  {
+    key: 'shop-drawing',
+    num: '02',
+    title: 'Shop drawing automation',
+    description: 'Scripted documentation pipelines that take rationalized geometry straight to fabrication-ready shop drawings, cutting manual drafting time on large panel counts.',
+    tags: ['Scripted documentation', 'Shop drawings', 'Large panel counts', 'Rhino.Inside.Revit'],
+  },
+  {
+    key: 'college-workshops',
+    num: '03',
+    title: 'College workshops',
+    description: 'Multi-day or semester-length computational design programs for architecture schools, delivered on campus or online.',
+    tags: ['Multi-day programs', 'Semester-length', 'On campus', 'Online'],
+  },
+  {
+    key: 'corporate-training',
+    num: '04',
+    title: 'Corporate training for architectural firms',
+    description: "Structured digital-tech upskilling for practicing studios: Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm's live project pipeline.",
+    tags: ['Rhino', 'Grasshopper', 'Rhino.Inside.Revit', 'Live project pipeline'],
+  },
+] as const;
+
 export default async function ServicesPage() {
   // A transient Supabase failure previously crashed this entire public
   // page with an unhandled 500 -- confirmed via a local resilience test
@@ -119,6 +154,19 @@ export default async function ServicesPage() {
       src: p.filename ? getSiteImageUrl(`workshops/${p.filename}`) : undefined,
     })),
   }));
+
+  // Same resilience pattern as the workshops query above -- a failed
+  // fetch here just means the 4 service blocks render without images
+  // (the noImage/text-forward treatment), not a page-wide crash.
+  let serviceImageMap: Record<string, { image_path: string | null; caption: string | null }> = {};
+  try {
+    const { data: imgData, error: imgErr } = await getSupabaseAdmin().from('service_images').select('service_key, image_path, caption');
+    if (imgErr) console.error('[services] service_images query failed:', imgErr.message);
+    serviceImageMap = Object.fromEntries((imgData ?? []).map((r) => [r.service_key, r]));
+  } catch (err) {
+    console.error('[services] service_images query threw:', err);
+  }
+
   return (
     <>
       <SiteHeader active="/services" />
@@ -147,26 +195,32 @@ export default async function ServicesPage() {
               <p className="note">Consulting and delivery work for studios and contractors who need outsourced computational design expertise.</p>
             </div>
             <div className={styles.servicesList}>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>01</span>
-                <h3>Parametric facade fabrication</h3>
-                <p>Surface rationalization, panel typology, and double-curved geometry workflows scripted end-to-end in Grasshopper, built for fabrication, not just visualization.</p>
-              </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>02</span>
-                <h3>Shop drawing automation</h3>
-                <p>Scripted documentation pipelines that take rationalized geometry straight to fabrication-ready shop drawings, cutting manual drafting time on large panel counts.</p>
-              </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>03</span>
-                <h3>College workshops</h3>
-                <p>Multi-day or semester-length computational design programs for architecture schools, delivered on campus or online.</p>
-              </div>
-              <div className={styles.serviceRow}>
-                <span className={styles.idx}>04</span>
-                <h3>Corporate training for architectural firms</h3>
-                <p>Structured digital-tech upskilling for practicing studios: Rhino, Grasshopper, and Rhino.Inside.Revit workflows tailored to the firm&apos;s live project pipeline.</p>
-              </div>
+              {SERVICES.map((svc, i) => {
+                const img = serviceImageMap[svc.key];
+                const imgUrl = resolveServiceImageUrl(img?.image_path ?? null);
+                const layoutClass = i % 2 === 0 ? styles.imageFirst : styles.contentFirst;
+                return (
+                  <div key={svc.key} className={`${styles.serviceBlock} ${layoutClass}`}>
+                    {imgUrl ? (
+                      <div className={styles.serviceImageWrap}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imgUrl} alt={svc.title} />
+                        {img?.caption && <span className={styles.serviceImageCaption}>{img.caption}</span>}
+                      </div>
+                    ) : null}
+                    <div className={`${styles.serviceContent} ${imgUrl ? '' : styles.noImage}`}>
+                      <span className={styles.idx}>{svc.num}</span>
+                      <h3>{svc.title}</h3>
+                      <p>{svc.description}</p>
+                      <div className={styles.serviceTags}>
+                        {svc.tags.map((tag) => (
+                          <span key={tag} className={styles.serviceTag}>{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -175,8 +229,8 @@ export default async function ServicesPage() {
           <div className="wrap">
             <div className="eyebrow">WORKSHOP ARCHIVE</div>
             <div className="section-head">
-              <h2>Workshops delivered.</h2>
-              <p className="note">Institutional and academic engagements, ongoing and completed.</p>
+              <h2>Where this has actually been delivered.</h2>
+              <p className="note">Real institutional and academic engagements, photographed on-site, not a client list.</p>
             </div>
 
             <div className={styles.workshopList}>

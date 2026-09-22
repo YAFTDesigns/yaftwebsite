@@ -37,6 +37,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
         { href: '/admin/community', label: 'Community', badge: counts.pendingApprovals },
         { href: '/admin/projects', label: 'Projects' },
         { href: '/admin/workshops', label: 'Workshops' },
+        { href: '/admin/services', label: 'Services page images' },
       ],
     },
     {
