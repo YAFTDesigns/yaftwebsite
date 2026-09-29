@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
+import LeadStatusEditor from '@/components/admin/LeadStatusEditor';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -11,23 +12,34 @@ type Enquiry = {
   course_interest: string | null;
   message: string | null;
   created_at: string;
+  lead_id: string | null;
 };
 
-async function getEnquiries(): Promise<{ enquiries: Enquiry[]; error: string | null }> {
+type LeadStatusRow = { id: string; status: string; notes: string | null; follow_up_date: string | null };
+
+async function getEnquiries(): Promise<{ enquiries: Enquiry[]; error: string | null; leadStatus: Record<string, LeadStatusRow> }> {
   const supabase = getSupabaseAdmin();
   const result = await safeQuery<Enquiry[]>(
     supabase
       .from('enquiries')
-      .select('id, name, email, course_interest, message, created_at')
+      .select('id, name, email, course_interest, message, created_at, lead_id')
       .order('created_at', { ascending: false }),
     [],
     'enquiries list'
   );
-  return { enquiries: result.data, error: result.error };
+
+  const leadIds = [...new Set(result.data.map((e) => e.lead_id).filter((id): id is string => !!id))];
+  let leadStatus: Record<string, LeadStatusRow> = {};
+  if (leadIds.length > 0) {
+    const { data: leadRows } = await supabase.from('leads').select('id, status, notes, follow_up_date').in('id', leadIds);
+    leadStatus = Object.fromEntries((leadRows ?? []).map((r) => [r.id, r]));
+  }
+
+  return { enquiries: result.data, error: result.error, leadStatus };
 }
 
 export default async function AdminEnquiriesPage() {
-  const { enquiries, error } = await getEnquiries();
+  const { enquiries, error, leadStatus } = await getEnquiries();
 
   return (
     <>
@@ -51,19 +63,28 @@ export default async function AdminEnquiriesPage() {
               <th>Email</th>
               <th>Interested in</th>
               <th>Message</th>
+              <th>Status</th>
               <th>Submitted</th>
             </tr>
           </thead>
           <tbody>
-            {enquiries.map((enq) => (
-              <tr key={enq.id}>
-                <td>{enq.name}</td>
-                <td>{enq.email}</td>
-                <td>{enq.course_interest ?? '—'}</td>
-                <td style={{ maxWidth: 320 }}>{enq.message ?? '—'}</td>
-                <td>{new Date(enq.created_at).toLocaleString()}</td>
-              </tr>
-            ))}
+            {enquiries.map((enq) => {
+              const ls = enq.lead_id ? leadStatus[enq.lead_id] : undefined;
+              return (
+                <tr key={enq.id}>
+                  <td>{enq.name}</td>
+                  <td>{enq.email}</td>
+                  <td>{enq.course_interest ?? '—'}</td>
+                  <td style={{ maxWidth: 320 }}>{enq.message ?? '—'}</td>
+                  <td>
+                    {ls ? (
+                      <LeadStatusEditor leadId={ls.id} initialStatus={ls.status} initialNotes={ls.notes} initialFollowUp={ls.follow_up_date} />
+                    ) : '—'}
+                  </td>
+                  <td>{new Date(enq.created_at).toLocaleString()}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}

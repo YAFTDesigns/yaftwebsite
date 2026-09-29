@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import DeclinedToggle from '@/components/admin/DeclinedToggle';
+import LeadStatusEditor from '@/components/admin/LeadStatusEditor';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -14,6 +15,9 @@ type Lead = {
   first_seen: string;
   last_seen: string;
   declined: boolean;
+  status: string;
+  notes: string | null;
+  follow_up_date: string | null;
 };
 
 type TimeOnSite = { seconds: number; pageViews: number } | null;
@@ -23,7 +27,7 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   const result = await safeQuery<Lead[]>(
     supabase
       .from('leads')
-      .select('id, email, name, linkedin_url, source, first_seen, last_seen, declined')
+      .select('id, email, name, linkedin_url, source, first_seen, last_seen, declined, status, notes, follow_up_date')
       .order('last_seen', { ascending: false }),
     [],
     'leads list'
@@ -170,6 +174,7 @@ export default async function AdminLeadsPage() {
               <th>Time on site</th>
               <th>First seen</th>
               <th>Last seen</th>
+              <th>Status</th>
               <th>Follow-up</th>
             </tr>
           </thead>
@@ -203,6 +208,7 @@ export default async function AdminLeadsPage() {
                 </td>
                 <td>{formatSeen(lead.first_seen)}</td>
                 <td>{formatSeen(lead.last_seen)}</td>
+                <td><LeadStatusEditor leadId={lead.id} initialStatus={lead.status} initialNotes={lead.notes} initialFollowUp={lead.follow_up_date} /></td>
                 <td><DeclinedToggle leadId={lead.id} initialDeclined={lead.declined} /></td>
               </tr>
             ))}
