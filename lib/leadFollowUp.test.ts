@@ -105,3 +105,25 @@ describe('signature banner', () => {
     }
   });
 });
+
+import { firstNameOf } from './leadFollowUp';
+describe('personalisation', () => {
+  it('uses a clean first name only', () => {
+    expect(firstNameOf('haniya aireen')).toBe('Haniya');
+    expect(firstNameOf('  PRIYA  Shah')).toBe('Priya');
+    expect(firstNameOf('uy959699')).toBeNull();
+    expect(firstNameOf('<b>x</b>')).toBeNull();
+    expect(firstNameOf(null)).toBeNull();
+  });
+  it('greets by name and names the unlocked course with its published length', () => {
+    const m = buildFollowUpEmail({ source: 'syllabus_gate', name: 'malhar singhvi', course_interest: null, syllabus_slug: 'grasshopper-architecture' });
+    expect(m.html).toContain('Hi Malhar,');
+    expect(m.subject).toBe('Did the Grasshopper for Architecture syllabus answer your questions?');
+    expect(m.html).toContain('36 hours over 6 days');
+  });
+  it('falls back to a plain greeting and generic wording without a name or course', () => {
+    const m = buildFollowUpEmail({ source: 'syllabus_gate', name: null, course_interest: null, syllabus_slug: null });
+    expect(m.html).toContain('>Hi,<');
+    expect(m.subject).toBe('Did the YAFT syllabus answer your questions?');
+  });
+});

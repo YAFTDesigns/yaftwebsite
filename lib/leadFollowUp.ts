@@ -77,6 +77,24 @@ export function rankCandidates<T extends { source: LeadSource; course_interest: 
   return [...list].sort((a, b) => w(a) - w(b) || new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime());
 }
 
+// Published course facts (durations are on the live course pages). Keyed by
+// the database course slug stored on syllabus_requests.
+export const COURSE_FACTS: Record<string, { title: string; length: string }> = {
+  'rhino-architecture': { title: 'Rhino3D for Architecture', length: '30 hours over 5 days' },
+  'grasshopper-architecture': { title: 'Grasshopper for Architecture', length: '36 hours over 6 days' },
+  'revit-rhino-inside': { title: 'Revit + Rhino.Inside.Revit', length: '60 hours over 6 weeks' },
+  'rhino-industrial-design': { title: 'Rhino3D for Industrial Design', length: '30 hours' },
+  'rhino-wearables-footwear': { title: 'Rhino3D for Wearables & Footwear', length: '30 hours' },
+  'rhino-aec-climate': { title: 'Rhino3D for AEC & Climate', length: '' },
+};
+
+// Only a clean first name is used; anything odd falls back to a plain "Hi,".
+export function firstNameOf(raw: string | null | undefined): string | null {
+  const t = raw?.trim().split(/\s+/)[0] ?? '';
+  if (!/^[A-Za-z][A-Za-z'.-]{1,29}$/.test(t)) return null;
+  return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
+}
+
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 export function utm(source: LeadSource, path: string): string {
@@ -92,9 +110,9 @@ export function utm(source: LeadSource, path: string): string {
 // Wording follows what the person actually did. Gate activity is NOT
 // described as a conversation: a syllabus unlock or a WhatsApp gate opening
 // does not mean we ever spoke to them.
-export function buildFollowUpEmail(c: { source: LeadSource; name: string | null; course_interest: string | null; enquiry_at?: string | null }): { subject: string; html: string } {
+export function buildFollowUpEmail(c: { source: LeadSource; name: string | null; course_interest: string | null; enquiry_at?: string | null; syllabus_slug?: string | null }): { subject: string; html: string } {
   const name = c.name?.trim() || null;
-  const first = name ? name.split(/\s+/)[0] : null;
+  const first = firstNameOf(name);
   const hi = first ? `Hi ${esc(first)},` : 'Hi,';
   const course = c.course_interest ? esc(c.course_interest) : null;
 
@@ -108,11 +126,20 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
       'If you still have questions about the course content, schedule or whether it fits your background, reply here and I will answer directly.',
     ];
   } else if (c.source === 'syllabus_gate') {
-    subject = 'Did the YAFT syllabus answer your questions?';
-    paras = [
-      'You unlocked a course syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.',
-      'If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can suggest which course fits and what to skip.',
-    ];
+    const facts = c.syllabus_slug ? COURSE_FACTS[c.syllabus_slug] : undefined;
+    if (facts) {
+      subject = `Did the ${facts.title} syllabus answer your questions?`;
+      paras = [
+        `You unlocked the <strong>${esc(facts.title)}</strong> syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.`,
+        `${facts.length ? `That course runs ${esc(facts.length)}. ` : ''}If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can say whether it fits you or point you to a better starting course.`,
+      ];
+    } else {
+      subject = 'Did the YAFT syllabus answer your questions?';
+      paras = [
+        'You unlocked a course syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.',
+        'If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can suggest which course fits and what to skip.',
+      ];
+    }
   } else if (c.source === 'whatsapp_gate') {
     subject = 'A question about YAFT courses?';
     paras = [

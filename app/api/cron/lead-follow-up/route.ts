@@ -82,7 +82,7 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
   const excluded: Record<string, number> = {};
   const bump = (k: string) => { excluded[k] = (excluded[k] ?? 0) + 1; };
 
-  type Cand = { id: string; email: string; name: string | null; source: string; lead_source: string; enquiry_at: string | null; status: string; last_seen: string; course_interest: string | null };
+  type Cand = { id: string; email: string; name: string | null; source: string; lead_source: string; enquiry_at: string | null; syllabus_slug: string | null; status: string; last_seen: string; course_interest: string | null };
   const eligible: Cand[] = [];
   for (const l of leads ?? []) {
     const email = String(l.email).trim().toLowerCase();
@@ -93,13 +93,21 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
     if (approved && !approved.has(email)) { bump('not_on_approved_list'); continue; }
     const { data: lastEnquiry } = await supabase
       .from('enquiries')
-      .select('course_interest, created_at')
+      .select('course_interest, created_at, name')
       .eq('lead_id', l.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+    const { data: lastSyllabus } = await supabase
+      .from('syllabus_requests')
+      .select('course_slug')
+      .eq('lead_id', l.id)
+      .order('requested_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     eligible.push({
-      id: l.id, email, name: l.name,
+      id: l.id, email, name: l.name ?? lastEnquiry?.name ?? null,
+      syllabus_slug: lastSyllabus?.course_slug ?? null,
       // wording/ranking/UTM follow actual context (an enquiry on record), not the latest-capture leads.source
       source: contextSource(l.source, !!lastEnquiry),
       lead_source: l.source,
