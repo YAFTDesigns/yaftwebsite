@@ -76,6 +76,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
     messagePlaceholder: 'Year and batch size, preferred dates, and on campus or online',
     segment: 'college',
     crossLinks: ['individual', 'corporate'],
+    heroVideo: { src: '/assets/video/colleges-hero.mp4', poster: '/assets/video/colleges-hero-poster.jpg' },
   },
   corporate: {
     key: 'corporate',
