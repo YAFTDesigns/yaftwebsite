@@ -91,7 +91,7 @@ export default function RhinoWearablesFootwear() {
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
       </div>
-      <div className={s.payNote}>Payment: 50% advance upon blocking of dates, 50% upon commencement of classes. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.payNote}>Payment: 50% advance upon blocking of dates, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Computer requirements</p>
@@ -122,7 +122,7 @@ export default function RhinoWearablesFootwear() {
       <div className={s.faqItem}><p className={s.faqQ}>Is this only for footwear?</p><p className={s.faqA}>No. The course covers footwear alongside neckwear, wrist, and arm bands, the same modeling principles apply across wearable categories.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
-      <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance upon blocking of dates, 50% upon commencement of classes. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
+      <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance upon blocking of dates, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 
       <hr className={s.divider} />
       <div className={s.ctaBottom}>

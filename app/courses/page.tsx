@@ -198,7 +198,7 @@ export default async function CoursesPage() {
               <div className="req-card">
                 <span className="num">REQ 03</span>
                 <h3>Payment terms</h3>
-                <p>50% advance to confirm your seat, 50% on commencement. Group batches carry a student discount where noted, ask when you enquire.</p>
+                <p>50% advance to confirm your seat, balance within 7 days of the invoice date. Group batches carry a student discount where noted, ask when you enquire.</p>
               </div>
             </div>
           </div>

@@ -99,7 +99,7 @@ export default function GrasshopperArchitecture() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 28,000 + GST<div className={s.feeUsd}>approx. $336</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
       </div>
-      <div className={s.payNote}>Payment: 50% advance on booking, 50% on commencement. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
       <div className={s.comboOffer}>
         <span className={s.comboOfferTag}>Combo offer</span>
         <span className={s.comboOfferText}>Take <strong>Grasshopper for Architecture</strong> and <strong>Rhino3D for Architecture</strong> together for <strong>INR 40,000 + GST</strong>, personal training.</span>
@@ -128,7 +128,7 @@ export default function GrasshopperArchitecture() {
       
         <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
-        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, 50% on commencement of classes. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 
       <hr className={s.divider} />
       <div className={s.ctaBottom}>

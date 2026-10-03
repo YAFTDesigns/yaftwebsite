@@ -16,7 +16,7 @@ const TERMS = [
   },
   {
     title: '2. Booking and Payment',
-    body: 'An advance of 50% of the agreed fee is required to confirm your seat or engagement. The remaining 50% is due on or before the commencement of the first session. The advance is refundable only as set out in section 3. For institutional or multi-day workshop engagements, payment terms will be agreed upon in writing prior to commencement. All prices are quoted in Indian Rupees (INR) unless otherwise stated in writing. Any applicable bank charges or transaction fees are the responsibility of the payer.',
+    body: 'An advance of 50% of the agreed fee is required to confirm your seat or engagement. The remaining 50% is payable within 7 days of the invoice date. The advance is refundable only as set out in section 3. For institutional or multi-day workshop engagements, payment terms will be agreed upon in writing prior to commencement. All prices are quoted in Indian Rupees (INR) unless otherwise stated in writing. Any applicable bank charges or transaction fees are the responsibility of the payer.',
   },
   {
     title: '3. Cancellations and Refunds',
