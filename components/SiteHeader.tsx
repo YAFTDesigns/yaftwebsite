@@ -9,15 +9,16 @@ const RHINO_DIRECTORY_URL =
 
 export default function SiteHeader({ active }: { active?: string }) {
   const [open, setOpen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | null>(null);
+  const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | 'for' | null>(null);
   const [hidden, setHidden] = useState(false);
   const projectsRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
+  const forRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Small delay before closing on mouse-leave so moving the cursor from
   // the label down into the menu doesn't snap it shut mid-transition.
-  function openOnHover(menu: 'projects' | 'resources') {
+  function openOnHover(menu: 'projects' | 'resources' | 'for') {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenMenu(menu);
   }
@@ -58,13 +59,21 @@ export default function SiteHeader({ active }: { active?: string }) {
       const target = e.target as Node;
       const insideProjects = projectsRef.current && projectsRef.current.contains(target);
       const insideResources = resourcesRef.current && resourcesRef.current.contains(target);
-      if (!insideProjects && !insideResources) setOpenMenu(null);
+      const insideFor = forRef.current && forRef.current.contains(target);
+      if (!insideProjects && !insideResources && !insideFor) setOpenMenu(null);
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const isProjectsActive = active === '/projects' || active === '/projects/community';
+  const FOR_LINKS = [
+    { href: '/individuals', label: 'Individuals', sub: 'Students and working professionals' },
+    { href: '/colleges', label: 'Colleges', sub: 'Workshops and semester programs' },
+    { href: '/corporate', label: 'Corporate', sub: 'Team training for firms' },
+    { href: '/consulting', label: 'Consulting', sub: 'Facade and automation projects' },
+  ];
+  const isForActive = FOR_LINKS.some((l) => l.href === active);
   const isResourcesActive = active === '/resources' || active === '/insights';
 
   return (
@@ -78,6 +87,36 @@ export default function SiteHeader({ active }: { active?: string }) {
         <div className={`navlinks${open ? ' open' : ''}`} id="navlinks">
           <Link href="/courses"  className={active === '/courses'  ? 'active' : undefined} onClick={() => setOpen(false)}>Courses</Link>
           <Link href="/services" className={active === '/services' ? 'active' : undefined} onClick={() => setOpen(false)}>Services</Link>
+
+          {/* Who it's for dropdown */}
+          <div
+            className="nav-dropdown"
+            ref={forRef}
+            onMouseEnter={() => openOnHover('for')}
+            onMouseLeave={closeOnHoverOut}
+          >
+            <span className={`nav-drop-btn${isForActive ? ' active' : ''}`}>
+              <button
+                type="button"
+                className="nav-drop-caret"
+                style={{ fontSize: 'inherit', color: 'inherit', padding: 0 }}
+                onClick={() => setOpenMenu(v => v === 'for' ? null : 'for')}
+                aria-expanded={openMenu === 'for'}
+              >
+                Who it&apos;s for <span className="nav-caret" aria-hidden>▾</span>
+              </button>
+            </span>
+            {openMenu === 'for' && (
+              <div className="nav-drop-menu">
+                {FOR_LINKS.map((l) => (
+                  <Link key={l.href} href={l.href} className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                    <span className="nav-drop-label">{l.label}</span>
+                    <span className="nav-drop-sub">{l.sub}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Projects dropdown */}
           <div
