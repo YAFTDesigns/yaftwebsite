@@ -6,6 +6,7 @@ import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { normalizePhone, normalizeSegment } from '@/lib/enquiryFields';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
   if (!name || !EMAIL_RE.test(email) || !message) {
     return NextResponse.json({ error: 'Name, a valid email, and a message are required.' }, { status: 400 });
   }
+  // Optional marketing fields: blank is fine, invalid is rejected.
+  const seg = normalizeSegment(body?.segment);
+  if (!seg.ok) return NextResponse.json({ error: 'Please choose a valid enquiry type.' }, { status: 400 });
+  const ph = normalizePhone(body?.phone);
+  if (!ph.ok) return NextResponse.json({ error: 'Please enter a valid phone number, or leave it blank.' }, { status: 400 });
+  const segment = seg.value;
+  const phone = ph.value;
 
   const supabase = getSupabaseAdmin();
 
@@ -34,7 +42,7 @@ export async function POST(request: NextRequest) {
 
       const { data: enquiryRow, error } = await supabase
         .from('enquiries')
-        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message })
+        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message, segment, phone })
         .select('id')
         .single();
       if (error) throw error;
@@ -45,7 +53,7 @@ export async function POST(request: NextRequest) {
       // enquiry submission for the visitor.
       sendPushToAll({
         title: 'New enquiry',
-        body: `${name}${interest ? ` — ${interest}` : ''}`,
+        body: `${name}${interest ? ` — ${interest}` : ''}${segment && segment !== 'individual' ? ` (${segment})` : ''}`,
         url: '/admin/leads',
       }).catch((pushErr) => console.error('enquiry push notification failed:', pushErr));
     } catch (dbErr) {
@@ -56,7 +64,7 @@ export async function POST(request: NextRequest) {
       // them a failure for something that will resolve itself shortly.
       console.error('enquiries insert failed, queueing for retry:', dbErr);
       try {
-        await pushEnquiryToQueue({ name, email, message, interest: interest || null, queuedAt: new Date().toISOString() });
+        await pushEnquiryToQueue({ name, email, message, interest: interest || null, segment, phone, queuedAt: new Date().toISOString() });
       } catch (queueErr) {
         // Both Supabase and the retry queue are unreachable -- genuinely
         // nothing left to do but surface the failure to the visitor.

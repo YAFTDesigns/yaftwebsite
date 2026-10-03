@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
 
-const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock', 'whatsapp_click', 'whatsapp_gate_open', 'lab_script_view', 'lab_script_download']);
+const VALID_EVENTS = new Set(['page_view', 'syllabus_modal_open', 'syllabus_unlock', 'enquiry_submit', 'course_gate_open', 'course_gate_unlock', 'whatsapp_click', 'whatsapp_gate_open', 'lab_script_view', 'lab_script_download', 'cta_click']);
 
 // A recent scan showed bot/scanner traffic posting fabricated page
 // values straight to this endpoint (e.g. base64-looking garbage,
@@ -25,7 +25,9 @@ export async function POST(request: NextRequest) {
   const eventType = typeof body?.eventType === 'string' ? body.eventType : '';
   const page = typeof body?.page === 'string' ? body.page : null;
   const courseSlug = typeof body?.courseSlug === 'string' ? body.courseSlug : null;
-  const meta = body?.meta && typeof body.meta === 'object' ? body.meta : null;
+  const rawMeta = body?.meta && typeof body.meta === 'object' ? body.meta : null;
+  // meta is attacker-controllable (no auth on this endpoint): cap its size.
+  const meta = rawMeta && JSON.stringify(rawMeta).length <= 1000 ? rawMeta : null;
   const referrer = typeof body?.referrer === 'string' ? body.referrer.slice(0, 2048) : null;
   const utmSource = typeof body?.utmSource === 'string' ? body.utmSource.slice(0, 200) : null;
   const utmMedium = typeof body?.utmMedium === 'string' ? body.utmMedium.slice(0, 200) : null;

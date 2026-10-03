@@ -19,6 +19,7 @@ const GA4_EVENT_NAMES: Partial<Record<Parameters<typeof track>[0], string>> = {
   enquiry_submit: 'generate_lead',
   course_gate_unlock: 'syllabus_unlock',
   whatsapp_click: 'whatsapp_click',
+  cta_click: 'cta_click',
 };
 
 // Founder/team browsers can mark themselves as internal once, via
@@ -91,7 +92,7 @@ export function getSessionId(): string {
 }
 
 export function track(
-  eventType: 'page_view' | 'syllabus_modal_open' | 'syllabus_unlock' | 'enquiry_submit' | 'course_gate_open' | 'course_gate_unlock' | 'whatsapp_click' | 'whatsapp_gate_open' | 'lab_script_view' | 'lab_script_download',
+  eventType: 'page_view' | 'syllabus_modal_open' | 'syllabus_unlock' | 'enquiry_submit' | 'course_gate_open' | 'course_gate_unlock' | 'whatsapp_click' | 'whatsapp_gate_open' | 'lab_script_view' | 'lab_script_download' | 'cta_click',
   extra: { page?: string; courseSlug?: string; meta?: Record<string, unknown> } = {}
 ) {
   try {
@@ -115,6 +116,10 @@ export function track(
       window.gtag('event', ga4EventName, {
         course_slug: extra.courseSlug,
         page: extra.page,
+        // short, non-personal labels only (never free text)
+        cta: typeof extra.meta?.cta === 'string' ? extra.meta.cta : undefined,
+        service: typeof extra.meta?.service === 'string' ? extra.meta.service : undefined,
+        segment: typeof extra.meta?.segment === 'string' ? extra.meta.segment : undefined,
       });
     }
   } catch {

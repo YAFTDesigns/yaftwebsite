@@ -48,6 +48,8 @@ async function runRetry() {
           email:           enq.email,
           course_interest: enq.interest || null,
           message:         enq.message,
+          segment:         enq.segment ?? null,
+          phone:           enq.phone ?? null,
         });
       if (error) throw error;
       eProcessed++;

@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import DeclinedToggle from '@/components/admin/DeclinedToggle';
 import LeadStatusEditor from '@/components/admin/LeadStatusEditor';
+import { SEGMENT_LABELS } from '@/lib/enquiryFields';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -22,7 +23,9 @@ type Lead = {
 
 type TimeOnSite = { seconds: number; pageViews: number } | null;
 
-async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite>; syllabusByLead: Record<string, string[]> }> {
+type EnquiryContext = { segment: string | null; phone: string | null };
+
+async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite>; syllabusByLead: Record<string, string[]>; enquiryByLead: Record<string, EnquiryContext> }> {
   const supabase = getSupabaseAdmin();
   const result = await safeQuery<Lead[]>(
     supabase
@@ -112,7 +115,29 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
     }
   }
 
-  return { leads: result.data, error: result.error, timeOnSite, syllabusByLead };
+  // Segment and phone live on enquiries; show the latest enquiry's values.
+  const enquiryByLead: Record<string, EnquiryContext> = {};
+  if (leadIds.length > 0) {
+    const { data: enqRows, error: enqError } = await supabase
+      .from('enquiries')
+      .select('lead_id, segment, phone, created_at')
+      .in('lead_id', leadIds)
+      .order('created_at', { ascending: true });
+    if (enqError) {
+      console.error('[leads] failed to load enquiry context:', enqError);
+    } else {
+      for (const r of enqRows ?? []) {
+        const prev = enquiryByLead[r.lead_id as string];
+        // ascending order: later rows overwrite, but never replace a value with blank
+        enquiryByLead[r.lead_id as string] = {
+          segment: (r.segment as string | null) ?? prev?.segment ?? null,
+          phone: (r.phone as string | null) ?? prev?.phone ?? null,
+        };
+      }
+    }
+  }
+
+  return { leads: result.data, error: result.error, timeOnSite, syllabusByLead, enquiryByLead };
 }
 
 // Below 24h, a precise duration is a plausible single session and
@@ -146,7 +171,7 @@ function formatSeen(iso: string): string {
 }
 
 export default async function AdminLeadsPage() {
-  const { leads, error, timeOnSite, syllabusByLead } = await getLeads();
+  const { leads, error, timeOnSite, syllabusByLead, enquiryByLead } = await getLeads();
 
   return (
     <>
@@ -170,6 +195,8 @@ export default async function AdminLeadsPage() {
               <th>Name</th>
               <th>LinkedIn</th>
               <th>Source</th>
+              <th>Segment</th>
+              <th>Phone</th>
               <th>Syllabus accessed</th>
               <th>Time on site</th>
               <th>First seen</th>
@@ -193,6 +220,8 @@ export default async function AdminLeadsPage() {
                   )}
                 </td>
                 <td>{lead.source ?? '—'}</td>
+                <td>{enquiryByLead[lead.id]?.segment ? SEGMENT_LABELS[enquiryByLead[lead.id]!.segment as keyof typeof SEGMENT_LABELS] ?? enquiryByLead[lead.id]!.segment : '—'}</td>
+                <td>{enquiryByLead[lead.id]?.phone ?? '—'}</td>
                 <td>{syllabusByLead[lead.id]?.join(', ') || '—'}</td>
                 <td>
                   {timeOnSite[lead.id] ? (

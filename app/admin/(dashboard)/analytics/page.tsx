@@ -2,6 +2,8 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import BarChart from '@/components/admin/BarChart';
 import LineChart from '@/components/admin/LineChart';
+import { buildJourney, pct, type JourneyEvent, type InterestCount } from '@/lib/serviceJourney';
+import { SEGMENT_LABELS } from '@/lib/enquiryFields';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +37,7 @@ async function getAnalytics() {
 
   const TREND_EVENTS = ['page_view', 'course_gate_open', 'course_gate_unlock', 'enquiry_submit'] as const;
 
-  const [funnelRes, courseRes, sourceRes, trendRes] = await Promise.all([
+  const [funnelRes, courseRes, sourceRes, trendRes, journeyRes, interestRes] = await Promise.all([
     safeQuery<{ event_type: string; sessions: number }[]>(
       supabase.from('analytics_funnel_counts').select('event_type, sessions'),
       [],
@@ -62,6 +64,16 @@ async function getAnalytics() {
         .gte('month', sixMonthsAgoStart().slice(0, 7)),
       [],
       'analytics 6-month trend'
+    ),
+    safeQuery<JourneyEvent[]>(
+      supabase.from('service_journey_events').select('stage, key, sessions'),
+      [],
+      'service journey events'
+    ),
+    safeQuery<InterestCount[]>(
+      supabase.from('enquiry_interest_segment_counts').select('course_interest, segment, enquiries'),
+      [],
+      'enquiry interest by segment'
     ),
   ]);
 
@@ -90,13 +102,17 @@ async function getAnalytics() {
     }
   }
 
-  const errors = [funnelRes.error, courseRes.error, sourceRes.error, trendRes.error].filter(Boolean) as string[];
+  const errors = [funnelRes.error, courseRes.error, sourceRes.error, trendRes.error, journeyRes.error, interestRes.error].filter(Boolean) as string[];
+  const journey = buildJourney(journeyRes.data, interestRes.data);
 
-  return { byEventType, byCourse, bySource, monthlyByEvent, error: errors.length > 0 ? errors.join('; ') : null };
+  return { byEventType, byCourse, bySource, monthlyByEvent, journey, error: errors.length > 0 ? errors.join('; ') : null };
 }
 
 export default async function AdminAnalyticsPage() {
-  const { byEventType, byCourse, bySource, monthlyByEvent, error } = await getAnalytics();
+  const { byEventType, byCourse, bySource, monthlyByEvent, journey, error } = await getAnalytics();
+  const th = { textAlign: 'left', fontWeight: 400, padding: '6px 10px', color: 'var(--ink-soft)' } as const;
+  const td = { padding: '6px 10px' } as const;
+  const cell = (n: number | null) => (n === null ? '–' : n);
 
   const funnelItems = FUNNEL_STEPS.map((step) => ({ label: FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
   const waFunnelItems = WA_FUNNEL_STEPS.map((step) => ({ label: WA_FUNNEL_LABELS[step], value: byEventType[step] ?? 0 }));
@@ -172,6 +188,45 @@ export default async function AdminAnalyticsPage() {
         ) : (
           <BarChart items={sourceItems} color="var(--blueprint)" />
         )}
+      </div>
+
+      <div className={`eyebrow ${styles.eyebrowSpaced}`}>SERVICE JOURNEYS</div>
+      <div className={styles.panel}>
+        <h2 className={styles.panelTitle}>Page → enquiry button → (syllabus) → enquiry, per service</h2>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', marginBottom: 14 }}>
+          Unique sessions for views, button clicks and syllabus steps; enquiries are rows in the enquiries table.
+          Internal traffic and admin pages are excluded. Service buttons were added on 3 Oct 2026, so button clicks start from zero.
+          All service rows share one /services page view count (the services page is a single page).
+          Course enquiry buttons are tracked in total only: {journey.courseCtaTotal} sessions so far.
+        </p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', fontFamily: 'var(--mono)', fontSize: 12, borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={th}>Offering</th><th style={th}>Viewed</th><th style={th}>Button clicks</th>
+                <th style={th}>Syllabus modal</th><th style={th}>Unlocked</th><th style={th}>Enquiries</th><th style={th}>Enquiries / viewed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {journey.rows.map((r) => (
+                <tr key={r.group + r.label} style={{ borderTop: '1px solid #222' }}>
+                  <td style={td}>{r.label} <span style={{ opacity: 0.5 }}>({r.group.toLowerCase()})</span></td>
+                  <td style={td}>{cell(r.viewed)}</td>
+                  <td style={td}>{cell(r.cta)}</td>
+                  <td style={td}>{cell(r.gateOpen)}</td>
+                  <td style={td}>{cell(r.unlocked)}</td>
+                  <td style={td}>{r.enquiries}</td>
+                  <td style={td}>{pct(r.enquiries, r.viewed)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--ink-soft)', marginTop: 14 }}>
+          Enquiries by audience:{' '}
+          {Object.entries(journey.bySegment).length === 0 ? 'none yet' : Object.entries(journey.bySegment)
+            .map(([s, n]) => `${SEGMENT_LABELS[s as keyof typeof SEGMENT_LABELS] ?? 'Not recorded'}: ${n}`).join(' | ')}
+        </p>
       </div>
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>SYLLABUS REQUESTS</div>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
+import ServiceCta from '@/components/ServiceCta';
 import NextSteps from '@/components/NextSteps';
 import WorkshopGallery from '@/components/WorkshopGallery';
 import FadeInOnView from '@/components/FadeInOnView';
@@ -97,6 +98,13 @@ const INTEREST_OPTIONS = [
 // Tags pulled directly from language already in each service's own
 // description below, not invented -- e.g. "Grasshopper", "fabrication",
 // "panel typology" all appear verbatim in the existing copy.
+const SERVICE_CTA: Record<string, { interest: string; segment?: 'college' | 'corporate'; label: string }> = {
+  'parametric-facade': { interest: 'Parametric facade fabrication', label: 'Enquire about facade fabrication' },
+  'shop-drawing': { interest: 'Shop drawing automation', label: 'Enquire about shop drawing automation' },
+  'college-workshops': { interest: 'College workshop', segment: 'college', label: 'Enquire about a college workshop' },
+  'corporate-training': { interest: 'Corporate training', segment: 'corporate', label: 'Enquire about corporate training' },
+};
+
 const SERVICES = [
   {
     key: 'parametric-facade',
@@ -218,6 +226,11 @@ export default async function ServicesPage() {
                           <span key={tag} className={styles.serviceTag}>{tag}</span>
                         ))}
                       </div>
+                      {SERVICE_CTA[svc.key] && (
+                        <p style={{ marginTop: 16 }}>
+                          <ServiceCta service={svc.key} cta="service_block" interest={SERVICE_CTA[svc.key].interest} segment={SERVICE_CTA[svc.key].segment} label={SERVICE_CTA[svc.key].label} />
+                        </p>
+                      )}
                     </div>
                   </FadeInOnView>
                 );
@@ -233,6 +246,10 @@ export default async function ServicesPage() {
               <h2>Where this has actually been delivered.</h2>
               <p className="note">Real institutional and academic engagements, photographed on-site, not a client list.</p>
             </div>
+
+            <p style={{ marginBottom: 24 }}>
+              <ServiceCta service="college-workshops" cta="workshop_archive" interest="College workshop" segment="college" label="Host a workshop at your college" />
+            </p>
 
             <div className={styles.workshopList}>
               {workshops.map((w) => (

@@ -22,6 +22,8 @@ export type QueuedEnquiry = {
   email: string;
   message: string;
   interest: string | null;
+  segment?: string | null;
+  phone?: string | null;
   queuedAt: string;
 };
 
