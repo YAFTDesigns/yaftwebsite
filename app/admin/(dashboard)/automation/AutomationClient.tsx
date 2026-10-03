@@ -44,6 +44,14 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
     setPreview(await res.json());
   }
 
+  async function sendTest() {
+    if (!window.confirm('Send ONE [TEST] copy of the first proposed recipient\'s email to YOUR OWN admin address? No customer is emailed.')) return;
+    setMsg('Sending test...');
+    const res = await fetch('/api/cron/lead-follow-up?test=1', { method: 'POST' });
+    const j = await res.json();
+    setMsg(res.ok ? `Test ${j.status} to ${j.to} (rendered for ${j.rendered_for}). Subject: ${j.subject}${j.error ? ' | ' + j.error : ''}` : (j.error ?? 'Failed'));
+  }
+
   return (
     <div style={mono}>
       {msg && <p>{msg}</p>}
@@ -67,7 +75,8 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
         <p>Approved recipients (one email per line). Only these can be emailed. Blank = no restriction.</p>
         <textarea value={approvedText} onChange={(e) => setApprovedText(e.target.value)} rows={6} style={{ ...mono, width: '100%' }} />
         <button style={btn} onClick={() => patch({ job: 'lead-follow-up', approved_emails: approvedText.split(/\s+/).filter(Boolean).length ? approvedText.split(/\s+/).filter(Boolean) : null })}>Save approved list</button>{' '}
-        <button style={btn} onClick={runPreview}>Preview recipients (sends nothing)</button>
+        <button style={btn} onClick={runPreview}>Preview recipients (sends nothing)</button>{' '}
+        <button style={btn} onClick={sendTest}>Send test to my own address</button>
         {preview && (
           <div style={{ marginTop: 12 }}>
             {preview.error && <p>{preview.error}</p>}

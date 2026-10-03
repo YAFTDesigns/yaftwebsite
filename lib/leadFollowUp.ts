@@ -59,6 +59,17 @@ export function selectionReason(c: { source: LeadSource; last_seen: string; cour
   return bits.join(', ');
 }
 
+// Which wording a lead gets follows the strongest thing they actually did,
+// not leads.source (which is overwritten by whichever capture came last).
+// Anyone with an enquiry on record wrote to us, so they get enquiry wording.
+export function contextSource(leadSource: LeadSource, hasEnquiry: boolean): LeadSource {
+  return hasEnquiry ? 'contact_form' : leadSource;
+}
+
+export function formatEnquiryDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', timeZone: 'Asia/Kolkata' });
+}
+
 // Contact-form first (they wrote to us), then those with a stated course
 // interest, then most recently active.
 export function rankCandidates<T extends { source: LeadSource; course_interest: string | null; last_seen: string }>(list: T[]): T[] {
@@ -81,7 +92,7 @@ export function utm(source: LeadSource, path: string): string {
 // Wording follows what the person actually did. Gate activity is NOT
 // described as a conversation: a syllabus unlock or a WhatsApp gate opening
 // does not mean we ever spoke to them.
-export function buildFollowUpEmail(c: { source: LeadSource; name: string | null; course_interest: string | null }): { subject: string; html: string } {
+export function buildFollowUpEmail(c: { source: LeadSource; name: string | null; course_interest: string | null; enquiry_at?: string | null }): { subject: string; html: string } {
   const name = c.name?.trim() || null;
   const first = name ? name.split(/\s+/)[0] : null;
   const hi = first ? `Hi ${esc(first)},` : 'Hi,';
@@ -93,7 +104,7 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
   if (c.source === 'contact_form') {
     subject = course ? `Following up on your ${c.course_interest} enquiry` : 'Following up on your YAFT enquiry';
     paras = [
-      `You wrote to YAFT Designs recently${course ? ` about <strong>${course}</strong>` : ''}. I wanted to check that you got what you needed.`,
+      `You wrote to YAFT Designs${c.enquiry_at ? ` on ${formatEnquiryDate(c.enquiry_at)}` : ' recently'}${course ? ` about <strong>${course}</strong>` : ''}. I wanted to check that you got what you needed.`,
       'If you still have questions about the course content, schedule or whether it fits your background, reply here and I will answer directly.',
     ];
   } else if (c.source === 'syllabus_gate') {

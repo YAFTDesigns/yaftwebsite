@@ -78,3 +78,21 @@ describe('ranking and reason', () => {
     expect(r).toContain('10 days ago');
   });
 });
+
+import { contextSource, formatEnquiryDate } from './leadFollowUp';
+describe('context vs latest capture source', () => {
+  it('an enquiry on record wins over a later gate capture', () => {
+    expect(contextSource('syllabus_gate', true)).toBe('contact_form');
+    expect(contextSource('whatsapp_gate', true)).toBe('contact_form');
+  });
+  it('no enquiry keeps the lead source', () => {
+    expect(contextSource('syllabus_gate', false)).toBe('syllabus_gate');
+  });
+  it('enquiry wording carries the enquiry date and course and never the syllabus line', () => {
+    const m = buildFollowUpEmail({ source: contextSource('syllabus_gate', true), name: 'Haniya A', course_interest: 'Rhino3D for Architecture', enquiry_at: '2026-09-07T10:00:00Z' });
+    expect(m.html).toContain('on ' + formatEnquiryDate('2026-09-07T10:00:00Z'));
+    expect(m.html).toContain('Rhino3D for Architecture');
+    expect(m.html).not.toContain('unlocked a course syllabus');
+    expect(m.html).toContain('utm_content=contact_form');
+  });
+});

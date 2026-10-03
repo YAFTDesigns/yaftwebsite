@@ -4,10 +4,13 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { isAdminEmail } from '@/lib/admin';
+import { getSupabaseServer } from '@/lib/supabase/server';
 import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
 import {
   MAX_FAILED_ATTEMPTS,
   buildFollowUpEmail,
+  contextSource,
   isJunkEmail,
   rankCandidates,
   selectionReason,
@@ -28,7 +31,7 @@ const MAX_DAYS_SINCE_LAST_CONTACT = 30;
 // is retried (at most MAX_FAILED_ATTEMPTS times) instead of excluding the
 // lead forever. The per-job control row can additionally restrict sends to
 // an approved list and a lifetime cap, and switches itself off at the cap.
-async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; viaScheduler: boolean }) {
+async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryRun: boolean; viaScheduler: boolean; testTo?: string; testAs?: string }) {
   const supabase = getSupabaseAdmin();
   const control = await getCronControl(supabase, JOB);
 
@@ -36,7 +39,12 @@ async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; via
   // run or a dry run is an explicit human action, so it is not blocked by
   // the switch (but still honours the approved list and the cap).
   if (viaScheduler && !control.enabled) return { ...DISABLED_RESPONSE };
-  if (!dryRun && !isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
+  // Fail safe: never let the scheduler run with neither a cap nor an approved
+  // list (a blank list means "no restriction"), e.g. after an accidental save.
+  if (viaScheduler && control.max_total_sends === null && !(control.approved_emails && control.approved_emails.length > 0)) {
+    return { sent: 0, skipped: 'refusing to run without a send cap or an approved list' };
+  }
+  if ((testTo || !dryRun) && !isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
 
   const now = Date.now();
   const newest = new Date(now - MIN_DAYS_SINCE_LAST_CONTACT * 86_400_000).toISOString();
@@ -74,7 +82,7 @@ async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; via
   const excluded: Record<string, number> = {};
   const bump = (k: string) => { excluded[k] = (excluded[k] ?? 0) + 1; };
 
-  type Cand = { id: string; email: string; name: string | null; source: string; status: string; last_seen: string; course_interest: string | null };
+  type Cand = { id: string; email: string; name: string | null; source: string; lead_source: string; enquiry_at: string | null; status: string; last_seen: string; course_interest: string | null };
   const eligible: Cand[] = [];
   for (const l of leads ?? []) {
     const email = String(l.email).trim().toLowerCase();
@@ -85,12 +93,20 @@ async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; via
     if (approved && !approved.has(email)) { bump('not_on_approved_list'); continue; }
     const { data: lastEnquiry } = await supabase
       .from('enquiries')
-      .select('course_interest')
+      .select('course_interest, created_at')
       .eq('lead_id', l.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    eligible.push({ id: l.id, email, name: l.name, source: l.source, status: l.status, last_seen: l.last_seen, course_interest: lastEnquiry?.course_interest ?? null });
+    eligible.push({
+      id: l.id, email, name: l.name,
+      // wording/ranking/UTM follow actual context (an enquiry on record), not the latest-capture leads.source
+      source: contextSource(l.source, !!lastEnquiry),
+      lead_source: l.source,
+      enquiry_at: lastEnquiry?.created_at ?? null,
+      status: l.status, last_seen: l.last_seen,
+      course_interest: lastEnquiry?.course_interest ?? null,
+    });
   }
 
   const ranked = rankCandidates(eligible);
@@ -104,6 +120,7 @@ async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; via
       email: c.email,
       name: c.name,
       source: c.source,
+      lead_source: c.lead_source,
       last_activity: c.last_seen.slice(0, 10),
       status: c.status,
       course_interest: c.course_interest,
@@ -122,6 +139,30 @@ async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; via
   };
 
   if (dryRun) return { ...summary, would_send: preview.length, recipients: preview };
+
+  // Controlled test: render the exact email a proposed recipient would get and
+  // send it ONLY to the admin's own address. Never touches the customer, the
+  // cap, the dedupe log (separate template) or the job switch.
+  if (testTo) {
+    const pick = (testAs ? batch.find((c) => c.email === testAs.trim().toLowerCase()) : undefined) ?? batch[0];
+    if (!pick) return { ...summary, sent: 0, skipped: 'no eligible recipient to render for the test' };
+    const { subject, html } = buildFollowUpEmail(pick);
+    let status = 'sent';
+    let errMsg: string | null = null;
+    let resendEmailId: string | null = null;
+    try {
+      const result = await sendEmail({ to: testTo, subject: `[TEST] ${subject}`, html });
+      resendEmailId = result.id;
+    } catch (mailErr) {
+      status = 'failed';
+      errMsg = getErrorMessage(mailErr);
+    }
+    await supabase.from('email_logs').insert({
+      to_email: testTo, to_name: null, subject: `[TEST] ${subject}`,
+      template: `${FOLLOW_UP_TEMPLATE}_test`, status, error: errMsg, resend_email_id: resendEmailId,
+    });
+    return { test: true, to: testTo, rendered_for: pick.email, subject: `[TEST] ${subject}`, status, resend_email_id: resendEmailId, error: errMsg };
+  }
   if (batch.length === 0) return { ...summary, sent: 0, skipped: 'no eligible recipients' };
 
   let sent = 0;
@@ -174,11 +215,22 @@ export async function GET(request: Request) {
 }
 
 // Admin-only. ?dry_run=1 previews recipients and sends nothing.
+// ?test=1[&as=<lead email>] sends ONE [TEST] copy to the signed-in admin's own address only.
 export async function POST(request: Request) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const dryRun = new URL(request.url).searchParams.get('dry_run') === '1';
-  const result = await runFollowUpCheck({ dryRun, viaScheduler: false });
+  const params = new URL(request.url).searchParams;
+  const dryRun = params.get('dry_run') === '1';
+  let testTo: string | undefined;
+  if (params.get('test') === '1') {
+    // The test copy goes to the signed-in admin's own address, nowhere else.
+    const { data: { user } } = await (await getSupabaseServer()).auth.getUser();
+    testTo = user?.email?.toLowerCase();
+    if (!testTo || !isAdminEmail(testTo)) {
+      return NextResponse.json({ error: 'No admin address to send the test to' }, { status: 400 });
+    }
+  }
+  const result = await runFollowUpCheck({ dryRun, viaScheduler: false, testTo, testAs: params.get('as') ?? undefined });
   return NextResponse.json(result);
 }
