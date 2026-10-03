@@ -67,7 +67,11 @@ const TERMS = [
     body: 'YAFT Designs reserves the right to update these terms at any time. The most current version will be published on yaftdesigns.com. Continued engagement with YAFT Designs after any update constitutes acceptance of the revised terms.',
   },
   {
-    title: '15. Contact',
+    title: '15. Website Content, Design and Automated Access',
+    body: 'The design, layout, text, images, graphics, code, course material and other content of yaftdesigns.com are the intellectual property of YAFT Designs. You may not copy, reproduce, scrape, mirror, or republish them, or use them to train, fine-tune, or build any artificial intelligence or machine learning model or to create a lookalike website, course or service, without prior written consent from YAFT Designs. Automated access to this website (including bots, crawlers and AI agents) is permitted only for ordinary search-engine indexing in line with our robots.txt.',
+  },
+  {
+    title: '16. Contact',
     body: 'For questions, clarifications, or concerns regarding these terms, please contact us at yaftdesigns@gmail.com. Studio: Coimbatore, Tamil Nadu, India.',
   },
 ];
