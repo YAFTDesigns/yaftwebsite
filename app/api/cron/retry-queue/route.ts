@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAuthorizedCron } from '@/lib/cronAuth';
+import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
   popEnquiriesFromQueue, pushEnquiryToQueue,
@@ -130,6 +131,10 @@ async function runRetry() {
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  // Independent per-job switch (cron_job_controls). Off by default; fails closed.
+  if (!(await getCronControl(getSupabaseAdmin(), 'retry-queue')).enabled) {
+    return NextResponse.json({ ...DISABLED_RESPONSE });
   }
 
   const result = await runRetry();

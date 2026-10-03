@@ -4,140 +4,181 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
+import {
+  MAX_FAILED_ATTEMPTS,
+  buildFollowUpEmail,
+  isJunkEmail,
+  rankCandidates,
+  selectionReason,
+  summariseFollowUpLogs,
+} from '@/lib/leadFollowUp';
 
 export const dynamic = 'force-dynamic';
 
+const JOB = 'lead-follow-up' as const;
 const FOLLOW_UP_TEMPLATE = 'lead_follow_up';
 const MIN_DAYS_SINCE_LAST_CONTACT = 3;
+const MAX_DAYS_SINCE_LAST_CONTACT = 30;
 
-function buildEmailHtml(name: string | null, courseInterest: string | null) {
-  const firstName = name ? (name.trim().split(/\s+/)[0] || name) : 'there';
-  return `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
-  <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Hi ${firstName},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Just checking in, how have you been?</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">You reached out a little while back${courseInterest ? ` about <strong>${courseInterest}</strong>` : ' about learning with us'}, and I wanted to follow up properly rather than let it go quiet. Are you still interested in picking up computational design, Rhino, Grasshopper, and the kind of parametric workflow that lets you actually automate the repetitive parts of a project?</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">If now isn't the right time, no worries at all, just let me know. And if you'd like to get a feel for the kind of work involved before committing to anything, we've got a growing library of free Grasshopper and Rhino scripts you can download and try yourself:</p>
-  <p style="margin:0 0 20px;"><a href="https://www.yaftdesigns.com/labs" style="display:inline-block;background:#E63946;color:#fff;font-size:13px;padding:10px 20px;border-radius:6px;text-decoration:none;">Browse free scripts on YAFT Labs &rarr;</a></p>
-  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 20px;" />
-  <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Reply to this email whenever suits you, happy to answer anything or pick up where we left off.</p>
-  <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
-  <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">
-    YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br>
-    <a href="https://www.yaftdesigns.com" style="color:#E63946;text-decoration:none;">yaftdesigns.com</a>
-  </p>
-</div>`;
-}
-
-// A genuine, once-per-lead follow-up -- not a drip sequence. Fires at
-// most once for a given lead: after MIN_DAYS_SINCE_LAST_CONTACT with
-// no further activity, skips anyone Yokes has manually marked
-// declined (leads.declined -- the system has no way to detect a
-// reply declining on its own), and skips anyone already sent one
-// (checked via email_logs, same dedup pattern as the accountant
-// reminder).
-async function runFollowUpCheck(dryRun = false) {
-  if (!isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
-
+// One follow-up per lead, ever, and only to leads that are:
+//   status 'new', not declined, active 3-30 days ago, not a junk/test
+//   address, and never bounced/complained on ANY earlier email.
+// A send only counts as "done" if it actually went out; a failed attempt
+// is retried (at most MAX_FAILED_ATTEMPTS times) instead of excluding the
+// lead forever. The per-job control row can additionally restrict sends to
+// an approved list and a lifetime cap, and switches itself off at the cap.
+async function runFollowUpCheck({ dryRun, viaScheduler }: { dryRun: boolean; viaScheduler: boolean }) {
   const supabase = getSupabaseAdmin();
-  const cutoff = new Date(Date.now() - MIN_DAYS_SINCE_LAST_CONTACT * 24 * 60 * 60 * 1000).toISOString();
+  const control = await getCronControl(supabase, JOB);
 
-  const { data: candidates, error } = await supabase
+  // The scheduler may only act when the job is switched on. A manual admin
+  // run or a dry run is an explicit human action, so it is not blocked by
+  // the switch (but still honours the approved list and the cap).
+  if (viaScheduler && !control.enabled) return { ...DISABLED_RESPONSE };
+  if (!dryRun && !isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
+
+  const now = Date.now();
+  const newest = new Date(now - MIN_DAYS_SINCE_LAST_CONTACT * 86_400_000).toISOString();
+  const oldest = new Date(now - MAX_DAYS_SINCE_LAST_CONTACT * 86_400_000).toISOString();
+
+  const { data: leads, error } = await supabase
     .from('leads')
-    .select('id, email, name, last_seen, declined')
+    .select('id, email, name, source, status, last_seen')
     .eq('declined', false)
+    .eq('status', 'new')
     .not('email', 'is', null)
-    .lte('last_seen', cutoff);
-
+    .gte('last_seen', oldest)
+    .lte('last_seen', newest);
   if (error) {
     console.error('[lead-follow-up] failed to load candidate leads:', error);
     return { sent: 0, error: error.message };
   }
-  if (!candidates || candidates.length === 0) return { sent: 0, skipped: 'no candidates' };
 
-  let sent = 0;
-  const results: string[] = [];
+  // Suppression: anyone who ever bounced or complained, on any template.
+  const { data: suppressedRows } = await supabase
+    .from('email_logs')
+    .select('to_email')
+    .in('status', ['bounced', 'complained']);
+  const suppressed = new Set((suppressedRows ?? []).map((r) => String(r.to_email).trim().toLowerCase()));
 
-  for (const lead of candidates) {
-    // Only email requires a real value -- name doesn't, roughly 70%
-    // of leads have no name on file (syllabus/WhatsApp-gate captures
-    // just the email), and the original guard here required both,
-    // which meant this cron silently skipped every nameless lead
-    // since the day it was built. Every place below that uses the
-    // name now degrades gracefully instead.
-    if (!lead.email) continue;
+  const { data: logRows } = await supabase
+    .from('email_logs')
+    .select('to_email, status')
+    .eq('template', FOLLOW_UP_TEMPLATE);
+  const { done, failed } = summariseFollowUpLogs(logRows ?? []);
+  const sentSoFar = done.size;
 
-    const { count: alreadyFollowedUp } = await supabase
-      .from('email_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('template', FOLLOW_UP_TEMPLATE)
-      .eq('to_email', lead.email);
-    if ((alreadyFollowedUp ?? 0) > 0) continue;
+  const approved = control.approved_emails && control.approved_emails.length > 0 ? new Set(control.approved_emails) : null;
 
-    // Most recent enquiry, for course_interest personalization -- best
-    // effort, a missing enquiry row just means a slightly more generic
-    // opening line, not a skipped follow-up.
+  const excluded: Record<string, number> = {};
+  const bump = (k: string) => { excluded[k] = (excluded[k] ?? 0) + 1; };
+
+  type Cand = { id: string; email: string; name: string | null; source: string; status: string; last_seen: string; course_interest: string | null };
+  const eligible: Cand[] = [];
+  for (const l of leads ?? []) {
+    const email = String(l.email).trim().toLowerCase();
+    if (isJunkEmail(email)) { bump('junk_or_test_address'); continue; }
+    if (suppressed.has(email)) { bump('bounced_or_complained'); continue; }
+    if (done.has(email)) { bump('already_followed_up'); continue; }
+    if ((failed.get(email) ?? 0) >= MAX_FAILED_ATTEMPTS) { bump('failed_too_many_times'); continue; }
+    if (approved && !approved.has(email)) { bump('not_on_approved_list'); continue; }
     const { data: lastEnquiry } = await supabase
       .from('enquiries')
       .select('course_interest')
-      .eq('lead_id', lead.id)
+      .eq('lead_id', l.id)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+    eligible.push({ id: l.id, email, name: l.name, source: l.source, status: l.status, last_seen: l.last_seen, course_interest: lastEnquiry?.course_interest ?? null });
+  }
 
-    const displayName = lead.name?.trim() || null;
-    const firstName = displayName ? (displayName.split(/\s+/)[0] || displayName) : 'there';
-    const subject = `Hey ${firstName}, still thinking about it?`;
-    const html = buildEmailHtml(displayName, lastEnquiry?.course_interest ?? null);
+  const ranked = rankCandidates(eligible);
+  const cap = control.max_total_sends;
+  const remaining = cap === null ? Number.POSITIVE_INFINITY : Math.max(0, cap - sentSoFar);
+  const batch = ranked.slice(0, Number.isFinite(remaining) ? remaining : ranked.length);
 
-    // Dry run: list who WOULD be emailed, send and log nothing.
-    if (dryRun) {
-      results.push(`${lead.email} (${displayName ?? 'no name'}, last seen ${String(lead.last_seen).slice(0, 10)})`);
-      continue;
-    }
+  const preview = batch.map((c) => {
+    const mail = buildFollowUpEmail(c);
+    return {
+      email: c.email,
+      name: c.name,
+      source: c.source,
+      last_activity: c.last_seen.slice(0, 10),
+      status: c.status,
+      course_interest: c.course_interest,
+      selection_reason: selectionReason(c, now),
+      subject: mail.subject,
+    };
+  });
 
+  const summary = {
+    dry_run: dryRun,
+    control: { enabled: control.enabled, max_total_sends: cap, approved_list_size: approved?.size ?? null },
+    sent_so_far: sentSoFar,
+    remaining_under_cap: Number.isFinite(remaining) ? remaining : null,
+    eligible_before_cap: ranked.length,
+    excluded,
+  };
+
+  if (dryRun) return { ...summary, would_send: preview.length, recipients: preview };
+  if (batch.length === 0) return { ...summary, sent: 0, skipped: 'no eligible recipients' };
+
+  let sent = 0;
+  const results: string[] = [];
+  for (const c of batch) {
+    const { subject, html } = buildFollowUpEmail(c);
     let status = 'sent';
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
-
     try {
-      const result = await sendEmail({ to: displayName ? `${displayName} <${lead.email}>` : lead.email, subject, html, bcc: getNotificationBcc() });
+      const result = await sendEmail({ to: c.name ? `${c.name} <${c.email}>` : c.email, subject, html, bcc: getNotificationBcc() });
       resendEmailId = result.id;
       sent++;
     } catch (mailErr) {
       status = 'failed';
       errMsg = getErrorMessage(mailErr);
-      console.error('[lead-follow-up] send failed for', lead.email, mailErr);
+      console.error('[lead-follow-up] send failed for', c.email, mailErr);
     }
-
     await supabase.from('email_logs').insert({
-      to_email: lead.email,
-      to_name: displayName,
+      to_email: c.email,
+      to_name: c.name,
       subject,
       template: FOLLOW_UP_TEMPLATE,
       status,
       error: errMsg,
       resend_email_id: resendEmailId,
     });
-    results.push(`${lead.email}: ${status}`);
+    results.push(`${c.email}: ${status}`);
   }
 
-  return { dry_run: dryRun, sent, total_candidates: candidates.length, would_send: dryRun ? results.length : undefined, results };
+  // Pilot pause: once the lifetime cap is reached the job switches itself off.
+  let pausedAtCap = false;
+  if (cap !== null && sentSoFar + sent >= cap) {
+    await supabase
+      .from('cron_job_controls')
+      .update({ enabled: false, updated_at: new Date().toISOString(), updated_by: 'auto: lifetime cap reached' })
+      .eq('job', JOB);
+    pausedAtCap = true;
+  }
+
+  return { ...summary, sent, results, paused_at_cap: pausedAtCap };
 }
 
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await runFollowUpCheck();
+  const result = await runFollowUpCheck({ dryRun: false, viaScheduler: true });
   return NextResponse.json(result);
 }
 
-// Manual "run now" trigger, behind the real admin session.
+// Admin-only. ?dry_run=1 previews recipients and sends nothing.
 export async function POST(request: Request) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const dryRun = new URL(request.url).searchParams.get('dry_run') === '1';
-  const result = await runFollowUpCheck(dryRun);
+  const result = await runFollowUpCheck({ dryRun, viaScheduler: false });
   return NextResponse.json(result);
 }

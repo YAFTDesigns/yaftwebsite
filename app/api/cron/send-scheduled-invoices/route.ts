@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isAuthorizedCron } from '@/lib/cronAuth';
+import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendInvoiceEmail, type InvoiceForEmail } from '@/lib/invoiceEmail';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
@@ -87,6 +88,10 @@ async function runScheduledSends() {
 export async function GET(request: Request) {
   if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  // Independent per-job switch (cron_job_controls). Off by default; fails closed.
+  if (!(await getCronControl(getSupabaseAdmin(), 'send-scheduled-invoices')).enabled) {
+    return NextResponse.json({ ...DISABLED_RESPONSE });
   }
 
   const result = await runScheduledSends();

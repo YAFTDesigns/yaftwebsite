@@ -89,3 +89,22 @@ export async function getInvoiceQueueLength(): Promise<number> {
   const res = await redis(['LLEN', INVOICE_QUEUE_KEY]);
   return res.result ?? 0;
 }
+
+// ── Read-only inspection (does NOT remove anything) ──────────────────
+export async function peekEnquiryQueue(count = 50): Promise<QueuedEnquiry[]> {
+  const res = await redis(['LRANGE', QUEUE_KEY, '0', String(count - 1)]);
+  const out: QueuedEnquiry[] = [];
+  for (const raw of (res.result ?? []) as string[]) {
+    try { out.push(JSON.parse(raw)); } catch { /* skip */ }
+  }
+  return out;
+}
+
+export async function peekInvoiceQueue(count = 50): Promise<QueuedInvoice[]> {
+  const res = await redis(['LRANGE', INVOICE_QUEUE_KEY, '0', String(count - 1)]);
+  const out: QueuedInvoice[] = [];
+  for (const raw of (res.result ?? []) as string[]) {
+    try { out.push(JSON.parse(raw)); } catch { /* skip */ }
+  }
+  return out;
+}
