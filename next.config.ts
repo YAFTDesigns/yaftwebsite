@@ -2,6 +2,18 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pdfkit'],
+  // Never ship source maps to the browser: they expose readable source.
+  productionBrowserSourceMaps: false,
+  async headers() {
+    return [
+      {
+        // Opt-out signals for AI training and image scraping. Unknown
+        // directives are ignored by search engines, so indexing is unchanged.
+        source: '/:path*',
+        headers: [{ key: 'X-Robots-Tag', value: 'noai, noimageai' }],
+      },
+    ];
+  },
   async redirects() {
     // These .html URLs are from the old static GitHub Pages site,
     // before the migration to Next.js. Google indexed them back then
