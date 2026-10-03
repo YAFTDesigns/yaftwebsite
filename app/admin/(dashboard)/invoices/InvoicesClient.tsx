@@ -62,7 +62,8 @@ export default function InvoicesClient({
     client_address:'', client_phone:'', schedule_note:'',
   });
   const [items, setItems] = useState<Item[]>([{ desc:'', hrs:0, qty:1, rate:0 }]);
-  const [advance, setAdvance] = useState(0);
+  const [advanceInput, setAdvance] = useState(0);
+  const [paidInFull, setPaidInFull] = useState(false);
   const [sendMode, setSendMode] = useState<'now' | 'schedule'>('now');
   const [scheduledSendAt, setScheduledSendAt] = useState('');
   const [sending, setSending] = useState(false);
@@ -173,6 +174,8 @@ export default function InvoicesClient({
 
   const { subtotal, cgst, sgst, igst, total: grandTotal, taxMode } = computeInvoiceTotals(items, form.client_state);
   const intra = taxMode === 'intra';
+  // Tick 'Fully paid' and the advance follows the total (even if items change).
+  const advance    = paidInFull ? grandTotal : advanceInput;
   const balance    = grandTotal - advance;
 
   function setF(k: string, v: string) { setForm(f => ({...f, [k]: v})); }
@@ -466,6 +469,7 @@ export default function InvoicesClient({
     });
     setItems([{ desc: invoiceType === 'consultancy' ? 'Computational Design Consulting' : 'Rhino3D for Architecture', hrs: 10, qty: 1, rate: 5000 }]);
     setAdvance(0);
+    setPaidInFull(false);
   }
 
   const inp: React.CSSProperties = {
@@ -817,6 +821,10 @@ export default function InvoicesClient({
                         <div>
                           <span style={lbl}>Advance Paid (INR)</span>
                           <input style={inp} type="number" value={editInv.advance || ''} onChange={e => setEditField('advance', parseFloat(e.target.value) || 0)} placeholder="0" />
+                          <label style={{ display:'flex', alignItems:'center', gap:8, marginTop:8, fontFamily:'var(--mono)', fontSize:12, color: eBalance <= 0 && eTotal > 0 && (editInv.advance || 0) > 0 ? '#4caf50' : '#777', cursor:'pointer' }}>
+                            <input type="checkbox" checked={eTotal > 0 && (editInv.advance || 0) >= eTotal} onChange={e => setEditField('advance', e.target.checked ? eTotal : 0)} />
+                            Fully paid
+                          </label>
                         </div>
                         <div>
                           <span style={lbl}>Balance Due (INR)</span>
@@ -1127,7 +1135,11 @@ export default function InvoicesClient({
               <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12 }}>
                 <div>
                   <span style={lbl}>Advance Paid (INR)</span>
-                  <input style={inp} type="number" value={advance||''} onChange={e=>setAdvance(parseFloat(e.target.value)||0)} placeholder="0" />
+                  <input style={{ ...inp, ...(paidInFull ? { background:'#0a0a0a', color:'#555' } : {}) }} type="number" value={advance||''} readOnly={paidInFull} onChange={e=>setAdvance(parseFloat(e.target.value)||0)} placeholder="0" />
+                  <label style={{ display:'flex', alignItems:'center', gap:8, marginTop:8, fontFamily:'var(--mono)', fontSize:12, color: paidInFull ? '#4caf50' : '#777', cursor:'pointer' }}>
+                    <input type="checkbox" checked={paidInFull} onChange={e=>setPaidInFull(e.target.checked)} />
+                    Fully paid
+                  </label>
                 </div>
                 <div>
                   <span style={lbl}>Balance Due (INR)</span>
@@ -1192,7 +1204,7 @@ export default function InvoicesClient({
                 <div style={{ borderTop:'1px solid #222', paddingTop:10, marginTop:6, display:'flex', justifyContent:'space-between', fontFamily:'var(--mono)', fontSize:14, fontWeight:600, color:'#fff' }}>
                   <span>TOTAL</span><span>INR {fmt(grandTotal)}</span>
                 </div>
-                {advance > 0 && <>
+                {advance > 0 && balance > 0 && <>
                   <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'var(--mono)', fontSize:12, color:'#555', marginTop:8 }}><span>Advance Paid</span><span>INR {fmt(advance)}</span></div>
                   <div style={{ display:'flex', justifyContent:'space-between', fontFamily:'var(--mono)', fontSize:13, fontWeight:600, color:'#E63946', marginTop:4 }}><span>Balance Due</span><span>INR {fmt(balance)}</span></div>
                 </>}

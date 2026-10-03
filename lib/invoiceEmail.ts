@@ -35,6 +35,7 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
   const fmt = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2 });
   const advance = data.advance || 0;
   const balance = data.balance || 0;
+  const fullyPaid = advance > 0 && balance <= 0;
 
   // Same computeInvoiceTotals() the PDF and Excel export already use,
   // recomputed from items+client_state rather than trusting a
@@ -70,7 +71,7 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
     ${taxTotals.sgst > 0 ? `<tr><td style="padding:8px 12px;color:#888;">SGST 9%</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.sgst)}</td></tr>` : ''}
     ${taxTotals.igst > 0 ? `<tr><td style="padding:8px 12px;color:#888;">IGST 18%</td><td style="padding:8px 12px;">INR ${fmt(taxTotals.igst)}</td></tr>` : ''}
     <tr style="background:#f8f8f8;"><td style="padding:8px 12px;color:#888;">Total Amount</td><td style="padding:8px 12px;font-weight:600;">INR ${fmt(data.grand_total)}</td></tr>
-    ${advance > 0 ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(advance)}</td></tr>` : ''}
+    ${advance > 0 && !fullyPaid ? `<tr><td style="padding:8px 12px;color:#888;">Advance Paid</td><td style="padding:8px 12px;">INR ${fmt(advance)}</td></tr>` : ''}
     ${balance > 0 ? `<tr style="background:#fff3f3;"><td style="padding:8px 12px;color:#888;">Balance Due</td><td style="padding:8px 12px;font-weight:600;color:#E63946;">INR ${fmt(balance)}</td></tr>` : ''}
   </table>
   ${isProformaEmail && data.schedule_note ? `<div style="background:#f8f8f8;border-radius:8px;padding:16px;margin-bottom:16px;">

@@ -226,18 +226,26 @@ export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
     doc.text(`INR ${fmt(grandTotal)}`, 0, ty2, { align: 'right', width: W - M });
     ty2 += 24;
 
-    doc.font('Helvetica').fontSize(8).fillColor('#000000');
-    doc.text('ADVANCE PAID', tx, ty2);
-    doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
-    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
-       .text(fmt(data.advance || 0), tx + 84, ty2, { width: 109, align: 'right' });
-    ty2 += 22;
-    doc.font('Helvetica').fontSize(8).fillColor('#000000');
-    doc.text('BALANCE AMOUNT', tx, ty2);
-    doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
-    doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
-       .text(fmt(data.balance ?? (grandTotal - (data.advance || 0))), tx + 84, ty2, { width: 109, align: 'right' });
-    ty2 += 18;
+    // Fully paid: just the TOTAL line (plus the PAID stamp), no advance /
+    // balance rows. Otherwise show the advance and balance as before.
+    const paidAdvance = data.advance || 0;
+    const paidBalance = data.balance ?? (grandTotal - paidAdvance);
+    if (!(paidBalance <= 0 && paidAdvance > 0)) {
+      doc.font('Helvetica').fontSize(8).fillColor('#000000');
+      doc.text('ADVANCE PAID', tx, ty2);
+      doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
+         .text(fmt(data.advance || 0), tx + 84, ty2, { width: 109, align: 'right' });
+      ty2 += 22;
+      doc.font('Helvetica').fontSize(8).fillColor('#000000');
+      doc.text('BALANCE AMOUNT', tx, ty2);
+      doc.rect(tx + 79, ty2 - 2, 119, 14).fill('#cce0f5').stroke('#000000');
+      doc.fillColor('#000000').font('Helvetica-Bold').fontSize(8)
+         .text(fmt(data.balance ?? (grandTotal - (data.advance || 0))), tx + 84, ty2, { width: 109, align: 'right' });
+      ty2 += 18;
+    } else {
+      ty2 -= 6;
+    }
 
     // Amount in words
     doc.font('Helvetica-Oblique').fontSize(8).fillColor('#555555')
