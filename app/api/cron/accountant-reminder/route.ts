@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthorizedCron } from '@/lib/cronAuth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendAdminAlert } from '@/lib/adminAlert';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
@@ -114,12 +115,7 @@ async function runReminderCheck() {
 // session middleware, which a Cron invocation never has, and Cron
 // always sends GET regardless of what's configured in vercel.json.
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET ?? '';
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-  const isManualCall = cronSecret.length > 0 && authHeader === ('Bearer ' + cronSecret);
-
-  if (!isVercelCron && !isManualCall) {
+  if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

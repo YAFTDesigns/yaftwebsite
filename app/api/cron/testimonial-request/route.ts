@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthorizedCron } from '@/lib/cronAuth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
@@ -39,7 +40,7 @@ function buildEmailHtml(clientName: string, jobType: string) {
 // asked once before for something else. Waits
 // MIN_DAYS_SINCE_COMPLETION so the client has actually had time to
 // use the deliverable before being asked to review it.
-async function runTestimonialRequestCheck() {
+async function runTestimonialRequestCheck(dryRun = false) {
   if (!isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
 
   const supabase = getSupabaseAdmin();
@@ -82,6 +83,12 @@ async function runTestimonialRequestCheck() {
     const subject = `How was the ${job.job_type}?`;
     const html = buildEmailHtml(displayName, job.job_type);
 
+    // Dry run: list who WOULD be emailed, send and log nothing.
+    if (dryRun) {
+      results.push(`${client.email} (${displayName}, ${job.job_type}, job ${job.id})`);
+      continue;
+    }
+
     let status = 'sent';
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
@@ -109,25 +116,22 @@ async function runTestimonialRequestCheck() {
     results.push(`${client.email} (job ${job.id}): ${status}`);
   }
 
-  return { sent, total_candidates: jobs.length, results };
+  return { dry_run: dryRun, sent, total_candidates: jobs.length, would_send: dryRun ? results.length : undefined, results };
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET ?? '';
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-  const isManualCall = cronSecret.length > 0 && authHeader === ('Bearer ' + cronSecret);
-  if (!isVercelCron && !isManualCall) {
+  if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const result = await runTestimonialRequestCheck();
   return NextResponse.json(result);
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await runTestimonialRequestCheck();
+  const dryRun = new URL(request.url).searchParams.get('dry_run') === '1';
+  const result = await runTestimonialRequestCheck(dryRun);
   return NextResponse.json(result);
 }

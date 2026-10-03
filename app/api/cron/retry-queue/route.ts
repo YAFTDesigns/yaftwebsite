@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthorizedCron } from '@/lib/cronAuth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
   popEnquiriesFromQueue, pushEnquiryToQueue,
@@ -127,12 +128,7 @@ async function runRetry() {
 // Also accepts a manual Bearer CRON_SECRET call for testing outside
 // the Vercel platform.
 export async function GET(request: Request) {
-  const authHeader   = request.headers.get('authorization');
-  const cronSecret   = process.env.CRON_SECRET ?? '';
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-  const isManualCall = cronSecret.length > 0 && authHeader === ('Bearer ' + cronSecret);
-
-  if (!isVercelCron && !isManualCall) {
+  if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

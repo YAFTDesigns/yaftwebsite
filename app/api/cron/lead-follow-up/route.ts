@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isAuthorizedCron } from '@/lib/cronAuth';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
@@ -34,7 +35,7 @@ function buildEmailHtml(name: string | null, courseInterest: string | null) {
 // reply declining on its own), and skips anyone already sent one
 // (checked via email_logs, same dedup pattern as the accountant
 // reminder).
-async function runFollowUpCheck() {
+async function runFollowUpCheck(dryRun = false) {
   if (!isEmailConfigured()) return { sent: 0, skipped: 'email not configured' };
 
   const supabase = getSupabaseAdmin();
@@ -88,6 +89,12 @@ async function runFollowUpCheck() {
     const subject = `Hey ${firstName}, still thinking about it?`;
     const html = buildEmailHtml(displayName, lastEnquiry?.course_interest ?? null);
 
+    // Dry run: list who WOULD be emailed, send and log nothing.
+    if (dryRun) {
+      results.push(`${lead.email} (${displayName ?? 'no name'}, last seen ${String(lead.last_seen).slice(0, 10)})`);
+      continue;
+    }
+
     let status = 'sent';
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
@@ -114,15 +121,11 @@ async function runFollowUpCheck() {
     results.push(`${lead.email}: ${status}`);
   }
 
-  return { sent, total_candidates: candidates.length, results };
+  return { dry_run: dryRun, sent, total_candidates: candidates.length, would_send: dryRun ? results.length : undefined, results };
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET ?? '';
-  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
-  const isManualCall = cronSecret.length > 0 && authHeader === ('Bearer ' + cronSecret);
-  if (!isVercelCron && !isManualCall) {
+  if (!isAuthorizedCron(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   const result = await runFollowUpCheck();
@@ -130,10 +133,11 @@ export async function GET(request: Request) {
 }
 
 // Manual "run now" trigger, behind the real admin session.
-export async function POST() {
+export async function POST(request: Request) {
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  const result = await runFollowUpCheck();
+  const dryRun = new URL(request.url).searchParams.get('dry_run') === '1';
+  const result = await runFollowUpCheck(dryRun);
   return NextResponse.json(result);
 }
