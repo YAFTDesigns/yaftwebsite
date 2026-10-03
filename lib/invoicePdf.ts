@@ -270,7 +270,7 @@ export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
     doc.font('Helvetica-Bold').fontSize(8).text('GSTIN : 33ANCPY7046B1Z3', M, ny);
     ny += 24;
     doc.font('Helvetica').fontSize(8).text('Terms and Conditions :', M, ny); ny += 14;
-    doc.text('1. YAFT DESIGNS invoices are due and payable within 7 days of invoice data.', M, ny);
+    doc.text('1. YAFT DESIGNS invoices are due and payable within 7 days of invoice date.', M, ny);
 
     // Signature
     const sy = ny + 50;

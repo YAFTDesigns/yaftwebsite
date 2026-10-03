@@ -35,7 +35,7 @@ export default function SiteFooter() {
             lineHeight: 1.7,
             margin: 0,
           }}>
-            By engaging with YAFT Designs you agree to our terms and conditions. Course materials are for individual use only and remain the intellectual property of YAFT Designs. Fees paid are non-refundable within 15 days of course commencement. YAFT Designs does not sell or resell Rhino3D licenses. Governed by the laws of India, jurisdiction: Coimbatore, Tamil Nadu.
+            By engaging with YAFT Designs you agree to our terms and conditions. Course materials are for individual use only and remain the intellectual property of YAFT Designs. The advance is refundable, less transaction fees, if you cancel at least 15 days before the start date, and is not refundable after that (see Terms). YAFT Designs does not sell or resell Rhino3D licenses. Governed by the laws of India, jurisdiction: Coimbatore, Tamil Nadu.
           </p>
         </div>
       </div>

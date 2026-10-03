@@ -16,7 +16,7 @@ const TERMS = [
   },
   {
     title: '2. Booking and Payment',
-    body: 'A non-refundable advance of 60% of the agreed fee is required to confirm your seat or engagement. The remaining 40% is due on or before the commencement of the first session. For institutional or multi-day workshop engagements, payment terms will be agreed upon in writing prior to commencement. All prices are quoted in Indian Rupees (INR) unless otherwise stated in writing. Any applicable bank charges or transaction fees are the responsibility of the payer.',
+    body: 'An advance of 50% of the agreed fee is required to confirm your seat or engagement. The remaining 50% is due on or before the commencement of the first session. The advance is refundable only as set out in section 3. For institutional or multi-day workshop engagements, payment terms will be agreed upon in writing prior to commencement. All prices are quoted in Indian Rupees (INR) unless otherwise stated in writing. Any applicable bank charges or transaction fees are the responsibility of the payer.',
   },
   {
     title: '3. Cancellations and Refunds',
@@ -85,7 +85,7 @@ export default function TermsPage() {
           <div className="wrap">
             <div className="eyebrow">LEGAL</div>
             <h1 className={styles.title}>Terms and Conditions</h1>
-            <p className={styles.updated}>Last updated: June 2026</p>
+            <p className={styles.updated}>Last updated: October 2026</p>
             <p className={styles.intro}>
               By registering for, enquiring about, or attending any training, workshop, or consulting engagement with YAFT Designs, you agree to the following terms.
             </p>
