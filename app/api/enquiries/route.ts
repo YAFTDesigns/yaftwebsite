@@ -6,7 +6,7 @@ import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
-import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText } from '@/lib/enquiryFields';
+import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText, cleanDetails } from '@/lib/enquiryFields';
 import { recordEnquiryContext } from '@/lib/enquiryLead';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
   const need = cleanText(body?.need, 120);
   const organisation = cleanText(body?.organisation, 120);
   const sourcePage = cleanText(body?.sourcePage, 120);
+  const details = cleanDetails(body?.details);
   if ((audience === 'college' || audience === 'company') && !organisation) {
     return NextResponse.json({ error: audience === 'college' ? 'Please add your college or university name.' : 'Please add your company name.' }, { status: 400 });
   }
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
 
       const { data: enquiryRow, error } = await supabase
         .from('enquiries')
-        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message, segment, phone, audience, funnel, need, organisation, source_page: sourcePage })
+        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message, segment, phone, audience, funnel, need, organisation, source_page: sourcePage, details })
         .select('id')
         .single();
       if (error) throw error;
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       // them a failure for something that will resolve itself shortly.
       console.error('enquiries insert failed, queueing for retry:', dbErr);
       try {
-        await pushEnquiryToQueue({ name, email, message, interest: interest || null, segment, phone, audience, funnel, need, organisation, sourcePage, queuedAt: new Date().toISOString() });
+        await pushEnquiryToQueue({ name, email, message, interest: interest || null, segment, phone, audience, funnel, need, organisation, sourcePage, details, queuedAt: new Date().toISOString() });
       } catch (queueErr) {
         // Both Supabase and the retry queue are unreachable -- genuinely
         // nothing left to do but surface the failure to the visitor.

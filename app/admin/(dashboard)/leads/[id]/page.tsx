@@ -18,7 +18,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   if (!lead) notFound();
 
   const [{ data: enquiries }, { data: notes }, { data: syllabus }, { data: emails }] = await Promise.all([
-    supabase.from('enquiries').select('id, created_at, course_interest, message, phone, need, organisation, audience, funnel, source_page').eq('lead_id', id).order('created_at', { ascending: false }),
+    supabase.from('enquiries').select('id, created_at, course_interest, message, phone, need, organisation, audience, funnel, source_page, details').eq('lead_id', id).order('created_at', { ascending: false }),
     supabase.from('lead_notes').select('id, kind, body, created_at').eq('lead_id', id).order('created_at', { ascending: false }).limit(100),
     supabase.from('syllabus_requests').select('course_slug, requested_at').eq('lead_id', id).order('requested_at', { ascending: false }).limit(10),
     supabase.from('email_logs').select('id, created_at, template, subject, status').eq('to_email', lead.email).order('created_at', { ascending: false }).limit(10),
@@ -69,6 +69,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
                   {fmt(e.created_at)}{e.source_page && ` · from ${e.source_page}`}{e.phone && ` · ${e.phone}`}
                 </div>
                 <div>{[e.course_interest, e.need && e.need !== e.course_interest ? e.need : null].filter(Boolean).join(' / ') || '—'}</div>
+                {e.details && <div style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#8ab4f8' }}>{Object.entries(e.details as Record<string, string>).map(([k, v]) => `${k}: ${v}`).join(' · ')}</div>}
                 <div style={{ opacity: 0.85 }}>{e.message}</div>
               </div>
             ))}

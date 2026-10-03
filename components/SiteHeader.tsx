@@ -69,7 +69,7 @@ export default function SiteHeader({ active }: { active?: string }) {
   const isProjectsActive = active === '/projects' || active === '/projects/community';
   const FOR_LINKS = [
     { href: '/individuals', label: 'Individuals', sub: 'Students and working professionals' },
-    { href: '/colleges', label: 'Colleges', sub: 'Workshops and semester programs' },
+    { href: '/colleges', label: 'Institutions', sub: 'Colleges and universities' },
     { href: '/corporate', label: 'Corporate', sub: 'Team training for firms' },
     { href: '/consulting', label: 'Consulting', sub: 'Facade and automation projects' },
   ];

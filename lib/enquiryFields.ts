@@ -72,3 +72,17 @@ export function cleanText(v: unknown, max: number): string | null {
   const t = v.trim().replace(/\s+/g, ' ');
   return t ? t.slice(0, max) : null;
 }
+
+// Extra answers on institutional enquiries. Only these keys are ever stored.
+export const DETAIL_KEYS = ['role', 'participants', 'duration', 'dates', 'city'] as const;
+export type EnquiryDetails = Partial<Record<(typeof DETAIL_KEYS)[number], string>>;
+
+export function cleanDetails(v: unknown): EnquiryDetails | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const out: EnquiryDetails = {};
+  for (const k of DETAIL_KEYS) {
+    const t = cleanText((v as Record<string, unknown>)[k], 120);
+    if (t) out[k] = t;
+  }
+  return Object.keys(out).length ? out : null;
+}

@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import ContactForm from '@/components/ContactForm';
 import ServiceCta from '@/components/ServiceCta';
+import CollegeSections from '@/components/CollegeSections';
 import { FUNNEL_CONFIG } from '@/lib/funnels';
 import { FUNNEL_LABELS, type Funnel } from '@/lib/enquiryFields';
 
@@ -16,7 +17,7 @@ export function funnelMetadata(key: Funnel): Metadata {
   };
 }
 
-export default function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
+export default async function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
   const c = FUNNEL_CONFIG[funnelKey];
   return (
     <>
@@ -41,9 +42,11 @@ export default function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
             <h1 style={{ fontFamily: 'var(--display)', fontWeight: 700, letterSpacing: '-0.02em' }}>{c.heading}</h1>
             <p className="lede" style={c.heroVideo ? { color: 'rgba(255,255,255,.82)' } : undefined}>{c.lede}</p>
             <ServiceCta service={`funnel_${c.key}`} cta="hero" interest={c.options[0]} segment={c.segment} label={c.cta} />
+            {c.secondaryCta && <a href={c.secondaryCta.href} className="enquire" style={{ marginLeft: 20 }}>{c.secondaryCta.label}</a>}
           </div>
         </section>
 
+        {c.key === 'college' ? <CollegeSections /> : (
         <section>
           <div className="wrap">
             <div className="section-head"><h2>What we offer</h2></div>
@@ -57,6 +60,7 @@ export default function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
             </div>
           </div>
         </section>
+        )}
 
         <section>
           <div className="wrap">

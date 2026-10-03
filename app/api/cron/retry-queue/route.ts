@@ -56,6 +56,7 @@ async function runRetry() {
           need:            enq.need ?? null,
           organisation:    enq.organisation ?? null,
           source_page:     enq.sourcePage ?? null,
+          details:         enq.details ?? null,
         });
       if (error) throw error;
       await recordEnquiryContext(supabase, leadId, { audience: enq.audience ?? null, funnel: enq.funnel ?? null, need: enq.need ?? null, organisation: enq.organisation ?? null, interest: enq.interest || null });

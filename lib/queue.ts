@@ -29,6 +29,7 @@ export type QueuedEnquiry = {
   need?: string | null;
   organisation?: string | null;
   sourcePage?: string | null;
+  details?: Record<string, string> | null;
   queuedAt: string;
 };
 

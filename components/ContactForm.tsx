@@ -47,6 +47,7 @@ export default function ContactForm({ options, funnel, messagePlaceholder }: Con
           need: interest,
           organisation: needsOrg ? String(data.get('organisation') ?? '').trim() : undefined,
           sourcePage: window.location.pathname,
+          details: funnel === 'college' ? Object.fromEntries(['role', 'participants', 'duration', 'dates', 'city'].map((k) => [k, String(data.get(`d_${k}`) ?? '').trim()])) : undefined,
           phone: phone || undefined,
           message: data.get('message'),
           sessionId: getSessionId(),
@@ -98,8 +99,33 @@ export default function ContactForm({ options, funnel, messagePlaceholder }: Con
         </div>
       )}
 
+      {funnel === 'college' && (
+        <>
+          <div className="field">
+            <label htmlFor="d_role">Your role</label>
+            <input type="text" name="d_role" id="d_role" maxLength={120} placeholder="Dean, HOD, faculty coordinator" />
+          </div>
+          <div className="field">
+            <label htmlFor="d_city">City and country</label>
+            <input type="text" name="d_city" id="d_city" maxLength={120} />
+          </div>
+          <div className="field">
+            <label htmlFor="d_participants">Estimated participants</label>
+            <input type="text" name="d_participants" id="d_participants" maxLength={120} placeholder="e.g. 40 students" />
+          </div>
+          <div className="field">
+            <label htmlFor="d_duration">Preferred duration</label>
+            <input type="text" name="d_duration" id="d_duration" maxLength={120} placeholder="e.g. 3 days, one semester" />
+          </div>
+          <div className="field">
+            <label htmlFor="d_dates">Preferred dates</label>
+            <input type="text" name="d_dates" id="d_dates" maxLength={120} placeholder="e.g. January 2027" />
+          </div>
+        </>
+      )}
+
       <div className="field">
-        <label htmlFor="contactPhone">Phone (optional)</label>
+        <label htmlFor="contactPhone">Phone or WhatsApp (optional)</label>
         <input type="tel" name="phone" id="contactPhone" placeholder="+91 98765 43210" autoComplete="tel" maxLength={30} />
       </div>
 

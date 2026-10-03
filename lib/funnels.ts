@@ -23,6 +23,7 @@ export type FunnelConfig = {
   crossLinks: Funnel[];
   // Optional looping, muted hero background (files under /public/assets/video).
   heroVideo?: { src: string; poster: string };
+  secondaryCta?: { label: string; href: string };
 };
 
 export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
@@ -55,25 +56,22 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
   college: {
     key: 'college',
     path: '/colleges',
-    title: 'Computational design workshops for colleges',
-    description: 'Multi-day or semester-length computational design programs for architecture schools, delivered on campus or online by YAFT Designs.',
-    eyebrow: 'FOR COLLEGES',
-    heading: 'Computational design programs for your architecture students.',
-    lede: 'Multi-day or semester-length programs for architecture schools, delivered on campus or online. Tell us your batch and timeline and we will propose a format.',
-    points: [
-      { title: 'Multi-day workshops', text: 'Short, focused programs on Rhino and Grasshopper.' },
-      { title: 'Semester-length programs', text: 'A structured computational design track across a term.' },
-      { title: 'On campus or online', text: 'Delivered where it suits your department.' },
-    ],
+    title: 'Rhino and Grasshopper workshops for architecture colleges and universities',
+    description: 'YAFT Designs runs practical Rhino3D, Grasshopper, Rhino.Inside.Revit and computational design workshops and modules for architecture and design institutions, from IIT Kharagpur to VIT Vellore.',
+    eyebrow: 'FOR INSTITUTIONS',
+    heading: 'Computational design training for architecture and design institutions.',
+    lede: 'YAFT Designs conducts practical Rhino3D, Grasshopper, Rhino.Inside.Revit and computational design workshops for architecture and design schools, on campus or online.',
+    points: [],
     steps: [
-      'Send your institution, batch size and what you want students to learn.',
-      'We reply with a proposed format and schedule.',
+      'Send your institution, batch size, topic and preferred timing.',
+      'We reply with a proposed format, schedule and proposal.',
       'Confirm with a 50% advance to hold the dates.',
     ],
-    cta: 'Plan a college program',
-    formHeading: 'Tell us about your college',
-    options: ['Multi-day workshop', 'Semester-length program', 'Faculty training', 'Not sure yet, advise me'],
-    messagePlaceholder: 'Year and batch size, preferred dates, and on campus or online',
+    cta: 'Invite YAFT to your institution',
+    secondaryCta: { label: 'View past workshops', href: '#past-workshops' },
+    formHeading: 'Invite YAFT to your institution',
+    options: ['Multi-day workshop', 'Semester or elective module', 'Faculty development program', 'Custom program', 'Not sure yet, advise me'],
+    messagePlaceholder: 'Student year, topic or software you want covered, and on campus or online',
     segment: 'college',
     crossLinks: ['individual', 'corporate'],
     heroVideo: { src: '/assets/video/colleges-hero.mp4', poster: '/assets/video/colleges-hero-poster.jpg' },

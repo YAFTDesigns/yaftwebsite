@@ -71,3 +71,17 @@ describe('audience and funnel', () => {
     expect(AUDIENCES.length).toBe(4);
   });
 });
+
+import { cleanDetails } from './enquiryFields';
+describe('cleanDetails', () => {
+  it('keeps only whitelisted keys, trimmed and capped', () => {
+    expect(cleanDetails({ role: ' HOD ', participants: '40', evil: 'x', city: 'a'.repeat(300) })).toEqual({ role: 'HOD', participants: '40', city: 'a'.repeat(120) });
+  });
+  it('returns null for nothing useful', () => {
+    expect(cleanDetails({})).toBeNull();
+    expect(cleanDetails({ role: '   ' })).toBeNull();
+    expect(cleanDetails('x')).toBeNull();
+    expect(cleanDetails([1])).toBeNull();
+    expect(cleanDetails(null)).toBeNull();
+  });
+});
