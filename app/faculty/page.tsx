@@ -217,7 +217,6 @@ export default async function FacultyPage() {
         <NextSteps
           links={[
             { href: '/courses', label: 'Browse courses', description: 'See what our faculty and mentors teach, from Rhino fundamentals to Rhino.Inside.Revit.' },
-            { href: '/colleges', label: 'Institutional training', description: 'Workshops and modules for architecture and design colleges, with past institutions and an enquiry form.' },
             { href: '/services', label: 'Explore our services', description: 'Facade engineering, BIM automation, and computational design consulting.' },
           ]}
         />

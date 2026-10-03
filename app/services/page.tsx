@@ -231,9 +231,6 @@ export default async function ServicesPage() {
                           <ServiceCta service={svc.key} cta="service_block" interest={SERVICE_CTA[svc.key].interest} segment={SERVICE_CTA[svc.key].segment} label={SERVICE_CTA[svc.key].label} />
                         </p>
                       )}
-                      {svc.key === 'college-workshops' && (
-                        <p style={{ marginTop: 10 }}><a href="/colleges" className="enquire">Learn more about Institutional Training →</a></p>
-                      )}
                     </div>
                   </FadeInOnView>
                 );
