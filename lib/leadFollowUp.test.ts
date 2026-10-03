@@ -97,16 +97,26 @@ describe('context vs latest capture source', () => {
   });
 });
 
-describe('signature banner', () => {
-  it('every variant carries the Rhino banner like the other YAFT emails', () => {
+describe('signature banner (pilot: omitted)', () => {
+  it('is left out of every variant while FOLLOW_UP_BANNER is false', () => {
+    expect(FOLLOW_UP_BANNER).toBe(false);
     for (const source of ['contact_form', 'syllabus_gate', 'whatsapp_gate', 'other']) {
       const m = buildFollowUpEmail({ source, name: null, course_interest: null });
-      expect(m.html).toContain('https://www.yaftdesigns.com/assets/images/rhino-banner.png');
+      expect(m.html).not.toContain('rhino-banner.png');
     }
   });
 });
 
-import { firstNameOf } from './leadFollowUp';
+describe('revit variant', () => {
+  it('makes no duration claim and asks about Revit experience and workflow', () => {
+    const m = buildFollowUpEmail({ source: 'syllabus_gate', name: null, course_interest: null, syllabus_slug: 'revit-rhino-inside' });
+    expect(m.html).not.toMatch(/hours|weeks|days/);
+    expect(m.html).toContain('How much Revit experience do you have');
+    expect(m.html).toContain('what workflow do you want to learn');
+  });
+});
+
+import { firstNameOf, FOLLOW_UP_BANNER } from './leadFollowUp';
 describe('personalisation', () => {
   it('uses a clean first name only', () => {
     expect(firstNameOf('haniya aireen')).toBe('Haniya');

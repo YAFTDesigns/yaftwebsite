@@ -79,10 +79,15 @@ export function rankCandidates<T extends { source: LeadSource; course_interest: 
 
 // Published course facts (durations are on the live course pages). Keyed by
 // the database course slug stored on syllabus_requests.
-export const COURSE_FACTS: Record<string, { title: string; length: string }> = {
+// `ask` overrides the default background question for a course. Revit has no
+// published length here until the duration inconsistencies on the site are resolved.
+// Pilot setting: the Rhino banner is left out of follow-ups; flip to true to restore it.
+export const FOLLOW_UP_BANNER = false;
+
+export const COURSE_FACTS: Record<string, { title: string; length: string; ask?: string }> = {
   'rhino-architecture': { title: 'Rhino3D for Architecture', length: '30 hours over 5 days' },
   'grasshopper-architecture': { title: 'Grasshopper for Architecture', length: '36 hours over 6 days' },
-  'revit-rhino-inside': { title: 'Revit + Rhino.Inside.Revit', length: '60 hours over 6 weeks' },
+  'revit-rhino-inside': { title: 'Revit + Rhino.Inside.Revit', length: '', ask: 'How much Revit experience do you have, and what workflow do you want to learn? Once I know that, I can say whether this course fits you or suggest a better starting point.' },
   'rhino-industrial-design': { title: 'Rhino3D for Industrial Design', length: '30 hours' },
   'rhino-wearables-footwear': { title: 'Rhino3D for Wearables & Footwear', length: '30 hours' },
   'rhino-aec-climate': { title: 'Rhino3D for AEC & Climate', length: '' },
@@ -131,7 +136,7 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
       subject = `Did the ${facts.title} syllabus answer your questions?`;
       paras = [
         `You unlocked the <strong>${esc(facts.title)}</strong> syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.`,
-        `${facts.length ? `That course runs ${esc(facts.length)}. ` : ''}If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can say whether it fits you or point you to a better starting course.`,
+        facts.ask ? esc(facts.ask) : `${facts.length ? `That course runs ${esc(facts.length)}. ` : ''}If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can say whether it fits you or point you to a better starting course.`,
       ];
     } else {
       subject = 'Did the YAFT syllabus answer your questions?';
@@ -156,8 +161,7 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">${hi}</p>
 ${paras.map((p) => `  <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">${p}</p>`).join('\n')}
   <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">If you would like to try our work first, there are free Grasshopper and Rhino scripts on <a href="${labs}" style="color:#E63946;">YAFT Labs</a>.</p>
-  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
-  <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Not the right time? Just reply "no thanks" and I will not follow up again.</p>
+${FOLLOW_UP_BANNER ? `  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />\n` : ''}  <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Not the right time? Just reply "no thanks" and I will not follow up again.</p>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">
     Yokes Marapa &middot; YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br>
