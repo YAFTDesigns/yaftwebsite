@@ -13,12 +13,18 @@ async function readStored(): Promise<Stored> {
   }
 }
 
+// Env values pasted into dashboards often carry quotes, spaces or a line break.
+export function cleanToken(raw: string | undefined | null): string | undefined {
+  const t = (raw ?? '').replace(/^["'\s]+|["'\s]+$/g, '').replace(/\s+/g, '');
+  return t || undefined;
+}
+
 // Newest usable token: the refreshed one in the database while it is still valid,
 // otherwise the INSTAGRAM_ACCESS_TOKEN env var (the first seed, or a manual replacement).
 export async function getInstagramToken(): Promise<string | undefined> {
   const stored = await readStored();
-  if (stored && (!stored.expires_at || new Date(stored.expires_at).getTime() > Date.now())) return stored.token;
-  return process.env.INSTAGRAM_ACCESS_TOKEN || undefined;
+  if (stored && (!stored.expires_at || new Date(stored.expires_at).getTime() > Date.now())) return cleanToken(stored.token);
+  return cleanToken(process.env.INSTAGRAM_ACCESS_TOKEN);
 }
 
 export type RefreshResult = { ok: true; expiresAt: string } | { ok: false; reason: string };
