@@ -7,6 +7,9 @@ import { useState, useRef, useEffect } from 'react';
 const RHINO_DIRECTORY_URL =
   'https://www.rhino3d.com/training/sites/1650/?coordinates=[78.476681,22.199166]&radius=2200429.497656352&place_type=country';
 
+// Hidden for now (pages stay live by URL). Flip to true to show the menu again.
+const SHOW_AUDIENCE_MENU = false;
+
 export default function SiteHeader({ active }: { active?: string }) {
   const [open, setOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | 'for' | null>(null);
@@ -89,7 +92,7 @@ export default function SiteHeader({ active }: { active?: string }) {
           <Link href="/services" className={active === '/services' ? 'active' : undefined} onClick={() => setOpen(false)}>Services</Link>
 
           {/* Who it's for dropdown */}
-          <div
+          {SHOW_AUDIENCE_MENU && <div
             className="nav-dropdown"
             ref={forRef}
             onMouseEnter={() => openOnHover('for')}
@@ -116,7 +119,7 @@ export default function SiteHeader({ active }: { active?: string }) {
                 ))}
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Projects dropdown */}
           <div

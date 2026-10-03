@@ -12,10 +12,6 @@ export default function SiteFooter() {
             <p>Rhino3D for Architecture<br />Grasshopper<br />Rhino.Inside.Revit<br />AEC &amp; Climate<br />Wearables &amp; Footwear<br />Industrial Design</p>
           </div>
           <div className="fcol">
-            <h3>Who it&apos;s for</h3>
-            <p><a href="/individuals">Individuals</a><br /><a href="/colleges">Colleges</a><br /><a href="/corporate">Corporate</a><br /><a href="/consulting">Consulting</a></p>
-          </div>
-          <div className="fcol">
             <h3>Company</h3>
             <p>© 2026 YAFT Designs<br />All rights reserved</p>
             <p style={{ marginTop: 8 }}>
