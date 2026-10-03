@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/balance-reminder",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/instagram-token-refresh",
+      "schedule": "0 8 1,15 * *"
     }
   ]
 }

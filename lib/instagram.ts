@@ -1,3 +1,5 @@
+import { getInstagramToken } from '@/lib/instagramToken';
+
 export type InstagramMedia = {
   id: string;
   caption: string | null;
@@ -17,7 +19,7 @@ const FIELDS = 'id,caption,media_type,media_url,thumbnail_url,permalink,timestam
  * something that should ever break page render.
  */
 export async function getInstagramMedia(limit = 8): Promise<InstagramMedia[]> {
-  const token = process.env.INSTAGRAM_ACCESS_TOKEN;
+  const token = await getInstagramToken();
   if (!token) return [];
 
   try {
