@@ -21,6 +21,8 @@ export type FunnelConfig = {
   // ServiceCta wants one of these to preselect the audience.
   segment: 'individual' | 'college' | 'corporate';
   crossLinks: Funnel[];
+  // Optional looping, muted hero background (files under /public/assets/video).
+  heroVideo?: { src: string; poster: string };
 };
 
 export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
@@ -48,6 +50,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
     messagePlaceholder: 'Your background, any Rhino or Grasshopper experience, and what you want to be able to do',
     segment: 'individual',
     crossLinks: ['college', 'corporate'],
+    heroVideo: { src: '/assets/video/individuals-hero.mp4', poster: '/assets/video/individuals-hero-poster.jpg' },
   },
   college: {
     key: 'college',

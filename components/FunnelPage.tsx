@@ -22,11 +22,24 @@ export default function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
     <>
       <SiteHeader active={c.path} />
       <main id="top">
-        <section className="page-hero">
-          <div className="wrap">
+        <section className="page-hero" style={c.heroVideo ? { position: 'relative', overflow: 'hidden', background: '#000' } : undefined}>
+          {c.heroVideo && (
+            <>
+              <video
+                autoPlay muted loop playsInline preload="metadata"
+                poster={c.heroVideo.poster}
+                aria-hidden="true"
+                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              >
+                <source src={c.heroVideo.src} type="video/mp4" />
+              </video>
+              <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(0,0,0,.82) 0%, rgba(0,0,0,.6) 55%, rgba(0,0,0,.45) 100%)' }} />
+            </>
+          )}
+          <div className="wrap" style={c.heroVideo ? { position: 'relative', color: '#fff' } : undefined}>
             <div className="eyebrow">{c.eyebrow}</div>
             <h1 style={{ fontFamily: 'var(--display)', fontWeight: 700, letterSpacing: '-0.02em' }}>{c.heading}</h1>
-            <p className="lede">{c.lede}</p>
+            <p className="lede" style={c.heroVideo ? { color: 'rgba(255,255,255,.82)' } : undefined}>{c.lede}</p>
             <ServiceCta service={`funnel_${c.key}`} cta="hero" interest={c.options[0]} segment={c.segment} label={c.cta} />
           </div>
         </section>
