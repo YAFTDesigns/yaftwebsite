@@ -12,7 +12,7 @@ export function funnelMetadata(key: Funnel): Metadata {
     title: c.title,
     description: c.description,
     alternates: { canonical: c.path },
-    openGraph: { title: c.title, description: c.description, url: `https://www.yaftdesigns.com${c.path}`, type: 'website', images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }] },
+    openGraph: { title: `${c.title} | YAFT Designs`, description: c.description, url: `https://www.yaftdesigns.com${c.path}`, type: 'website', images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }] },
   };
 }
 

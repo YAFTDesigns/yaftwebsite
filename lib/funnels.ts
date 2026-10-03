@@ -27,7 +27,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
   individual: {
     key: 'individual',
     path: '/individuals',
-    title: 'Rhino and Grasshopper courses for students and professionals | YAFT Designs',
+    title: 'Rhino and Grasshopper courses for students and professionals',
     description: 'Live Rhino3D, Grasshopper and Rhino.Inside.Revit courses for architecture students and working professionals, from an Authorized Rhino Training Center in Coimbatore.',
     eyebrow: 'FOR INDIVIDUALS',
     heading: 'Learn Rhino and Grasshopper for real architecture and design work.',
@@ -52,7 +52,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
   college: {
     key: 'college',
     path: '/colleges',
-    title: 'Computational design workshops for colleges | YAFT Designs',
+    title: 'Computational design workshops for colleges',
     description: 'Multi-day or semester-length computational design programs for architecture schools, delivered on campus or online by YAFT Designs.',
     eyebrow: 'FOR COLLEGES',
     heading: 'Computational design programs for your architecture students.',
@@ -77,7 +77,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
   corporate: {
     key: 'corporate',
     path: '/corporate',
-    title: 'Rhino and Grasshopper training for architecture firms | YAFT Designs',
+    title: 'Rhino and Grasshopper training for architecture firms',
     description: 'Structured digital-technology upskilling for practising studios: Rhino, Grasshopper and Rhino.Inside.Revit workflows tailored to your live project pipeline.',
     eyebrow: 'FOR COMPANIES',
     heading: 'Upskill your design team on workflows from your own projects.',
@@ -102,7 +102,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
   consulting: {
     key: 'consulting',
     path: '/consulting',
-    title: 'Computational design and BIM consulting | YAFT Designs',
+    title: 'Computational design and BIM consulting',
     description: 'Parametric facade fabrication, shop drawing automation and computational design execution for studios and contractors, from YAFT Designs.',
     eyebrow: 'CONSULTING',
     heading: 'Computational design execution, from parametric facade to fabrication-ready output.',
