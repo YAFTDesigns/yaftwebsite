@@ -39,6 +39,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
         { href: '/admin/workshops', label: 'Workshops' },
         { href: '/admin/courses', label: 'Courses' },
         { href: '/admin/services', label: 'Services page images' },
+        { href: '/admin/bd-leads', label: 'BD Leads' },
       ],
     },
     {
