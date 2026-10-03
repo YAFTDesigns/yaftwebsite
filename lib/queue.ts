@@ -24,6 +24,11 @@ export type QueuedEnquiry = {
   interest: string | null;
   segment?: string | null;
   phone?: string | null;
+  audience?: string | null;
+  funnel?: string | null;
+  need?: string | null;
+  organisation?: string | null;
+  sourcePage?: string | null;
   queuedAt: string;
 };
 

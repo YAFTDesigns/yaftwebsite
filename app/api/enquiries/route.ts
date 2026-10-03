@@ -6,7 +6,8 @@ import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
-import { normalizePhone, normalizeSegment } from '@/lib/enquiryFields';
+import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText } from '@/lib/enquiryFields';
+import { recordEnquiryContext } from '@/lib/enquiryLead';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,8 +29,21 @@ export async function POST(request: NextRequest) {
   if (!seg.ok) return NextResponse.json({ error: 'Please choose a valid enquiry type.' }, { status: 400 });
   const ph = normalizePhone(body?.phone);
   if (!ph.ok) return NextResponse.json({ error: 'Please enter a valid phone number, or leave it blank.' }, { status: 400 });
-  const segment = seg.value;
+  const aud = normalizeAudience(body?.audience);
+  if (!aud.ok) return NextResponse.json({ error: 'Please choose who you are enquiring as.' }, { status: 400 });
+  const fun = normalizeFunnel(body?.funnel);
+  if (!fun.ok) return NextResponse.json({ error: 'Invalid enquiry path.' }, { status: 400 });
+  const audience = aud.value;
+  // audience is the richer answer; segment is derived from it when present.
+  const segment = audience ? audienceToSegment(audience) : seg.value;
+  const funnel = fun.value ?? (audience ? defaultFunnel(audience) : null);
   const phone = ph.value;
+  const need = cleanText(body?.need, 120);
+  const organisation = cleanText(body?.organisation, 120);
+  const sourcePage = cleanText(body?.sourcePage, 120);
+  if ((audience === 'college' || audience === 'company') && !organisation) {
+    return NextResponse.json({ error: audience === 'college' ? 'Please add your college or university name.' : 'Please add your company name.' }, { status: 400 });
+  }
 
   const supabase = getSupabaseAdmin();
 
@@ -42,11 +56,12 @@ export async function POST(request: NextRequest) {
 
       const { data: enquiryRow, error } = await supabase
         .from('enquiries')
-        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message, segment, phone })
+        .insert({ lead_id: leadId, name, email, course_interest: interest || null, message, segment, phone, audience, funnel, need, organisation, source_page: sourcePage })
         .select('id')
         .single();
       if (error) throw error;
       enquiryId = enquiryRow?.id ?? null;
+      await recordEnquiryContext(supabase, leadId, { audience, funnel, need, organisation, interest: interest || null });
 
       // Fire-and-forget -- a push failure (no subscription yet, VAPID
       // not configured, a stale endpoint) must never fail the actual
@@ -64,7 +79,7 @@ export async function POST(request: NextRequest) {
       // them a failure for something that will resolve itself shortly.
       console.error('enquiries insert failed, queueing for retry:', dbErr);
       try {
-        await pushEnquiryToQueue({ name, email, message, interest: interest || null, segment, phone, queuedAt: new Date().toISOString() });
+        await pushEnquiryToQueue({ name, email, message, interest: interest || null, segment, phone, audience, funnel, need, organisation, sourcePage, queuedAt: new Date().toISOString() });
       } catch (queueErr) {
         // Both Supabase and the retry queue are unreachable -- genuinely
         // nothing left to do but surface the failure to the visitor.

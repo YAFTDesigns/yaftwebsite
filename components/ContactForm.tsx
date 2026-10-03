@@ -2,13 +2,26 @@
 
 import { useState } from 'react';
 import { track, getSessionId } from '@/lib/analytics';
-import { SEGMENTS, SEGMENT_LABELS } from '@/lib/enquiryFields';
+import { AUDIENCES, AUDIENCE_LABELS, audienceToSegment, type Audience, type Funnel } from '@/lib/enquiryFields';
 
 type ContactFormProps = {
   options: string[];
+  // Set on a funnel page: fixes the path and limits the audience choices.
+  funnel?: Funnel;
+  messagePlaceholder?: string;
 };
 
-export default function ContactForm({ options }: ContactFormProps) {
+const FUNNEL_AUDIENCES: Record<Funnel, Audience[]> = {
+  individual: ['student', 'professional'],
+  college: ['college'],
+  corporate: ['company'],
+  consulting: ['company'],
+};
+
+export default function ContactForm({ options, funnel, messagePlaceholder }: ContactFormProps) {
+  const audiences = funnel ? FUNNEL_AUDIENCES[funnel] : [...AUDIENCES];
+  const [audience, setAudience] = useState<Audience>(audiences[0]);
+  const needsOrg = audience === 'college' || audience === 'company';
   const [status, setStatus] = useState<'idle' | 'submitting' | 'sent' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -17,7 +30,6 @@ export default function ContactForm({ options }: ContactFormProps) {
     const form = e.currentTarget;
     const data = new FormData(form);
     const interest = data.get('interest');
-    const segment = data.get('segment');
     const phone = String(data.get('phone') ?? '').trim();
 
     setStatus('submitting');
@@ -29,7 +41,12 @@ export default function ContactForm({ options }: ContactFormProps) {
           name: data.get('name'),
           email: data.get('email'),
           interest,
-          segment,
+          audience,
+          segment: audienceToSegment(audience),
+          funnel,
+          need: interest,
+          organisation: needsOrg ? String(data.get('organisation') ?? '').trim() : undefined,
+          sourcePage: window.location.pathname,
           phone: phone || undefined,
           message: data.get('message'),
           sessionId: getSessionId(),
@@ -41,7 +58,7 @@ export default function ContactForm({ options }: ContactFormProps) {
         throw new Error('request failed');
       }
       setErrorMsg('');
-      track('enquiry_submit', { meta: { interest, segment } });
+      track('enquiry_submit', { meta: { interest, segment: audienceToSegment(audience), audience, ...(funnel ? { funnel } : {}) } });
       setStatus('sent');
       form.reset();
     } catch {
@@ -66,13 +83,20 @@ export default function ContactForm({ options }: ContactFormProps) {
       </div>
 
       <div className="field">
-        <label htmlFor="contactSegment">I am enquiring as</label>
-        <select name="segment" id="contactSegment" defaultValue="individual">
-          {SEGMENTS.map((s) => (
-            <option key={s} value={s}>{SEGMENT_LABELS[s]}</option>
+        <label htmlFor="contactSegment">I am a</label>
+        <select name="audience" id="contactSegment" value={audience} onChange={(e) => setAudience(e.target.value as Audience)}>
+          {audiences.map((a) => (
+            <option key={a} value={a}>{AUDIENCE_LABELS[a]}</option>
           ))}
         </select>
       </div>
+
+      {needsOrg && (
+        <div className="field">
+          <label htmlFor="contactOrg">{audience === 'college' ? 'College or university name' : 'Company name'}</label>
+          <input type="text" name="organisation" id="contactOrg" maxLength={120} required />
+        </div>
+      )}
 
       <div className="field">
         <label htmlFor="contactPhone">Phone (optional)</label>
@@ -80,7 +104,7 @@ export default function ContactForm({ options }: ContactFormProps) {
       </div>
 
       <div className="field">
-        <label htmlFor="interestSelect">Interested in</label>
+        <label htmlFor="interestSelect">What do you need?</label>
         <select name="interest" id="interestSelect" defaultValue={options[0]}>
           {options.map((opt) => (
             <option key={opt} value={opt}>{opt}</option>
@@ -90,7 +114,7 @@ export default function ContactForm({ options }: ContactFormProps) {
 
       <div className="field">
         <label htmlFor="contactMessage">Message</label>
-        <textarea name="message" id="contactMessage" rows={3} placeholder="Tell us about your goals or project" required></textarea>
+        <textarea name="message" id="contactMessage" rows={3} placeholder={messagePlaceholder ?? (needsOrg ? 'Tell us about your team or students, and what you want to achieve' : 'Tell us about your goals, background and any experience with Rhino or Grasshopper')} required></textarea>
       </div>
 
       {status === 'error' && (

@@ -1,7 +1,8 @@
+import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import LeadStatusEditor from '@/components/admin/LeadStatusEditor';
-import { SEGMENTS, SEGMENT_LABELS } from '@/lib/enquiryFields';
+import { SEGMENTS, SEGMENT_LABELS, AUDIENCE_LABELS, FUNNEL_LABELS } from '@/lib/enquiryFields';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -16,6 +17,10 @@ type Enquiry = {
   lead_id: string | null;
   segment: string | null;
   phone: string | null;
+  audience: string | null;
+  funnel: string | null;
+  need: string | null;
+  organisation: string | null;
 };
 
 type LeadStatusRow = { id: string; status: string; notes: string | null; follow_up_date: string | null };
@@ -25,7 +30,7 @@ async function getEnquiries(): Promise<{ enquiries: Enquiry[]; error: string | n
   const result = await safeQuery<Enquiry[]>(
     supabase
       .from('enquiries')
-      .select('id, name, email, course_interest, message, created_at, lead_id, segment, phone')
+      .select('id, name, email, course_interest, message, created_at, lead_id, segment, phone, audience, funnel, need, organisation')
       .order('created_at', { ascending: false }),
     [],
     'enquiries list'
@@ -79,8 +84,10 @@ export default async function AdminEnquiriesPage({ searchParams }: { searchParam
               <th>Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Segment</th>
+              <th>Who</th>
+              <th>Funnel</th>
               <th>Interested in</th>
+              <th>Need</th>
               <th>Message</th>
               <th>Status</th>
               <th>Submitted</th>
@@ -91,11 +98,16 @@ export default async function AdminEnquiriesPage({ searchParams }: { searchParam
               const ls = enq.lead_id ? leadStatus[enq.lead_id] : undefined;
               return (
                 <tr key={enq.id}>
-                  <td>{enq.name}</td>
+                  <td>{enq.lead_id ? <Link href={`/admin/leads/${enq.lead_id}`} style={{ textDecoration: 'underline' }}>{enq.name}</Link> : enq.name}</td>
                   <td>{enq.email}</td>
                   <td>{enq.phone ?? '—'}</td>
-                  <td>{enq.segment ? SEGMENT_LABELS[enq.segment as keyof typeof SEGMENT_LABELS] ?? enq.segment : '—'}</td>
+                  <td>
+                    {enq.audience ? AUDIENCE_LABELS[enq.audience as keyof typeof AUDIENCE_LABELS] : enq.segment ? SEGMENT_LABELS[enq.segment as keyof typeof SEGMENT_LABELS] ?? enq.segment : '—'}
+                    {enq.organisation && <div style={{ opacity: 0.6, fontSize: 11 }}>{enq.organisation}</div>}
+                  </td>
+                  <td>{enq.funnel ? FUNNEL_LABELS[enq.funnel as keyof typeof FUNNEL_LABELS] : '—'}</td>
                   <td>{enq.course_interest ?? '—'}</td>
+                  <td>{enq.need && enq.need !== enq.course_interest ? enq.need : '—'}</td>
                   <td style={{ maxWidth: 320 }}>{enq.message ?? '—'}</td>
                   <td>
                     {ls ? (

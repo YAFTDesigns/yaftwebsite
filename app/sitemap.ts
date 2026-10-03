@@ -29,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...COURSE_NAV_LIST.map(({ href }) => ({
       url: `${BASE}${href}`, lastModified: NOW, changeFrequency: 'monthly' as const, priority: 0.85,
     })),
+    ...['/individuals', '/colleges', '/corporate', '/consulting'].map((path) => ({ url: `${BASE}${path}`, lastModified: NOW, changeFrequency: 'monthly' as const, priority: 0.8 })),
     { url: `${BASE}/services`,  lastModified: NOW, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE}/faculty`,   lastModified: NOW, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${BASE}/projects`,           lastModified: NOW, changeFrequency: 'monthly', priority: 0.7 },

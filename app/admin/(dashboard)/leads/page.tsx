@@ -1,8 +1,10 @@
+import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeQuery } from '@/lib/admin/safeQuery';
 import DeclinedToggle from '@/components/admin/DeclinedToggle';
 import LeadStatusEditor from '@/components/admin/LeadStatusEditor';
-import { SEGMENT_LABELS } from '@/lib/enquiryFields';
+import { SEGMENT_LABELS, AUDIENCE_LABELS, FUNNELS, FUNNEL_LABELS } from '@/lib/enquiryFields';
+import { PROPOSAL_LABELS, PAYMENT_LABELS } from '@/lib/admin/leadPipeline';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +21,12 @@ type Lead = {
   status: string;
   notes: string | null;
   follow_up_date: string | null;
+  audience: string | null;
+  funnel: string | null;
+  organisation: string | null;
+  service_interest: string | null;
+  proposal_status: string;
+  payment_status: string;
 };
 
 type TimeOnSite = { seconds: number; pageViews: number } | null;
@@ -30,7 +38,7 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   const result = await safeQuery<Lead[]>(
     supabase
       .from('leads')
-      .select('id, email, name, linkedin_url, source, first_seen, last_seen, declined, status, notes, follow_up_date')
+      .select('id, email, name, linkedin_url, source, first_seen, last_seen, declined, status, notes, follow_up_date, audience, funnel, organisation, service_interest, proposal_status, payment_status')
       .order('last_seen', { ascending: false }),
     [],
     'leads list'
@@ -170,12 +178,21 @@ function formatSeen(iso: string): string {
   });
 }
 
-export default async function AdminLeadsPage() {
-  const { leads, error, timeOnSite, syllabusByLead, enquiryByLead } = await getLeads();
+export default async function AdminLeadsPage({ searchParams }: { searchParams: Promise<{ funnel?: string }> }) {
+  const { funnel: funnelParam } = await searchParams;
+  const { leads: allLeads, error, timeOnSite, syllabusByLead, enquiryByLead } = await getLeads();
+  const funnelFilter = funnelParam === 'none' || (FUNNELS as readonly string[]).includes(funnelParam ?? '') ? funnelParam! : null;
+  const leads = funnelFilter ? allLeads.filter((l) => (l.funnel ?? 'none') === funnelFilter) : allLeads;
+  const tab = (active: boolean) => ({ fontFamily: 'var(--mono)', fontSize: 12, marginRight: 14, color: active ? '#fff' : '#777', textDecoration: active ? 'underline' : 'none' } as const);
 
   return (
     <>
-      <h1 className={styles.sectionTitle}>Leads ({leads.length})</h1>
+      <h1 className={styles.sectionTitle}>Leads ({leads.length}{funnelFilter ? ` of ${allLeads.length}` : ''})</h1>
+      <p style={{ marginBottom: 16 }}>
+        <Link href="/admin/leads" style={tab(!funnelFilter)}>All</Link>
+        {FUNNELS.map((f) => <Link key={f} href={`/admin/leads?funnel=${f}`} style={tab(funnelFilter === f)}>{FUNNEL_LABELS[f]}</Link>)}
+        <Link href="/admin/leads?funnel=none" style={tab(funnelFilter === 'none')}>No funnel</Link>
+      </p>
 
       {error && (
         <div style={{ background:'#2a0a0a', border:'1px solid #5a1a1a', borderRadius:8, padding:'12px 16px', marginBottom:20 }}>
@@ -195,7 +212,11 @@ export default async function AdminLeadsPage() {
               <th>Name</th>
               <th>LinkedIn</th>
               <th>Source</th>
-              <th>Segment</th>
+              <th>Who</th>
+              <th>Funnel</th>
+              <th>Interest</th>
+              <th>Proposal</th>
+              <th>Payment</th>
               <th>Phone</th>
               <th>Syllabus accessed</th>
               <th>Time on site</th>
@@ -208,7 +229,7 @@ export default async function AdminLeadsPage() {
           <tbody>
             {leads.map((lead) => (
               <tr key={lead.id}>
-                <td>{lead.email}</td>
+                <td><Link href={`/admin/leads/${lead.id}`} style={{ textDecoration: 'underline' }}>{lead.email}</Link></td>
                 <td>{lead.name ?? '—'}</td>
                 <td>
                   {lead.linkedin_url ? (
@@ -220,7 +241,14 @@ export default async function AdminLeadsPage() {
                   )}
                 </td>
                 <td>{lead.source ?? '—'}</td>
-                <td>{enquiryByLead[lead.id]?.segment ? SEGMENT_LABELS[enquiryByLead[lead.id]!.segment as keyof typeof SEGMENT_LABELS] ?? enquiryByLead[lead.id]!.segment : '—'}</td>
+                <td>
+                  {lead.audience ? AUDIENCE_LABELS[lead.audience as keyof typeof AUDIENCE_LABELS] : enquiryByLead[lead.id]?.segment ? SEGMENT_LABELS[enquiryByLead[lead.id]!.segment as keyof typeof SEGMENT_LABELS] ?? enquiryByLead[lead.id]!.segment : '—'}
+                  {lead.organisation && <div style={{ opacity: 0.6, fontSize: 11 }}>{lead.organisation}</div>}
+                </td>
+                <td>{lead.funnel ? FUNNEL_LABELS[lead.funnel as keyof typeof FUNNEL_LABELS] : '—'}</td>
+                <td>{lead.service_interest ?? '—'}</td>
+                <td>{lead.proposal_status === 'none' ? '—' : PROPOSAL_LABELS[lead.proposal_status]}</td>
+                <td>{lead.payment_status === 'none' ? '—' : PAYMENT_LABELS[lead.payment_status]}</td>
                 <td>{enquiryByLead[lead.id]?.phone ?? '—'}</td>
                 <td>{syllabusByLead[lead.id]?.join(', ') || '—'}</td>
                 <td>

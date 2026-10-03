@@ -32,3 +32,42 @@ describe('normalizePhone', () => {
     expect(normalizePhone(12345).ok).toBe(false);
   });
 });
+
+import { audienceToSegment, defaultFunnel, normalizeAudience, normalizeFunnel, cleanText, AUDIENCES, FUNNELS } from './enquiryFields';
+import { FUNNEL_CONFIG } from './funnels';
+
+describe('audience and funnel', () => {
+  it('maps audience to the coarse segment and default funnel', () => {
+    expect(audienceToSegment('student')).toBe('individual');
+    expect(audienceToSegment('professional')).toBe('individual');
+    expect(audienceToSegment('college')).toBe('college');
+    expect(audienceToSegment('company')).toBe('corporate');
+    expect(defaultFunnel('company')).toBe('corporate');
+    expect(defaultFunnel('student')).toBe('individual');
+  });
+  it('validates audience and funnel, blank allowed', () => {
+    expect(normalizeAudience('student')).toEqual({ ok: true, value: 'student' });
+    expect(normalizeAudience('')).toEqual({ ok: true, value: null });
+    expect(normalizeAudience('teacher')).toEqual({ ok: false });
+    expect(normalizeFunnel('consulting')).toEqual({ ok: true, value: 'consulting' });
+    expect(normalizeFunnel('x')).toEqual({ ok: false });
+  });
+  it('cleanText trims, collapses and caps', () => {
+    expect(cleanText('  a   b ', 10)).toBe('a b');
+    expect(cleanText('abcdef', 3)).toBe('abc');
+    expect(cleanText('   ', 5)).toBeNull();
+    expect(cleanText(5, 5)).toBeNull();
+  });
+  it('every funnel has a page config with unique path and valid cross links', () => {
+    const paths = new Set<string>();
+    for (const f of FUNNELS) {
+      const c = FUNNEL_CONFIG[f];
+      expect(c.key).toBe(f);
+      expect(c.options.length).toBeGreaterThan(1);
+      expect(paths.has(c.path)).toBe(false);
+      paths.add(c.path);
+      c.crossLinks.forEach((k) => expect(FUNNELS).toContain(k));
+    }
+    expect(AUDIENCES.length).toBe(4);
+  });
+});

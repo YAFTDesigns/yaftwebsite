@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeCount } from '@/lib/admin/safeQuery';
+import { istDate } from '@/lib/admin/leadPipeline';
 
 /**
  * Small counts shown as red badges on the admin nav, so anything
@@ -11,7 +12,7 @@ import { safeCount } from '@/lib/admin/safeQuery';
 export async function getNavCounts() {
   const supabase = getSupabaseAdmin();
 
-  const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, newLeads, pendingJobs] =
+  const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, newLeads, pendingJobs, dueToday] =
     await Promise.all([
       safeCount(
         supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null),
@@ -37,6 +38,10 @@ export async function getNavCounts() {
         supabase.from('jobs').select('id', { count: 'exact', head: true }).eq('status', 'Pending').is('deleted_at', null),
         'nav:jobs'
       ),
+      safeCount(
+        supabase.from('leads').select('id', { count: 'exact', head: true }).lte('follow_up_date', istDate()).eq('declined', false).neq('status', 'lost'),
+        'nav:due_today'
+      ),
     ]);
 
   return {
@@ -45,5 +50,6 @@ export async function getNavCounts() {
     failedEmails: failedEmails.data,
     newLeads: newLeads.data,
     pendingJobs: pendingJobs.data,
+    dueToday: dueToday.data,
   };
 }

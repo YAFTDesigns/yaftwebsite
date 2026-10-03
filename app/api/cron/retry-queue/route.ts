@@ -10,6 +10,7 @@ import { upsertLead } from '@/lib/leads';
 import { sendAdminAlert } from '@/lib/adminAlert';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
+import { recordEnquiryContext } from '@/lib/enquiryLead';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 export const dynamic = 'force-dynamic';
@@ -50,8 +51,14 @@ async function runRetry() {
           message:         enq.message,
           segment:         enq.segment ?? null,
           phone:           enq.phone ?? null,
+          audience:        enq.audience ?? null,
+          funnel:          enq.funnel ?? null,
+          need:            enq.need ?? null,
+          organisation:    enq.organisation ?? null,
+          source_page:     enq.sourcePage ?? null,
         });
       if (error) throw error;
+      await recordEnquiryContext(supabase, leadId, { audience: enq.audience ?? null, funnel: enq.funnel ?? null, need: enq.need ?? null, organisation: enq.organisation ?? null, interest: enq.interest || null });
       eProcessed++;
     } catch (err) {
       await pushEnquiryToQueue(enq);

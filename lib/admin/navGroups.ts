@@ -6,6 +6,7 @@ export type NavCounts = {
   pendingApprovals: number;
   failedEmails: number;
   newLeads: number;
+  dueToday: number;
   pendingJobs: number;
 };
 
@@ -17,6 +18,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
     {
       label: 'Sales',
       links: [
+        { href: '/admin/today', label: 'Today', badge: counts.dueToday },
         { href: '/admin/leads', label: 'Leads', badge: counts.newLeads },
         { href: '/admin/enquiries', label: 'Enquiries' },
         { href: '/admin/jobs', label: 'Jobs', badge: counts.pendingJobs },
