@@ -96,3 +96,12 @@ describe('context vs latest capture source', () => {
     expect(m.html).toContain('utm_content=contact_form');
   });
 });
+
+describe('signature banner', () => {
+  it('every variant carries the Rhino banner like the other YAFT emails', () => {
+    for (const source of ['contact_form', 'syllabus_gate', 'whatsapp_gate', 'other']) {
+      const m = buildFollowUpEmail({ source, name: null, course_interest: null });
+      expect(m.html).toContain('https://www.yaftdesigns.com/assets/images/rhino-banner.png');
+    }
+  });
+});
