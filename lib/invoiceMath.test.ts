@@ -12,9 +12,9 @@ describe('getTaxMode', () => {
   });
 
   it.each(['Australia', 'Singapore', 'UAE', 'Oman', 'International'])(
-    'treats %s as international (no GST)',
+    'charges IGST on international client %s',
     (state) => {
-      expect(getTaxMode(state)).toBe('intl');
+      expect(getTaxMode(state)).toBe('interstate');
     }
   );
 
@@ -54,14 +54,14 @@ describe('computeInvoiceTotals', () => {
     expect(result.taxMode).toBe('interstate');
   });
 
-  it('applies no tax at all for international clients', () => {
+  it('applies IGST 18% for international clients too', () => {
     const result = computeInvoiceTotals(oneItem, 'Singapore');
     expect(result.subtotal).toBe(10000);
     expect(result.cgst).toBe(0);
     expect(result.sgst).toBe(0);
-    expect(result.igst).toBe(0);
-    expect(result.total).toBe(10000);
-    expect(result.taxMode).toBe('intl');
+    expect(result.igst).toBe(1800);
+    expect(result.total).toBe(11800);
+    expect(result.taxMode).toBe('interstate');
   });
 
   it('sums multiple line items before applying tax', () => {

@@ -13,8 +13,8 @@
  *
  * Tax rule (India GST, intra-state vs inter-state vs export/intl):
  *  - Client state is Tamil Nadu (YAFT's home state)  -> CGST 9% + SGST 9%
- *  - Client is in an international/export bucket     -> no GST
- *  - Anything else (other Indian states)              -> IGST 18%
+ *  - Anything else, including international clients   -> IGST 18%
+ *    (owner decision: GST is charged on international bills too)
  *
  * This module must stay dependency-free (no Supabase, no Next.js
  * server APIs) so it can be safely imported from both client
@@ -39,12 +39,9 @@ export type InvoiceTotals = {
   taxMode: InvoiceTaxMode;
 };
 
-const INTL_STATES = ['australia', 'singapore', 'uae', 'oman', 'international'];
-
 export function getTaxMode(clientState: string): InvoiceTaxMode {
   const state = (clientState || '').toLowerCase();
   if (state.includes('tamil')) return 'intra';
-  if (INTL_STATES.includes(state)) return 'intl';
   return 'interstate';
 }
 
