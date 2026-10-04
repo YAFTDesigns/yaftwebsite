@@ -109,7 +109,7 @@ export default function Rhino3DAEC() {
       <div className={s.faqItem}><p className={s.faqQ}>Is this suitable for beginners?</p><p className={s.faqA}>Yes. Day 1 starts from Rhino basics. Day 2 introduces Grasshopper for climatic analysis. No prior Rhino or Grasshopper experience required.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>Can this be conducted at our institution?</p><p className={s.faqA}>Yes. We offer on-site workshops for colleges and institutions. Travel expenses are borne by the institution. Contact us to discuss scheduling and pricing.</p></div>
       
-        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 

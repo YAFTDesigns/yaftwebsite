@@ -122,7 +122,7 @@ export default function Rhino3DArchitecture() {
       <div className={s.faqItem}><p className={s.faqQ}>Do I need prior Rhino experience?</p><p className={s.faqA}>No. The course starts from object types and interface basics. SketchUp and AutoCAD users can join without any prior Rhino experience.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>Will this help me learn Grasshopper later?</p><p className={s.faqA}>Absolutely. Rhino3D is the foundation for Grasshopper. This course gives you a strong head start for the Grasshopper for Architecture course at YAFT Designs.</p></div>
       
-        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 

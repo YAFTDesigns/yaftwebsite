@@ -119,7 +119,7 @@ export default function RevitRhinoInside() {
       <div className={s.faqItem}><p className={s.faqQ}>Do I need prior BIM experience?</p><p className={s.faqA}>No. The course covers everything from the very basics up to proficient use. Complete beginners are welcome.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>What is Rhino.Inside.Revit?</p><p className={s.faqA}>Rhino.Inside.Revit lets you run Rhino and Grasshopper inside the Revit environment, enabling computational design and parametric modeling directly within your BIM workflow.</p></div>
       
-        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 

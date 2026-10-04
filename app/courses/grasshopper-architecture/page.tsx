@@ -126,7 +126,7 @@ export default function GrasshopperArchitecture() {
       <p className={s.sectionLabel}>Frequently asked questions</p>
       <div className={s.faqItem}><p className={s.faqQ}>Do I need to know Rhino3D first?</p><p className={s.faqA}>Basic Rhino3D knowledge is recommended. If you are new to Rhino, we suggest completing the Rhino3D for Architecture course first.</p></div>
       
-        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
 
