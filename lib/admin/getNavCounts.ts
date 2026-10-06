@@ -31,7 +31,7 @@ export async function getNavCounts() {
         'nav:email_logs'
       ),
       safeCount(
-        supabase.from('leads').select('id', { count: 'exact', head: true }).is('viewed_at', null),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).is('viewed_at', null).eq('is_test', false),
         'nav:leads'
       ),
       safeCount(
@@ -39,7 +39,7 @@ export async function getNavCounts() {
         'nav:jobs'
       ),
       safeCount(
-        supabase.from('leads').select('id', { count: 'exact', head: true }).lte('follow_up_date', istDate()).eq('declined', false).neq('status', 'lost'),
+        supabase.from('leads').select('id', { count: 'exact', head: true }).lte('follow_up_date', istDate()).eq('declined', false).neq('status', 'lost').eq('is_test', false),
         'nav:due_today'
       ),
     ]);

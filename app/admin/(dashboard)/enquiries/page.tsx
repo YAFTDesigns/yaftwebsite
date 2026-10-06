@@ -31,6 +31,7 @@ async function getEnquiries(): Promise<{ enquiries: Enquiry[]; error: string | n
     supabase
       .from('enquiries')
       .select('id, name, email, course_interest, message, created_at, lead_id, segment, phone, audience, funnel, need, organisation')
+      .eq('is_test', false)
       .order('created_at', { ascending: false }),
     [],
     'enquiries list'

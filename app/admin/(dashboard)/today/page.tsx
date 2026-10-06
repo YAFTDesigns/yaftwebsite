@@ -21,7 +21,7 @@ export default async function TodayPage() {
   const supabase = getSupabaseAdmin();
   const now = nowMs();
   const leadsRes = await safeQuery<Row[]>(
-    supabase.from('leads').select('id, email, name, source, status, declined, follow_up_date, proposal_status, proposal_updated_at, payment_status, payment_updated_at, funnel, audience, organisation, service_interest, need'),
+    supabase.from('leads').select('id, email, name, source, status, declined, follow_up_date, proposal_status, proposal_updated_at, payment_status, payment_updated_at, funnel, audience, organisation, service_interest, need').eq('is_test', false),
     [], 'today leads'
   );
   const enqRes = await safeQuery<{ lead_id: string }[]>(supabase.from('enquiries').select('lead_id').not('lead_id', 'is', null), [], 'today enquiries');

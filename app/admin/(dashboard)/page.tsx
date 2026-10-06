@@ -97,22 +97,22 @@ async function getCounts() {
     sixMonthInvoices, selectableInvoices, accountantOptions,
     allTimeOutstandingInvoices,
   ] = await Promise.all([
-    safe(supabase.from('leads').select('id', { count: 'exact', head: true }), null),
-    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }), null),
+    safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
+    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
     safe(supabase.from('syllabus_requests').select('id', { count: 'exact', head: true }), null),
     safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'course_gate_unlock'), null),
     safe(supabase.from('analytics_events').select('id', { count: 'exact', head: true }).eq('event_type', 'whatsapp_click'), null),
     Promise.all(
       SOURCES.map((source) =>
-        safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source), null)
+        safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source).eq('is_test', false), null)
       )
     ),
     safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
-    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart), null),
+    safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart).eq('is_test', false), null),
     safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart).neq('invoice_type', 'proforma'), []),
     safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
     safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
-    safe<RecentEnquiryRow[]>(supabase.from('enquiries').select('name, email, course_interest, created_at').order('created_at', { ascending: false }).limit(5), []),
+    safe<RecentEnquiryRow[]>(supabase.from('enquiries').select('name, email, course_interest, created_at').eq('is_test', false).order('created_at', { ascending: false }).limit(5), []),
     safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).neq('invoice_type', 'proforma').order('created_at', { ascending: false }).limit(5), []),
     safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
     safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart).neq('invoice_type', 'proforma'), []),

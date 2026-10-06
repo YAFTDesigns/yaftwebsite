@@ -39,6 +39,7 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
     supabase
       .from('leads')
       .select('id, email, name, linkedin_url, source, first_seen, last_seen, declined, status, notes, follow_up_date, audience, funnel, organisation, service_interest, proposal_status, payment_status')
+      .eq('is_test', false)
       .order('last_seen', { ascending: false }),
     [],
     'leads list'
