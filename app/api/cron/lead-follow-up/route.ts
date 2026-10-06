@@ -21,6 +21,13 @@ export const dynamic = 'force-dynamic';
 
 const JOB = 'lead-follow-up' as const;
 const FOLLOW_UP_TEMPLATE = 'lead_follow_up';
+// Follow-ups read as a personal note, so they come from a person-style address
+// on the verified domain (Reply-To stays the business Gmail) and carry a
+// mailto List-Unsubscribe so mail clients can offer a built-in opt-out.
+const FOLLOW_UP_FROM = 'Yokes Marapa <yokes@yaftdesigns.com>';
+const FOLLOW_UP_HEADERS = {
+  'List-Unsubscribe': '<mailto:yaftdesigns@gmail.com?subject=Unsubscribe>',
+};
 const MIN_DAYS_SINCE_LAST_CONTACT = 3;
 const MAX_DAYS_SINCE_LAST_CONTACT = 30;
 
@@ -159,7 +166,7 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
     try {
-      const result = await sendEmail({ to: testTo, subject: `[TEST] ${subject}`, html });
+      const result = await sendEmail({ to: testTo, subject: `[TEST] ${subject}`, html, from: FOLLOW_UP_FROM, headers: FOLLOW_UP_HEADERS });
       resendEmailId = result.id;
     } catch (mailErr) {
       status = 'failed';
@@ -181,7 +188,7 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
     let errMsg: string | null = null;
     let resendEmailId: string | null = null;
     try {
-      const result = await sendEmail({ to: c.name ? `${c.name} <${c.email}>` : c.email, subject, html, bcc: getNotificationBcc() });
+      const result = await sendEmail({ to: c.name ? `${c.name} <${c.email}>` : c.email, subject, html, bcc: getNotificationBcc(), from: FOLLOW_UP_FROM, headers: FOLLOW_UP_HEADERS });
       resendEmailId = result.id;
       sent++;
     } catch (mailErr) {

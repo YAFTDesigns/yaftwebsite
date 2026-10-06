@@ -38,16 +38,21 @@ export async function sendEmail({
   html,
   attachments,
   bcc,
+  from,
+  headers,
 }: {
   to: string;
   subject: string;
   html: string;
   attachments?: EmailAttachment[];
   bcc?: string | string[];
+  from?: string;
+  headers?: Record<string, string>;
 }): Promise<{ id: string | null }> {
   const resend = getResendClient();
   const { data, error } = await resend.emails.send({
-    from: FROM_ADDRESS,
+    from: from ?? FROM_ADDRESS,
+    ...(headers ? { headers } : {}),
     to,
     subject,
     html,
