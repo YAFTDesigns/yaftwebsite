@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import Link from 'next/link';
 import SiteStatus from '@/components/admin/SiteStatus';
+import VisitorSummary from '@/components/admin/VisitorSummary';
 import BarChart from '@/components/admin/BarChart';
 import PieChart from '@/components/admin/PieChart';
 import LineChart from '@/components/admin/LineChart';
@@ -278,6 +279,8 @@ export default async function AdminOverviewPage() {
           )}
         </div>
       )}
+
+      <VisitorSummary />
 
       <div className="eyebrow" style={{ marginBottom: 16 }}>THIS MONTH</div>
       <div className={styles.statGrid}>
