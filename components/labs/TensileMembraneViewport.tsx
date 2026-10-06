@@ -214,6 +214,8 @@ export default function TensileMembraneViewport() {
     let settledFlag = false;
     let hoverId: string | null = null;
     let dragId: string | null = null;
+    let grabbing = false;
+    const grabStart = new THREE.Vector3();
 
     const setSettledUI = (v: boolean) => {
       if (v !== settledFlag) { settledFlag = v; setSettled(v); }
@@ -232,7 +234,7 @@ export default function TensileMembraneViewport() {
         } else {
           calm = 0;
         }
-        const resting = calm > 20 && !dragId;
+        const resting = calm > 20 && !dragId && !grabbing;
         setSettledUI(resting);
         if (!resting) keep = true;
         (surface?.geometry.attributes.position as THREE.BufferAttribute | undefined)!.needsUpdate = true;
@@ -241,7 +243,7 @@ export default function TensileMembraneViewport() {
 
       if (controls.update()) keep = true;
       renderer.render(scene, camera);
-      if (keep || dragId) { raf = requestAnimationFrame(frame); } else { lastT = 0; }
+      if (keep || dragId || grabbing) { raf = requestAnimationFrame(frame); } else { lastT = 0; }
     };
     const wake = () => {
       calm = 0;
@@ -283,6 +285,19 @@ export default function TensileMembraneViewport() {
       if (!hits.length) return null;
       return handles.find((h) => h.hit === hits[0].object) ?? null;
     };
+    // Nearest mesh node to a surface hit, so the fabric itself can be grabbed.
+    const pickSurface = (): { node: number; point: THREE.Vector3 } | null => {
+      if (!surface) return null;
+      const hit = raycaster.intersectObject(surface, false)[0];
+      if (!hit || !hit.face) return null;
+      let best = hit.face.a, bd = Infinity;
+      for (const v of [hit.face.a, hit.face.b, hit.face.c]) {
+        const d = hit.point.distanceToSquared(new THREE.Vector3(membrane.pos[v * 3], membrane.pos[v * 3 + 1], membrane.pos[v * 3 + 2]));
+        if (d < bd) { bd = d; best = v; }
+      }
+      if (membrane.pinned[best]) return null;
+      return { node: best, point: hit.point.clone() };
+    };
     const setHover = (id: string | null) => {
       if (id === hoverId) return;
       hoverId = id;
@@ -298,7 +313,25 @@ export default function TensileMembraneViewport() {
     const onDown = (e: PointerEvent) => {
       setNdc(e);
       const h = pick();
-      if (!h) return;
+      if (!h) {
+        const s = pickSurface();
+        if (!s) return;
+        e.preventDefault();
+        grabbing = true;
+        grabStart.copy(s.point);
+        membrane.startGrab(s.node);
+        controls.enabled = false;
+        canvas.setPointerCapture(e.pointerId);
+        plane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), s.point);
+        setHoverState(true);
+        setDragging(true);
+        if (!interacted) {
+          interacted = true;
+          track('cta_click', { page: '/labs/tensile-membrane', meta: { cta: 'lab_experiment_interact', experiment: 'tensile-membrane' } });
+        }
+        wake();
+        return;
+      }
       e.preventDefault();
       dragId = h.anchor.id;
       controls.enabled = false;
@@ -318,6 +351,13 @@ export default function TensileMembraneViewport() {
     };
     const onMove = (e: PointerEvent) => {
       setNdc(e);
+      if (grabbing) {
+        if (raycaster.ray.intersectPlane(plane, hitPoint)) {
+          membrane.moveGrab([hitPoint.x - grabStart.x, hitPoint.y - grabStart.y, hitPoint.z - grabStart.z]);
+          wake();
+        }
+        return;
+      }
       if (dragId) {
         const h = handles.find((x) => x.anchor.id === dragId);
         if (!h || !raycaster.ray.intersectPlane(plane, hitPoint)) return;
@@ -334,10 +374,22 @@ export default function TensileMembraneViewport() {
         }
         wake();
       } else if (e.pointerType === 'mouse') {
-        setHover(pick()?.anchor.id ?? null);
+        const hh = pick();
+        setHover(hh?.anchor.id ?? null);
+        if (!hh) setHoverState(!!pickSurface());
       }
     };
     const endDrag = (e: PointerEvent) => {
+      if (grabbing) {
+        grabbing = false;
+        membrane.endGrab();
+        controls.enabled = true;
+        if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+        setDragging(false);
+        setHoverState(false);
+        wake();
+        return;
+      }
       if (!dragId) return;
       dragId = null;
       controls.enabled = true;
@@ -432,9 +484,9 @@ export default function TensileMembraneViewport() {
   return (
     <div className={styles.stage}>
       <div ref={hostRef} className={`${styles.viewport} ${hover ? styles.over : ''} ${dragging ? styles.dragging : ''}`}>
-        <canvas ref={canvasRef} className={styles.canvas} role="img" aria-label="Interactive 3D tensile membrane. Drag the red masts and anchors to reshape it." />
+        <canvas ref={canvasRef} className={styles.canvas} role="img" aria-label="Interactive 3D tensile membrane. Drag the fabric or the red masts and anchors to reshape it." />
         {webglError && <div className={styles.loading}>3D view needs WebGL, which this browser could not start.</div>}
-        <div className={styles.hint}>Drag masts and anchors · orbit · scroll to zoom</div>
+        <div className={styles.hint}>Drag the fabric, masts or anchors · orbit · scroll to zoom</div>
         <div className={styles.status} aria-live="polite">
           <span className={`${styles.dot} ${live ? styles.dotLive : ''}`} />
           {statusText}

@@ -45,7 +45,9 @@ export const DEFAULT_PARAMS: SolverParams = { stiffness: 3, prestress: 0.7, grav
 const DENSITY = 0.05;
 const GRAVITY_LOAD = 0.3;
 const GROUND_Y = 0.02; // the membrane rests on the ground plane rather than passing through it
-const DAMPING = 5;
+const DAMPING = 2.5; // light enough that a released membrane visibly bounces
+const GRAB_RADIUS = 2; // grid cells either side of a grabbed node that follow it
+const GRAB_STIFFNESS = 3; // multiple of the spring stiffness
 const EDGE_CABLE_FACTOR = 10;
 const SHEAR_FACTOR = 0.5;
 const MAX_SUBSTEPS = 12;
@@ -80,6 +82,7 @@ export class Membrane {
   anchors: Anchor[] = [];
   /** Largest node speed after the latest step, used to detect equilibrium. */
   maxSpeed = Infinity;
+  private grab: { idx: number[]; w: number[]; start: Float32Array; delta: Vec3 } | null = null;
 
   constructor(n: number, anchors: Anchor[], from?: Membrane) {
     this.n = n;
@@ -180,6 +183,33 @@ export class Membrane {
     }
   }
 
+  /** Start pulling the membrane itself at `node` (smooth falloff to neighbours). */
+  startGrab(node: number) {
+    const ci = node % this.n, cj = Math.floor(node / this.n);
+    const idx: number[] = [], w: number[] = [], start: number[] = [];
+    for (let j = Math.max(0, cj - GRAB_RADIUS); j <= Math.min(this.n - 1, cj + GRAB_RADIUS); j++) {
+      for (let i = Math.max(0, ci - GRAB_RADIUS); i <= Math.min(this.n - 1, ci + GRAB_RADIUS); i++) {
+        const k = j * this.n + i;
+        if (this.pinned[k]) continue;
+        const d = Math.hypot(i - ci, j - cj);
+        if (d > GRAB_RADIUS) continue;
+        idx.push(k); w.push(1 - d / (GRAB_RADIUS + 1));
+        start.push(this.pos[k * 3], this.pos[k * 3 + 1], this.pos[k * 3 + 2]);
+      }
+    }
+    this.grab = { idx, w, start: Float32Array.from(start), delta: [0, 0, 0] };
+    this.maxSpeed = Infinity;
+  }
+
+  /** Move the grabbed point by `delta` from where it was picked up. */
+  moveGrab(delta: Vec3) {
+    if (this.grab) { this.grab.delta = delta; this.maxSpeed = Infinity; }
+  }
+
+  endGrab() { this.grab = null; this.maxSpeed = Infinity; }
+
+  get isGrabbed() { return this.grab !== null; }
+
   /** Re-pin after an anchor's position changed (drag or mast-height slider). */
   anchorsMoved() {
     this.applyAnchors();
@@ -220,6 +250,17 @@ export class Membrane {
       const fx = f * dx, fy = f * dy, fz = f * dz;
       force[a] += fx; force[a + 1] += fy; force[a + 2] += fz;
       force[b] -= fx; force[b + 1] -= fy; force[b + 2] -= fz;
+    }
+
+    if (this.grab) {
+      const { idx, w, start, delta } = this.grab;
+      const kg = kk * GRAB_STIFFNESS;
+      for (let g = 0; g < idx.length; g++) {
+        const p = idx[g] * 3;
+        force[p] += kg * w[g] * (start[g * 3] + delta[0] * w[g] - pos[p]);
+        force[p + 1] += kg * w[g] * (start[g * 3 + 1] + delta[1] * w[g] - pos[p + 1]);
+        force[p + 2] += kg * w[g] * (start[g * 3 + 2] + delta[2] * w[g] - pos[p + 2]);
+      }
     }
 
     const damp = Math.exp(-DAMPING * dt);

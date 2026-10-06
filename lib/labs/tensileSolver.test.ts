@@ -101,4 +101,18 @@ describe('Membrane dynamic relaxation', () => {
     relax(m, DEFAULT_PARAMS);
     expect(centreY(m)).toBeGreaterThan(low + 0.5);
   });
+
+  it('can be pulled by hand, follows the pull, then relaxes back after release', () => {
+    const m = new Membrane(20, defaultAnchors());
+    relax(m, DEFAULT_PARAMS);
+    const node = 10 * 20 + 10;
+    const rest = m.pos[node * 3 + 1];
+    m.startGrab(node);
+    m.moveGrab([0, 1.5, 0]);
+    for (let f = 0; f < 120; f++) m.advance(1 / 60, DEFAULT_PARAMS);
+    expect(m.pos[node * 3 + 1]).toBeGreaterThan(rest + 0.4);
+    m.endGrab();
+    expect(relax(m, DEFAULT_PARAMS)).toBeGreaterThan(0);
+    expect(Math.abs(m.pos[node * 3 + 1] - rest)).toBeLessThan(0.05);
+  });
 });
