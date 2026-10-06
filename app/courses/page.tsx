@@ -1,3 +1,4 @@
+import CoursesHeroVideo from '@/components/CoursesHeroVideo';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import SiteHeader from '@/components/SiteHeader';
@@ -111,6 +112,7 @@ export default async function CoursesPage() {
 
       <main id="top">
         <section className={`page-hero ${styles.coursesHero}`}>
+          <CoursesHeroVideo />
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <h1>Browse our live courses in Rhino3D, Grasshopper &amp; BIM.</h1>
