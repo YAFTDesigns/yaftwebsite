@@ -1,5 +1,6 @@
 'use client';
 
+import ExperimentsStrip from '@/components/labs/ExperimentsStrip';
 import { useState, useMemo } from 'react';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
@@ -124,6 +125,8 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
             </div>
           </div>
         </section>
+
+        <ExperimentsStrip />
 
         <section className={styles.body}>
           {scripts.length === 0 ? (
