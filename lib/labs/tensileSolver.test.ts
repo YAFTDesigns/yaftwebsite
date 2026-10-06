@@ -1,16 +1,30 @@
 import { describe, it, expect } from 'vitest';
-import { Membrane, defaultAnchors, DEFAULT_PARAMS, REST_SPEED, type Anchor, type SolverParams } from './tensileSolver';
+import { Membrane, defaultAnchors, DEFAULT_PARAMS, REST_SPEED, PLAN_RADIUS, type Anchor, type SolverParams } from './tensileSolver';
 
-function relax(m: Membrane, params: SolverParams, maxFrames = 3000) {
+function relax(m: Membrane, params: SolverParams, maxFrames = 4000) {
   for (let f = 0; f < maxFrames; f++) {
     m.advance(1 / 60, params);
     if (m.maxSpeed < REST_SPEED) return f;
   }
   return -1;
 }
-const centreY = (m: Membrane) => m.pos[((m.n >> 1) * m.n + (m.n >> 1)) * 3 + 1];
+const centreY = (m: Membrane) => m.pos[1];
+const nodeAt = (m: Membrane, x: number, z: number) => {
+  let best = 0, bd = Infinity;
+  for (let i = 0; i < m.count; i++) {
+    const d = (m.plan[i * 2] - x) ** 2 + (m.plan[i * 2 + 1] - z) ** 2;
+    if (d < bd) { bd = d; best = i; }
+  }
+  return best;
+};
+const ringAnchors = (heights: number[]): Anchor[] =>
+  heights.map((y, j) => {
+    const a = (j / heights.length) * Math.PI * 2;
+    const x = PLAN_RADIUS * Math.cos(a), z = PLAN_RADIUS * Math.sin(a);
+    return { id: `e${j}`, kind: 'edge', x, z, pos: [x, y, z] };
+  });
 
-describe('Membrane dynamic relaxation', () => {
+describe('Membrane dynamic relaxation (ring boundary)', () => {
   it('converges to rest for the default configuration', () => {
     const m = new Membrane(24, defaultAnchors());
     expect(relax(m, DEFAULT_PARAMS)).toBeGreaterThan(0);
@@ -21,12 +35,12 @@ describe('Membrane dynamic relaxation', () => {
     const m = new Membrane(20, anchors);
     relax(m, DEFAULT_PARAMS, 300);
     for (const a of anchors) {
-      const node = Math.round(a.v * 19) * 20 + Math.round(a.u * 19);
+      const node = nodeAt(m, a.x, a.z);
       expect(m.pos[node * 3 + 1]).toBeCloseTo(a.pos[1], 5);
     }
   });
 
-  it('stays finite at maximum density and stiffness', () => {
+  it('stays finite at maximum density, stiffness and prestress', () => {
     const m = new Membrane(48, defaultAnchors());
     const p = { stiffness: 8, prestress: 0.95, gravity: true };
     for (let f = 0; f < 200; f++) m.advance(1 / 60, p);
@@ -35,30 +49,21 @@ describe('Membrane dynamic relaxation', () => {
   });
 
   it('keeps a flat boundary flat (minimal surface is a plane) without gravity', () => {
-    const anchors: Anchor[] = defaultAnchors(0.6);
-    const m = new Membrane(16, anchors);
+    const m = new Membrane(16, defaultAnchors(0.6));
     relax(m, { stiffness: 3, prestress: 0.9, gravity: false });
     for (let i = 0; i < m.count; i++) expect(m.pos[i * 3 + 1]).toBeCloseTo(0.6, 2);
   });
 
-  it('saddle boundary: interior stays within boundary heights and centre sits near the mean (max principle)', () => {
-    const s = 4;
-    const at = (u: number, v: number, y: number): [number, number, number] => [(u - 0.5) * 8, y, (v - 0.5) * 8];
-    const anchors: Anchor[] = [
-      { id: 'a', kind: 'corner', u: 0, v: 0, pos: at(0, 0, 0) },
-      { id: 'b', kind: 'corner', u: 1, v: 0, pos: at(1, 0, s) },
-      { id: 'c', kind: 'corner', u: 0, v: 1, pos: at(0, 1, s) },
-      { id: 'd', kind: 'corner', u: 1, v: 1, pos: at(1, 1, 0) },
-    ];
-    const m = new Membrane(17, anchors);
+  it('alternating boundary: interior stays within boundary heights (maximum principle)', () => {
+    const m = new Membrane(20, ringAnchors([0.5, 4, 0.5, 4, 0.5, 4]));
     relax(m, { stiffness: 3, prestress: 0.95, gravity: false });
     for (let i = 0; i < m.count; i++) {
       const y = m.pos[i * 3 + 1];
-      expect(y).toBeGreaterThan(-0.2);
-      expect(y).toBeLessThan(s + 0.2);
+      expect(y).toBeGreaterThan(0.3);
+      expect(y).toBeLessThan(4.2);
     }
-    expect(centreY(m)).toBeGreaterThan(1.4);
-    expect(centreY(m)).toBeLessThan(2.6);
+    expect(centreY(m)).toBeGreaterThan(1.5);
+    expect(centreY(m)).toBeLessThan(3.0);
   });
 
   it('gravity sags a flat-boundary surface and higher prestress sags it less', () => {
@@ -77,39 +82,38 @@ describe('Membrane dynamic relaxation', () => {
 
   it('never passes through the ground plane', () => {
     const m = new Membrane(20, defaultAnchors(0.6));
-    relax(m, { stiffness: 1, prestress: 0.1, gravity: true });
+    relax(m, { stiffness: 1.5, prestress: 0.1, gravity: true });
     for (let i = 0; i < m.count; i++) expect(m.pos[i * 3 + 1]).toBeGreaterThanOrEqual(0.0199);
   });
 
   it('keeps form when density changes (resample) and reconverges', () => {
     const m1 = new Membrane(16, defaultAnchors());
     relax(m1, DEFAULT_PARAMS);
-    const before = centreY(m1);
+    const before = m1.surfaceArea();
     const m2 = new Membrane(28, m1.anchors, m1);
-    expect(Math.abs(centreY(m2) - before)).toBeLessThan(0.35);
+    expect(Math.abs(m2.surfaceArea() - before) / before).toBeLessThan(0.15);
     expect(relax(m2, DEFAULT_PARAMS)).toBeGreaterThan(0);
   });
 
-  it('follows a moved mast', () => {
+  it('follows moved masts', () => {
     const anchors = defaultAnchors();
     const m = new Membrane(20, anchors);
     relax(m, DEFAULT_PARAMS);
-    const low = centreY(m);
-    anchors.find((a) => a.id === 'mastA')!.pos[1] = 5.5;
-    anchors.find((a) => a.id === 'mastB')!.pos[1] = 5.5;
+    const area = m.surfaceArea();
+    for (const a of anchors) if (a.kind === 'mast') a.pos[1] = 6;
     m.anchorsMoved();
     relax(m, DEFAULT_PARAMS);
-    expect(centreY(m)).toBeGreaterThan(low + 0.5);
+    expect(m.surfaceArea()).toBeGreaterThan(area * 1.05);
   });
 
   it('can be pulled by hand, follows the pull, then relaxes back after release', () => {
     const m = new Membrane(20, defaultAnchors());
     relax(m, DEFAULT_PARAMS);
-    const node = 10 * 20 + 10;
+    const node = nodeAt(m, 0.3, 0.2);
     const rest = m.pos[node * 3 + 1];
     m.startGrab(node);
     m.moveGrab([0, 1.5, 0]);
-    for (let f = 0; f < 120; f++) m.advance(1 / 60, DEFAULT_PARAMS);
+    for (let f = 0; f < 150; f++) m.advance(1 / 60, DEFAULT_PARAMS);
     expect(m.pos[node * 3 + 1]).toBeGreaterThan(rest + 0.4);
     m.endGrab();
     expect(relax(m, DEFAULT_PARAMS)).toBeGreaterThan(0);

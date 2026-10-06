@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import {
-  Membrane, defaultAnchors, densityLimits, DEFAULT_MAST_HEIGHT, DEFAULT_PARAMS, PLAN_SIZE, REST_SPEED,
+  Membrane, defaultAnchors, densityLimits, DEFAULT_MAST_HEIGHT, DEFAULT_PARAMS, PLAN_RADIUS, REST_SPEED,
   type Anchor, type SolverParams,
 } from '@/lib/labs/tensileSolver';
 import { track } from '@/lib/analytics';
@@ -96,12 +96,13 @@ export default function TensileMembraneViewport() {
     // Ground: a restrained grid plus the plan outline of the membrane.
     const grid = new THREE.GridHelper(24, 24, 0x2e2e2e, 0x1a1a1a);
     scene.add(grid);
-    const half = PLAN_SIZE / 2;
+    const ringPts: THREE.Vector3[] = [];
+    for (let i = 0; i < 96; i++) {
+      const t = (i / 96) * Math.PI * 2;
+      ringPts.push(new THREE.Vector3(PLAN_RADIUS * Math.cos(t), 0.005, PLAN_RADIUS * Math.sin(t)));
+    }
     const outline = new THREE.LineLoop(
-      new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(-half, 0.005, -half), new THREE.Vector3(half, 0.005, -half),
-        new THREE.Vector3(half, 0.005, half), new THREE.Vector3(-half, 0.005, half),
-      ]),
+      new THREE.BufferGeometry().setFromPoints(ringPts),
       new THREE.LineBasicMaterial({ color: TEAL, transparent: true, opacity: 0.25 }),
     );
     scene.add(outline);
@@ -121,19 +122,10 @@ export default function TensileMembraneViewport() {
     const buildGeometry = () => {
       if (surface) { scene.remove(surface); surface.geometry.dispose(); }
       if (lines) { scene.remove(lines); lines.geometry.dispose(); }
-      const n = membrane.n;
       const posAttr = new THREE.BufferAttribute(membrane.pos, 3);
       posAttr.setUsage(THREE.DynamicDrawUsage);
-      const tri: number[] = [];
-      const seg: number[] = [];
-      for (let j = 0; j < n; j++) {
-        for (let i = 0; i < n; i++) {
-          const a = j * n + i;
-          if (i + 1 < n && j + 1 < n) tri.push(a, a + 1, a + n + 1, a, a + n + 1, a + n);
-          if (i + 1 < n) seg.push(a, a + 1);
-          if (j + 1 < n) seg.push(a, a + n);
-        }
-      }
+      const tri = Array.from(membrane.tris);
+      const seg = Array.from(membrane.segs);
       const sg = new THREE.BufferGeometry();
       sg.setAttribute('position', posAttr);
       sg.setIndex(tri);
@@ -361,7 +353,7 @@ export default function TensileMembraneViewport() {
       if (dragId) {
         const h = handles.find((x) => x.anchor.id === dragId);
         if (!h || !raycaster.ray.intersectPlane(plane, hitPoint)) return;
-        const lim = PLAN_SIZE * 1.1;
+        const lim = PLAN_RADIUS * 1.3;
         const x = THREE.MathUtils.clamp(hitPoint.x + dragOffset.x, -lim, lim);
         const y = THREE.MathUtils.clamp(hitPoint.y + dragOffset.y, 0.05, 8);
         const z = THREE.MathUtils.clamp(hitPoint.z + dragOffset.z, -lim, lim);
