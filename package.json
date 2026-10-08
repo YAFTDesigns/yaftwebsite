@@ -16,11 +16,12 @@
     "@types/pdfkit": "^0.17.6",
     "@vercel/analytics": "^2.0.1",
     "exceljs": "^4.4.0",
-    "next": "^16.3.0",
+    "next": "^16.3.8",
     "pdfkit": "^0.19.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.18.1",
+    "sharp": "^0.35.5",
     "three": "^0.184.0",
     "web-push": "^3.6.7"
   },

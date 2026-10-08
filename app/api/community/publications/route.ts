@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
     status: 'pending',
   }]);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error('[publications] insert failed:', error);
+    return NextResponse.json({ error: 'Could not save your submission. Please try again.' }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

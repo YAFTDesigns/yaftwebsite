@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
+import { cleanImageUpload } from '@/lib/imageUpload';
 
 // GET /api/testimonials — public, returns approved testimonials only
 export async function GET() {
@@ -9,11 +10,17 @@ export async function GET() {
     .from('testimonials')
     .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating')
     .eq('status', 'approved')
+    .is('deleted_at', null)
     .order('reviewed_at', { ascending: false })
     .limit(50);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ data: data ?? [] });
+  if (error) {
+    console.error('[testimonials] read failed:', error);
+    return NextResponse.json({ error: 'Could not load testimonials.' }, { status: 500 });
+  }
+  // Only expose social links when the author opted in.
+  const rows = (data ?? []).map((t) => (t.show_social ? t : { ...t, linkedin_url: null, instagram_url: null }));
+  return NextResponse.json({ data: rows });
 }
 
 // POST /api/testimonials — public submission, status = 'pending'
@@ -39,12 +46,12 @@ export async function POST(request: NextRequest) {
   const supabase = getSupabaseAdmin();
   let photo_url: string | null = null;
 
-  const ext = photoFile.name.split('.').pop() ?? 'jpg';
-  const storagePath = `testimonials/${Date.now()}.${ext}`;
-  const bytes = await photoFile.arrayBuffer();
+  const clean = await cleanImageUpload(photoFile, 800);
+  if (!clean) return NextResponse.json({ error: 'Please upload a JPG, PNG or WebP photo.' }, { status: 400 });
+  const storagePath = `testimonials/${Date.now()}-${Math.random().toString(36).slice(2)}.${clean.ext}`;
   const { error: uploadErr } = await supabase.storage
     .from('public-assets')
-    .upload(storagePath, Buffer.from(bytes), { contentType: photoFile.type, cacheControl: '3600', upsert: false });
+    .upload(storagePath, clean.buffer, { contentType: clean.contentType, cacheControl: '3600', upsert: false });
   if (uploadErr) {
     return NextResponse.json({ error: 'Failed to upload photo. Please try again.' }, { status: 500 });
   }
@@ -65,6 +72,9 @@ export async function POST(request: NextRequest) {
     status: 'pending',
   }]);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error('[testimonials] insert failed:', error);
+    return NextResponse.json({ error: 'Could not save your testimonial. Please try again.' }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

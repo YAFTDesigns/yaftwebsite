@@ -20,6 +20,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .select('id, view_count')
     .eq('id', id)
     .eq('active', true)
+    .is('deleted_at', null)
     .maybeSingle();
 
   if (fetchErr || !script) {

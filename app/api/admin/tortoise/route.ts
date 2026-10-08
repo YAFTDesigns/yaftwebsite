@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { addMonths, newLicenseKey, normalizeKey } from '@/lib/tortoiseLicense';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 // Covered by the proxy matcher (/api/admin/:path*), so only logged-in admins reach it.
 
 // GET /api/admin/tortoise  -> licences with how many PCs each is used on
 export async function GET() {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const supabase = getSupabaseAdmin();
   const { data: lics, error } = await supabase
     .from('tortoise_licenses')
@@ -30,6 +32,7 @@ export async function GET() {
 
 // POST /api/admin/tortoise  { email, months (0 = perpetual), max_machines, note }
 export async function POST(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const email = String(body?.email ?? '').trim().toLowerCase();
   const months = Number(body?.months ?? 12);
@@ -58,6 +61,7 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/admin/tortoise  { key, action: 'revoke' | 'restore' | 'reset' | 'extend', months }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const key = normalizeKey(body?.key);
   const action = body?.action;

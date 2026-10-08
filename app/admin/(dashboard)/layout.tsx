@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import SignOutButton from '@/components/SignOutButton';
 import AdminNav from '@/components/admin/AdminNav';
 import AdminSubNav from '@/components/admin/AdminSubNav';
@@ -8,6 +10,9 @@ import styles from './admin.module.css';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Defence in depth: the proxy normally gates /admin, but fail closed here too
+  // (covers missing Supabase config or a proxy mismatch).
+  if (!(await isRequestFromAdmin())) redirect('/admin/login');
   const counts = await getNavCounts();
 
   return (

@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import { usePathname } from 'next/navigation';
 import { Analytics } from '@vercel/analytics/next';
 import AnalyticsTracker from './AnalyticsTracker';
 
 const GA_MEASUREMENT_ID = 'G-XDVDJC7X24';
+
+// Pages whose URL carries a private share token or admin/auth state must never
+// reach any analytics provider.
+const PRIVATE_PATH = /^\/(client-jobs|team-jobs|admin|auth)(\/|$)/;
 
 // Google Tag Manager flagged "additional domains detected" -- the old
 // gate was process.env.NODE_ENV === 'production' only, which is true
@@ -27,6 +32,7 @@ const GA_MEASUREMENT_ID = 'G-XDVDJC7X24';
 // thing that becomes client-rendered, and it renders nothing visible
 // either way.
 export default function ProductionOnlyAnalytics() {
+  const pathname = usePathname();
   const [isRealDomain, setIsRealDomain] = useState(false);
 
   useEffect(() => {
@@ -35,6 +41,7 @@ export default function ProductionOnlyAnalytics() {
   }, []);
 
   if (process.env.NODE_ENV !== 'production' || !isRealDomain) return null;
+  if (PRIVATE_PATH.test(pathname ?? '')) return null;
 
   return (
     <>
@@ -50,7 +57,15 @@ gtag('js', new Date());
 gtag('config', '${GA_MEASUREMENT_ID}');`}
       </Script>
       <AnalyticsTracker />
-      <Analytics />
+      <Analytics
+        beforeSend={(event) => {
+          try {
+            return PRIVATE_PATH.test(new URL(event.url).pathname) ? null : event;
+          } catch {
+            return null;
+          }
+        }}
+      />
     </>
   );
 }
