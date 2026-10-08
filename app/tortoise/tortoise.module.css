@@ -1,0 +1,8 @@
+.body { max-width: 760px; margin: 0 auto; padding-top: 40px; padding-bottom: 72px; }
+.body h2 { font-family: var(--display); font-size: 22px; margin: 36px 0 12px; }
+.body h2:first-child { margin-top: 0; }
+.body p, .body li { font-family: var(--display); font-size: 16px; line-height: 1.65; color: var(--ink-soft); }
+.body p { margin: 0 0 16px; }
+.list { margin: 0 0 8px; padding-left: 20px; display: grid; gap: 8px; }
+.body a { color: var(--blueprint); }
+.small { font-size: 13px !important; }
