@@ -3,13 +3,13 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushEnquiryToQueue } from '@/lib/queue';
-import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
+import { sendEmail, renderTemplate, isEmailConfigured, escapeHtml, safeDisplayName } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText, cleanDetails } from '@/lib/enquiryFields';
 import { recordEnquiryContext } from '@/lib/enquiryLead';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
@@ -23,6 +23,9 @@ export async function POST(request: NextRequest) {
 
   if (!name || !EMAIL_RE.test(email) || !message) {
     return NextResponse.json({ error: 'Name, a valid email, and a message are required.' }, { status: 400 });
+  }
+  if (name.length > 100 || email.length > 200 || interest.length > 120 || message.length > 5000) {
+    return NextResponse.json({ error: 'One of the fields is too long.' }, { status: 400 });
   }
   // Optional marketing fields: blank is fine, invalid is rejected.
   const seg = normalizeSegment(body?.segment);
@@ -102,14 +105,22 @@ export async function POST(request: NextRequest) {
           .eq('key', 'enquiry_confirmation')
           .single();
 
+        // Visitor-supplied text is escaped for the HTML body; the subject is plain
+        // text, so it gets the raw values with line breaks removed.
         const vars = {
-          name,
-          interest: interest ? ` about ${interest}` : '',
-          interest_line: interest ? ` about <strong>${interest}</strong>` : '',
-          message: message.replace(/\n/g, '<br>'),
+          name: escapeHtml(name),
+          interest: interest ? escapeHtml(` about ${interest}`) : '',
+          interest_line: interest ? ` about <strong>${escapeHtml(interest)}</strong>` : '',
+          message: escapeHtml(message).replace(/\n/g, '<br>'),
+        };
+        const subjectVars = {
+          name: name.replace(/[\r\n]+/g, ' '),
+          interest: interest ? ` about ${interest.replace(/[\r\n]+/g, ' ')}` : '',
+          interest_line: interest ? ` about ${interest.replace(/[\r\n]+/g, ' ')}` : '',
+          message: '',
         };
 
-        subject = renderTemplate(tmpl?.subject ?? 'Re: Your enquiry - YAFT Designs', vars);
+        subject = renderTemplate(tmpl?.subject ?? 'Re: Your enquiry - YAFT Designs', subjectVars);
         const defaultHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Hi {{name}},</p>
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">Thank you for your enquiry{{interest_line}}.</p>
@@ -135,7 +146,7 @@ export async function POST(request: NextRequest) {
 
         const html = renderTemplate(tmpl?.body_html ?? defaultHtml, vars);
 
-        const result = await sendEmail({ to: `${name} <${email}>`, subject, html });
+        const result = await sendEmail({ to: `${safeDisplayName(name) || 'there'} <${email}>`, subject, html });
         resendEmailId = result.id;
       } catch (mailErr) {
         status = 'failed';

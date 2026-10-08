@@ -70,3 +70,18 @@ export function renderTemplate(template: string, vars: Record<string, string>): 
     template
   );
 }
+
+/** Escape text for safe interpolation into HTML (element content and quoted attributes). */
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/** Make a visitor-supplied name safe to use as an email display name (no address/header injection). */
+export function safeDisplayName(value: string): string {
+  return value.replace(/[<>"',;@\r\n\\]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+}
