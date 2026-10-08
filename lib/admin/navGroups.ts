@@ -49,6 +49,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       label: 'YAFT Labs',
       links: [
         { href: '/admin/labs', label: 'Scripts & Categories' },
+        { href: '/admin/tortoise', label: 'Tortoise licences' },
       ],
     },
     {
