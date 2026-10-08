@@ -24,7 +24,7 @@ export default function TortoiseClient() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [newKey, setNewKey] = useState('');
-  const [form, setForm] = useState({ email: '', months: 12, max_machines: 2, note: '' });
+  const [form, setForm] = useState({ email: '', months: 0, max_machines: 2, note: '' });
 
   const [tick, setTick] = useState(0);
   const load = () => setTick((t) => t + 1);
