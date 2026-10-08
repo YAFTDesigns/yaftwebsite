@@ -46,8 +46,8 @@ export default function TortoisePage() {
             and the plugin works offline for up to 30 days between checks.
           </p>
           <p>
-            To get a licence key, email{' '}
-            <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a> with your name, company and the number of PCs.
+            A licence is <strong>US$49</strong> per licence key. To buy one, email{' '}
+            <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a> with your name, company and the number of PCs, and we will send payment details and your key.
           </p>
 
           <h2>Requirements</h2>
