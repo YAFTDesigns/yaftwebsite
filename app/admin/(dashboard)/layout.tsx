@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/testimonials">Testimonials</Link>
             <Link href="/admin/community">Community</Link>
             <Link href="/admin/analytics">Analytics</Link>
+            <Link href="/admin/tortoise">Tortoise</Link>
           </nav>
           <SignOutButton />
         </div>
