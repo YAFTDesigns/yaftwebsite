@@ -20,6 +20,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     .select('id, title, file_path, download_count, active')
     .eq('id', id)
     .eq('active', true)
+    .is('deleted_at', null)
     .maybeSingle();
 
   if (error || !script || !script.file_path) {

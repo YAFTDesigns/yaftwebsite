@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 const CATEGORIES = ['facade', 'bim-automation', 'computational-design', 'wearables', 'product'] as const;
 
 // GET /api/admin/projects
 export async function GET(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const trash = new URL(request.url).searchParams.get('trash') === 'true';
   const supabase = getSupabaseAdmin();
   const query = supabase.from('portfolio_projects').select('*').order('display_order', { ascending: true });
@@ -22,6 +24,7 @@ export async function GET(request: NextRequest) {
 
 // POST /api/admin/projects  { slug, title, category, location, summary, description, ... }
 export async function POST(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   if (!body?.slug || !body?.title || !body?.category || !body?.location || !body?.summary || !body?.description) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -57,6 +60,7 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/admin/projects  { id, ...fields }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   if (typeof id !== 'string' || !id) {
@@ -82,6 +86,7 @@ export async function PATCH(request: NextRequest) {
 // Soft delete -- sets deleted_at rather than removing the row, so it
 // stays recoverable via the Trash view (PUT below restores it).
 export async function DELETE(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   if (typeof id !== 'string' || !id) {
@@ -102,6 +107,7 @@ export async function DELETE(request: NextRequest) {
 // PUT /api/admin/projects  { id }
 // Restores a soft-deleted project -- clears deleted_at.
 export async function PUT(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   if (typeof id !== 'string' || !id) {

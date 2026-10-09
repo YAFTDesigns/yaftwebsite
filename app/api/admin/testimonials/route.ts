@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 // GET /api/admin/testimonials?status=pending&trash=true
 export async function GET(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const trash = searchParams.get('trash') === 'true';
@@ -25,6 +27,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/testimonials  { id, status }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   const status = body?.status;
@@ -54,6 +57,7 @@ export async function PATCH(request: NextRequest) {
 // Soft delete -- sets deleted_at rather than removing the row, so it
 // stays recoverable via the Trash view (PUT below restores it).
 export async function DELETE(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
 
@@ -75,6 +79,7 @@ export async function DELETE(request: NextRequest) {
 // PUT /api/admin/testimonials  { id }
 // Restores a soft-deleted testimonial -- clears deleted_at.
 export async function PUT(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
 

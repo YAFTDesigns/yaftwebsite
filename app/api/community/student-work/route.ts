@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
+import { cleanImageUpload } from '@/lib/imageUpload';
 
 const IMG_MAX_BYTES = 2 * 1024 * 1024;
 
@@ -9,12 +10,12 @@ async function uploadToStorage(
   file: File,
   folder: string,
 ): Promise<string | null> {
-  const ext = file.name.split('.').pop() ?? 'jpg';
-  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-  const bytes = await file.arrayBuffer();
+  const clean = await cleanImageUpload(file);
+  if (!clean) return null;
+  const name = `${Date.now()}-${Math.random().toString(36).slice(2)}.${clean.ext}`;
   const { error } = await supabase.storage
     .from('site-images')
-    .upload(`${folder}/${name}`, Buffer.from(bytes), { contentType: file.type, upsert: false });
+    .upload(`${folder}/${name}`, clean.buffer, { contentType: clean.contentType, upsert: false });
   return error ? null : name;
 }
 
@@ -67,6 +68,9 @@ export async function POST(request: NextRequest) {
     project_image_urls: project_image_urls.length ? project_image_urls : null,
   }]);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    console.error('[student-work] insert failed:', error);
+    return NextResponse.json({ error: 'Could not save your submission. Please try again.' }, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }

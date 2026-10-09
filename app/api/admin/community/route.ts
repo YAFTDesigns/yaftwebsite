@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isCommunityTable } from '@/lib/admin/communityTables';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 // GET /api/admin/community?table=student_work&status=pending&trash=true
 // GET /api/admin/community?table=partners (no status filter — returns all)
 export async function GET(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const table = searchParams.get('table');
   const status = searchParams.get('status');
@@ -36,6 +38,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/community  { table, id, updates: {...} }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const table = body?.table;
   const id = body?.id;
@@ -66,6 +69,7 @@ export async function PATCH(request: NextRequest) {
 // Soft delete -- sets deleted_at rather than removing the row, so it
 // stays recoverable via the Trash view (PUT below restores it).
 export async function DELETE(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const table = body?.table;
   const id = body?.id;
@@ -91,6 +95,7 @@ export async function DELETE(request: NextRequest) {
 // PUT /api/admin/community  { table, id }
 // Restores a soft-deleted row -- clears deleted_at.
 export async function PUT(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const table = body?.table;
   const id = body?.id;
@@ -116,6 +121,7 @@ export async function PUT(request: NextRequest) {
 // POST /api/admin/community  { table, insert: {...} }
 // Used for adding new partners from the admin panel.
 export async function POST(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const table = body?.table;
   const insert = body?.insert;

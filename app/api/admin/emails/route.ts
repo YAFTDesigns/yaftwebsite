@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isAdminEmail } from '@/lib/admin';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 // GET /api/admin/emails?type=logs
 // GET /api/admin/emails?type=templates
 export async function GET(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
 
@@ -65,6 +67,7 @@ export async function GET(request: NextRequest) {
 // PATCH /api/admin/emails  { id, subject, body_html }
 // Updates an email template.
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   const subject = body?.subject;

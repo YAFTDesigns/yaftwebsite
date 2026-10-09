@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { getQueueLength, getInvoiceQueueLength } from '@/lib/queue';
 import sitemap from '@/app/sitemap';
 import { dedupeToTopLevelPages } from '@/lib/sitePages';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 const BASE = 'https://www.yaftdesigns.com';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? BASE;
   const entries = await sitemap();
   const PAGES = dedupeToTopLevelPages(entries, BASE);
