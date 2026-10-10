@@ -12,6 +12,17 @@ type Lic = {
 const field = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '8px 10px', fontSize: 14 } as const;
 const btn = { ...field, cursor: 'pointer', marginRight: 6 } as const;
 
+type Sale = {
+  payment_id: string; email: string; name: string | null; amount: number; currency: string; quantity: number;
+  license_keys: string[]; customer_emailed: boolean; created_at: string; invoice_no: string | null;
+  buyer_state: string | null; buyer_gstin: string | null; test_mode: boolean;
+};
+
+function money(minor: number, cur: string) {
+  const v = (minor / 100).toLocaleString(cur === 'INR' ? 'en-IN' : 'en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return `${cur === 'INR' ? '₹' : 'US$'}${v}`;
+}
+
 function fmtDate(s: string | null) { return s ? new Date(s).toLocaleDateString('en-GB') : '—'; }
 function state(l: Lic) {
   if (l.status === 'revoked') return 'Revoked';
@@ -26,6 +37,9 @@ export default function TortoiseClient() {
   const [newKey, setNewKey] = useState('');
   const [form, setForm] = useState({ email: '', months: 0, max_machines: 2, note: '' });
 
+  const [tab, setTab] = useState<'licences' | 'sales'>('licences');
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [notice, setNotice] = useState('');
   const [tick, setTick] = useState(0);
   const load = () => setTick((t) => t + 1);
 
@@ -40,8 +54,24 @@ export default function TortoiseClient() {
         setRows(json.data ?? []);
       })
       .catch(() => { if (live) setError('Could not load licences'); });
+    fetch('/api/admin/tortoise?view=sales')
+      .then(async (res) => ({ ok: res.ok, json: await res.json().catch(() => ({})) }))
+      .then(({ ok, json }) => { if (live && ok) setSales(json.data ?? []); })
+      .catch(() => {});
     return () => { live = false; };
   }, [tick]);
+
+  async function resend(p: Sale) {
+    if (!confirm(`Email the key${p.license_keys.length > 1 ? 's' : ''}${p.invoice_no ? ' and invoice ' + p.invoice_no : ''} to ${p.email}?`)) return;
+    setNotice('Sending...');
+    const res = await fetch('/api/admin/tortoise', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resend_key_email', payment_id: p.payment_id }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setNotice(res.ok ? `Sent to ${p.email}` : (json.error ?? 'Send failed'));
+    load();
+  }
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
@@ -70,10 +100,40 @@ export default function TortoiseClient() {
 
   return (
     <>
-      <h1 className={styles.sectionTitle}>Tortoise licences ({rows.length})</h1>
+      <h1 className={styles.sectionTitle}>Tortoise {tab === 'licences' ? `licences (${rows.length})` : `sales (${sales.length})`}</h1>
+      <div style={{ marginBottom: 16 }}>
+        <button style={{ ...btn, fontWeight: tab === 'licences' ? 700 : 400 }} onClick={() => setTab('licences')}>Licences</button>
+        <button style={{ ...btn, fontWeight: tab === 'sales' ? 700 : 400 }} onClick={() => setTab('sales')}>Sales</button>
+      </div>
+      {notice && <p style={{ fontFamily: 'var(--mono)', fontSize: 12, marginBottom: 12 }}>{notice}</p>}
 
       {error && <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#e55', marginBottom: 16 }}>{error}</p>}
 
+      {tab === 'sales' && (
+        sales.length === 0 ? <p className={styles.empty}>No sales yet.</p> : (
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Date</th><th>Buyer</th><th>State</th><th>Paid</th><th>Keys</th><th>Invoice</th><th>Key emailed</th><th></th></tr>
+            </thead>
+            <tbody>
+              {sales.map((p) => (
+                <tr key={p.payment_id}>
+                  <td>{fmtDate(p.created_at)}{p.test_mode ? ' (TEST)' : ''}</td>
+                  <td>{p.name ?? '—'}<br />{p.email}{p.buyer_gstin ? <><br />GSTIN {p.buyer_gstin}</> : null}</td>
+                  <td>{p.buyer_state ?? '—'}</td>
+                  <td>{money(p.amount, p.currency)}<br />x{p.quantity}</td>
+                  <td style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{p.license_keys.map((k) => <div key={k}>{k}</div>)}</td>
+                  <td>{p.invoice_no ?? (p.currency === 'INR' ? 'Missing' : 'Manual (USD)')}</td>
+                  <td>{p.customer_emailed ? 'Yes' : 'No'}</td>
+                  <td><button style={btn} onClick={() => resend(p)}>{p.customer_emailed ? 'Resend' : 'Send key'}</button></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )
+      )}
+
+      {tab === 'licences' && (<>
       <form onSubmit={create} className={styles.panel}>
         <h2 className={styles.panelTitle}>New key</h2>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'end' }}>
@@ -119,6 +179,7 @@ export default function TortoiseClient() {
           </tbody>
         </table>
       )}
+      </>)}
     </>
   );
 }

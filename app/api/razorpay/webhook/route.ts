@@ -3,8 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
 import { newLicenseKey } from '@/lib/tortoiseLicense';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
-
-const MAX_MACHINES_PER_KEY = 2;
+import { createInvoiceForSale, sendBuyerKeyEmail, MAX_MACHINES_PER_KEY, type Sale } from '@/lib/tortoiseSale';
 
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
 export async function POST(request: NextRequest) {
@@ -47,6 +46,9 @@ export async function POST(request: NextRequest) {
     amount: Number(pay.amount ?? 0),
     currency: String(pay.currency ?? ''),
     quantity,
+    buyer_state: notes.state || null,
+    buyer_gstin: notes.gstin || null,
+    test_mode: testMode,
     license_keys: [],
     customer_emailed: false,
   });
@@ -73,34 +75,57 @@ export async function POST(request: NextRequest) {
   }
   await supabase.from('tortoise_payments').update({ license_keys: keys }).eq('payment_id', paymentId);
 
-  // Emails are best effort: the keys already exist and are visible in /admin/tortoise.
+  // Everything below is best effort: the keys already exist and are visible in /admin/tortoise.
+  const currency = String(pay.currency ?? '');
+  const sale: Sale = {
+    paymentId, name, email, quantity, amountMinor: Number(pay.amount ?? 0), currency,
+    state: notes.state || null, gstin: notes.gstin || null, testMode, keys,
+  };
+  const alerts: string[] = [];
+  let invoiceNo: string | null = null;
+  if (currency === 'INR') {
+    try {
+      const inv = await createInvoiceForSale(sale);
+      invoiceNo = inv.invoiceNo;
+      if (inv.mismatch) alerts.push(`Invoice ${inv.invoiceNo} total differs from the amount paid. Check it in Admin > Invoices.`);
+    } catch (invErr) {
+      console.error('[razorpay-webhook] invoice failed:', invErr);
+      alerts.push('The tax invoice could NOT be created automatically. Create it manually in Admin > Invoices.');
+    }
+  } else {
+    alerts.push(`${currency} sale: no invoice is generated automatically. Raise an export invoice manually (confirm GST/LUT treatment with your CA).`);
+  }
+
   if (isEmailConfigured()) {
     const keyList = keys.map((k) => `<li style="font-family:monospace;font-size:16px;">${escapeHtml(k)}</li>`).join('');
+    const ownerTo = getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com';
     try {
       if (autoEmail) {
-        await sendEmail({
-          to: email,
-          bcc: getNotificationBcc(),
-          subject: 'Your Tortoise licence key',
-          html: `<p>Hi ${escapeHtml(name || 'there')},</p><p>Thank you for buying Tortoise. Your licence key${keys.length > 1 ? 's' : ''}:</p><ul>${keyList}</ul>
-<p>Enter it in Rhino under Tortoise &gt; About / Help &gt; Licence. Each key works on up to ${MAX_MACHINES_PER_KEY} PCs and does not expire.</p>
-<p>Questions? Just reply to this email.</p><p>YAFT Designs</p>`,
-        });
-        await supabase.from('tortoise_payments').update({ customer_emailed: true }).eq('payment_id', paymentId);
+        await sendBuyerKeyEmail({ ...sale, invoiceNo }, { bccOwner: true });
       } else {
         // Safe default: only tell the owner, who forwards the key after checking the payment.
         await sendEmail({
-          to: getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com',
-          subject: `Tortoise sale: ${email.replace(/[\r\n]+/g, ' ')}`,
-          html: `<p>Payment ${escapeHtml(paymentId)} captured (${Number(pay.amount) / 100} ${escapeHtml(String(pay.currency))}).</p>
-<p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;. Key${keys.length > 1 ? 's' : ''} created:</p><ul>${keyList}</ul>
-<p>Auto-emailing to the buyer is OFF. Forward the key${keys.length > 1 ? 's' : ''} to the buyer.</p>`,
+          to: ownerTo,
+          subject: `${testMode ? '[TEST] ' : ''}Tortoise sale: ${email.replace(/[\r\n]+/g, ' ')}`,
+          html: `<p>Payment ${escapeHtml(paymentId)} captured (${Number(pay.amount) / 100} ${escapeHtml(currency)}).</p>
+<p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;${notes.state ? `, ${escapeHtml(notes.state)}` : ''}. Key${keys.length > 1 ? 's' : ''} created:</p><ul>${keyList}</ul>
+<p>Auto-emailing to the buyer is OFF. Use Admin &gt; Tortoise &gt; Sales &gt; Resend to send the key${invoiceNo ? ' and invoice ' + escapeHtml(invoiceNo) : ''}.</p>`,
         });
       }
     } catch (mailErr) {
       console.error('[razorpay-webhook] email failed:', mailErr);
+      alerts.push('The buyer email failed to send. Use Admin > Tortoise > Sales > Resend.');
+    }
+    if (alerts.length) {
+      try {
+        await sendEmail({
+          to: ownerTo,
+          subject: `${testMode ? '[TEST] ' : ''}Tortoise sale needs attention: ${paymentId}`,
+          html: `<ul>${alerts.map((a) => `<li>${escapeHtml(a)}</li>`).join('')}</ul><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p>`,
+        });
+      } catch (e) { console.error('[razorpay-webhook] alert email failed:', e); }
     }
   }
 
-  return NextResponse.json({ ok: true, keys: keys.length });
+  return NextResponse.json({ ok: true, keys: keys.length, invoice: invoiceNo });
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { priceFor, formatMinor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
+import { INDIAN_STATES } from '@/lib/indianStates';
 import styles from '@/app/tortoise/tortoise.module.css';
 
 type RazorpayHandlerResponse = { razorpay_payment_id: string };
@@ -42,6 +43,8 @@ export default function TortoiseBuy() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [state, setState] = useState('');
+  const [gstin, setGstin] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [paid, setPaid] = useState(false);
@@ -56,7 +59,7 @@ export default function TortoiseBuy() {
       const res = await fetch('/api/tortoise/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name, email, quantity, currency }),
+        body: JSON.stringify({ name, email, quantity, currency, state, gstin }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { setError(data.error ?? 'Could not start the payment.'); return; }
@@ -79,7 +82,7 @@ export default function TortoiseBuy() {
   if (paid) {
     return (
       <div className={styles.buy}>
-        <p><strong>Payment received, thank you.</strong> Your licence key will be emailed to {email} shortly. If you do not see it within a day, email yaftdesigns@gmail.com.</p>
+        <p><strong>Payment received, thank you.</strong> Your licence key and tax invoice will be emailed to {email} shortly. If you do not see it within a day, email yaftdesigns@gmail.com.</p>
       </div>
     );
   }
@@ -103,6 +106,19 @@ export default function TortoiseBuy() {
           </select>
         </label>
       </div>
+      {currency === 'INR' && (
+        <div className={styles.row}>
+          <label>State (for the GST invoice)
+            <select value={state} onChange={(e) => setState(e.target.value)} required>
+              <option value="">Select your state</option>
+              {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+          <label>GSTIN (optional)
+            <input value={gstin} onChange={(e) => setGstin(e.target.value.toUpperCase())} maxLength={15} placeholder="Only if you want it on the invoice" />
+          </label>
+        </div>
+      )}
       <p className={styles.small}>
         {currency === 'INR'
           ? `Base ${formatMinor(price.base, 'INR')} + GST 18% ${formatMinor(price.gst, 'INR')} = `
