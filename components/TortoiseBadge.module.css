@@ -1,15 +1,14 @@
 .badge { position: absolute; left: 63px; bottom: 28px; z-index: 3; display: flex; align-items: center; gap: 14px; color: #fff; text-decoration: none; }
-.svg { width: 104px; height: 104px; flex: none; overflow: visible; }
-.svg g { transform-box: view-box; transform-origin: 60px 60px; }
-.slow { animation: spin 40s linear infinite; }
-.mid { animation: spin 14s linear infinite reverse; }
-.fast { animation: spin 4s linear infinite; }
+.mark { position: relative; width: 104px; height: 104px; flex: none; display: block; }
+.ring { position: absolute; inset: 0; width: 100%; height: 100%; }
+.logo { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); image-rendering: pixelated; }
+.slow { animation: spin 30s linear infinite reverse; }
+.fast { animation: spin 9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .label { font-family: var(--display, 'Space Grotesk', sans-serif); font-weight: 700; font-size: 18px; line-height: 1.2; }
 .label small { display: block; font-family: var(--mono, 'IBM Plex Mono', monospace); font-weight: 400; font-size: 11px; color: #bbb; margin-top: 3px; }
 .badge:hover .label { color: #E63946; }
-.badge:hover .slow { animation-duration: 14s; }
-.badge:hover .mid { animation-duration: 5s; }
-.badge:hover .fast { animation-duration: 1.2s; }
-@media (max-width: 760px) { .badge { left: 20px; bottom: 16px; } .svg { width: 72px; height: 72px; } .label small { display: none; } }
-@media (prefers-reduced-motion: reduce) { .slow, .mid, .fast { animation: none; } }
+.badge:hover .slow { animation-duration: 10s; }
+.badge:hover .fast { animation-duration: 2.5s; }
+@media (max-width: 760px) { .badge { left: 20px; bottom: 16px; } .mark { width: 72px; height: 72px; } .logo { inset: 5px; width: calc(100% - 10px); height: calc(100% - 10px); } .label small { display: none; } }
+@media (prefers-reduced-motion: reduce) { .slow, .fast { animation: none; } }
