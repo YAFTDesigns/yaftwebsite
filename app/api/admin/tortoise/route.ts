@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { addMonths, newLicenseKey, normalizeKey } from '@/lib/tortoiseLicense';
 
-// Covered by the proxy matcher (/api/admin/:path*), so only logged-in admins reach it.
+// The proxy matcher (/api/admin/:path*) already limits this to admins; each handler also checks, so a matcher change cannot expose key creation.
+const deny = () => NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
 // GET /api/admin/tortoise  -> licences with how many PCs each is used on
 export async function GET() {
+  if (!(await isRequestFromAdmin())) return deny();
   const supabase = getSupabaseAdmin();
   const { data: lics, error } = await supabase
     .from('tortoise_licenses')
@@ -30,6 +33,7 @@ export async function GET() {
 
 // POST /api/admin/tortoise  { email, months (0 = perpetual), max_machines, note }
 export async function POST(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return deny();
   const body = await request.json().catch(() => null);
   const email = String(body?.email ?? '').trim().toLowerCase();
   const months = Number(body?.months ?? 12);
@@ -58,6 +62,7 @@ export async function POST(request: NextRequest) {
 
 // PATCH /api/admin/tortoise  { key, action: 'revoke' | 'restore' | 'reset' | 'extend', months }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return deny();
   const body = await request.json().catch(() => null);
   const key = normalizeKey(body?.key);
   const action = body?.action;
