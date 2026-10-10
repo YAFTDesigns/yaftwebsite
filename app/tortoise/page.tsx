@@ -1,7 +1,11 @@
 import type { Metadata } from 'next';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import TortoiseBuy from '@/components/TortoiseBuy';
 import styles from './tortoise.module.css';
+
+// Online purchase stays hidden until TORTOISE_CHECKOUT_ENABLED=1 is set in Vercel and the site is redeployed.
+const CHECKOUT_ENABLED = process.env.TORTOISE_CHECKOUT_ENABLED === '1';
 
 export const metadata: Metadata = {
   title: 'Tortoise for Rhino 8 | Auto-dimensioned Glass and Panel Sheets | YAFT Designs',
@@ -45,10 +49,23 @@ export default function TortoisePage() {
             PDF, DWG/DXF and BOM with TRIAL EXPIRED until a licence key is entered in Tortoise &gt; About / Help &gt; Licence. The key is checked online now and then,
             and the plugin works offline for up to 30 days between checks.
           </p>
-          <p>
-            A licence is a one-time <strong>US$49</strong> per licence key, and it does not expire. To buy one, email{' '}
-            <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a> with your name, company and the number of PCs, and we will send payment details and your key.
-          </p>
+          {CHECKOUT_ENABLED ? (
+            <>
+              <p>
+                A licence is a one-time purchase per licence key, and it does not expire. Pay securely with Razorpay (cards, UPI, netbanking) and your key is emailed to you.
+              </p>
+              <TortoiseBuy />
+              <p className={styles.small}>
+                Prefer to pay another way, or need an invoice first? Email{' '}
+                <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a>.
+              </p>
+            </>
+          ) : (
+            <p>
+              A licence is a one-time <strong>US$49</strong> per licence key, and it does not expire. To buy one, email{' '}
+              <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a> with your name, company and the number of PCs, and we will send payment details and your key.
+            </p>
+          )}
 
           <h2>Requirements</h2>
           <p>Rhino 8 for Windows. Mac is not supported yet. Excel is only needed to open the BOM, not to create it.</p>
