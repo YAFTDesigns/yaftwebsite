@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 // GET /api/admin/testimonials?status=pending
 export async function GET(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
 
@@ -23,6 +25,7 @@ export async function GET(request: NextRequest) {
 
 // PATCH /api/admin/testimonials  { id, status }
 export async function PATCH(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
   const status = body?.status;
@@ -50,6 +53,7 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE /api/admin/testimonials  { id }
 export async function DELETE(request: NextRequest) {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
   const id = body?.id;
 

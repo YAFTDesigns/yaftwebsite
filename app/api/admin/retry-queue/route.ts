@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import {
   popEnquiriesFromQueue, pushEnquiryToQueue, getQueueLength,
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const [enquiryQueue, invoiceQueue] = await Promise.all([
     getQueueLength(),
     getInvoiceQueueLength(),
