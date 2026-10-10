@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
 import { createOrder, razorpayConfig } from '@/lib/razorpay';
+import { INDIAN_STATES, GSTIN_RE } from '@/lib/indianStates';
 import { priceFor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
 
 const EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
@@ -22,6 +23,16 @@ export async function POST(request: NextRequest) {
   if (!name || name.length > 100) return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 });
   if (!EMAIL_RE.test(email) || email.length > 200) return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
   if (!currency) return NextResponse.json({ error: 'Choose INR or USD.' }, { status: 400 });
+  const state = typeof body?.state === 'string' ? body.state.trim() : '';
+  const gstin = typeof body?.gstin === 'string' ? body.gstin.trim().toUpperCase() : '';
+  if (currency === 'INR') {
+    if (!(INDIAN_STATES as readonly string[]).includes(state)) {
+      return NextResponse.json({ error: 'Please choose your state (needed for the GST invoice).' }, { status: 400 });
+    }
+    if (gstin && !GSTIN_RE.test(gstin)) {
+      return NextResponse.json({ error: 'That GSTIN does not look valid. Leave it blank if you do not have one.' }, { status: 400 });
+    }
+  }
   if (!Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY) {
     return NextResponse.json({ error: `Quantity must be 1 to ${MAX_QUANTITY}.` }, { status: 400 });
   }
@@ -32,7 +43,7 @@ export async function POST(request: NextRequest) {
       amount: price.total,
       currency,
       receipt: `tort_${Date.now()}`,
-      notes: { product: 'tortoise', name, email, quantity: String(quantity), base: String(price.base), gst: String(price.gst) },
+      notes: { product: 'tortoise', name, email, quantity: String(quantity), base: String(price.base), gst: String(price.gst), state: currency === 'INR' ? state : '', gstin: currency === 'INR' ? gstin : '' },
     });
     return NextResponse.json({
       orderId: order.id,

@@ -29,3 +29,14 @@ describe('priceFor', () => {
     expect(() => priceFor('INR', 11)).toThrow();
   });
 });
+
+describe('Tortoise invoice maths matches what Razorpay charges', () => {
+  it.each(['Tamil Nadu', 'Karnataka'])('INR x3 in %s', async (state) => {
+    const { computeInvoiceTotals } = await import('./invoiceMath');
+    const p = priceFor('INR', 3);
+    const t = computeInvoiceTotals([{ qty: 3, rate: p.base / 3 / 100 }], state);
+    expect(Math.round(t.total * 100)).toBe(p.total);
+    if (state === 'Tamil Nadu') { expect(t.cgst).toBe(t.sgst); expect(t.igst).toBe(0); }
+    else expect(t.igst).toBeGreaterThan(0);
+  });
+});

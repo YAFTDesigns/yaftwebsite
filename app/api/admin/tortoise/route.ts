@@ -2,13 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { addMonths, newLicenseKey, normalizeKey } from '@/lib/tortoiseLicense';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { sendBuyerKeyEmail } from '@/lib/tortoiseSale';
 
 // Covered by the proxy matcher (/api/admin/:path*), so only logged-in admins reach it.
 
 // GET /api/admin/tortoise  -> licences with how many PCs each is used on
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const supabase = getSupabaseAdmin();
+  if (new URL(request.url).searchParams.get('view') === 'sales') {
+    const { data, error: salesErr } = await supabase.from('tortoise_payments').select('*').order('created_at', { ascending: false }).limit(500);
+    if (salesErr) {
+      console.error('[tortoise-admin] sales GET failed:', salesErr);
+      return NextResponse.json({ error: 'Could not load sales' }, { status: 500 });
+    }
+    return NextResponse.json({ data: data ?? [] });
+  }
   const { data: lics, error } = await supabase
     .from('tortoise_licenses')
     .select('*')
@@ -34,6 +43,25 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const body = await request.json().catch(() => null);
+
+  // Resend the key email (with the invoice for INR sales) for an existing payment.
+  if (body?.action === 'resend_key_email') {
+    const supabase = getSupabaseAdmin();
+    const { data: p } = await supabase.from('tortoise_payments').select('*').eq('payment_id', String(body.payment_id ?? '')).maybeSingle();
+    if (!p || !p.license_keys?.length) return NextResponse.json({ error: 'Payment not found or has no keys' }, { status: 404 });
+    try {
+      await sendBuyerKeyEmail({
+        paymentId: p.payment_id, name: p.name ?? '', email: p.email, quantity: p.quantity,
+        amountMinor: p.amount, currency: p.currency, state: p.buyer_state, gstin: p.buyer_gstin,
+        testMode: !!p.test_mode, keys: p.license_keys, invoiceNo: p.invoice_no,
+      }, { bccOwner: true });
+      return NextResponse.json({ ok: true });
+    } catch (err) {
+      console.error('[tortoise-admin] resend failed:', err);
+      return NextResponse.json({ error: 'Email failed to send' }, { status: 502 });
+    }
+  }
+
   const email = String(body?.email ?? '').trim().toLowerCase();
   const months = Number(body?.months ?? 12);
   const maxMachines = Number(body?.max_machines ?? 2);
