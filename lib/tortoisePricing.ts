@@ -1,7 +1,7 @@
 // Tortoise licence prices. Amounts are in minor units (paise / cents).
-// INR price is a PROPOSAL pending owner approval; GST is added on top for India.
+// INR base price is owner-approved (₹4,100); GST is added on top for India.
 export const TORTOISE_USD_CENTS = 4900; // US$49 per licence key, export (no GST)
-export const TORTOISE_INR_BASE_PAISE = 400000; // ₹4,000 per licence key before GST
+export const TORTOISE_INR_BASE_PAISE = 410000; // ₹4,100 per licence key before GST (approved by owner)
 export const GST_RATE_PERCENT = 18;
 export const MAX_QUANTITY = 10;
 

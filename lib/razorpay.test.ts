@@ -20,9 +20,9 @@ describe('priceFor', () => {
   it('USD has no GST', () => expect(priceFor('USD', 2)).toEqual({ currency: 'USD', quantity: 2, base: 9800, gst: 0, total: 9800 }));
   it('INR adds 18% GST', () => {
     const p = priceFor('INR', 1);
-    expect(p.base).toBe(400000);
-    expect(p.gst).toBe(72000);
-    expect(p.total).toBe(472000);
+    expect(p.base).toBe(410000);
+    expect(p.gst).toBe(73800);
+    expect(p.total).toBe(483800);
   });
   it('rejects bad quantity', () => {
     expect(() => priceFor('INR', 0)).toThrow();
