@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
+import TortoiseBadge from '@/components/TortoiseBadge';
 import type { LabScript, LabCategory } from './page';
 import { getYouTubeVideoId } from '@/lib/youtube';
 import { track } from '@/lib/analytics';
@@ -114,6 +115,8 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
               </svg>
             ))}
           </div>
+
+          <TortoiseBadge />
 
           <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
             <h1>YAFT Labs</h1>
