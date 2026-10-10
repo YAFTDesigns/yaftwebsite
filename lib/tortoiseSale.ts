@@ -116,7 +116,8 @@ export async function sendBuyerKeyEmail(s: Sale & { invoiceNo: string | null }, 
 <p style="font-size:13px;line-height:1.7;color:#444;">Each key works on up to ${MAX_MACHINES_PER_KEY} PCs, never expires, and is checked online now and then (it keeps working offline for up to 30 days between checks). To move a key to a new PC, just email us.</p>
 <p style="font-size:13px;line-height:1.7;color:#444;">Payment received: ${escapeHtml(paid)}, ${s.quantity} key${s.quantity > 1 ? 's' : ''}. Payment ref ${escapeHtml(s.paymentId)}.${attachments.length ? ' Your tax invoice is attached.' : ''}${!isInr ? ' This email is your receipt; email us if you need an invoice for your records.' : ''}</p>
 <p style="font-size:13px;line-height:1.7;color:#444;">Questions or a bug to report? Just reply to this email.</p>
-<hr style="border:none;border-top:1px solid #eee;margin:20px 0 14px;">
+<img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:20px 0 20px;" />
+<hr style="border:none;border-top:1px solid #eee;margin:0 0 14px;">
 <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br><a href="https://www.yaftdesigns.com/tortoise" style="color:#E63946;text-decoration:none;">yaftdesigns.com/tortoise</a></p>
 </div>`;
 
