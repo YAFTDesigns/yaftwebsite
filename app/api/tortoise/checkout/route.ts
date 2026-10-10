@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rateLimit';
-import { createOrder } from '@/lib/razorpay';
+import { createOrder, razorpayConfig } from '@/lib/razorpay';
 import { priceFor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
 
 const EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
+      keyId: razorpayConfig().keyId,
     });
   } catch (err) {
     console.error('[tortoise-checkout] order failed:', err);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { verifyWebhookSignature } from '@/lib/razorpay';
+import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
 import { newLicenseKey } from '@/lib/tortoiseLicense';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 
@@ -8,7 +8,7 @@ const MAX_MACHINES_PER_KEY = 2;
 
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
 export async function POST(request: NextRequest) {
-  const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  const { webhookSecret: secret, test: testMode } = razorpayConfig();
   if (!secret) return NextResponse.json({ error: 'Not configured' }, { status: 503 });
 
   const raw = await request.text();
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
   for (let i = 0; i < quantity; i++) {
     const key = newLicenseKey();
     const { error } = await supabase.from('tortoise_licenses').insert({
-      key, email, max_machines: MAX_MACHINES_PER_KEY, expires_at: null, note: `Razorpay ${paymentId}`,
+      key, email, max_machines: MAX_MACHINES_PER_KEY, expires_at: null, note: `${testMode ? "TEST " : ""}Razorpay ${paymentId}`,
     });
     if (error) {
       console.error('[razorpay-webhook] licence insert failed:', error);
