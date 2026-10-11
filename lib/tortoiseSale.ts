@@ -16,6 +16,8 @@ export type Sale = {
   currency: string;
   state: string | null;
   gstin: string | null;
+  buyerType?: 'individual' | 'company';
+  company?: string | null;
   testMode: boolean;
   keys: string[];
 };
@@ -60,7 +62,8 @@ export async function createInvoiceForSale(sale: Sale): Promise<{ invoiceNo: str
       date: ddmmyyyy(),
       client_name: sale.name || sale.email,
       client_email: sale.email,
-      client_type: sale.gstin ? 'company' : 'individual',
+      client_type: sale.buyerType === 'company' || sale.gstin ? 'company' : 'individual',
+      client_company: sale.company || null,
       client_gst: sale.gstin,
       client_state: state,
       items,

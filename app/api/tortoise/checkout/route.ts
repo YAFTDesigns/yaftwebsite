@@ -23,6 +23,11 @@ export async function POST(request: NextRequest) {
   if (!name || name.length > 100) return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 });
   if (!EMAIL_RE.test(email) || email.length > 200) return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
   if (!currency) return NextResponse.json({ error: 'Choose INR or USD.' }, { status: 400 });
+  const buyerType = body?.buyerType === 'company' ? 'company' : 'individual';
+  const company = buyerType === 'company' && typeof body?.company === 'string' ? body.company.trim() : '';
+  if (buyerType === 'company' && (!company || company.length > 120)) {
+    return NextResponse.json({ error: 'Please enter your company name.' }, { status: 400 });
+  }
   const state = typeof body?.state === 'string' ? body.state.trim() : '';
   const gstin = typeof body?.gstin === 'string' ? body.gstin.trim().toUpperCase() : '';
   if (currency === 'INR') {
@@ -43,7 +48,7 @@ export async function POST(request: NextRequest) {
       amount: price.total,
       currency,
       receipt: `tort_${Date.now()}`,
-      notes: { product: 'tortoise', name, email, quantity: String(quantity), base: String(price.base), gst: String(price.gst), state: currency === 'INR' ? state : '', gstin: currency === 'INR' ? gstin : '' },
+      notes: { product: 'tortoise', name, email, quantity: String(quantity), base: String(price.base), gst: String(price.gst), buyer_type: buyerType, company, state: currency === 'INR' ? state : '', gstin: currency === 'INR' ? gstin : '' },
     });
     return NextResponse.json({
       orderId: order.id,
