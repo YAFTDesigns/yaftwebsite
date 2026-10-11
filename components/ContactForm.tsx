@@ -147,6 +147,7 @@ export default function ContactForm({ options, funnel, messagePlaceholder }: Con
         <p className="modal-error show">{errorMsg || 'Something went wrong sending that, please try again, or email us directly.'}</p>
       )}
 
+      <p style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.5, margin: '0 0 12px' }}>By submitting, you agree to our <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'inherit', textDecoration: 'underline' }}>Privacy Policy</a> and to be contacted about your request.</p>
       <button type="submit" className="btn-primary" disabled={status === 'submitting'} style={{ border: 'none', cursor: 'pointer' }}>
         {status === 'submitting' ? 'Sending…' : 'Send Enquiry'}
       </button>
