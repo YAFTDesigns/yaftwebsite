@@ -16,11 +16,11 @@ const CLAUSES = [
   },
   {
     title: 'What We Collect',
-    body: 'We collect the personal data you choose to give us: your name, email address, and any message you send when you submit an enquiry, unlock a course syllabus, or leave a testimonial. If you make a payment for a course or service, we also generate an invoice containing your name and contact details for that purpose. We do not collect payment card details ourselves; any payment processing is handled outside this site.',
+    body: 'We collect the personal data you choose to give us: your name, email address, and any message you send when you submit an enquiry, unlock a course syllabus, or leave a testimonial. If you make a payment for a course or service, we also generate an invoice containing your name and contact details for that purpose. We do not collect payment card details ourselves; payments are processed by Razorpay and course payments may also be handled outside this site. If you buy or download the Tortoise plugin, we also collect your name, email, billing state, and GSTIN if you give one (needed for a GST invoice), and we store the Razorpay payment and order IDs, the amount paid, your licence keys, the computers a key is activated on (a machine identifier), and your invoice. Licence checks from the plugin send the key and a machine identifier to our server. Free downloads of the plugin are counted without recording who downloaded.',
   },
   {
     title: 'How We Use It',
-    body: 'We use your data to respond to enquiries, send confirmation and follow-up emails, issue invoices and certificates, and improve our courses and site content. We do not sell, rent, or trade your personal data to third parties, and we do not use it for advertising.',
+    body: 'We use your data to respond to enquiries, send confirmation and follow-up emails, issue invoices, certificates, and licence keys, keep tax and accounting records, and improve our courses and site content. We do not sell, rent, or trade your personal data to third parties, and we do not use it for advertising.',
   },
   {
     title: 'Email Communications',
@@ -28,7 +28,7 @@ const CLAUSES = [
   },
   {
     title: 'Where Your Data Is Stored',
-    body: 'Enquiries, leads, testimonials, and invoices are stored in a Supabase-hosted database with access restricted to YAFT Designs administrators. Site analytics are processed through Google Analytics 4 and a first-party analytics system described in our Cookies Policy. We take reasonable technical measures, including access controls and encrypted connections, to protect this data.',
+    body: 'Enquiries, leads, testimonials, and invoices, licence keys, and payment records are stored in a Supabase-hosted database with access restricted to YAFT Designs administrators. Site analytics are processed through Google Analytics 4 and a first-party analytics system described in our Cookies Policy. We take reasonable technical measures, including access controls and encrypted connections, to protect this data.',
   },
   {
     title: 'Certificates and Verification',
@@ -40,7 +40,7 @@ const CLAUSES = [
   },
   {
     title: 'Third-Party Services',
-    body: 'This site uses Google Analytics 4 for traffic analysis, Resend for transactional email, Supabase for data storage, and Vercel for hosting. Each of these providers processes data under their own privacy policies. We choose providers that meet reasonable data protection standards and only share the minimum data necessary for them to perform their function.',
+    body: 'This site uses Google Analytics 4 for traffic analysis, Razorpay for payment processing, Resend for transactional email, Supabase for data storage, and Vercel for hosting. Each of these providers processes data under their own privacy policies. We choose providers that meet reasonable data protection standards and only share the minimum data necessary for them to perform their function.',
   },
   {
     title: "Children's Privacy",
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
           <div className="wrap">
             <div className="eyebrow">LEGAL</div>
             <h1 className={styles.title}>Privacy Policy</h1>
-            <p className={styles.updated}>Last updated: July 2026</p>
+            <p className={styles.updated}>Last updated: October 2026</p>
             <p className={styles.intro}>
               This policy explains what personal data yaftdesigns.com collects and how we use it. For related policies see our{' '}
               <a href="/terms" style={{ color: 'var(--brass)', borderBottom: '1px solid var(--brass)' }}>Terms</a>{' '}and{' '}
