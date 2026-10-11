@@ -6,6 +6,7 @@ import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Grasshopper for Architecture | YAFT Designs',
@@ -84,8 +85,8 @@ export default function GrasshopperArchitecture() {
       <CourseGallery
         groupKey="grasshopper-architecture"
         images={[
-          { src: '/assets/images/courses/grasshopper-architecture-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
-          { src: '/assets/images/courses/grasshopper-architecture-2.jpg', caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
+          { src: imageUrl('courses/grasshopper-architecture-1.jpg'), caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
+          { src: imageUrl('courses/grasshopper-architecture-2.jpg'), caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
         ]}
       />
 
@@ -145,8 +146,8 @@ export default function GrasshopperArchitecture() {
           title: 'Grasshopper for Architecture',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/grasshopper-architecture-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
-            { src: '/assets/images/courses/grasshopper-architecture-2.jpg', caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
+            { src: imageUrl('courses/grasshopper-architecture-1.jpg'), caption: 'Voronoi and patterns, point attractors, culling and vector fields, Kangaroo physics' },
+            { src: imageUrl('courses/grasshopper-architecture-2.jpg'), caption: 'Facade optimisation with Ladybug climate analysis and robotic fabrication with KUKA' },
           ],
         }]}
       />

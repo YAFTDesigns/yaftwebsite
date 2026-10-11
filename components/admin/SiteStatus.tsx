@@ -39,8 +39,16 @@ export default function SiteStatus() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- periodic health check against the site's own status endpoints, not a cascading-render bug
     check();
-    const interval = setInterval(check, 60_000); // re-check every 60s
-    return () => clearInterval(interval);
+    // Re-check every 60s while the tab is visible (each check renders ~14 pages
+    // server-side, so a background tab shouldn't keep paying for it), and
+    // refresh right away when the tab comes back.
+    const tick = () => { if (!document.hidden) check(); };
+    const interval = setInterval(tick, 60_000);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', tick);
+    };
   }, [check]);
 
   const hasQueueBacklog = queues.enquiry > 0 || queues.invoice > 0;

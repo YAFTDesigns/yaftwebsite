@@ -3,6 +3,7 @@ import { computeInvoiceTotals } from './invoiceMath';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from './email';
 import { getSupabaseAdmin } from './supabase/admin';
 import { getErrorMessage } from './errorMessage';
+import { imageUrl } from '@/lib/assetUrl';
 
 export type InvoiceForEmail = InvoicePdfData & {
   grand_total: number;
@@ -93,7 +94,7 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
       <li>Email ID for billing</li>
     </ul>
   </div>` : ''}
-  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
+  <img src="${imageUrl('rhino-banner.png')}" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 20px;">
   <p style="font-size:13px;font-weight:600;color:#111;margin:0 0 8px;">Share your experience</p>
   <p style="font-size:13px;color:#555;line-height:1.7;margin:0 0 12px;">If the training has been useful, we'd love a quick testimonial. It helps other students and professionals find us.</p>

@@ -20,11 +20,18 @@ const BALANCE_DUE_DAYS = 7; // terms: balance payable within 7 days of invoice d
 export default async function TodayPage() {
   const supabase = getSupabaseAdmin();
   const now = nowMs();
-  const leadsRes = await safeQuery<Row[]>(
-    supabase.from('leads').select('id, email, name, source, status, declined, follow_up_date, proposal_status, proposal_updated_at, payment_status, payment_updated_at, funnel, audience, organisation, service_interest, need').eq('is_test', false),
-    [], 'today leads'
-  );
-  const enqRes = await safeQuery<{ lead_id: string }[]>(supabase.from('enquiries').select('lead_id').not('lead_id', 'is', null), [], 'today enquiries');
+  // Three independent reads: run them together.
+  const [leadsRes, enqRes, invRes] = await Promise.all([
+    safeQuery<Row[]>(
+      supabase.from('leads').select('id, email, name, source, status, declined, follow_up_date, proposal_status, proposal_updated_at, payment_status, payment_updated_at, funnel, audience, organisation, service_interest, need').eq('is_test', false),
+      [], 'today leads'
+    ),
+    safeQuery<{ lead_id: string }[]>(supabase.from('enquiries').select('lead_id').not('lead_id', 'is', null), [], 'today enquiries'),
+    safeQuery<{ id: string; invoice_no: string; date: string; client_name: string; balance: number }[]>(
+      supabase.from('invoices').select('id, invoice_no, date, client_name, balance').is('deleted_at', null).neq('invoice_type', 'proforma').gt('balance', 0),
+      [], 'today invoices'
+    ),
+  ]);
   const withEnquiry = new Set(enqRes.data.map((e) => e.lead_id));
 
   const items = leadsRes.data
@@ -32,10 +39,6 @@ export default async function TodayPage() {
     .filter((x) => x.reasons.length > 0)
     .sort((a, b) => a.reasons[0].rank - b.reasons[0].rank || (a.l.follow_up_date ?? '9').localeCompare(b.l.follow_up_date ?? '9'));
 
-  const invRes = await safeQuery<{ id: string; invoice_no: string; date: string; client_name: string; balance: number }[]>(
-    supabase.from('invoices').select('id, invoice_no, date, client_name, balance').is('deleted_at', null).neq('invoice_type', 'proforma').gt('balance', 0),
-    [], 'today invoices'
-  );
   const dueInvoices = invRes.data
     .map((i) => ({ ...i, days: Math.floor((now - new Date(ddmmyyyyToIso(i.date)).getTime()) / 86_400_000) }))
     .filter((i) => Number.isFinite(i.days) && i.days > BALANCE_DUE_DAYS)

@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 
+// Assets moved from public/ to Supabase Storage. Old absolute URLs (emails already
+// sent, cached social previews) keep working through the redirects below.
+const STORAGE = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://rjvadqwqgqouihuydlnu.supabase.co'}/storage/v1/object/public`;
+
 const nextConfig: NextConfig = {
   serverExternalPackages: ['pdfkit'],
   // Never ship source maps to the browser: they expose readable source.
@@ -43,6 +47,8 @@ const nextConfig: NextConfig = {
     // instead of leaving them dead so that history transfers to the
     // new URLs rather than just being lost.
     return [
+      { source: '/assets/images/:file(rhino-banner.png|og-image.jpg)', destination: `${STORAGE}/site-images/:file`, permanent: false },
+      { source: '/assets/:dir(video|pdfs|partners|docs)/:path*', destination: `${STORAGE}/public-assets/:dir/:path*`, permanent: false },
       { source: '/index.html', destination: '/', permanent: true },
       { source: '/courses.html', destination: '/courses', permanent: true },
       { source: '/services.html', destination: '/services', permanent: true },

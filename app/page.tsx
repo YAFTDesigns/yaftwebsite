@@ -20,6 +20,7 @@ import PortraitLabelReveal from '@/components/PortraitLabelReveal';
 import { getPartners, getFeaturedTestimonials, getTestimonialAggregate } from '@/lib/feature-wall';
 import { COURSE_INTEREST_OPTIONS } from './courses/courseNav';
 import styles from './home.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
 const DESCRIPTION =
@@ -34,13 +35,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://www.yaftdesigns.com/',
     type: 'website',
-    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: imageUrl('og-image.jpg') }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+    images: [imageUrl('og-image.jpg')],
   },
 };
 
@@ -74,7 +75,7 @@ const JSON_LD = {
     'Authorized Rhino Training Center India',
   ],
   url: 'https://www.yaftdesigns.com',
-  logo: 'https://www.yaftdesigns.com/assets/images/og-image.jpg',
+  logo: imageUrl('og-image.jpg'),
   description:
     'Authorized Rhino Training Center recognized by McNeel and Associates. Offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training across India, Australia, Singapore, Indonesia, Philippines, Japan and online worldwide.',
   address: {
@@ -122,8 +123,8 @@ const HOME_COURSE_CARDS = [
   { title: 'Grasshopper for Computational Design', img: '/assets/images/courses/grasshopper-architecture.jpg', alt: 'Grasshopper', tag: 'Basic → Advanced', dbSlug: 'grasshopper-architecture' },
   { title: 'Rhino.Inside.Revit', img: '/assets/images/courses/revit-rhino-inside.jpg', alt: 'Rhino.Inside.Revit', tag: 'Advanced', dbSlug: 'revit-rhino-inside' },
   { title: 'Rhino3D for AEC & Climate Design', img: '/assets/images/courses/rhino-aec-climate.jpg', alt: 'AEC & Climate Design', tag: 'Intermediate', dbSlug: 'rhino-aec-climate' },
-  { title: 'Wearables & Product Design', img: '/assets/images/courses/rhino-wearables-footwear.jpg', alt: 'Wearables & Product Design', tag: 'All levels', dbSlug: 'rhino-wearables-footwear' },
-  { title: 'Industrial Design', img: '/assets/images/courses/rhino-industrial-design.jpg', alt: 'Industrial Design', tag: 'All levels', dbSlug: 'rhino-industrial-design' },
+  { title: 'Wearables & Product Design', img: imageUrl('courses/rhino-wearables-footwear.jpg'), alt: 'Wearables & Product Design', tag: 'All levels', dbSlug: 'rhino-wearables-footwear' },
+  { title: 'Industrial Design', img: imageUrl('courses/rhino-industrial-design.jpg'), alt: 'Industrial Design', tag: 'All levels', dbSlug: 'rhino-industrial-design' },
 ] as const;
 
 const FAQ_ITEMS = [
@@ -395,7 +396,7 @@ export default async function HomePage() {
                   <div className={styles.portraitBackdrop}></div>
                   <PortraitLabelReveal>LEAD<br />MENTOR</PortraitLabelReveal>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/assets/images/profile-cutout.png" alt="Yokes Marapa" className={styles.portraitCutout} width={700} height={871} loading="lazy" decoding="async" />
+                  <img src={imageUrl('profile-cutout.png')} alt="Yokes Marapa" className={styles.portraitCutout} width={700} height={871} loading="lazy" decoding="async" />
                 </div>
               </div>
             </div>

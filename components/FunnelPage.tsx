@@ -6,6 +6,7 @@ import ServiceCta from '@/components/ServiceCta';
 import CollegeSections from '@/components/CollegeSections';
 import { FUNNEL_CONFIG } from '@/lib/funnels';
 import { FUNNEL_LABELS, type Funnel } from '@/lib/enquiryFields';
+import { imageUrl } from '@/lib/assetUrl';
 
 export function funnelMetadata(key: Funnel): Metadata {
   const c = FUNNEL_CONFIG[key];
@@ -13,7 +14,7 @@ export function funnelMetadata(key: Funnel): Metadata {
     title: c.title,
     description: c.description,
     alternates: { canonical: c.path },
-    openGraph: { title: `${c.title} | YAFT Designs`, description: c.description, url: `https://www.yaftdesigns.com${c.path}`, type: 'website', images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }] },
+    openGraph: { title: `${c.title} | YAFT Designs`, description: c.description, url: `https://www.yaftdesigns.com${c.path}`, type: 'website', images: [{ url: imageUrl('og-image.jpg') }] },
   };
 }
 

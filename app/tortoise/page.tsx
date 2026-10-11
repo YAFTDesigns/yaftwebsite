@@ -6,6 +6,7 @@ import TortoiseBuy from '@/components/TortoiseBuy';
 import { priceFor, formatMinor, TORTOISE_USD_CENTS } from '@/lib/tortoisePricing';
 import { getTortoiseDownloadCount } from '@/lib/tortoiseDownloads';
 import styles from './tortoise.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 // Refresh the download count every 5 minutes.
 export const revalidate = 300;
@@ -29,12 +30,12 @@ export const metadata: Metadata = {
   },
 };
 
-const HERO_IMAGE = { src: '/assets/images/tortoise/tortoise-walkthrough.gif', w: 1000, h: 684, alt: 'Tortoise walkthrough: pick material and glass types, select panels, run, review the layouts and export' };
+const HERO_IMAGE = { src: imageUrl('tortoise/tortoise-walkthrough.gif'), w: 1000, h: 684, alt: 'Tortoise walkthrough: pick material and glass types, select panels, run, review the layouts and export' };
 
 const SCREENSHOTS = [
-  { src: '/assets/images/tortoise/tortoise-sheet.png', alt: 'A Tortoise A3 sheet for a glass panel with side dimensions, corner angles, side letters, DIM A to I table and title block', caption: 'One dimensioned A3 sheet per panel: side letters, dimensions, corner angles, DIM table and title block.', w: 1800, h: 1273, unopt: false },
-  { src: '/assets/images/tortoise/tortoise-run-review.png', alt: 'Tortoise review list showing four panels with sizes, glass types and layout names, and a layout preview', caption: 'Run once and review every layout, size and glass type before you export.', w: 1100, h: 752, unopt: false },
-  { src: '/assets/images/tortoise/tortoise-sheets.gif', alt: 'Four Tortoise sheets for panels of different sizes', caption: 'Panels of different sizes, each on its own sheet.', w: 1400, h: 990, unopt: true },
+  { src: imageUrl('tortoise/tortoise-sheet.png'), alt: 'A Tortoise A3 sheet for a glass panel with side dimensions, corner angles, side letters, DIM A to I table and title block', caption: 'One dimensioned A3 sheet per panel: side letters, dimensions, corner angles, DIM table and title block.', w: 1800, h: 1273, unopt: false },
+  { src: imageUrl('tortoise/tortoise-run-review.png'), alt: 'Tortoise review list showing four panels with sizes, glass types and layout names, and a layout preview', caption: 'Run once and review every layout, size and glass type before you export.', w: 1100, h: 752, unopt: false },
+  { src: imageUrl('tortoise/tortoise-sheets.gif'), alt: 'Four Tortoise sheets for panels of different sizes', caption: 'Panels of different sizes, each on its own sheet.', w: 1400, h: 990, unopt: true },
 ];
 
 const FEATURES = [
@@ -120,7 +121,7 @@ export default async function TortoisePage() {
               </div>
               <p className="eyebrow">YAFT Designs &middot; Plugin for Rhino 8</p>
               <h1 className={styles.titleRow}>
-                <Image src="/assets/images/tortoise/tortoise-logo.png" alt="" width={72} height={72} className={styles.titleLogo} />
+                <Image src={imageUrl('tortoise/tortoise-logo.png')} alt="" width={72} height={72} className={styles.titleLogo} />
                 Tortoise
               </h1>
               <p className={styles.lede}>
@@ -240,7 +241,7 @@ export default async function TortoisePage() {
             <div className={styles.dl}>
               <div className={styles.dlCard}>
                 <div className={styles.dlHead}>
-                  <Image src="/assets/images/tortoise/tortoise-logo.png" alt="Tortoise logo" width={56} height={56} className={styles.titleLogo} />
+                  <Image src={imageUrl('tortoise/tortoise-logo.png')} alt="Tortoise logo" width={56} height={56} className={styles.titleLogo} />
                   <p className={styles.dlName}>Tortoise v{VERSION} Free</p>
                 </div>
                 <p className={styles.dlMeta}>Windows &middot; Rhino 8 &middot; {DOWNLOAD_SIZE} zip &middot; 9 Oct 2026{downloads ? <> &middot; {downloads.toLocaleString('en-IN')} downloads</> : null}</p>

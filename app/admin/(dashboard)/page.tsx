@@ -11,6 +11,7 @@ import PendingFloater from '@/components/admin/PendingFloater';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 import { fmtInt } from '@/lib/format';
+import { getNavCounts } from '@/lib/admin/getNavCounts';
 
 export const dynamic = 'force-dynamic';
 
@@ -92,11 +93,12 @@ async function getCounts() {
 
   const [
     leads, enquiries, syllabusRequests, unlocks, whatsappClicks, leadsBySource,
-    pendingTestimonials, enquiriesThisWeek,
-    invoicesThisMonth, pendingStudentWork, pendingPublications,
-    recentEnquiries, recentInvoices, failedEmails,
+    enquiriesThisWeek,
+    invoicesThisMonth,
+    recentEnquiries, recentInvoices,
     sixMonthInvoices, selectableInvoices, accountantOptions,
     allTimeOutstandingInvoices,
+    navCounts,
   ] = await Promise.all([
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
@@ -108,14 +110,10 @@ async function getCounts() {
         safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('source', source).eq('is_test', false), null)
       )
     ),
-    safe(supabase.from('testimonials').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).gte('created_at', weekStart).eq('is_test', false), null),
     safe<InvoiceMonthRow[]>(supabase.from('invoices').select('total, advance, balance, items, client_state').is('deleted_at', null).gte('created_at', monthStart).neq('invoice_type', 'proforma'), []),
-    safe(supabase.from('student_work').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
-    safe(supabase.from('publications').select('id', { count: 'exact', head: true }).eq('status', 'pending').is('deleted_at', null), null),
     safe<RecentEnquiryRow[]>(supabase.from('enquiries').select('name, email, course_interest, created_at').eq('is_test', false).order('created_at', { ascending: false }).limit(5), []),
     safe<RecentInvoiceRow[]>(supabase.from('invoices').select('invoice_no, client_name, total, balance, created_at').is('deleted_at', null).neq('invoice_type', 'proforma').order('created_at', { ascending: false }).limit(5), []),
-    safe(supabase.from('email_logs').select('id', { count: 'exact', head: true }).eq('status', 'failed').is('viewed_at', null), null),
     safe<InvoiceSixMonthRow[]>(supabase.from('invoices').select('total, items, client_state, created_at').is('deleted_at', null).gte('created_at', sixMoStart).neq('invoice_type', 'proforma'), []),
     // Feeds the "Email invoices to accountant" widget -- last 12
     // months of real invoices (proformas excluded here too, matching
@@ -135,6 +133,10 @@ async function getCounts() {
       supabase.from('invoices').select('invoice_no, client_name, balance').is('deleted_at', null).neq('invoice_type', 'proforma').gt('balance', 0).order('balance', { ascending: false }),
       []
     ),
+    // Pending testimonials / student work / publications and failed emails: the
+    // same four counts the layout's nav badges use, shared via React cache()
+    // so the request fetches them once.
+    getNavCounts(),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -180,14 +182,14 @@ async function getCounts() {
     leadsBySource: SOURCES.map((source, i) => ({ label: source, value: leadsBySource[i].count ?? 0 })),
     enquirySourceSlices,
     monthlyRevenue: monthlyTotals,
-    pendingTestimonials: pendingTestimonials.count ?? 0,
+    pendingTestimonials: navCounts.pendingTestimonials,
     invoicesThisMonth: invoiceRows.length,
     revenueThisMonth,
     taxThisMonth,
     outstandingBalance,
-    pendingStudentWork: pendingStudentWork.count ?? 0,
-    pendingPublications: pendingPublications.count ?? 0,
-    failedEmails: failedEmails.count ?? 0,
+    pendingStudentWork: navCounts.pendingStudentWork,
+    pendingPublications: navCounts.pendingPublications,
+    failedEmails: navCounts.failedEmails,
     recentEnquiries: recentEnquiries.data ?? [],
     recentInvoices: recentInvoices.data ?? [],
     selectableInvoices: selectableInvoices.data ?? [],

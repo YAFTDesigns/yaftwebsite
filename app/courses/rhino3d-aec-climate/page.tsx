@@ -5,6 +5,7 @@ import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Rhino3D for AEC and Climate | YAFT Designs',
@@ -74,8 +75,8 @@ export default function Rhino3DAEC() {
       <CourseGallery
         groupKey="rhino3d-aec-climate"
         images={[
-          { src: '/assets/images/courses/rhino-aec-climate-1.jpg', caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
-          { src: '/assets/images/courses/rhino-aec-climate-2.jpg', caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
+          { src: imageUrl('courses/rhino-aec-climate-1.jpg'), caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
+          { src: imageUrl('courses/rhino-aec-climate-2.jpg'), caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
         ]}
       />
 
@@ -128,8 +129,8 @@ export default function Rhino3DAEC() {
           title: 'Rhino3D for AEC & Climate',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/rhino-aec-climate-1.jpg', caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
-            { src: '/assets/images/courses/rhino-aec-climate-2.jpg', caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
+            { src: imageUrl('courses/rhino-aec-climate-1.jpg'), caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
+            { src: imageUrl('courses/rhino-aec-climate-2.jpg'), caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
           ],
         }]}
       />

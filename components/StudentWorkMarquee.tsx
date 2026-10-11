@@ -3,31 +3,32 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import styles from './StudentWorkMarquee.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 const ROW1: { src: string; label: string }[] = [
-  { src: '/assets/images/student-work/sw-01.jpg', label: 'Parametric Shell Structure' },
-  { src: '/assets/images/student-work/sw-02.jpg', label: 'Contour Bench' },
-  { src: '/assets/images/student-work/sw-03.jpg', label: 'Voronoi Facade Panel' },
-  { src: '/assets/images/student-work/sw-04.jpg', label: 'Curtain Wall, Revit' },
-  { src: '/assets/images/student-work/sw-05.jpg', label: 'Absolute Towers Recreation' },
-  { src: '/assets/images/student-work/sw-06.jpg', label: 'Acoustic Panel, 3D Printed' },
-  { src: '/assets/images/student-work/sw-07.jpg', label: 'Bambu Lab in Progress' },
-  { src: '/assets/images/student-work/sw-15.jpg', label: 'Parametric Wall Panel' },
-  { src: '/assets/images/student-work/sw-16.jpg', label: 'Contour Chair Render' },
-  { src: '/assets/images/student-work/sw-17.jpg', label: 'Organic Facade Panel' },
+  { src: imageUrl('student-work/sw-01.jpg'), label: 'Parametric Shell Structure' },
+  { src: imageUrl('student-work/sw-02.jpg'), label: 'Contour Bench' },
+  { src: imageUrl('student-work/sw-03.jpg'), label: 'Voronoi Facade Panel' },
+  { src: imageUrl('student-work/sw-04.jpg'), label: 'Curtain Wall, Revit' },
+  { src: imageUrl('student-work/sw-05.jpg'), label: 'Absolute Towers Recreation' },
+  { src: imageUrl('student-work/sw-06.jpg'), label: 'Acoustic Panel, 3D Printed' },
+  { src: imageUrl('student-work/sw-07.jpg'), label: 'Bambu Lab in Progress' },
+  { src: imageUrl('student-work/sw-15.jpg'), label: 'Parametric Wall Panel' },
+  { src: imageUrl('student-work/sw-16.jpg'), label: 'Contour Chair Render' },
+  { src: imageUrl('student-work/sw-17.jpg'), label: 'Organic Facade Panel' },
 ];
 
 const ROW2: { src: string; label: string }[] = [
-  { src: '/assets/images/student-work/sw-08.jpg', label: 'Flexible Lattice Textile' },
-  { src: '/assets/images/student-work/sw-09.jpg', label: 'Parametric Shoe' },
-  { src: '/assets/images/student-work/sw-10.jpg', label: 'Voronoi Vessel' },
-  { src: '/assets/images/student-work/sw-11.jpg', label: 'Parametric Collar, Unreal' },
-  { src: '/assets/images/student-work/sw-12.jpg', label: 'Lattice Shoe Structure' },
-  { src: '/assets/images/student-work/sw-13.jpg', label: 'Wearable Body Piece' },
-  { src: '/assets/images/student-work/sw-14.jpg', label: 'Parametric Wearable Harness' },
-  { src: '/assets/images/student-work/sw-18.jpg', label: 'Corrugated Facade Prototype' },
-  { src: '/assets/images/student-work/sw-19.jpg', label: 'Laser-Cut Wood Contour' },
-  { src: '/assets/images/student-work/sw-20.jpg', label: 'Concrete 3D Printed Columns' },
+  { src: imageUrl('student-work/sw-08.jpg'), label: 'Flexible Lattice Textile' },
+  { src: imageUrl('student-work/sw-09.jpg'), label: 'Parametric Shoe' },
+  { src: imageUrl('student-work/sw-10.jpg'), label: 'Voronoi Vessel' },
+  { src: imageUrl('student-work/sw-11.jpg'), label: 'Parametric Collar, Unreal' },
+  { src: imageUrl('student-work/sw-12.jpg'), label: 'Lattice Shoe Structure' },
+  { src: imageUrl('student-work/sw-13.jpg'), label: 'Wearable Body Piece' },
+  { src: imageUrl('student-work/sw-14.jpg'), label: 'Parametric Wearable Harness' },
+  { src: imageUrl('student-work/sw-18.jpg'), label: 'Corrugated Facade Prototype' },
+  { src: imageUrl('student-work/sw-19.jpg'), label: 'Laser-Cut Wood Contour' },
+  { src: imageUrl('student-work/sw-20.jpg'), label: 'Concrete 3D Printed Columns' },
 ];
 
 function shuffle<T>(arr: T[]): T[] {

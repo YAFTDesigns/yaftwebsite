@@ -1,5 +1,6 @@
 import { COURSE_NAV_LIST } from '@/app/courses/courseNav';
 import type { Funnel } from '@/lib/enquiryFields';
+import { assetUrl } from '@/lib/assetUrl';
 
 // Copy below only restates what the live site already says (services page,
 // course pages, terms). Do not add prices, dates or outcome claims here
@@ -21,7 +22,7 @@ export type FunnelConfig = {
   // ServiceCta wants one of these to preselect the audience.
   segment: 'individual' | 'college' | 'corporate';
   crossLinks: Funnel[];
-  // Optional looping, muted hero background (files under /public/assets/video).
+  // Optional looping, muted hero background (files in the public-assets bucket, video/).
   heroVideo?: { src: string; poster: string };
   secondaryCta?: { label: string; href: string };
 };
@@ -51,7 +52,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
     messagePlaceholder: 'Your background, any Rhino or Grasshopper experience, and what you want to be able to do',
     segment: 'individual',
     crossLinks: ['college', 'corporate'],
-    heroVideo: { src: '/assets/video/individuals-hero.mp4', poster: '/assets/video/individuals-hero-poster.jpg' },
+    heroVideo: { src: assetUrl('video/individuals-hero.mp4'), poster: assetUrl('video/individuals-hero-poster.jpg') },
   },
   college: {
     key: 'college',
@@ -74,7 +75,7 @@ export const FUNNEL_CONFIG: Record<Funnel, FunnelConfig> = {
     messagePlaceholder: 'Student year, topic or software you want covered, and on campus or online',
     segment: 'college',
     crossLinks: ['individual', 'corporate'],
-    heroVideo: { src: '/assets/video/colleges-hero.mp4', poster: '/assets/video/colleges-hero-poster.jpg' },
+    heroVideo: { src: assetUrl('video/colleges-hero.mp4'), poster: assetUrl('video/colleges-hero-poster.jpg') },
   },
   corporate: {
     key: 'corporate',

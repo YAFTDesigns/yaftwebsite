@@ -35,26 +35,42 @@ export default function ContourCanvas() {
     const LEVELS = 14;
     const G = 4; // grid step in buffer px — larger = faster
 
+    // The field does not depend on the iso level, so sample it once per frame
+    // (Float64 keeps the values bit-identical to calling f() per level).
+    let grid = new Float64Array(0);
+    const lerp = (iso: number, a: number, b: number, va: number, vb: number) =>
+      a + (iso - va) / (vb - va + 0.0001) * (b - a);
+
     function draw() {
       ctx.clearRect(0, 0, W, H);
       ctx.lineWidth = 0.6;
 
+      // Cell columns/rows: every x = i*G with x < W - G (same for y).
+      const cols = Math.max(0, Math.ceil((W - G) / G));
+      const rows = Math.max(0, Math.ceil((H - G) / G));
+      const stride = rows + 1;
+      const size = (cols + 1) * stride;
+      if (grid.length !== size) grid = new Float64Array(size);
+      for (let i = 0; i <= cols; i++) {
+        for (let j = 0; j <= rows; j++) grid[i * stride + j] = f(i * G, j * G);
+      }
+
       for (let lv = 0; lv < LEVELS; lv++) {
         const iso = -0.85 + (lv / (LEVELS - 1)) * 1.7;
         ctx.beginPath();
-        for (let x = 0; x < W - G; x += G) {
-          for (let y = 0; y < H - G; y += G) {
-            const v00 = f(x,     y    );
-            const v10 = f(x + G, y    );
-            const v01 = f(x,     y + G);
-            const v11 = f(x + G, y + G);
-            const ip = (a: number, b: number, va: number, vb: number) =>
-              a + (iso - va) / (vb - va + 0.0001) * (b - a);
+        for (let i = 0; i < cols; i++) {
+          const x = i * G;
+          for (let j = 0; j < rows; j++) {
+            const y = j * G;
+            const v00 = grid[i * stride + j];
+            const v10 = grid[(i + 1) * stride + j];
+            const v01 = grid[i * stride + j + 1];
+            const v11 = grid[(i + 1) * stride + j + 1];
             const pts: [number, number][] = [];
-            if ((v00 < iso) !== (v10 < iso)) pts.push([ip(x, x+G, v00, v10), y]);
-            if ((v10 < iso) !== (v11 < iso)) pts.push([x+G, ip(y, y+G, v10, v11)]);
-            if ((v01 < iso) !== (v11 < iso)) pts.push([ip(x, x+G, v01, v11), y+G]);
-            if ((v00 < iso) !== (v01 < iso)) pts.push([x, ip(y, y+G, v00, v01)]);
+            if ((v00 < iso) !== (v10 < iso)) pts.push([lerp(iso, x, x+G, v00, v10), y]);
+            if ((v10 < iso) !== (v11 < iso)) pts.push([x+G, lerp(iso, y, y+G, v10, v11)]);
+            if ((v01 < iso) !== (v11 < iso)) pts.push([lerp(iso, x, x+G, v01, v11), y+G]);
+            if ((v00 < iso) !== (v01 < iso)) pts.push([x, lerp(iso, y, y+G, v00, v01)]);
             if (pts.length >= 2) {
               ctx.moveTo(pts[0][0], pts[0][1]);
               ctx.lineTo(pts[1][0], pts[1][1]);

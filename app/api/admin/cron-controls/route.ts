@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { CRON_JOBS, type CronJob } from '@/lib/cronControls';
-import { peekEnquiryQueue, peekInvoiceQueue } from '@/lib/queue';
+import { CRON_JOBS, getAutomationSnapshot, type CronJob } from '@/lib/cronControls';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,30 +12,10 @@ export async function GET() {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const supabase = getSupabaseAdmin();
 
-  const { data: controls, error } = await supabase.from('cron_job_controls').select('*').order('job');
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  const { controls, controlsError, queues, due } = await getAutomationSnapshot(supabase);
+  if (controlsError) return NextResponse.json({ error: controlsError.message }, { status: 500 });
 
-  let queues: unknown;
-  try {
-    const [enq, inv] = await Promise.all([peekEnquiryQueue(50), peekInvoiceQueue(50)]);
-    queues = {
-      enquiries: enq.map((e) => ({ name: e.name, email: e.email, interest: e.interest, queuedAt: e.queuedAt })),
-      invoices: inv.map((i) => ({ invoice_no: i.invoice_no, client_name: i.client_name, client_email: i.client_email, total: i.total, queuedAt: i.queuedAt })),
-    };
-  } catch (e) {
-    queues = { error: e instanceof Error ? e.message : 'queue unavailable' };
-  }
-
-  const { data: dueInvoices } = await supabase
-    .from('invoices')
-    .select('invoice_no, client_name, client_email, scheduled_send_at')
-    .is('deleted_at', null)
-    .is('email_sent_at', null)
-    .eq('send_cancelled', false)
-    .not('scheduled_send_at', 'is', null)
-    .lte('scheduled_send_at', new Date().toISOString());
-
-  return NextResponse.json({ controls, queues, due_scheduled_invoices: dueInvoices ?? [] });
+  return NextResponse.json({ controls, queues, due_scheduled_invoices: due });
 }
 
 // PATCH { job, enabled?, max_total_sends?, approved_emails? }

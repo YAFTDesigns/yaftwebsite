@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { loggedIds } from '@/lib/emailLogLookup';
 
 export const dynamic = 'force-dynamic';
 
@@ -63,15 +64,16 @@ async function runTestimonialRequestCheck(dryRun = false) {
   let sent = 0;
   const results: string[] = [];
 
+  // One lookup for every job that could be emailed, instead of a count query
+  // per completed job (that grew without bound, every day).
+  const alreadySent = await loggedIds(
+    supabase, TEMPLATE, 'job_id',
+    jobs.filter((j) => j.client_id).map((j) => j.id as string),
+  );
+
   for (const job of jobs) {
     if (!job.client_id) continue; // no linked client to email
-
-    const { count: alreadySent } = await supabase
-      .from('email_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('template', TEMPLATE)
-      .eq('job_id', job.id);
-    if ((alreadySent ?? 0) > 0) continue;
+    if (alreadySent.has(job.id as string)) continue;
 
     const { data: client } = await supabase
       .from('clients')

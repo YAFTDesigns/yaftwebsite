@@ -7,12 +7,13 @@ import EnquireLink from '@/components/EnquireLink';
 import { getSupabasePublic } from '@/lib/supabase/public';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import styles from '../projects.module.css';
+import { imageUrl, localAssetToUrl } from '@/lib/assetUrl';
 
 // Most project images live in Supabase Storage, but some (client-confidential
 // material) are checked into the repo instead under /public. A path starting
 // with "/" is treated as a static asset and served as-is.
 function resolveImageUrl(path: string): string {
-  return path.startsWith('/') ? path : getSiteImageUrl(`projects/${path}`);
+  return path.startsWith('/') ? localAssetToUrl(path) : getSiteImageUrl(`projects/${path}`);
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -66,7 +67,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const url = `https://www.yaftdesigns.com/projects/${project.slug}`;
   const ogImage = project.cover_image_path
     ? resolveImageUrl(project.cover_image_path)
-    : 'https://www.yaftdesigns.com/assets/images/og-image.jpg';
+    : imageUrl('og-image.jpg');
 
   return {
     title: `${project.title} | YAFT Designs Case Study`,

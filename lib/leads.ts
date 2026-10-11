@@ -33,8 +33,11 @@ export async function upsertLead(
   // tag any events already logged in this session as theirs.
   const sessionId = params.sessionId?.trim() || null;
   if (sessionId) {
-    await supabase.from('lead_sessions').upsert({ session_id: sessionId, lead_id: leadId }, { onConflict: 'session_id' });
-    await supabase.from('analytics_events').update({ lead_id: leadId }).eq('session_id', sessionId).is('lead_id', null);
+    // Independent writes, so one round trip instead of two.
+    await Promise.all([
+      supabase.from('lead_sessions').upsert({ session_id: sessionId, lead_id: leadId }, { onConflict: 'session_id' }),
+      supabase.from('analytics_events').update({ lead_id: leadId }).eq('session_id', sessionId).is('lead_id', null),
+    ]);
   }
 
   return leadId;

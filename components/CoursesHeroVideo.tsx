@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { assetUrl } from '@/lib/assetUrl';
 
 // Courses hero: alternates between the existing background image and a short
 // Rhino/Grasshopper screen recording. Image shows first, the clip fades in and
@@ -44,7 +45,7 @@ export default function CoursesHeroVideo() {
       muted
       playsInline
       preload="none"
-      poster="/assets/video/courses-hero-poster.jpg"
+      poster={assetUrl('video/courses-hero-poster.jpg')}
       aria-hidden="true"
       tabIndex={-1}
       style={{
@@ -53,7 +54,7 @@ export default function CoursesHeroVideo() {
         filter: 'saturate(0.85) brightness(0.9)', pointerEvents: 'none',
       }}
     >
-      <source src="/assets/video/courses-hero.mp4" type="video/mp4" />
+      <source src={assetUrl('video/courses-hero.mp4')} type="video/mp4" />
     </video>
   );
 }

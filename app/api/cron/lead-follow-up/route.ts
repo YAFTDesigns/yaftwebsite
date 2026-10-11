@@ -57,31 +57,34 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
   const newest = new Date(now - MIN_DAYS_SINCE_LAST_CONTACT * 86_400_000).toISOString();
   const oldest = new Date(now - MAX_DAYS_SINCE_LAST_CONTACT * 86_400_000).toISOString();
 
-  const { data: leads, error } = await supabase
-    .from('leads')
-    .select('id, email, name, source, status, last_seen')
-    .eq('declined', false)
-    .eq('status', 'new')
-    .not('email', 'is', null)
-    .gte('last_seen', oldest)
-    .lte('last_seen', newest);
+  // Three independent reads: candidate leads, suppression list (anyone who
+  // ever bounced or complained, on any template) and prior follow-up logs.
+  const [leadsRes, suppressedRes, logsRes] = await Promise.all([
+    supabase
+      .from('leads')
+      .select('id, email, name, source, status, last_seen')
+      .eq('declined', false)
+      .eq('status', 'new')
+      .not('email', 'is', null)
+      .gte('last_seen', oldest)
+      .lte('last_seen', newest),
+    supabase
+      .from('email_logs')
+      .select('to_email')
+      .in('status', ['bounced', 'complained']),
+    supabase
+      .from('email_logs')
+      .select('to_email, status')
+      .eq('template', FOLLOW_UP_TEMPLATE),
+  ]);
+  const { data: leads, error } = leadsRes;
   if (error) {
     console.error('[lead-follow-up] failed to load candidate leads:', error);
     return { sent: 0, error: error.message };
   }
 
-  // Suppression: anyone who ever bounced or complained, on any template.
-  const { data: suppressedRows } = await supabase
-    .from('email_logs')
-    .select('to_email')
-    .in('status', ['bounced', 'complained']);
-  const suppressed = new Set((suppressedRows ?? []).map((r) => String(r.to_email).trim().toLowerCase()));
-
-  const { data: logRows } = await supabase
-    .from('email_logs')
-    .select('to_email, status')
-    .eq('template', FOLLOW_UP_TEMPLATE);
-  const { done, failed } = summariseFollowUpLogs(logRows ?? []);
+  const suppressed = new Set((suppressedRes.data ?? []).map((r) => String(r.to_email).trim().toLowerCase()));
+  const { done, failed } = summariseFollowUpLogs(logsRes.data ?? []);
   const sentSoFar = done.size;
 
   const approved = control.approved_emails && control.approved_emails.length > 0 ? new Set(control.approved_emails) : null;
@@ -98,20 +101,22 @@ async function runFollowUpCheck({ dryRun, viaScheduler, testTo, testAs }: { dryR
     if (done.has(email)) { bump('already_followed_up'); continue; }
     if ((failed.get(email) ?? 0) >= MAX_FAILED_ATTEMPTS) { bump('failed_too_many_times'); continue; }
     if (approved && !approved.has(email)) { bump('not_on_approved_list'); continue; }
-    const { data: lastEnquiry } = await supabase
-      .from('enquiries')
-      .select('course_interest, created_at, name')
-      .eq('lead_id', l.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const { data: lastSyllabus } = await supabase
-      .from('syllabus_requests')
-      .select('course_slug')
-      .eq('lead_id', l.id)
-      .order('requested_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [{ data: lastEnquiry }, { data: lastSyllabus }] = await Promise.all([
+      supabase
+        .from('enquiries')
+        .select('course_interest, created_at, name')
+        .eq('lead_id', l.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from('syllabus_requests')
+        .select('course_slug')
+        .eq('lead_id', l.id)
+        .order('requested_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ]);
     eligible.push({
       id: l.id, email, name: l.name ?? lastEnquiry?.name ?? null,
       syllabus_slug: lastSyllabus?.course_slug ?? null,

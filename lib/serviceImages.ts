@@ -1,4 +1,5 @@
 import { getSiteImageUrl } from './supabase/storage';
+import { localAssetToUrl } from '@/lib/assetUrl';
 
 /**
  * Resolves a service_images.image_path value to an actual, usable
@@ -14,6 +15,6 @@ import { getSiteImageUrl } from './supabase/storage';
  */
 export function resolveServiceImageUrl(imagePath: string | null): string | null {
   if (!imagePath) return null;
-  if (imagePath.startsWith('/')) return imagePath;
+  if (imagePath.startsWith('/')) return localAssetToUrl(imagePath);
   return getSiteImageUrl(imagePath);
 }

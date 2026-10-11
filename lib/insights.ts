@@ -1,3 +1,4 @@
+import { imageUrl } from '@/lib/assetUrl';
 export type InsightBlock =
   | { type: 'p'; text: string }
   | { type: 'h2'; text: string }
@@ -26,7 +27,7 @@ export const INSIGHT_POSTS: InsightPost[] = [
     publishedAt: '2026-07-25',
     updatedAt: '2026-07-25',
     readMinutes: 6,
-    coverImage: '/assets/images/insights/fin-clustering-shell-cover.jpg',
+    coverImage: imageUrl('insights/fin-clustering-shell-cover.jpg'),
     coverCaption: 'A stylized illustration of the clustering result: elements grouped by curvature band into six shared-mold clusters across a curved shell surface.',
     body: [
       { type: 'p', text: "On a recent facade rationalization job, the design called for around 131 strip and fin elements, each following its own gentle curve across the building's surface. Left as is, that's 131 unique fabrication molds, and every unique mold costs real money and real lead time. The brief was simple to state and hard to do: find which of those 131 curves are close enough to each other that they can share a mold, without visibly changing the design intent." },
@@ -71,7 +72,7 @@ clusters.append(current)` },
     publishedAt: '2026-07-25',
     updatedAt: '2026-07-25',
     readMinutes: 7,
-    coverImage: '/assets/images/insights/rhino-inside-revit-cover.jpg',
+    coverImage: imageUrl('insights/rhino-inside-revit-cover.jpg'),
     coverCaption: 'A BEAM-based Rhino to Revit workflow (Rhino geometry exported as a Revit family, opened in Revit). BEAM is a separate, no-code tool from MKS DTECH, different from the scripted Rhino.Inside.Revit approach this post covers, shown here because the underlying problem, getting Rhino geometry into Revit as real BIM data, is the same one.',
     body: [
       { type: 'p', text: "Rhino.Inside.Revit is genuinely powerful once it's working. You get Grasshopper's parametric logic driving live Revit elements, no round tripping through import and export. But the path from this works in a Python console to this works reliably inside a Grasshopper definition has a few specific traps that cost real debugging time. Mostly around two things: how Revit's Transaction model expects to be used, and how loosely typed Grasshopper data needs to be coerced into the exact Revit API types a method expects." },
@@ -112,7 +113,7 @@ clusters.append(current)` },
     publishedAt: '2026-07-25',
     updatedAt: '2026-07-25',
     readMinutes: 5,
-    coverImage: '/assets/images/insights/facade-fin-clustering-cover.jpg',
+    coverImage: imageUrl('insights/facade-fin-clustering-cover.jpg'),
     coverCaption: 'The actual GHPython component from a real sort-and-group script: curves and a tolerance in, cluster count and per-cluster colors out. 1,048 branches sorted and grouped in the viewport.',
     body: [
       { type: 'p', text: "Sorting and grouping 600 curves by their Z value sounds like the kind of task Grasshopper's native components should handle without ceremony, and for a while, they do. The interesting part isn't whether it's possible natively. It is. It's at what point native components stop being the right tool, and why." },

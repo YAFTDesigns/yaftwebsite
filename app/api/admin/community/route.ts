@@ -5,12 +5,29 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 // GET /api/admin/community?table=student_work&status=pending&trash=true
 // GET /api/admin/community?table=partners (no status filter — returns all)
+// GET /api/admin/community?counts=true  (the six status counts, head-only: no rows)
 export async function GET(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const table = searchParams.get('table');
   const status = searchParams.get('status');
   const trash = searchParams.get('trash') === 'true';
+
+  if (searchParams.get('counts') === 'true') {
+    const supabase = getSupabaseAdmin();
+    const count = async (t: 'student_work' | 'publications', s: 'pending' | 'approved' | 'rejected') => {
+      const { count: n, error } = await supabase
+        .from(t).select('id', { count: 'exact', head: true }).eq('status', s).is('deleted_at', null);
+      if (error) console.error(`[community-api] count ${t}/${s} failed:`, error);
+      return n ?? 0; // a failed count shows as 0, same as the per-list fetches it replaces
+    };
+    const [sw_pending_all, pub_pending_all, sw_approved, sw_rejected, pub_approved, pub_rejected] = await Promise.all([
+      count('student_work', 'pending'), count('publications', 'pending'),
+      count('student_work', 'approved'), count('student_work', 'rejected'),
+      count('publications', 'approved'), count('publications', 'rejected'),
+    ]);
+    return NextResponse.json({ counts: { sw_approved, sw_pending_all, sw_rejected, pub_approved, pub_pending_all, pub_rejected } });
+  }
 
   if (!isCommunityTable(table)) {
     return NextResponse.json({ error: 'Invalid or missing table parameter' }, { status: 400 });

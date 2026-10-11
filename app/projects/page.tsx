@@ -7,6 +7,7 @@ import CarouselDrag from '@/components/CarouselDrag';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import { getInstagramMedia } from '@/lib/instagram';
+import { imageUrl, localAssetToUrl } from '@/lib/assetUrl';
 
 // Most project images live in Supabase Storage, but some (e.g. where
 // we can't put client-confidential material through a third-party
@@ -14,7 +15,7 @@ import { getInstagramMedia } from '@/lib/instagram';
 // starting with "/" is treated as a static asset path and served
 // as-is; anything else is resolved through Supabase Storage as before.
 function resolveImageUrl(path: string): string {
-  return path.startsWith('/') ? path : getSiteImageUrl(`projects/${path}`);
+  return path.startsWith('/') ? localAssetToUrl(path) : getSiteImageUrl(`projects/${path}`);
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -40,13 +41,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://www.yaftdesigns.com/projects',
     type: 'website',
-    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: imageUrl('og-image.jpg') }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+    images: [imageUrl('og-image.jpg')],
   },
 };
 

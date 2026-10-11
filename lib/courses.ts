@@ -1,5 +1,6 @@
 import { getSupabasePublic } from './supabase/public';
 import { getSiteImageUrl } from './supabase/storage';
+import { assetUrl, localAssetToUrl } from '@/lib/assetUrl';
 
 export type Course = {
   slug: string;
@@ -41,13 +42,13 @@ function syllabusPdfUrl(path: string): string {
   const inBucket = SYLLABUS_BUCKET_FILES[path];
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (inBucket && base) return `${base}/storage/v1/object/public/syllabus/${inBucket}`;
-  return `/assets/pdfs/${path}`;
+  return assetUrl(`pdfs/${path}`);
 }
 
 function toCourse(row: CourseRow): Course {
   return {
     slug: row.slug,
-    image: row.image_path ? getSiteImageUrl(row.image_path) : '',
+    image: row.image_path ? (row.image_path.startsWith('/') ? localAssetToUrl(row.image_path) : getSiteImageUrl(row.image_path)) : '',
     alt: row.title,
     level: row.level ?? '',
     duration: row.duration ?? '',
@@ -55,7 +56,7 @@ function toCourse(row: CourseRow): Course {
     title: row.title,
     desc: row.description ?? '',
     // Syllabus PDFs live in the public Supabase "syllabus" bucket (keeps every Vercel deployment small).
-    // Any PDF not in the bucket yet is still served from /public/assets/pdfs.
+    // Any PDF not in the syllabus bucket is served from the public-assets bucket.
     pdf: row.pdf_storage_path ? syllabusPdfUrl(row.pdf_storage_path) : '',
     updatedAt: row.updated_at,
   };

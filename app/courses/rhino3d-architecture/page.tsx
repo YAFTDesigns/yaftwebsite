@@ -5,6 +5,7 @@ import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Rhino3D for Architecture | YAFT Designs',
@@ -83,8 +84,8 @@ export default function Rhino3DArchitecture() {
       <CourseGallery
         groupKey="rhino3d-architecture"
         images={[
-          { src: '/assets/images/courses/rhino-architecture-1.jpg', caption: 'Understanding morphology, key features, and recreating form-based modelling' },
-          { src: '/assets/images/courses/rhino-architecture-2.jpg', caption: 'Recreating complex surfaces with reference architectural projects' },
+          { src: imageUrl('courses/rhino-architecture-1.jpg'), caption: 'Understanding morphology, key features, and recreating form-based modelling' },
+          { src: imageUrl('courses/rhino-architecture-2.jpg'), caption: 'Recreating complex surfaces with reference architectural projects' },
         ]}
       />
 
@@ -141,8 +142,8 @@ export default function Rhino3DArchitecture() {
           title: 'Rhino3D for Architecture',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/rhino-architecture-1.jpg', caption: 'Understanding morphology, key features, and recreating form-based modelling' },
-            { src: '/assets/images/courses/rhino-architecture-2.jpg', caption: 'Recreating complex surfaces with reference architectural projects' },
+            { src: imageUrl('courses/rhino-architecture-1.jpg'), caption: 'Understanding morphology, key features, and recreating form-based modelling' },
+            { src: imageUrl('courses/rhino-architecture-2.jpg'), caption: 'Recreating complex surfaces with reference architectural projects' },
           ],
         }]}
       />

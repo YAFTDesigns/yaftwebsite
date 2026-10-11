@@ -28,7 +28,7 @@ Vercel's free (Hobby) plan caps **Deployment Storage at 10 GB**, cumulative acro
 
 - **Never push or merge on your own** (a push to `develop` or any branch deploys). Ask the developer to deploy.
 - **Before asking,** run `npm test` and `npm run build` locally and fix any errors. Only when both pass, tell the developer it is safe to deploy and let Vercel build.
-- Don't leave stray `.next` or other build output in commits, and don't add large files to `public/` (use the Supabase buckets; `public/assets/pdfs`, and the `point1.obj` model are the known offenders).
+- Don't add large files to `public/`. Images live in the Supabase `site-images` bucket, and video/PDFs/`point1.obj`/partner logos in `public-assets`; build their URLs with `imageUrl()` / `assetUrl()` from `lib/assetUrl.ts`. `public/` keeps only files read from disk (pdfkit assets), favicons, `sw.js`, and images referenced from CSS.
 
 ## What this is
 

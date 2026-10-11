@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import styles from './ServicesCarousel.module.css';
+import { assetUrl } from '@/lib/assetUrl';
 
 type Service = {
   title: string;
@@ -97,10 +98,10 @@ export default function ServicesCarousel() {
         muted
         loop
         playsInline
-        poster="/assets/video/services-bg-poster.jpg"
+        poster={assetUrl('video/services-bg-poster.jpg')}
       >
-        <source src="/assets/video/services-bg.webm" type="video/webm" />
-        <source src="/assets/video/services-bg.mp4" type="video/mp4" />
+        <source src={assetUrl('video/services-bg.webm')} type="video/webm" />
+        <source src={assetUrl('video/services-bg.mp4')} type="video/mp4" />
       </video>
       <div className={styles.bgFade} />
 

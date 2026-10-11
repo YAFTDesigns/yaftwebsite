@@ -5,6 +5,7 @@ import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Rhino3D for Wearables & Footwear | YAFT Designs',
@@ -81,8 +82,8 @@ export default function RhinoWearablesFootwear() {
       <CourseGallery
         groupKey="rhino-wearables-footwear"
         images={[
-          { src: '/assets/images/courses/rhino-wearables-footwear-1.jpg', caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
-          { src: '/assets/images/courses/rhino-wearables-footwear-2.jpg', caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
+          { src: imageUrl('courses/rhino-wearables-footwear-1.jpg'), caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
+          { src: imageUrl('courses/rhino-wearables-footwear-2.jpg'), caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
         ]}
       />
 
@@ -139,8 +140,8 @@ export default function RhinoWearablesFootwear() {
           title: 'Rhino3D for Wearables & Footwear',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/rhino-wearables-footwear-1.jpg', caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
-            { src: '/assets/images/courses/rhino-wearables-footwear-2.jpg', caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
+            { src: imageUrl('courses/rhino-wearables-footwear-1.jpg'), caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
+            { src: imageUrl('courses/rhino-wearables-footwear-2.jpg'), caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
           ],
         }]}
       />

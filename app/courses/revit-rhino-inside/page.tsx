@@ -5,6 +5,7 @@ import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Revit Architecture + Rhino.Inside | YAFT Designs',
@@ -83,8 +84,8 @@ export default function RevitRhinoInside() {
       <CourseGallery
         groupKey="revit-rhino-inside"
         images={[
-          { src: '/assets/images/courses/revit-rhino-inside-1.jpg', caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
-          { src: '/assets/images/courses/revit-rhino-inside-2.jpg', caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
+          { src: imageUrl('courses/revit-rhino-inside-1.jpg'), caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
+          { src: imageUrl('courses/revit-rhino-inside-2.jpg'), caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
         ]}
       />
 
@@ -138,8 +139,8 @@ export default function RevitRhinoInside() {
           title: 'Revit Architecture + Rhino.Inside.Revit',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/revit-rhino-inside-1.jpg', caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
-            { src: '/assets/images/courses/revit-rhino-inside-2.jpg', caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
+            { src: imageUrl('courses/revit-rhino-inside-1.jpg'), caption: 'Model creation for a villa: plan sheet composition, sections and legends' },
+            { src: imageUrl('courses/revit-rhino-inside-2.jpg'), caption: 'Rhino.Inside.Revit workflow for direct Grasshopper-to-Revit modelling' },
           ],
         }]}
       />

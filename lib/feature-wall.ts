@@ -1,5 +1,6 @@
 import { getSupabasePublic } from './supabase/public';
 import { getSiteImageUrl } from './supabase/storage';
+import { assetUrl } from '@/lib/assetUrl';
 
 export type StudentWork = {
   id: string;
@@ -62,7 +63,7 @@ export async function getPublications(): Promise<Publication[]> {
     if (error) throw error;
     return (data ?? []).map(r => ({
       ...r,
-      author_photo_url: r.author_photo_url ? `/assets/partners/${r.author_photo_url}` : null,
+      author_photo_url: r.author_photo_url ? assetUrl(`partners/${r.author_photo_url}`) : null,
     }));
   } catch { return []; }
 }
@@ -143,7 +144,7 @@ export async function getPartners(): Promise<Partner[]> {
     if (error) throw error;
     return (data ?? []).map(r => ({
       ...r,
-      logo_url: r.logo_url ? `/assets/partners/${r.logo_url}` : null,
+      logo_url: r.logo_url ? assetUrl(`partners/${r.logo_url}`) : null,
     }));
   } catch { return []; }
 }

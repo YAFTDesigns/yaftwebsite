@@ -3,6 +3,7 @@ import ProductionOnlyAnalytics from "@/components/ProductionOnlyAnalytics";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import WhatsAppGateModal from "@/components/WhatsAppGateModal";
 import "./globals.css";
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.yaftdesigns.com"),
@@ -28,13 +29,13 @@ export const metadata: Metadata = {
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
     url: "https://www.yaftdesigns.com",
     type: "website",
-    images: [{ url: "https://www.yaftdesigns.com/assets/images/og-image.jpg", width: 1200, height: 630, alt: "YAFT Designs — Authorized Rhino Training Center India" }],
+    images: [{ url: imageUrl('og-image.jpg'), width: 1200, height: 630, alt: "YAFT Designs — Authorized Rhino Training Center India" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Authorized Rhino3D Trainer India | Grasshopper Training | YAFT Designs",
     description: "Authorized Rhino3D Training in India. Rhino3D, Grasshopper, BIM Consulting, Computational Design and Parametric Design services.",
-    images: ["https://www.yaftdesigns.com/assets/images/og-image.jpg"],
+    images: [imageUrl('og-image.jpg')],
   },
 };
 

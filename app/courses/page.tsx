@@ -14,6 +14,7 @@ import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
 import styles from './courses.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 function formatUpdated(iso: string): string {
   const then = new Date(iso).getTime();
@@ -42,13 +43,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://www.yaftdesigns.com/courses',
     type: 'website',
-    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: imageUrl('og-image.jpg') }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+    images: [imageUrl('og-image.jpg')],
   },
 };
 

@@ -9,6 +9,7 @@ import { getYouTubeVideoId } from '@/lib/youtube';
 import { track } from '@/lib/analytics';
 import styles from './labs.module.css';
 import { fmtInt } from '@/lib/format';
+import { assetUrl } from '@/lib/assetUrl';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
 
@@ -87,10 +88,10 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
           <video
             className={styles.bgVideo}
             autoPlay muted loop playsInline
-            poster="/assets/video/labs-hero-poster.jpg"
+            poster={assetUrl('video/labs-hero-poster.jpg')}
           >
-            <source src="/assets/video/labs-hero.webm" type="video/webm" />
-            <source src="/assets/video/labs-hero.mp4" type="video/mp4" />
+            <source src={assetUrl('video/labs-hero.webm')} type="video/webm" />
+            <source src={assetUrl('video/labs-hero.mp4')} type="video/mp4" />
           </video>
           <div className={styles.bgFade} />
 

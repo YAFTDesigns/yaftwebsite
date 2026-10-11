@@ -5,6 +5,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import { INSIGHT_POSTS, getInsightPost } from '@/lib/insights';
 import styles from '../insights.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export function generateStaticParams() {
   return INSIGHT_POSTS.map((p) => ({ slug: p.slug }));
@@ -25,13 +26,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: post.dek,
       url,
       type: 'article',
-      images: [{ url: post.coverImage ? `https://www.yaftdesigns.com${post.coverImage}` : 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+      images: [{ url: post.coverImage || imageUrl('og-image.jpg') }],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.title,
       description: post.dek,
-      images: [post.coverImage ? `https://www.yaftdesigns.com${post.coverImage}` : 'https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+      images: [post.coverImage || imageUrl('og-image.jpg')],
     },
   };
 }

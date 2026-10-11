@@ -71,11 +71,26 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   // realistically catch up to the way raw-row fetching eventually would.
   const timeOnSite: Record<string, TimeOnSite> = {};
   const leadIds = result.data.map((l) => l.id);
-  if (leadIds.length > 0) {
-    const { data: rows, error: eventsError } = await supabase
-      .from('lead_time_on_site')
-      .select('lead_id, first_event, last_event, event_count')
-      .in('lead_id', leadIds);
+  // The three lookups below depend only on leadIds, so they run together.
+  const [timeRes, syllabusRes, enqRes] = leadIds.length > 0
+    ? await Promise.all([
+        supabase
+          .from('lead_time_on_site')
+          .select('lead_id, first_event, last_event, event_count')
+          .in('lead_id', leadIds),
+        supabase
+          .from('syllabus_requests')
+          .select('lead_id, course_slug, courses(title)')
+          .in('lead_id', leadIds),
+        supabase
+          .from('enquiries')
+          .select('lead_id, segment, phone, created_at')
+          .in('lead_id', leadIds)
+          .order('created_at', { ascending: true }),
+      ])
+    : [null, null, null];
+  if (timeRes) {
+    const { data: rows, error: eventsError } = timeRes;
 
     if (eventsError) {
       console.error('[leads] failed to load lead_time_on_site for time-on-site:', eventsError);
@@ -98,11 +113,8 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   // course's syllabus (one has done it 7 times), so this is a
   // deduped list per lead, not a single value.
   const syllabusByLead: Record<string, string[]> = {};
-  if (leadIds.length > 0) {
-    const { data: syllabusRows, error: syllabusError } = await supabase
-      .from('syllabus_requests')
-      .select('lead_id, course_slug, courses(title)')
-      .in('lead_id', leadIds);
+  if (syllabusRes) {
+    const { data: syllabusRows, error: syllabusError } = syllabusRes;
 
     if (syllabusError) {
       console.error('[leads] failed to load syllabus_requests:', syllabusError);
@@ -126,12 +138,8 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
 
   // Segment and phone live on enquiries; show the latest enquiry's values.
   const enquiryByLead: Record<string, EnquiryContext> = {};
-  if (leadIds.length > 0) {
-    const { data: enqRows, error: enqError } = await supabase
-      .from('enquiries')
-      .select('lead_id, segment, phone, created_at')
-      .in('lead_id', leadIds)
-      .order('created_at', { ascending: true });
+  if (enqRes) {
+    const { data: enqRows, error: enqError } = enqRes;
     if (enqError) {
       console.error('[leads] failed to load enquiry context:', enqError);
     } else {

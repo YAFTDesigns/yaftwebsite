@@ -8,6 +8,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
 import { COURSE_INTEREST_OPTIONS } from '../courses/courseNav';
 import styles from './faculty.module.css';
+import { assetUrl, imageUrl } from '@/lib/assetUrl';
 
 const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
@@ -24,13 +25,13 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: 'https://www.yaftdesigns.com/faculty',
     type: 'profile',
-    images: [{ url: 'https://www.yaftdesigns.com/assets/images/og-image.jpg' }],
+    images: [{ url: imageUrl('og-image.jpg') }],
   },
   twitter: {
     card: 'summary_large_image',
     title: TITLE,
     description: DESCRIPTION,
-    images: ['https://www.yaftdesigns.com/assets/images/og-image.jpg'],
+    images: [imageUrl('og-image.jpg')],
   },
 };
 
@@ -40,7 +41,7 @@ const PERSON_JSON_LD = {
   name: 'Yokes Marapa',
   jobTitle: 'Founder, YAFT Designs, and Head of Design and Automation, VS-CRAFT Facades & Roofing',
   url: 'https://www.yaftdesigns.com/faculty',
-  image: 'https://www.yaftdesigns.com/assets/images/og-image.jpg',
+  image: imageUrl('og-image.jpg'),
   worksFor: { '@type': 'Organization', name: 'YAFT Designs', url: 'https://www.yaftdesigns.com' },
   knowsAbout: ['Rhino3D', 'Grasshopper', 'Rhino.Inside.Revit', 'Computational Design', 'Parametric Design', 'BIM', 'Digital Fabrication'],
   credential: [
@@ -173,7 +174,7 @@ export default async function FacultyPage() {
                 <div style={{ marginTop: 16, border: '1px solid var(--line)', padding: 4, background: 'var(--paper)', maxWidth: 640 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element -- hidden inside a collapsed <details>, document scan not a photo, LCP/lazy-loading benefit is negligible */}
                   <img
-                    src="/assets/docs/Yokes_Marapa_ART_Certificate.jpg"
+                    src={assetUrl('docs/Yokes_Marapa_ART_Certificate.jpg')}
                     alt="Authorized Rhino Trainer Certificate: Yokes Marapa, McNeel South Asia, May 2024"
                     style={{ width: '100%', display: 'block', pointerEvents: 'none', userSelect: 'none' }}
                   />

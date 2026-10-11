@@ -6,6 +6,7 @@ import { sendAdminAlert } from '@/lib/adminAlert';
 import { ddmmyyyyToIso } from '@/lib/jobsGrouping';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { fmtFixed2 } from '@/lib/format';
+import { loggedIds } from '@/lib/emailLogLookup';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,15 +43,8 @@ async function runBalanceReminderCheck() {
   const overdue = data.filter((inv) => new Date(ddmmyyyyToIso(inv.date)).getTime() <= cutoff);
   if (overdue.length === 0) return { sent: false, skipped: 'nothing past the 14-day threshold yet' };
 
-  const newlyOverdue: typeof overdue = [];
-  for (const inv of overdue) {
-    const { count } = await supabase
-      .from('email_logs')
-      .select('id', { count: 'exact', head: true })
-      .eq('template', TEMPLATE)
-      .eq('invoice_id', inv.id);
-    if ((count ?? 0) === 0) newlyOverdue.push(inv);
-  }
+  const reminded = await loggedIds(supabase, TEMPLATE, 'invoice_id', overdue.map((inv) => inv.id as string));
+  const newlyOverdue = overdue.filter((inv) => !reminded.has(inv.id as string));
 
   if (newlyOverdue.length === 0) return { sent: false, skipped: 'already reminded about every currently-overdue invoice' };
 
@@ -78,16 +72,17 @@ async function runBalanceReminderCheck() {
 
   await sendAdminAlert(subject, html);
 
-  for (const inv of newlyOverdue) {
-    await supabase.from('email_logs').insert({
+  // One row per invoice, so a later run skips each of them -- inserted in one go.
+  await supabase.from('email_logs').insert(
+    newlyOverdue.map((inv) => ({
       to_email: 'yaftdesigns@gmail.com',
       to_name: 'Yokes',
       subject,
       template: TEMPLATE,
       status: 'sent',
       invoice_id: inv.id,
-    });
-  }
+    })),
+  );
 
   return { sent: true, count: newlyOverdue.length, total };
 }

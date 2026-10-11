@@ -1,5 +1,6 @@
 // Pure logic for the lead follow-up job (no I/O) so it can be unit tested.
 import { escapeHtml } from '@/lib/email';
+import { imageUrl } from '@/lib/assetUrl';
 
 export type LeadSource = 'syllabus_gate' | 'contact_form' | 'whatsapp_gate' | string;
 
@@ -160,7 +161,7 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
   <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">${hi}</p>
 ${paras.map((p) => `  <p style="font-size:14px;line-height:1.8;margin:0 0 16px;">${p}</p>`).join('\n')}
   <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">If you would like to try our work first, there are free Grasshopper and Rhino scripts on <a href="${labs}" style="color:#E63946;">YAFT Labs</a>.</p>
-${FOLLOW_UP_BANNER ? `  <img src="https://www.yaftdesigns.com/assets/images/rhino-banner.png" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />\n` : ''}  <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Not the right time? Just reply "no thanks" and I will not follow up again.</p>
+${FOLLOW_UP_BANNER ? `  <img src="${imageUrl('rhino-banner.png')}" alt="Rhinoceros, design, model, present, analyze, realize" style="width:100%;display:block;margin:0 0 24px;" />\n` : ''}  <p style="font-size:14px;line-height:1.8;margin:0 0 24px;">Not the right time? Just reply "no thanks" and I will not follow up again.</p>
   <hr style="border:none;border-top:1px solid #eee;margin:0 0 16px;">
   <p style="font-size:12px;color:#888;margin:0;line-height:1.7;">
     Yokes Marapa &middot; YAFT Designs &middot; Authorized Rhino Training Center &middot; Coimbatore, India<br>

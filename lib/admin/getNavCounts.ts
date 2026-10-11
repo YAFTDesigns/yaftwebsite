@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { safeCount } from '@/lib/admin/safeQuery';
 import { istDate } from '@/lib/admin/leadPipeline';
@@ -9,7 +10,9 @@ import { istDate } from '@/lib/admin/leadPipeline';
  * segment. Every query is wrapped in safeCount so a missing table
  * or RLS error just renders no badge instead of breaking the nav.
  */
-export async function getNavCounts() {
+// Wrapped in React cache(): the layout and the overview page both need these
+// numbers in the same request, so they share one fetch.
+export const getNavCounts = cache(async function getNavCounts() {
   const supabase = getSupabaseAdmin();
 
   const [pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, newLeads, pendingJobs, dueToday] =
@@ -46,10 +49,12 @@ export async function getNavCounts() {
 
   return {
     pendingTestimonials: pendingTestimonials.data,
+    pendingStudentWork: pendingStudentWork.data,
+    pendingPublications: pendingPublications.data,
     pendingApprovals: pendingStudentWork.data + pendingPublications.data,
     failedEmails: failedEmails.data,
     newLeads: newLeads.data,
     pendingJobs: pendingJobs.data,
     dueToday: dueToday.data,
   };
-}
+});

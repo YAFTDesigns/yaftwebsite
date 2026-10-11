@@ -5,6 +5,7 @@ import Lightbox from '@/components/Lightbox';
 import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
+import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Rhino3D for Industrial Design | YAFT Designs',
@@ -82,8 +83,8 @@ export default function Rhino3DIndustrialDesign() {
       <CourseGallery
         groupKey="rhino3d-industrial-design"
         images={[
-          { src: '/assets/images/courses/rhino-industrial-design-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
-          { src: '/assets/images/courses/rhino-industrial-design-2.jpg', caption: 'Parametric digital assembly technique and twisting furniture design' },
+          { src: imageUrl('courses/rhino-industrial-design-1.jpg'), caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
+          { src: imageUrl('courses/rhino-industrial-design-2.jpg'), caption: 'Parametric digital assembly technique and twisting furniture design' },
         ]}
       />
 
@@ -136,8 +137,8 @@ export default function Rhino3DIndustrialDesign() {
           title: 'Rhinoceros for Industrial Design',
           role: 'Course gallery',
           photos: [
-            { src: '/assets/images/courses/rhino-industrial-design-1.jpg', caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
-            { src: '/assets/images/courses/rhino-industrial-design-2.jpg', caption: 'Parametric digital assembly technique and twisting furniture design' },
+            { src: imageUrl('courses/rhino-industrial-design-1.jpg'), caption: 'Voronoi and patterns, point attractors, culling and vector fields, wood decor' },
+            { src: imageUrl('courses/rhino-industrial-design-2.jpg'), caption: 'Parametric digital assembly technique and twisting furniture design' },
           ],
         }]}
       />

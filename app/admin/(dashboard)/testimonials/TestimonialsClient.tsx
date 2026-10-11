@@ -96,7 +96,7 @@ export default function AdminTestimonialsPage({ initialItems, initialFilter }: {
   }, [filter, hasInitialData]);
 
   useEffect(() => {
-    const interval = setInterval(() => { load(); }, 20000);
+    const interval = setInterval(() => { if (!document.hidden) load(); }, 20000); // skip while the tab is in the background
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `load` intentionally omitted: recreated every render, including it would reset the interval on every render instead of only on filter change
   }, [filter]);

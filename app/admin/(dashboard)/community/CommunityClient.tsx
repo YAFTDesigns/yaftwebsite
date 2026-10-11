@@ -110,21 +110,12 @@ export default function AdminCommunityPage({ initialStudentWork, initialStatusBr
   const [actionError, setActionError] = useState('');
 
   async function loadCounts() {
-    const [sw, pub, swApproved, swRejected, pubApproved, pubRejected] = await Promise.all([
-      apiGet('student_work', 'pending'),
-      apiGet('publications', 'pending'),
-      apiGet('student_work', 'approved'),
-      apiGet('student_work', 'rejected'),
-      apiGet('publications', 'approved'),
-      apiGet('publications', 'rejected'),
-    ]);
-    setStatusBreakdown({
-      sw_approved: swApproved.data.length,
-      sw_pending_all: sw.data.length,
-      sw_rejected: swRejected.data.length,
-      pub_approved: pubApproved.data.length,
-      pub_pending_all: pub.data.length,
-      pub_rejected: pubRejected.data.length,
+    // One head-count request instead of six full-row list fetches.
+    const res = await fetch(`${API}?counts=true`);
+    const json = await res.json();
+    setStatusBreakdown(res.ok && json.counts ? json.counts : {
+      sw_approved: 0, sw_pending_all: 0, sw_rejected: 0,
+      pub_approved: 0, pub_pending_all: 0, pub_rejected: 0,
     });
   }
 

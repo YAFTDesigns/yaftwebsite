@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { assetUrl } from '@/lib/assetUrl';
 
 export default function Hero3D() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -90,7 +91,7 @@ export default function Hero3D() {
 
     const loader = new OBJLoader();
     loader.load(
-      '/point1.obj',
+      assetUrl('point1.obj'),
       (object) => {
         const sphereMaterial = new THREE.MeshPhongMaterial({
           color: 0x40e0d0,
