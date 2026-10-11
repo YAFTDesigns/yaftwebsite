@@ -35,3 +35,15 @@ export function formatMinor(minor: number, currency: Currency): string {
   });
   return currency === 'INR' ? `₹${v}` : `US$${v}`;
 }
+
+/**
+ * The amount actually charged is the only trustworthy record of how many keys were paid for.
+ * Returns the quantity (1..MAX_QUANTITY) whose server price equals `amountMinor`, or null if none does.
+ */
+export function quantityForPayment(currency: string, amountMinor: number): number | null {
+  if (currency !== 'INR' && currency !== 'USD') return null;
+  for (let q = 1; q <= MAX_QUANTITY; q++) {
+    if (priceFor(currency, q).total === amountMinor) return q;
+  }
+  return null;
+}

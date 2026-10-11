@@ -40,3 +40,17 @@ describe('Tortoise invoice maths matches what Razorpay charges', () => {
     else expect(t.igst).toBeGreaterThan(0);
   });
 });
+
+import { quantityForPayment } from './tortoisePricing';
+describe('quantityForPayment', () => {
+  it('maps the amount charged back to the quantity paid for', () => {
+    expect(quantityForPayment('INR', 483800)).toBe(1);
+    expect(quantityForPayment('INR', 483800 * 3)).toBe(3);
+    expect(quantityForPayment('USD', 4900 * 10)).toBe(10);
+  });
+  it('rejects amounts that match no quantity or an unknown currency', () => {
+    expect(quantityForPayment('INR', 410000)).toBeNull();
+    expect(quantityForPayment('INR', 1)).toBeNull();
+    expect(quantityForPayment('EUR', 4900)).toBeNull();
+  });
+});
