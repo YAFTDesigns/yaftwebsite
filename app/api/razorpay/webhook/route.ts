@@ -114,7 +114,9 @@ export async function POST(request: NextRequest) {
   const currency = String(pay.currency ?? '');
   const sale: Sale = {
     paymentId, name, email, quantity, amountMinor: Number(pay.amount ?? 0), currency,
-    state: notes.state || null, gstin: notes.gstin || null, testMode, keys,
+    state: notes.state || null, gstin: notes.gstin || null,
+    buyerType: notes.buyer_type === 'company' ? 'company' : 'individual',
+    company: String(notes.company || '').slice(0, 120) || null, testMode, keys,
   };
   const alerts: string[] = [];
   if (qtyMismatch) alerts.push(`The quantity in the order notes (${noteQty}) differs from what the amount paid covers (${quantity}). Keys were issued for ${quantity}. Check it in Razorpay.`);
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
           to: ownerTo,
           subject: `${testMode ? '[TEST] ' : ''}Tortoise sale: ${email.replace(/[\r\n]+/g, ' ')}`,
           html: `<p>Payment ${escapeHtml(paymentId)} captured (${Number(pay.amount) / 100} ${escapeHtml(currency)}).</p>
-<p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;${notes.state ? `, ${escapeHtml(notes.state)}` : ''}. Key${keys.length > 1 ? 's' : ''} created:</p><ul>${keyList}</ul>
+<p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;${notes.company ? ` (${escapeHtml(String(notes.company).slice(0, 120))})` : ' (individual)'}${notes.state ? `, ${escapeHtml(notes.state)}` : ''}. Key${keys.length > 1 ? 's' : ''} created:</p><ul>${keyList}</ul>
 <p>Auto-emailing to the buyer is OFF. Use Admin &gt; Tortoise &gt; Sales &gt; Resend to send the key${invoiceNo ? ' and invoice ' + escapeHtml(invoiceNo) : ''}.</p>`,
         });
       }

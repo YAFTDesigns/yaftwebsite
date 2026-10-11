@@ -45,6 +45,8 @@ export default function TortoiseBuy() {
   const [quantity, setQuantity] = useState(1);
   const [state, setState] = useState('');
   const [gstin, setGstin] = useState('');
+  const [buyerType, setBuyerType] = useState<'individual' | 'company'>('individual');
+  const [company, setCompany] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [paid, setPaid] = useState(false);
@@ -59,7 +61,7 @@ export default function TortoiseBuy() {
       const res = await fetch('/api/tortoise/checkout', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ name, email, quantity, currency, state, gstin }),
+        body: JSON.stringify({ name, email, quantity, currency, state, gstin, buyerType, company: buyerType === 'company' ? company : '' }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { setError(data.error ?? 'Could not start the payment.'); return; }
@@ -92,6 +94,17 @@ export default function TortoiseBuy() {
       <div className={styles.row}>
         <label>Name<input value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} autoComplete="name" /></label>
         <label>Email<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={200} autoComplete="email" /></label>
+      </div>
+      <div className={styles.row}>
+        <label>Buying as
+          <select value={buyerType} onChange={(e) => setBuyerType(e.target.value as 'individual' | 'company')}>
+            <option value="individual">Individual</option>
+            <option value="company">Company</option>
+          </select>
+        </label>
+        {buyerType === 'company' ? (
+          <label>Company name<input value={company} onChange={(e) => setCompany(e.target.value)} required maxLength={120} autoComplete="organization" /></label>
+        ) : <span />}
       </div>
       <div className={styles.row}>
         <label>Licence keys
