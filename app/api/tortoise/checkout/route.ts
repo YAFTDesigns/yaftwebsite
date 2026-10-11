@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimit } from '@/lib/rateLimit';
+import { rateLimitShared } from '@/lib/rateLimitShared';
 import { createOrder, razorpayConfig } from '@/lib/razorpay';
 import { INDIAN_STATES, GSTIN_RE } from '@/lib/indianStates';
 import { priceFor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   if (process.env.TORTOISE_CHECKOUT_ENABLED !== '1') {
     return NextResponse.json({ error: 'Online purchase is not open yet. Please email yaftdesigns@gmail.com.' }, { status: 503 });
   }
-  const limited = rateLimit(request, { limit: 10, windowMs: 60_000 });
+  const limited = await rateLimitShared(request, 'tortoise-checkout', { limit: 10, windowMs: 60_000 });
   if (limited) return limited;
 
   const body = await request.json().catch(() => null);

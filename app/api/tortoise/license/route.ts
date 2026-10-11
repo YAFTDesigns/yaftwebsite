@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { rateLimit } from '@/lib/rateLimit';
+import { rateLimitShared } from '@/lib/rateLimitShared';
 import { normalizeKey } from '@/lib/tortoiseLicense';
 
 // POST /api/tortoise/license  { key, machine, product, version }
@@ -9,7 +9,7 @@ import { normalizeKey } from '@/lib/tortoiseLicense';
 // Anything we are unsure about (DB trouble, missing config) returns 503 so the
 // plugin keeps working on its offline grace period instead of locking a paying user.
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, { limit: 20, windowMs: 60_000 });
+  const limited = await rateLimitShared(request, 'tortoise-license', { limit: 20, windowMs: 60_000 });
   if (limited) return limited;
 
   const body = await request.json().catch(() => null);
@@ -25,42 +25,22 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
-  const { data: lic, error } = await supabase
-    .from('tortoise_licenses')
-    .select('key, status, expires_at, max_machines')
-    .eq('key', key)
-    .maybeSingle();
-
-  if (error) {
-    console.error('[tortoise-license] lookup failed:', error);
+  // One atomic database call: checks status, expiry and the PC limit, and records the activation.
+  const { data: res, error } = await supabase.rpc('tortoise_activate', { p_key: key, p_machine: machine });
+  if (error || !res) {
+    console.error('[tortoise-license] activate failed:', error);
     return NextResponse.json({ valid: false, message: 'Licence service unavailable.' }, { status: 503 });
   }
-  if (!lic) return NextResponse.json({ valid: false, message: 'Key not found.' });
-  if (lic.status !== 'active') return NextResponse.json({ valid: false, message: 'This licence has been revoked.' });
-  if (lic.expires_at && new Date(lic.expires_at) < new Date()) {
-    return NextResponse.json({ valid: false, message: 'This licence has expired. Renew at yaftdesigns.com/tortoise' });
-  }
-
-  const { data: acts, error: actErr } = await supabase
-    .from('tortoise_activations')
-    .select('machine')
-    .eq('key', key);
-  if (actErr) {
-    console.error('[tortoise-license] activations failed:', actErr);
-    return NextResponse.json({ valid: false, message: 'Licence service unavailable.' }, { status: 503 });
-  }
-
-  const known = (acts ?? []).some((a) => a.machine === machine);
-  if (!known && (acts?.length ?? 0) >= lic.max_machines) {
-    return NextResponse.json({ valid: false, message: `This key is already used on ${lic.max_machines} PCs.` });
-  }
-
-  const { error: upErr } = await supabase
-    .from('tortoise_activations')
-    .upsert({ key, machine, last_seen: new Date().toISOString() }, { onConflict: 'key,machine' });
-  if (upErr) {
-    console.error('[tortoise-license] upsert failed:', upErr);
-    return NextResponse.json({ valid: false, message: 'Licence service unavailable.' }, { status: 503 });
+  const lic = { expires_at: (res.expires_at ?? null) as string | null, max_machines: Number(res.max_machines ?? 0) };
+  switch (res.result) {
+    case 'not_found': return NextResponse.json({ valid: false, message: 'Key not found.' });
+    case 'revoked': return NextResponse.json({ valid: false, message: 'This licence has been revoked.' });
+    case 'expired': return NextResponse.json({ valid: false, message: 'This licence has expired. Renew at yaftdesigns.com/tortoise' });
+    case 'limit': return NextResponse.json({ valid: false, message: `This key is already used on ${lic.max_machines} PCs.` });
+    case 'ok': break;
+    default:
+      console.error('[tortoise-license] unexpected result:', res.result);
+      return NextResponse.json({ valid: false, message: 'Licence service unavailable.' }, { status: 503 });
   }
 
   return NextResponse.json({ valid: true, expires: lic.expires_at, message: 'OK' });
