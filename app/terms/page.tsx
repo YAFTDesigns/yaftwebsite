@@ -5,7 +5,7 @@ import styles from './terms.module.css';
 
 export const metadata: Metadata = {
   title: 'Terms and Conditions | YAFT Designs',
-  description: 'Terms and conditions for training, workshops, and consulting services offered by YAFT Designs.',
+  description: 'Terms and conditions for training, workshops, consulting services, and the Tortoise plugin offered by YAFT Designs.',
   alternates: { canonical: 'https://www.yaftdesigns.com/terms' },
 };
 
@@ -44,7 +44,7 @@ const TERMS = [
   },
   {
     title: '9. Software and Equipment',
-    body: 'YAFT Designs is a training and consulting business only. We do not sell, supply, or resell Rhino3D licenses or any other software. Students are responsible for obtaining their own valid software licenses directly from the respective vendors. Students attending in-person sessions are responsible for bringing their own laptop, mouse, charger, and any other equipment required.',
+    body: 'YAFT Designs is a training and consulting business only. We do not sell, supply, or resell Rhino3D licenses or any third-party software. The only software we sell is our own Tortoise plugin, covered in sections 16 and 17. Students are responsible for obtaining their own valid software licenses directly from the respective vendors. Students attending in-person sessions are responsible for bringing their own laptop, mouse, charger, and any other equipment required.',
   },
   {
     title: '10. Certificates',
@@ -71,7 +71,15 @@ const TERMS = [
     body: 'The design, layout, text, images, graphics, code, course material and other content of yaftdesigns.com are the intellectual property of YAFT Designs. You may not copy, reproduce, scrape, mirror, or republish them, or use them to train, fine-tune, or build any artificial intelligence or machine learning model or to create a lookalike website, course or service, without prior written consent from YAFT Designs. Automated access to this website (including bots, crawlers and AI agents) is permitted only for ordinary search-engine indexing in line with our robots.txt.',
   },
   {
-    title: '16. Contact',
+    title: '16. Tortoise Plugin: Licence and Refunds',
+    body: 'Tortoise is a Rhino plugin made by YAFT Designs. Paid licences are sold at yaftdesigns.com/tortoise at INR 4,100 plus 18% GST per key (INR 4,838 in total), or US$49 per key for international buyers. Each key is a perpetual licence for one buyer and may be activated on up to 2 computers. Keys may not be shared, resold, sublicensed, or published. The 60-day free trial is the same plugin, and we recommend you try it on your own drawings before buying. A key is delivered by email after payment is confirmed. Refunds: if the plugin does not work for you on a supported Rhino version and we cannot fix the problem within a reasonable time, you may ask for a full refund within 7 days of purchase by writing to yaftdesigns@gmail.com. Refunds are not available once a key has been activated on more than 1 computer, or for change of mind after 7 days. Refunded keys are revoked. We may revoke a key that is shared, resold, or used in breach of these terms. We may issue updates but do not promise a particular feature set or support period.',
+  },
+  {
+    title: '17. Tortoise Outputs and Responsibility',
+    body: 'Tortoise generates sheets, schedules, and take-off drawings from the geometry you provide. You are responsible for checking every output against your design and site conditions before using it for quotation, fabrication, procurement, or construction. The plugin is provided as is, and YAFT Designs is not liable for errors, omissions, cost, or loss arising from reliance on its output. Our total liability for the plugin is limited to the amount you paid for the licence. The plugin checks its licence online, so some features need an internet connection.',
+  },
+  {
+    title: '18. Contact',
     body: 'For questions, clarifications, or concerns regarding these terms, please contact us at yaftdesigns@gmail.com. Studio: Coimbatore, Tamil Nadu, India.',
   },
 ];
