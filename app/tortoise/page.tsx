@@ -46,6 +46,10 @@ const FEATURES = [
   { t: 'Built for big jobs', d: 'One bad panel never stops the run. Combined PDFs are split in parts of 100 pages for speed and memory, and your settings are saved inside the .3dm.' },
 ];
 
+// Real user quotes only. Add { q, name, role } when a user agrees to be quoted;
+// the section below stays hidden while this list is empty.
+const USER_QUOTES: { q: string; name: string; role: string }[] = [];
+
 const FACADE = [
   { t: 'Faster take-off', d: 'Select the panels in your model and run once. No more dimensioning and laying out hundreds of glass or panel drawings by hand.' },
   { t: 'Shop drawings that match the model', d: 'Sizes, corner angles and side letters are read straight from the Rhino geometry, so every sheet follows the model, and re-running after a design change refreshes them all.' },
@@ -182,6 +186,21 @@ export default async function TortoisePage() {
             ))}
           </div>
         </section>
+
+        {/* USER QUOTES (hidden until a real quote is added) */}
+        {USER_QUOTES.length > 0 && (
+          <section className={`wrap ${styles.section}`}>
+            <p className="eyebrow">What users say</p>
+            <div className={styles.grid3}>
+              {USER_QUOTES.map((u) => (
+                <article key={u.name} className={styles.card}>
+                  <p>&ldquo;{u.q}&rdquo;</p>
+                  <h3 style={{ fontSize: 14, marginTop: 12 }}>{u.name}, {u.role}</h3>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* HOW IT WORKS */}
         <section className={styles.band}>

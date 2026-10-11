@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import styles from './StudentWorkMarquee.module.css';
 
@@ -39,8 +40,13 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function MarqueeTrack({ items, reverse }: { items: typeof ROW1; reverse?: boolean }) {
-  // Shuffle once on mount then duplicate for seamless loop
-  const shuffled = shuffle(items);
+  // Render the fixed order first (matches the server HTML, so no hydration
+  // mismatch), then shuffle once after mount. Duplicate for a seamless loop.
+  const [shuffled, setShuffled] = useState(items);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time client-only shuffle after hydration
+    setShuffled(shuffle(items));
+  }, [items]);
   const doubled = [...shuffled, ...shuffled];
 
   return (
