@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { jsonInit } from '@/lib/jsonInit';
 
 export default function DeclinedToggle({ leadId, initialDeclined }: { leadId: string; initialDeclined: boolean }) {
   const [declined, setDeclined] = useState(initialDeclined);
@@ -10,11 +11,7 @@ export default function DeclinedToggle({ leadId, initialDeclined }: { leadId: st
     setBusy(true);
     const next = !declined;
     try {
-      const res = await fetch(`/api/admin/leads/${leadId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ declined: next }),
-      });
+      const res = await fetch(`/api/admin/leads/${leadId}`, jsonInit('PATCH', { declined: next }));
       if (res.ok) setDeclined(next);
     } finally {
       setBusy(false);

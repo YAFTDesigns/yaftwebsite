@@ -3,17 +3,14 @@ import { isAuthorizedCron } from '@/lib/cronAuth';
 import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendAdminAlert } from '@/lib/adminAlert';
-import { ddmmyyyyToIso } from '@/lib/invoicesExport';
+import { ddmmyyyyToIso } from '@/lib/jobsGrouping';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
+import { fmtFixed2 } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
 const TEMPLATE = 'balance_reminder';
 const MIN_DAYS_OVERDUE = 14;
-
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 // A nudge to Yokes, not an automatic email to the client -- matches
 // his stated preference for staying in the loop on any client-facing
@@ -63,7 +60,7 @@ async function runBalanceReminderCheck() {
     .map((inv) => `<tr>
       <td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:13px;">${inv.invoice_no}</td>
       <td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:13px;">${inv.client_name}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:13px;text-align:right;">₹${fmt(Number(inv.balance))}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;font-size:13px;text-align:right;">₹${fmtFixed2(Number(inv.balance))}</td>
     </tr>`)
     .join('');
   const html = `<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;color:#111;">
@@ -76,7 +73,7 @@ async function runBalanceReminderCheck() {
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>
-    <p style="font-size:13px;color:#888;">Total overdue: ₹${fmt(total)}</p>
+    <p style="font-size:13px;color:#888;">Total overdue: ₹${fmtFixed2(total)}</p>
   </div>`;
 
   await sendAdminAlert(subject, html);

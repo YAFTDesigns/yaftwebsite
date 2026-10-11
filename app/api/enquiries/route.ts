@@ -6,10 +6,8 @@ import { pushEnquiryToQueue } from '@/lib/queue';
 import { sendEmail, renderTemplate, isEmailConfigured, escapeHtml, safeDisplayName } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
-import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText, cleanDetails } from '@/lib/enquiryFields';
+import { normalizePhone, normalizeSegment, normalizeAudience, normalizeFunnel, audienceToSegment, defaultFunnel, cleanText, cleanDetails, STRICT_EMAIL_RE } from '@/lib/enquiryFields';
 import { recordEnquiryContext } from '@/lib/enquiryLead';
-
-const EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
 
 export async function POST(request: NextRequest) {
   const limited = rateLimit(request, { limit: 5, windowMs: 60000 });
@@ -21,7 +19,7 @@ export async function POST(request: NextRequest) {
   const message  = typeof body?.message  === 'string' ? body.message.trim()  : '';
   const sessionId = typeof body?.sessionId === 'string' ? body.sessionId : null;
 
-  if (!name || !EMAIL_RE.test(email) || !message) {
+  if (!name || !STRICT_EMAIL_RE.test(email) || !message) {
     return NextResponse.json({ error: 'Name, a valid email, and a message are required.' }, { status: 400 });
   }
   if (name.length > 100 || email.length > 200 || interest.length > 120 || message.length > 5000) {

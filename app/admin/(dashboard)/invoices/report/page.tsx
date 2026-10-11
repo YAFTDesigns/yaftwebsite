@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
-import { ddmmyyyyToIso } from '@/lib/invoicesExport';
+import { ddmmyyyyToIso } from '@/lib/jobsGrouping';
 import { fyStartYearFor, fyLabel, currentFyStartYear, availableFyStartYears } from '@/lib/financialYear';
 import styles from '../../admin.module.css';
+import { fmtFixed2 } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +18,6 @@ type InvoiceRow = {
   total: number;
   balance: number;
 };
-
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 const MONTH_ORDER = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3]; // FY order: Apr..Mar
 const MONTH_NAMES: Record<number, string> = {
@@ -121,10 +118,10 @@ export default async function FinancialYearReportPage({
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16, margin: '24px 0' }}>
             {[
               ['Invoices', String(fyInvoices.length)],
-              ['Revenue (ex. GST)', `₹${fmt(grand.subtotal)}`],
-              ['GST collected', `₹${fmt(grand.cgst + grand.sgst + grand.igst)}`],
-              ['Total invoiced', `₹${fmt(grand.total)}`],
-              ['Outstanding balance', `₹${fmt(grand.balance)}`],
+              ['Revenue (ex. GST)', `₹${fmtFixed2(grand.subtotal)}`],
+              ['GST collected', `₹${fmtFixed2(grand.cgst + grand.sgst + grand.igst)}`],
+              ['Total invoiced', `₹${fmtFixed2(grand.total)}`],
+              ['Outstanding balance', `₹${fmtFixed2(grand.balance)}`],
             ].map(([label, value]) => (
               <div key={label} style={{ border: '1px solid var(--line)', borderRadius: 6, padding: '14px 16px' }}>
                 <div style={{ fontFamily: 'var(--mono)', fontSize: 20, fontWeight: 700, color: '#fff' }}>{value}</div>
@@ -134,9 +131,9 @@ export default async function FinancialYearReportPage({
           </div>
 
           <div style={{ display: 'flex', gap: 24, marginBottom: 28, fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>
-            <span>CGST: ₹{fmt(grand.cgst)}</span>
-            <span>SGST: ₹{fmt(grand.sgst)}</span>
-            <span>IGST: ₹{fmt(grand.igst)}</span>
+            <span>CGST: ₹{fmtFixed2(grand.cgst)}</span>
+            <span>SGST: ₹{fmtFixed2(grand.sgst)}</span>
+            <span>IGST: ₹{fmtFixed2(grand.igst)}</span>
           </div>
 
           <h2 style={{ fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)', marginBottom: 10 }}>Month by month</h2>
@@ -153,7 +150,7 @@ export default async function FinancialYearReportPage({
                 <tr key={m.month} style={{ borderBottom: '1px solid #1a1a1a', background: i % 2 === 1 ? 'var(--paper-2, #111)' : 'transparent' }}>
                   <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12 }}>{MONTH_NAMES[m.month]}</td>
                   <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12, textAlign: 'right', color: m.count ? '#fff' : '#444' }}>{m.count || '—'}</td>
-                  <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12, textAlign: 'right', color: m.count ? '#fff' : '#444' }}>{m.total ? fmt(m.total) : '—'}</td>
+                  <td style={{ padding: '6px 8px', fontFamily: 'var(--mono)', fontSize: 12, textAlign: 'right', color: m.count ? '#fff' : '#444' }}>{m.total ? fmtFixed2(m.total) : '—'}</td>
                 </tr>
               ))}
             </tbody>

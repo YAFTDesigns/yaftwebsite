@@ -1,19 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface Window {
-  count: number;
-  start: number;
-}
+type Window = { count: number; resetAt: number };
 
 const store = new Map<string, Window>();
+const SWEEP_AT = 1000; // purge expired windows once the map grows past this
 
-// Clean up old entries every 5 minutes to prevent memory leak
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, win] of store.entries()) {
-    if (now - win.start > 60_000) store.delete(key);
-  }
-}, 5 * 60 * 1000);
+export function clientIp(request: NextRequest): string {
+  return (
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    request.headers.get('x-real-ip') ??
+    'unknown'
+  );
+}
 
 /**
  * Returns a 429 NextResponse if the IP has exceeded the limit,
@@ -27,17 +25,15 @@ export function rateLimit(
   request: NextRequest,
   { limit, windowMs }: { limit: number; windowMs: number }
 ): NextResponse | null {
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown';
-
-  const key = `${request.nextUrl.pathname}:${ip}`;
+  const key = `${request.nextUrl.pathname}:${clientIp(request)}`;
   const now = Date.now();
   const win = store.get(key);
 
-  if (!win || now - win.start > windowMs) {
-    store.set(key, { count: 1, start: now });
+  if (!win || now > win.resetAt) {
+    if (store.size >= SWEEP_AT) {
+      for (const [k, w] of store) if (now > w.resetAt) store.delete(k);
+    }
+    store.set(key, { count: 1, resetAt: now + windowMs });
     return null;
   }
 
@@ -45,12 +41,7 @@ export function rateLimit(
   if (win.count > limit) {
     return NextResponse.json(
       { error: 'Too many requests. Please wait a moment and try again.' },
-      {
-        status: 429,
-        headers: {
-          'Retry-After': String(Math.ceil((win.start + windowMs - now) / 1000)),
-        },
-      }
+      { status: 429, headers: { 'Retry-After': String(Math.ceil((win.resetAt - now) / 1000)) } }
     );
   }
 

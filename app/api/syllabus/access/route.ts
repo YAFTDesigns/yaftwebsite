@@ -5,8 +5,8 @@ import { getCourseBySlug } from '@/lib/courses';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, renderTemplate, isEmailConfigured } from '@/lib/email';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { EMAIL_RE } from '@/lib/enquiryFields';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LINKEDIN_RE = /linkedin\.com\//i;
 
 export async function POST(request: NextRequest) {

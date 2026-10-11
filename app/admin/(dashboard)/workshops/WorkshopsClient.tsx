@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Photo = { filename?: string; caption: string };
 type Workshop = {
@@ -97,9 +98,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
     setNewSaving(true);
     setNewError('');
     try {
-      const res = await fetch('/api/admin/workshops', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newForm),
-      });
+      const res = await fetch('/api/admin/workshops', jsonInit('POST', newForm));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowNewForm(false);
@@ -121,9 +120,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
     setEditSaving(true);
     setEditError('');
     try {
-      const res = await fetch('/api/admin/workshops', {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, ...editForm }),
-      });
+      const res = await fetch('/api/admin/workshops', jsonInit('PATCH', { key, ...editForm }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setEditingKey(null);
@@ -136,9 +133,7 @@ export default function WorkshopsClient({ initialWorkshops }: { initialWorkshops
   }
 
   async function toggleActive(w: Workshop) {
-    await fetch('/api/admin/workshops', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key: w.key, active: !w.active }),
-    });
+    await fetch('/api/admin/workshops', jsonInit('PATCH', { key: w.key, active: !w.active }));
     await load();
   }
 

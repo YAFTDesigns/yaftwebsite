@@ -2,13 +2,11 @@
 
 import { useState, useMemo } from 'react';
 import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
+import { fmtInt } from '@/lib/format';
+import { jsonInit } from '@/lib/jsonInit';
 
 type SelectableInvoice = { id: string; invoice_no: string; date: string; client_name: string; total: number };
 type TeamOption = { id: string; name: string; email: string | null };
-
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
 
 // Sits in the empty space beside the compact "Leads by source" pie
 // chart on the admin Home page. Deliberately its own small feature
@@ -73,15 +71,11 @@ export default function EmailInvoicesWidget({
     if (!accountant?.email) { setError('Pick an accountant with an email on file.'); setStatus('error'); return; }
     setStatus('sending'); setError('');
     try {
-      const res = await fetch('/api/admin/invoices/email-selected', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await fetch('/api/admin/invoices/email-selected', jsonInit('POST', {
           invoiceIds: Array.from(selected),
           recipientEmail: accountant.email,
           recipientName: accountant.name,
-        }),
-      });
+        }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Failed to send');
       setStatus('sent');
@@ -129,7 +123,7 @@ export default function EmailInvoicesWidget({
               <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {inv.invoice_no} · {inv.client_name}
               </span>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff' }}>₹{fmt(Number(inv.total))}</span>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#fff' }}>₹{fmtInt(Number(inv.total))}</span>
             </label>
           ))}
         </div>
@@ -156,7 +150,7 @@ export default function EmailInvoicesWidget({
       </div>
 
       <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#666', marginTop: 6 }}>
-        {selected.size} invoice{selected.size === 1 ? '' : 's'} selected · ₹{fmt(selectedTotal)}
+        {selected.size} invoice{selected.size === 1 ? '' : 's'} selected · ₹{fmtInt(selectedTotal)}
       </p>
 
       {status === 'sent' && <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#4caf50', marginTop: 6 }}>Sent to {accountant?.name}.</p>}

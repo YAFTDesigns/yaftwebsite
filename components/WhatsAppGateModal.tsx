@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { storeWhatsappAccess, requestWhatsappAccess } from '@/lib/whatsappAccess';
 import { track } from '@/lib/analytics';
+import { EMAIL_RE } from '@/lib/enquiryFields';
 
 export const OPEN_WHATSAPP_GATE_EVENT = 'yaft:open-whatsapp-gate';
 
 export type WhatsAppGateDetail = { text: string; fallbackUrl: string };
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function WhatsAppGateModal() {
   const [open, setOpen]             = useState(false);

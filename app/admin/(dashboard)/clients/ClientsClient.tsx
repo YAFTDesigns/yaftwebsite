@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from '@/components/admin/adminPage.module.css';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Client = {
   id: string; created_at: string; updated_at: string;
@@ -81,12 +82,8 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
     setFormError('');
     try {
       const res = editId
-        ? await fetch(`/api/clients/${editId}`, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
-          })
-        : await fetch('/api/clients', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
-          });
+        ? await fetch(`/api/clients/${editId}`, jsonInit('PATCH', form))
+        : await fetch('/api/clients', jsonInit('POST', form));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowForm(false);
@@ -99,9 +96,7 @@ export default function ClientsClient({ initialClients }: { initialClients?: Cli
   }
 
   async function toggleActive(c: Client) {
-    await fetch(`/api/clients/${c.id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !c.active }),
-    });
+    await fetch(`/api/clients/${c.id}`, jsonInit('PATCH', { active: !c.active }));
     await load();
   }
 

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errorMessage';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
 const NAME = 'instagram';
@@ -50,6 +51,6 @@ export async function refreshInstagramToken(): Promise<RefreshResult> {
     if (error) return { ok: false, reason: `Refreshed but could not save the new token: ${error.message}` };
     return { ok: true, expiresAt };
   } catch (err) {
-    return { ok: false, reason: `Refresh request failed: ${err instanceof Error ? err.message : String(err)}` };
+    return { ok: false, reason: `Refresh request failed: ${getErrorMessage(err)}` };
   }
 }

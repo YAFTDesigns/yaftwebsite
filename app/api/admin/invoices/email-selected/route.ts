@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
 import { buildInvoicesWorkbook, type InvoiceRow } from '@/lib/invoicesExport';
-import { generatePDF, type InvoicePdfData } from '@/lib/invoicePdf';
+import { generatePDF, toInvoicePdfData } from '@/lib/invoicePdf';
 import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_RE } from '@/lib/enquiryFields';
 
 // POST /api/admin/invoices/email-selected
 // { invoiceIds: string[], recipientEmail, recipientName? }
@@ -20,8 +18,6 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // the picker UI this feeds only ever lists real invoices to begin
 // with, but this route doesn't trust that alone.
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
-  if (limited) return limited;
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -64,24 +60,7 @@ export async function POST(request: NextRequest) {
   try {
     pdfAttachments = await Promise.all(
       invoices.map(async (inv) => {
-        const pdfData: InvoicePdfData = {
-          invoice_no: inv.invoice_no,
-          date: inv.date,
-          invoice_type: inv.invoice_type || 'training',
-          client_name: inv.client_name,
-          client_email: inv.client_email,
-          client_type: inv.client_type,
-          client_company: inv.client_company,
-          client_pan: inv.client_pan,
-          client_gst: inv.client_gst,
-          client_state: inv.client_state,
-          client_address: inv.client_address,
-          client_phone: inv.client_phone,
-          items: inv.items ?? [],
-          advance: inv.advance,
-          balance: inv.balance,
-        };
-        const pdfBuffer = await generatePDF(pdfData);
+        const pdfBuffer = await generatePDF(toInvoicePdfData(inv));
         return { filename: `YAFT_Invoice_${inv.invoice_no}.pdf`, content: pdfBuffer.toString('base64') };
       })
     );

@@ -6,6 +6,8 @@ import { computeTaxFromMode, type InvoiceTaxMode } from '@/lib/invoiceMath';
 import JobsSheetView from './JobsSheetView';
 import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { fmt } from '@/lib/format';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Client = { id: string; name: string; company_name: string | null };
 type TeamOption = { id: string; name: string; role: string | null };
@@ -28,8 +30,6 @@ const GST_TYPES: { value: string; label: string }[] = [
 ];
 const GST_TYPE_TO_TAX_MODE: Record<string, InvoiceTaxMode> = { intra: 'intra', inter: 'interstate', none: 'intl' };
 const STATUSES = ['Pending', 'Submitted', 'In Review', 'Completed', 'Cancelled'];
-
-function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 const EMPTY_FORM = {
   job_no: '', client_id: '', client_name: '', job_type: JOB_TYPES[0],
@@ -166,11 +166,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients, 
     setFormError('');
     try {
       const designer = team.find(t => t.id === form.designer_id);
-      const res = await fetch('/api/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, qty: qtyNum, rate: rateNum, designer_name: designer?.name ?? null }),
-      });
+      const res = await fetch('/api/jobs', jsonInit('POST', { ...form, qty: qtyNum, rate: rateNum, designer_name: designer?.name ?? null }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setForm({ ...EMPTY_FORM, job_no: '', job_date: new Date().toISOString().slice(0, 10) });
@@ -213,11 +209,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients, 
     setEditError('');
     try {
       const designer = team.find(t => t.id === editForm.designer_id);
-      const res = await fetch(`/api/jobs/${editingJob.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...editForm, qty, rate: parseFloat(editForm.rate) || 0, designer_name: designer?.name ?? null }),
-      });
+      const res = await fetch(`/api/jobs/${editingJob.id}`, jsonInit('PATCH', { ...editForm, qty, rate: parseFloat(editForm.rate) || 0, designer_name: designer?.name ?? null }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setEditingJob(null);
@@ -261,9 +253,7 @@ export default function JobsClient({ initialJobs, initialTrash, initialClients, 
       if (entered === null) return; // cancelled the prompt itself
       status_note = entered.trim() || undefined;
     }
-    await fetch(`/api/jobs/${job.id}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status, status_note }),
-    });
+    await fetch(`/api/jobs/${job.id}`, jsonInit('PATCH', { status, status_note }));
     await loadJobs();
     if (expandedHistoryId === job.id) await loadHistory(job.id);
   }

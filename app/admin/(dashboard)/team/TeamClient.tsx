@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Member = {
   id: string; name: string; role: string | null; email: string | null;
@@ -79,8 +80,8 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
     setFormError('');
     try {
       const res = editId
-        ? await fetch(`/api/team/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-        : await fetch('/api/team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+        ? await fetch(`/api/team/${editId}`, jsonInit('PATCH', form))
+        : await fetch('/api/team', jsonInit('POST', form));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setShowForm(false);
@@ -93,7 +94,7 @@ export default function TeamClient({ initialTeam }: { initialTeam?: Member[] }) 
   }
 
   async function toggleActive(m: Member) {
-    await fetch(`/api/team/${m.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !m.active }) });
+    await fetch(`/api/team/${m.id}`, jsonInit('PATCH', { active: !m.active }));
     await load();
   }
 

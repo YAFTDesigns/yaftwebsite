@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errorMessage';
 import type { PostgrestSingleResponse, PostgrestResponse } from '@supabase/supabase-js';
 
 /**
@@ -44,7 +45,7 @@ export async function safeQuery<T>(
     }
     return { data: (res.data as T) ?? fallback, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = getErrorMessage(err);
     console.error(`[safeQuery:${label}] threw:`, message);
     return { data: fallback, error: message };
   }
@@ -66,7 +67,7 @@ export async function safeCount(
     }
     return { data: res.count ?? 0, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = getErrorMessage(err);
     console.error(`[safeCount:${label}] threw:`, message);
     return { data: 0, error: message };
   }

@@ -8,6 +8,7 @@ import type { LabScript, LabCategory } from './page';
 import { getYouTubeVideoId } from '@/lib/youtube';
 import { track } from '@/lib/analytics';
 import styles from './labs.module.css';
+import { fmtInt } from '@/lib/format';
 
 const SITE_IMAGE_BASE = 'https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/site-images/';
 
@@ -41,10 +42,6 @@ const PLUS_MARKS = Array.from({ length: PLUS_GRID_COLS * PLUS_GRID_ROWS }, (_, i
     delay: (i % 12) * 0.6,
   };
 });
-
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0 });
-}
 
 export default function LabsPageClient({ scripts, categories }: { scripts: LabScript[]; categories: LabCategory[] }) {
   const [query, setQuery] = useState('');
@@ -194,7 +191,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                     </div>
                     <div className={styles.detailBody}>
                       <span className={`${styles.priceBadge} ${selected.price > 0 ? styles.priceBadgePaid : styles.priceBadgeFree}`}>
-                        {selected.price > 0 ? `INR ${fmt(selected.price)}` : 'Free'}
+                        {selected.price > 0 ? `INR ${fmtInt(selected.price)}` : 'Free'}
                       </span>
                       <h2 className={styles.detailTitle}>{selected.title}</h2>
                       <p className={styles.detailMeta}>{categories.find(c => c.id === selected.category_id)?.name ?? 'Uncategorized'} · {selected.view_count} view{selected.view_count === 1 ? '' : 's'} · {selected.download_count} download{selected.download_count === 1 ? '' : 's'}</p>
@@ -204,7 +201,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                         className={styles.downloadBtn}
                         onClick={() => track('lab_script_download', { meta: { scriptId: selected.id, scriptTitle: selected.title } })}
                       >
-                        Download {selected.price > 0 ? `(INR ${fmt(selected.price)})` : ''} →
+                        Download {selected.price > 0 ? `(INR ${fmtInt(selected.price)})` : ''} →
                       </a>
                     </div>
                   </div>
@@ -221,7 +218,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                           <div className={styles.thumbPlaceholder} />
                         )}
                         <span className={`${styles.priceBadge} ${s.price > 0 ? styles.priceBadgePaid : styles.priceBadgeFree}`}>
-                          {s.price > 0 ? `INR ${fmt(s.price)}` : 'Free'}
+                          {s.price > 0 ? `INR ${fmtInt(s.price)}` : 'Free'}
                         </span>
                         <div className={styles.cardHoverFade} />
                         <div className={styles.cardHoverContent}>

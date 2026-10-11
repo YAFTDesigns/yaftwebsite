@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
+import { jsonInit } from '@/lib/jsonInit';
 
 const API = '/api/admin/certificates';
 
@@ -60,11 +61,7 @@ export default function AdminCertificatesPage({ initialItems }: { initialItems?:
 
   async function toggleRevoke(c: Certificate) {
     setBusyId(c.id);
-    await fetch(API, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: c.id, revoked: !c.revoked }),
-    });
+    await fetch(API, jsonInit('PATCH', { id: c.id, revoked: !c.revoked }));
     await load();
     setBusyId(null);
   }
@@ -76,11 +73,7 @@ export default function AdminCertificatesPage({ initialItems }: { initialItems?:
     }
     setCreating(true);
     setLastCreated(null);
-    const res = await fetch(API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...draft, student_email: draft.student_email || undefined, issue_date: draft.issue_date || undefined }),
-    });
+    const res = await fetch(API, jsonInit('POST', { ...draft, student_email: draft.student_email || undefined, issue_date: draft.issue_date || undefined }));
     const json = await res.json();
     setCreating(false);
     if (!res.ok) { alert(json.error ?? 'Failed to create'); return; }

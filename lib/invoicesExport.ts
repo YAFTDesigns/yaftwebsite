@@ -2,12 +2,6 @@ import ExcelJS from 'exceljs';
 import { computeInvoiceTotals, type InvoiceLineItem } from './invoiceMath';
 import { groupByMonth, monthLabel, ddmmyyyyToIso, type MinimalJob } from './jobsGrouping';
 
-// Re-exported so existing importers (the export API route, tests) keep
-// working -- the implementation itself now lives in jobsGrouping.ts,
-// which has no exceljs dependency, so client components can use the
-// date-parsing fix without bundling exceljs into the browser.
-export { ddmmyyyyToIso };
-
 export type InvoiceRow = {
   invoice_no: string;
   date: string;

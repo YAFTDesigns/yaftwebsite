@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Control = { job: string; enabled: boolean; max_total_sends: number | null; approved_emails: string[] | null; notes: string | null; updated_at: string | null; updated_by: string | null };
 type Recipient = { email: string; name: string | null; source: string; last_activity: string; status: string; course_interest: string | null; selection_reason: string; subject: string };
@@ -32,7 +33,7 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
   }
 
   async function patch(body: Record<string, unknown>) {
-    const res = await fetch('/api/admin/cron-controls', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const res = await fetch('/api/admin/cron-controls', jsonInit('PATCH', body));
     const j = await res.json();
     setMsg(res.ok ? 'Saved.' : (j.error ?? 'Failed'));
     await load();

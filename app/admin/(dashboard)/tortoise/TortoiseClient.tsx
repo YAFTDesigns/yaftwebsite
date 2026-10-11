@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from '../admin.module.css';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Lic = {
   key: string; email: string; note: string | null; status: 'active' | 'revoked';
@@ -64,10 +65,7 @@ export default function TortoiseClient() {
   async function resend(p: Sale) {
     if (!confirm(`Email the key${p.license_keys.length > 1 ? 's' : ''}${p.invoice_no ? ' and invoice ' + p.invoice_no : ''} to ${p.email}?`)) return;
     setNotice('Sending...');
-    const res = await fetch('/api/admin/tortoise', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'resend_key_email', payment_id: p.payment_id }),
-    });
+    const res = await fetch('/api/admin/tortoise', jsonInit('POST', { action: 'resend_key_email', payment_id: p.payment_id }));
     const json = await res.json().catch(() => ({}));
     setNotice(res.ok ? `Sent to ${p.email}` : (json.error ?? 'Send failed'));
     load();
@@ -76,9 +74,7 @@ export default function TortoiseClient() {
   async function create(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setNewKey('');
-    const res = await fetch('/api/admin/tortoise', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form),
-    });
+    const res = await fetch('/api/admin/tortoise', jsonInit('POST', form));
     const json = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) { setError(json.error ?? 'Could not create key'); return; }
@@ -90,9 +86,7 @@ export default function TortoiseClient() {
   async function act(key: string, action: string, months?: number) {
     if (action === 'revoke' && !confirm(`Revoke ${key}? The plugin drops the licence on its next check.`)) return;
     if (action === 'reset' && !confirm(`Clear all PCs for ${key}? It can then be activated on new PCs.`)) return;
-    const res = await fetch('/api/admin/tortoise', {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ key, action, months }),
-    });
+    const res = await fetch('/api/admin/tortoise', jsonInit('PATCH', { key, action, months }));
     const json = await res.json().catch(() => ({}));
     if (!res.ok) setError(json.error ?? 'Update failed');
     load();

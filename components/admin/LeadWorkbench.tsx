@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { LEAD_STATUSES, PROPOSAL_STATUSES, PAYMENT_STATUSES, PROPOSAL_LABELS, PAYMENT_LABELS } from '@/lib/admin/leadPipeline';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Props = {
   leadId: string;
@@ -26,7 +27,7 @@ export default function LeadWorkbench({ leadId, status, followUp, proposal, paym
 
   async function call(url: string, method: string, payload: Record<string, unknown>) {
     setMsg('Saving…');
-    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const res = await fetch(url, jsonInit(method, payload));
     if (!res.ok) { setMsg((await res.json().catch(() => null))?.error ?? 'Save failed'); return false; }
     setMsg('Saved');
     router.refresh();

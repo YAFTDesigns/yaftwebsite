@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { rateLimit } from '@/lib/rateLimit';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_RE } from '@/lib/enquiryFields';
 
 // Fair trade for the WhatsApp button: we ask for an email before handing
 // over the redirect to wa.me, same principle as the syllabus gate, except

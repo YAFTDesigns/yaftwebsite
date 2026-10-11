@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { groupByMonth, revenueByType, revenueByMonth, STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
+import { fmt } from '@/lib/format';
 
 type Job = {
   id: string; job_date: string; job_no: string | null;
@@ -12,8 +13,6 @@ type Job = {
 };
 
 const GST_LABEL: Record<string, string> = { intra: 'Intra-state (CGST+SGST)', inter: 'Inter-state (IGST)', none: 'No GST' };
-
-function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 const th: React.CSSProperties = { padding: '9px 10px', textAlign: 'left', fontFamily: 'var(--mono)', fontSize: 10.5, color: '#888', textTransform: 'uppercase', letterSpacing: '0.03em', borderBottom: '1px solid #2a2a2a', whiteSpace: 'nowrap' };
 const td: React.CSSProperties = { padding: '8px 10px', fontSize: 12.5, color: '#ccc', borderBottom: '1px solid #1a1a1a', whiteSpace: 'nowrap' };

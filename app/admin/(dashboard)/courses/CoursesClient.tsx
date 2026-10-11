@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { getSiteImageUrl } from '@/lib/supabase/storage';
+import { jsonInit } from '@/lib/jsonInit';
 
 export type CourseRow = {
   slug: string; title: string; tool: string; level: string; duration: string;
@@ -27,10 +28,7 @@ export default function CoursesClient({ initialRows }: { initialRows: CourseRow[
   async function save(row: CourseRow) {
     setBusy(row.slug); note(row.slug, true, '');
     try {
-      const res = await fetch(`/api/admin/courses/${row.slug}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: row.title, tool: row.tool, level: row.level, duration: row.duration, description: row.description, active: row.active }),
-      });
+      const res = await fetch(`/api/admin/courses/${row.slug}`, jsonInit('PATCH', { title: row.title, tool: row.tool, level: row.level, duration: row.duration, description: row.description, active: row.active }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       note(row.slug, true, 'Saved');

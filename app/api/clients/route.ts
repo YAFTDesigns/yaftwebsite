@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { rateLimit } from '@/lib/rateLimit';
 
 export async function GET(request: NextRequest) {
   if (!(await isRequestFromAdmin())) {
@@ -19,8 +18,6 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, { limit: 20, windowMs: 60000 });
-  if (limited) return limited;
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

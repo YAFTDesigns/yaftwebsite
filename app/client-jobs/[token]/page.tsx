@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { attachStatusDates } from '@/lib/jobStatusDates';
 import { STATUS_COLORS_HEX } from '@/lib/jobsGrouping';
 import styles from './jobsheet.module.css';
+import { fmt } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,10 +36,6 @@ type JobDisplayRow = {
   status_date: string | null;
   notes: string | null;
 };
-
-function fmt(n: number) {
-  return Number(n).toLocaleString('en-IN', { minimumFractionDigits: 2 });
-}
 
 export default async function ClientJobSheetPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

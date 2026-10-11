@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { jsonInit } from '@/lib/jsonInit';
 
 const STATUSES = [
   { value: 'new', label: 'New', color: '#888' },
@@ -34,9 +35,7 @@ export default function LeadStatusEditor({ leadId, initialStatus, initialNotes, 
   async function save(patch: Record<string, unknown>) {
     setSaving(true); setError('');
     try {
-      const res = await fetch(`/api/admin/leads/${leadId}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
-      });
+      const res = await fetch(`/api/admin/leads/${leadId}`, jsonInit('PATCH', patch));
       if (!res.ok) throw new Error((await res.json())?.error ?? 'Save failed');
     } catch (e) { setError(e instanceof Error ? e.message : 'Save failed'); }
     finally { setSaving(false); }

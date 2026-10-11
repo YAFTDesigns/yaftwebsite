@@ -10,6 +10,7 @@ import PushNotificationToggle from '@/components/admin/PushNotificationToggle';
 import PendingFloater from '@/components/admin/PendingFloater';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
+import { fmtInt } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -205,10 +206,6 @@ async function getCounts() {
   };
 }
 
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
-
 function timeAgo(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -285,16 +282,16 @@ export default async function AdminOverviewPage() {
       <div className="eyebrow" style={{ marginBottom: 16 }}>THIS MONTH</div>
       <div className={styles.statGrid}>
         <div className={styles.stat}>
-          <div className={styles.statValue}>₹{fmt(counts.revenueThisMonth)}</div>
+          <div className={styles.statValue}>₹{fmtInt(counts.revenueThisMonth)}</div>
           <div className={styles.statLabel}>Invoiced this month</div>
         </div>
         <div className={styles.stat}>
-          <div className={styles.statValue} style={{ color: 'var(--ink-soft, #888)' }}>₹{fmt(counts.taxThisMonth)}</div>
+          <div className={styles.statValue} style={{ color: 'var(--ink-soft, #888)' }}>₹{fmtInt(counts.taxThisMonth)}</div>
           <div className={styles.statLabel}>Tax collected (GST)</div>
         </div>
         <div className={styles.stat} style={{ borderTopColor: counts.outstandingBalance > 0 ? 'var(--brass)' : undefined }}>
           <div className={styles.statValue} style={{ color: counts.outstandingBalance > 0 ? 'var(--brass)' : undefined }}>
-            ₹{fmt(counts.outstandingBalance)}
+            ₹{fmtInt(counts.outstandingBalance)}
           </div>
           <div className={styles.statLabel}>Outstanding balance</div>
         </div>
@@ -366,9 +363,9 @@ export default async function AdminOverviewPage() {
                       <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: 'var(--ink-soft)' }}>{inv.invoice_no}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 600 }}>₹{fmt(inv.total)}</p>
+                      <p style={{ fontFamily: 'var(--mono)', fontSize: 13, fontWeight: 600 }}>₹{fmtInt(inv.total)}</p>
                       {inv.balance > 0
-                        ? <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)' }}>₹{fmt(inv.balance)} due</p>
+                        ? <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: 'var(--brass)' }}>₹{fmtInt(inv.balance)} due</p>
                         : <p style={{ fontFamily: 'var(--mono)', fontSize: 11, color: '#4caf50' }}>Paid</p>
                       }
                     </div>

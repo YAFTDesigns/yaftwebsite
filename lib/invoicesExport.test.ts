@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ddmmyyyyToIso } from './invoicesExport';
+import { ddmmyyyyToIso } from './jobsGrouping';
 import { monthKey, monthLabel } from './jobsGrouping';
 
 describe('ddmmyyyyToIso', () => {

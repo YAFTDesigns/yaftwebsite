@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import styles from '@/components/admin/adminPage.module.css';
 import JobsSheetView from '../../jobs/JobsSheetView';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { fmt } from '@/lib/format';
 
 type Client = {
   id: string; name: string; company_name: string | null; gstin: string | null;
@@ -20,8 +21,6 @@ type Job = {
 const STATUS_COLOR: Record<string, string> = {
   Completed: '#3fb950', Cancelled: '#E63946', 'In Review': '#a371f7', Submitted: '#58a6ff', Pending: '#d4a72c',
 };
-
-function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function ClientJobsClient({
   clientId, initialClient, initialJobs,

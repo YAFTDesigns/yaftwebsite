@@ -3,8 +3,7 @@ import { rateLimitShared } from '@/lib/rateLimitShared';
 import { createOrder, razorpayConfig } from '@/lib/razorpay';
 import { INDIAN_STATES, GSTIN_RE } from '@/lib/indianStates';
 import { priceFor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
-
-const EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
+import { STRICT_EMAIL_RE } from '@/lib/enquiryFields';
 
 // POST /api/tortoise/checkout { name, email, quantity, currency } -> Razorpay order for Checkout.js
 export async function POST(request: NextRequest) {
@@ -21,7 +20,7 @@ export async function POST(request: NextRequest) {
   const currency: Currency | null = body?.currency === 'INR' || body?.currency === 'USD' ? body.currency : null;
 
   if (!name || name.length > 100) return NextResponse.json({ error: 'Please enter your name.' }, { status: 400 });
-  if (!EMAIL_RE.test(email) || email.length > 200) return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
+  if (!STRICT_EMAIL_RE.test(email) || email.length > 200) return NextResponse.json({ error: 'Please enter a valid email.' }, { status: 400 });
   if (!currency) return NextResponse.json({ error: 'Choose INR or USD.' }, { status: 400 });
   const buyerType = body?.buyerType === 'company' ? 'company' : 'individual';
   const company = buyerType === 'company' && typeof body?.company === 'string' ? body.company.trim() : '';

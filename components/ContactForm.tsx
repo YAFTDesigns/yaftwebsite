@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { track, getSessionId } from '@/lib/analytics';
 import { AUDIENCES, AUDIENCE_LABELS, audienceToSegment, type Audience, type Funnel } from '@/lib/enquiryFields';
+import { jsonInit } from '@/lib/jsonInit';
 
 type ContactFormProps = {
   options: string[];
@@ -34,10 +35,7 @@ export default function ContactForm({ options, funnel, messagePlaceholder }: Con
 
     setStatus('submitting');
     try {
-      const res = await fetch('/api/enquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await fetch('/api/enquiries', jsonInit('POST', {
           name: data.get('name'),
           email: data.get('email'),
           interest,
@@ -51,8 +49,7 @@ export default function ContactForm({ options, funnel, messagePlaceholder }: Con
           phone: phone || undefined,
           message: data.get('message'),
           sessionId: getSessionId(),
-        }),
-      });
+        }));
       if (!res.ok) {
         const j = await res.json().catch(() => null);
         setErrorMsg(res.status === 400 && j?.error ? String(j.error) : '');

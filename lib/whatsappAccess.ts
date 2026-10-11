@@ -1,4 +1,5 @@
 import { getSessionId } from '@/lib/analytics';
+import { jsonInit } from '@/lib/jsonInit';
 
 const STORAGE_KEY = 'yaftWhatsappAccess';
 
@@ -20,11 +21,7 @@ export function storeWhatsappAccess(email: string) {
 
 export async function requestWhatsappAccess(email: string, text: string, fallbackUrl: string): Promise<string> {
   try {
-    const res = await fetch('/api/whatsapp/access', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, text, sessionId: getSessionId() }),
-    });
+    const res = await fetch('/api/whatsapp/access', jsonInit('POST', { email, text, sessionId: getSessionId() }));
     if (!res.ok) return fallbackUrl;
     const data = await res.json();
     return typeof data?.url === 'string' ? data.url : fallbackUrl;

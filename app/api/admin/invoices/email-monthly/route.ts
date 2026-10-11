@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { rateLimit } from '@/lib/rateLimit';
 import { sendEmail, isEmailConfigured, getNotificationBcc } from '@/lib/email';
-import { buildInvoicesWorkbook, ddmmyyyyToIso, isConfirmedRevenue, type InvoiceRow } from '@/lib/invoicesExport';
-import { monthKey, monthLabel } from '@/lib/jobsGrouping';
+import { buildInvoicesWorkbook, isConfirmedRevenue, type InvoiceRow } from '@/lib/invoicesExport';
+import { ddmmyyyyToIso, monthKey, monthLabel } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_RE } from '@/lib/enquiryFields';
 
 // POST /api/admin/invoices/email-monthly
 // { month: 'YYYY-MM', recipientEmail, recipientName? }
@@ -16,8 +14,6 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // emails it with a short summary in the body. Logged to email_logs
 // the same way every other outbound email on the site is.
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
-  if (limited) return limited;
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

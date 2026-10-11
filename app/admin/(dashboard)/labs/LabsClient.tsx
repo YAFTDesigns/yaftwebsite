@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import BarChart from '@/components/admin/BarChart';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Category = { id: string; name: string; display_order: number };
 type Script = {
@@ -65,11 +66,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
 
   async function restoreScript(id: string) {
     setBusyId(id);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('PUT', { id }));
     await Promise.all([load(), loadTrash()]);
     setBusyId(null);
   }
@@ -78,11 +75,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
     if (!newCategoryName.trim()) return;
     setCatBusy(true);
     try {
-      const res = await fetch('/api/admin/lab-categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newCategoryName.trim() }),
-      });
+      const res = await fetch('/api/admin/lab-categories', jsonInit('POST', { name: newCategoryName.trim() }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Failed');
       setNewCategoryName('');
@@ -96,11 +89,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
 
   async function renameCategory(id: string, name: string) {
     setCatBusy(true);
-    await fetch('/api/admin/lab-categories', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, name }),
-    });
+    await fetch('/api/admin/lab-categories', jsonInit('PATCH', { id, name }));
     await load();
     setCatBusy(false);
   }
@@ -114,14 +103,8 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
     if (!target) return;
     setCatBusy(true);
     await Promise.all([
-      fetch('/api/admin/lab-categories', {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: current.id, display_order: target.display_order }),
-      }),
-      fetch('/api/admin/lab-categories', {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: target.id, display_order: current.display_order }),
-      }),
+      fetch('/api/admin/lab-categories', jsonInit('PATCH', { id: current.id, display_order: target.display_order })),
+      fetch('/api/admin/lab-categories', jsonInit('PATCH', { id: target.id, display_order: current.display_order })),
     ]);
     await load();
     setCatBusy(false);
@@ -130,11 +113,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
   async function deleteCategory(id: string) {
     if (!confirm('Delete this category? Scripts in it will become uncategorized, not deleted.')) return;
     setCatBusy(true);
-    await fetch('/api/admin/lab-categories', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    await fetch('/api/admin/lab-categories', jsonInit('DELETE', { id }));
     await load();
     setCatBusy(false);
   }
@@ -145,11 +124,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
     if (!form.category_id) { setFormError('Add a category first, then pick one.'); return; }
     setSaving(true); setFormError('');
     try {
-      const res = await fetch('/api/admin/lab-scripts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, price: parseFloat(form.price) || 0 }),
-      });
+      const res = await fetch('/api/admin/lab-scripts', jsonInit('POST', { ...form, price: parseFloat(form.price) || 0 }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setForm({ ...EMPTY_FORM, category_id: form.category_id });
@@ -163,11 +138,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
 
   async function updateScriptCategory(scriptId: string, categoryId: string) {
     setBusyId(scriptId);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: scriptId, category_id: categoryId }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('PATCH', { id: scriptId, category_id: categoryId }));
     await load();
     setBusyId(null);
   }
@@ -182,11 +153,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
     if (!editForm.description.trim()) { alert('Description cannot be empty.'); return; }
     setBusyId(id);
     try {
-      const res = await fetch('/api/admin/lab-scripts', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, title: editForm.title, description: editForm.description }),
-      });
+      const res = await fetch('/api/admin/lab-scripts', jsonInit('PATCH', { id, title: editForm.title, description: editForm.description }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setEditingId(null);
@@ -200,11 +167,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
 
   async function toggleActive(s: Script) {
     setBusyId(s.id);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: s.id, active: !s.active }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('PATCH', { id: s.id, active: !s.active }));
     await load();
     setBusyId(null);
   }
@@ -212,11 +175,7 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
   async function deleteScript(id: string) {
     if (!confirm('Move this script to Trash? It will disappear from the public site, but you can restore it from the Trash view.')) return;
     setBusyId(id);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('DELETE', { id }));
     await load();
     setBusyId(null);
   }
@@ -239,22 +198,14 @@ export default function LabsClient({ initialScripts, initialCategories, sourceBr
 
   async function swapImages(s: Script) {
     setBusyId(s.id);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: s.id, thumbnail_path: s.detail_image_path, detail_image_path: s.thumbnail_path }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('PATCH', { id: s.id, thumbnail_path: s.detail_image_path, detail_image_path: s.thumbnail_path }));
     await load();
     setBusyId(null);
   }
 
   async function saveYoutubeUrl(id: string, url: string) {
     setBusyId(id);
-    await fetch('/api/admin/lab-scripts', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, youtube_url: url }),
-    });
+    await fetch('/api/admin/lab-scripts', jsonInit('PATCH', { id, youtube_url: url }));
     await load();
     setBusyId(null);
   }

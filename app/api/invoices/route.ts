@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { rateLimit } from '@/lib/rateLimit';
 import { pushInvoiceToQueue } from '@/lib/queue';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendInvoiceEmail, type InvoiceForEmail } from '@/lib/invoiceEmail';
 
 export async function POST(request: NextRequest) {
-  const limited = rateLimit(request, { limit: 10, windowMs: 60000 });
-  if (limited) return limited;
   if (!(await isRequestFromAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

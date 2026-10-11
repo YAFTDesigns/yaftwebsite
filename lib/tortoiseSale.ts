@@ -1,9 +1,10 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
-import { generatePDF, type InvoicePdfData } from '@/lib/invoicePdf';
+import { generatePDF, toInvoicePdfData } from '@/lib/invoicePdf';
 import { sendEmail, escapeHtml, safeDisplayName, getNotificationBcc } from '@/lib/email';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { priceFor } from '@/lib/tortoisePricing';
+import { fmtFixed2 } from '@/lib/format';
 
 export const MAX_MACHINES_PER_KEY = 2;
 
@@ -88,25 +89,16 @@ export async function createInvoiceForSale(sale: Sale): Promise<{ invoiceNo: str
 async function invoicePdfFor(invoiceNo: string): Promise<{ pdf: string; filename: string; invoiceId: string } | null> {
   const { data: inv } = await getSupabaseAdmin().from('invoices').select('*').eq('invoice_no', invoiceNo).is('deleted_at', null).maybeSingle();
   if (!inv) return null;
-  const pdfData: InvoicePdfData = {
-    invoice_no: inv.invoice_no, date: inv.date, invoice_type: inv.invoice_type,
-    client_name: inv.client_name, client_email: inv.client_email, client_type: inv.client_type,
-    client_company: inv.client_company, client_pan: inv.client_pan, client_gst: inv.client_gst,
-    client_state: inv.client_state, client_address: inv.client_address, client_phone: inv.client_phone,
-    items: inv.items ?? [], advance: inv.advance, balance: inv.balance,
-  };
-  const buf = await generatePDF(pdfData);
+  const buf = await generatePDF(toInvoicePdfData(inv));
   return { pdf: buf.toString('base64'), filename: `YAFT_Invoice_${inv.invoice_no}.pdf`, invoiceId: inv.id };
 }
-
-const inr = (n: number) => n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 /** The buyer's key email. Attaches the tax invoice for INR sales. Throws if sending fails. */
 export async function sendBuyerKeyEmail(s: Sale & { invoiceNo: string | null }, opts: { bccOwner: boolean }): Promise<void> {
   const keyList = s.keys.map((k) => `<li style="font-family:monospace;font-size:17px;letter-spacing:1px;margin:6px 0;">${escapeHtml(k)}</li>`).join('');
   const plural = s.keys.length > 1;
   const isInr = s.currency === 'INR';
-  const paid = isInr ? `INR ${inr(s.amountMinor / 100)} (including 18% GST)` : `USD ${(s.amountMinor / 100).toFixed(2)}`;
+  const paid = isInr ? `INR ${fmtFixed2(s.amountMinor / 100)} (including 18% GST)` : `USD ${(s.amountMinor / 100).toFixed(2)}`;
 
   const attachments: { filename: string; content: string }[] = [];
   let invoiceId: string | null = null;

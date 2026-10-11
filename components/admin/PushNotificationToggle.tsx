@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { jsonInit } from '@/lib/jsonInit';
 
 // Standard boilerplate for the Push API -- applicationServerKey must be
 // a Uint8Array, but VAPID public keys are handed out URL-safe base64.
@@ -63,11 +64,7 @@ export default function PushNotificationToggle() {
         applicationServerKey: urlBase64ToUint8Array(vapidKey),
       });
 
-      await fetch('/api/push/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(sub.toJSON()),
-      });
+      await fetch('/api/push/subscribe', jsonInit('POST', sub.toJSON()));
       setStatus('on');
     } catch (err) {
       console.error('[push] enable failed:', err);
@@ -81,11 +78,7 @@ export default function PushNotificationToggle() {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
       if (sub) {
-        await fetch('/api/push/subscribe', {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ endpoint: sub.endpoint }),
-        });
+        await fetch('/api/push/subscribe', jsonInit('DELETE', { endpoint: sub.endpoint }));
         await sub.unsubscribe();
       }
       setStatus('off');

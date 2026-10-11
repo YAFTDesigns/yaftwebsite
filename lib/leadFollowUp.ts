@@ -1,4 +1,5 @@
 // Pure logic for the lead follow-up job (no I/O) so it can be unit tested.
+import { escapeHtml } from '@/lib/email';
 
 export type LeadSource = 'syllabus_gate' | 'contact_form' | 'whatsapp_gate' | string;
 
@@ -100,8 +101,6 @@ export function firstNameOf(raw: string | null | undefined): string | null {
   return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
 }
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
 export function utm(source: LeadSource, path: string): string {
   const q = new URLSearchParams({
     utm_source: 'yaft_email',
@@ -118,8 +117,8 @@ export function utm(source: LeadSource, path: string): string {
 export function buildFollowUpEmail(c: { source: LeadSource; name: string | null; course_interest: string | null; enquiry_at?: string | null; syllabus_slug?: string | null }): { subject: string; html: string } {
   const name = c.name?.trim() || null;
   const first = firstNameOf(name);
-  const hi = first ? `Hi ${esc(first)},` : 'Hi,';
-  const course = c.course_interest ? esc(c.course_interest) : null;
+  const hi = first ? `Hi ${escapeHtml(first)},` : 'Hi,';
+  const course = c.course_interest ? escapeHtml(c.course_interest) : null;
 
   let subject: string;
   let paras: string[];
@@ -135,8 +134,8 @@ export function buildFollowUpEmail(c: { source: LeadSource; name: string | null;
     if (facts) {
       subject = `Did the ${facts.title} syllabus answer your questions?`;
       paras = [
-        `You unlocked the <strong>${esc(facts.title)}</strong> syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.`,
-        facts.ask ? esc(facts.ask) : `${facts.length ? `That course runs ${esc(facts.length)}. ` : ''}If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can say whether it fits you or point you to a better starting course.`,
+        `You unlocked the <strong>${escapeHtml(facts.title)}</strong> syllabus on the YAFT Designs website recently. I wanted to check whether it covered what you were looking for.`,
+        facts.ask ? escapeHtml(facts.ask) : `${facts.length ? `That course runs ${escapeHtml(facts.length)}. ` : ''}If you tell me your background (student or working professional, and any Rhino or Grasshopper experience), I can say whether it fits you or point you to a better starting course.`,
       ];
     } else {
       subject = 'Did the YAFT syllabus answer your questions?';

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
+import { jsonInit } from '@/lib/jsonInit';
 
 const API = '/api/admin/projects';
 
@@ -36,22 +37,14 @@ async function apiGet() {
 }
 
 async function apiPatch(id: string, fields: Partial<Project>) {
-  const res = await fetch(API, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, ...fields }),
-  });
+  const res = await fetch(API, jsonInit('PATCH', { id, ...fields }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };
 }
 
 async function apiDelete(id: string) {
-  const res = await fetch(API, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  });
+  const res = await fetch(API, jsonInit('DELETE', { id }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };
@@ -65,22 +58,14 @@ async function apiGetTrash() {
 }
 
 async function apiRestore(id: string) {
-  const res = await fetch(API, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id }),
-  });
+  const res = await fetch(API, jsonInit('PUT', { id }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };
 }
 
 async function apiCreate(body: Record<string, unknown>) {
-  const res = await fetch(API, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  const res = await fetch(API, jsonInit('POST', body));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };

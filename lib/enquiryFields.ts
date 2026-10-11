@@ -1,6 +1,11 @@
 // Optional enquiry fields added for marketing measurement. Both are
 // optional: a missing or blank value is fine, an invalid one is rejected.
 
+// Loose shape check, and a strict one that also rejects header/list
+// separators and quotes (used where the address is emailed or stored as-is).
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const STRICT_EMAIL_RE = /^[^\s@<>,;"\\]+@[^\s@<>,;"\\]+\.[^\s@<>,;"\\]+$/;
+
 export const SEGMENTS = ['individual', 'college', 'corporate'] as const;
 export type Segment = (typeof SEGMENTS)[number];
 

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import type { StudentWork, Publication, Partner } from '@/lib/feature-wall';
 import styles from './FeatureWall.module.css';
+import { jsonInit } from '@/lib/jsonInit';
 
 const TOOL_LABEL: Record<string, string> = { rhino: 'Rhino3D', grasshopper: 'Grasshopper', rir: 'RIR' };
 const PLACEHOLDERS = [1, 2, 3, 4];
@@ -107,11 +108,7 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
   async function submitPub() {
     if (!pubForm.author_name || !pubForm.title || !pubForm.description || !pubForm.pub_year) return;
     setSubmitting(true);
-    const res = await fetch('/api/community/publications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pubForm),
-    });
+    const res = await fetch('/api/community/publications', jsonInit('POST', pubForm));
     if (res.ok) {
       setPubForm(EMPTY_PUB);
       setShowPubForm(false);

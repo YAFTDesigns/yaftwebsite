@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
-import { generatePDF, type InvoicePdfData } from '@/lib/invoicePdf';
+import { generatePDF, toInvoicePdfData } from '@/lib/invoicePdf';
 
 // GET /api/admin/invoices/[id]/pdf
 // Regenerates the PDF from the invoice's current database row and
@@ -22,23 +22,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
   }
 
-  const pdfData: InvoicePdfData = {
-    invoice_no: inv.invoice_no,
-    date: inv.date,
-    invoice_type: inv.invoice_type || 'training',
-    client_name: inv.client_name,
-    client_email: inv.client_email,
-    client_type: inv.client_type,
-    client_company: inv.client_company,
-    client_pan: inv.client_pan,
-    client_gst: inv.client_gst,
-    client_state: inv.client_state,
-    client_address: inv.client_address,
-    client_phone: inv.client_phone,
-    items: inv.items ?? [],
-    advance: inv.advance,
-    balance: inv.balance,
-  };
+  const pdfData = toInvoicePdfData(inv);
 
   try {
     const pdfBuffer = await generatePDF(pdfData);

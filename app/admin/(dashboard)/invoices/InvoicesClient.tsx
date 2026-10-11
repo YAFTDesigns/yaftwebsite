@@ -7,6 +7,8 @@ import PieChart from '@/components/admin/PieChart';
 import { computeInvoiceTotals } from '@/lib/invoiceMath';
 import { monthKey, monthLabel, ddmmyyyyToIso } from '@/lib/jobsGrouping';
 import { getErrorMessage } from '@/lib/errorMessage';
+import { fmt } from '@/lib/format';
+import { jsonInit } from '@/lib/jsonInit';
 
 type Item = { desc: string; hrs: number; qty: number; rate: number; };
 type ClientOption = {
@@ -37,8 +39,6 @@ const STATES = [
   'Gujarat','Rajasthan','Telangana','West Bengal','Other',
   'Australia','Singapore','UAE','Oman','International',
 ];
-
-function fmt(n: number) { return n.toLocaleString('en-IN', { minimumFractionDigits: 2 }); }
 
 export default function InvoicesClient({
   initialClientOptions, initialTrashedInvoices, initialTeamOptions,
@@ -114,11 +114,7 @@ export default function InvoicesClient({
     setEmailSending(true);
     setEmailResult(null);
     try {
-      const res = await fetch('/api/admin/invoices/email-monthly', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ month: emailMonth, recipientEmail: recipient.email, recipientName: recipient.name }),
-      });
+      const res = await fetch('/api/admin/invoices/email-monthly', jsonInit('POST', { month: emailMonth, recipientEmail: recipient.email, recipientName: recipient.name }));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Failed to send');
       setEmailResult({ ok: true, text: `Sent ${json.count} invoice${json.count > 1 ? 's' : ''} to ${recipient.name}.${json.pendingCount > 0 ? ` (${json.pendingCount} pending proforma also attached, not counted in the total.)` : ''}` });
@@ -193,11 +189,7 @@ export default function InvoicesClient({
   const [sendNowMsg, setSendNowMsg] = useState('');
 
   async function patchInvoice(body: object) {
-    const res = await fetch('/api/admin/invoices', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const res = await fetch('/api/admin/invoices', jsonInit('PATCH', body));
     return res.json().catch(() => ({}));
   }
 
@@ -239,11 +231,7 @@ export default function InvoicesClient({
     if (!ok || !editInv) return;
     setResending(true);
     try {
-      const res = await fetch('/api/admin/invoices/resend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editInv.id }),
-      });
+      const res = await fetch('/api/admin/invoices/resend', jsonInit('POST', { id: editInv.id }));
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? 'Resend failed');
       setSaveMsg('Saved & resent to client');
@@ -337,11 +325,7 @@ export default function InvoicesClient({
   async function permanentlyDeleteInvoice(id: string) {
     if (!confirm('Permanently delete this invoice? This CANNOT be undone — it will be gone forever, not recoverable from trash.')) return;
     setDeletingId(id);
-    const res = await fetch('/api/invoices', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    });
+    const res = await fetch('/api/invoices', jsonInit('DELETE', { id }));
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
       console.error('Failed to permanently delete invoice:', json.error);
@@ -422,14 +406,10 @@ export default function InvoicesClient({
       if (new Date(scheduledSendAt).getTime() <= Date.now()) { setFormError('Scheduled time must be in the future.'); setSending(false); return; }
     }
     try {
-      const res = await fetch('/api/invoices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await fetch('/api/invoices', jsonInit('POST', {
           ...form, items, grand_total: grandTotal, advance, balance, invoice_type: invoiceType,
           scheduled_send_at: sendMode === 'schedule' ? new Date(scheduledSendAt).toISOString() : null,
-        }),
-      });
+        }));
       const json = await res.json();
       if (!res.ok) throw new Error(json.error);
       const blob = new Blob([Buffer.from(json.pdf, 'base64')], { type: 'application/pdf' });
@@ -443,11 +423,7 @@ export default function InvoicesClient({
       if (pendingJobIds.length > 0 && json.invoiceId) {
         await Promise.all(
           pendingJobIds.map(id =>
-            fetch(`/api/jobs/${id}`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ invoice_id: json.invoiceId }),
-            }).catch(() => {})
+            fetch(`/api/jobs/${id}`, jsonInit('PATCH', { invoice_id: json.invoiceId })).catch(() => {})
           )
         );
         setJobsLinked(true);

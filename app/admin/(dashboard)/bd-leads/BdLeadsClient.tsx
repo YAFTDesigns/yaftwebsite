@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { jsonInit } from '@/lib/jsonInit';
 
 export type BdLead = {
   id: string; organization: string; segment: string | null; country: string | null; city: string | null;
@@ -36,14 +37,14 @@ export default function BdLeadsClient({ initialLeads }: { initialLeads: BdLead[]
 
   async function patch(id: string, fields: Partial<BdLead>) {
     setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, ...fields } : l)));
-    await fetch(`/api/admin/bd-leads/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(fields) });
+    await fetch(`/api/admin/bd-leads/${id}`, jsonInit('PATCH', fields));
   }
 
   async function addLead() {
     if (!draft.organization.trim()) { setError('Organization is required'); return; }
     setAdding(true); setError('');
     try {
-      const res = await fetch('/api/admin/bd-leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(draft) });
+      const res = await fetch('/api/admin/bd-leads', jsonInit('POST', draft));
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error ?? 'Save failed');
       setLeads((ls) => {

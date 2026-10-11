@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
+import { jsonInit } from '@/lib/jsonInit';
 
 const API = '/api/admin/community';
 
@@ -24,33 +25,21 @@ async function apiGetTrash(table: string) {
 }
 
 async function apiRestore(table: string, id: string) {
-  const res = await fetch(API, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ table, id }),
-  });
+  const res = await fetch(API, jsonInit('PUT', { table, id }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };
 }
 
 async function apiPatch(table: string, id: string, updates: Record<string, unknown>) {
-  const res = await fetch(API, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ table, id, updates }),
-  });
+  const res = await fetch(API, jsonInit('PATCH', { table, id, updates }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };
 }
 
 async function apiDelete(table: string, id: string) {
-  const res = await fetch(API, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ table, id }),
-  });
+  const res = await fetch(API, jsonInit('DELETE', { table, id }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };

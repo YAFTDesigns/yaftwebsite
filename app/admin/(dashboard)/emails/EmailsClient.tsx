@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from '@/components/admin/adminPage.module.css';
 import PieChart from '@/components/admin/PieChart';
+import { jsonInit } from '@/lib/jsonInit';
 
 const API = '/api/admin/emails';
 
@@ -21,11 +22,7 @@ async function apiGetTemplates() {
 }
 
 async function apiSaveTemplate(id: string, subject: string, body_html: string) {
-  const res = await fetch(API, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, subject, body_html }),
-  });
+  const res = await fetch(API, jsonInit('PATCH', { id, subject, body_html }));
   const json = await res.json();
   if (!res.ok) return { error: json.error ?? 'Request failed' };
   return { error: null };

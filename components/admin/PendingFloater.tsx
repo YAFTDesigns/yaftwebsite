@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { fmtInt } from '@/lib/format';
 
 type PendingProps = {
   pendingTestimonials: number;
@@ -9,10 +10,6 @@ type PendingProps = {
   failedEmails: number;
   outstandingInvoices: { invoice_no: string; client_name: string; balance: number }[];
 };
-
-function fmt(n: number) {
-  return n.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-}
 
 // Fixed to the bottom of the viewport (not just further down the page)
 // so it stays visible regardless of scroll position -- built specifically
@@ -75,13 +72,13 @@ export default function PendingFloater({
         {outstandingInvoices.length > 0 && (
           <div>
             <a href="/admin/invoices/report" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', textDecoration: 'none' }}>
-              ₹{fmt(outstandingTotal)} outstanding, {outstandingInvoices.length} invoice{outstandingInvoices.length > 1 ? 's' : ''} →
+              ₹{fmtInt(outstandingTotal)} outstanding, {outstandingInvoices.length} invoice{outstandingInvoices.length > 1 ? 's' : ''} →
             </a>
             <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
               {outstandingInvoices.map((inv) => (
                 <div key={inv.invoice_no} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 12, color: '#999' }}>
                   <span>{inv.client_name}</span>
-                  <span>₹{fmt(Number(inv.balance))}</span>
+                  <span>₹{fmtInt(Number(inv.balance))}</span>
                 </div>
               ))}
             </div>

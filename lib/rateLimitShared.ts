@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
-import { rateLimit } from '@/lib/rateLimit';
+import { clientIp, rateLimit } from '@/lib/rateLimit';
 
 /**
  * Rate limit shared across all serverless instances (counter lives in the database).
@@ -12,7 +12,7 @@ export async function rateLimitShared(
   name: string,
   opts: { limit: number; windowMs: number },
 ): Promise<NextResponse | null> {
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? request.headers.get('x-real-ip') ?? 'unknown';
+  const ip = clientIp(request);
   try {
     const { data, error } = await getSupabaseAdmin().rpc('rate_limit_hit', {
       p_key: `${name}:${ip}`, p_limit: opts.limit, p_window_seconds: Math.ceil(opts.windowMs / 1000),
