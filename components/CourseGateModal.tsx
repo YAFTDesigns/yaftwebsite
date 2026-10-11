@@ -163,6 +163,7 @@ export default function CourseGateModal() {
                 }}
               />
             </div>
+            <p style={{ fontSize: 11, color: '#777', lineHeight: 1.5, margin: '0 0 12px' }}>By submitting, you agree to our <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'inherit', textDecoration: 'underline' }}>Privacy Policy</a> and to be contacted about your request.</p>
             {error && <p style={{ fontSize: 11, color: '#C1121F', marginBottom: 12, fontFamily: 'var(--mono)' }}>{error}</p>}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
               <button type="button" onClick={close} style={{

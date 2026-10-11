@@ -126,6 +126,7 @@ export default function TortoiseBuy() {
         <strong>Total {formatMinor(price.total, currency)}</strong>. One-time, never expires. Each key works on up to 2 PCs.
       </p>
       {error && <p className={styles.err}>{error}</p>}
+      <p style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.5, margin: '10px 0' }}>By clicking Buy now, you agree to our <a href="/terms" target="_blank" rel="noopener" style={{ color: 'inherit', textDecoration: 'underline' }}>Terms</a> (including that sales are final once the key is delivered) and <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'inherit', textDecoration: 'underline' }}>Privacy Policy</a>.</p>
       <button className="btn-primary" type="submit" disabled={busy}>{busy ? 'Please wait...' : 'Buy now'}</button>
     </form>
   );
