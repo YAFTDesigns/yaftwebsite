@@ -28,6 +28,22 @@ type CourseRow = {
 
 const COLUMNS = 'slug, title, tool, level, duration, description, image_path, pdf_storage_path, updated_at';
 
+// pdf_storage_path (as stored in the courses table) -> object name in the "syllabus" bucket.
+const SYLLABUS_BUCKET_FILES: Record<string, string> = {
+  'grasshopper-architecture.pdf': 'Grasshopper_Training_for_Architecture.pdf',
+  'revit-rhino-inside.pdf': 'Revit_Architecture_Rhino_Insider.pdf',
+  'rhino-aec-climate.pdf': 'Rhino_3D_Training_for_AEC_for_Climate.pdf',
+  'rhino-architecture.pdf': 'Rhino_3D_Training_for_Architecture.pdf',
+  'rhino-industrial-design.pdf': 'Rhino_3D_Training_for_Industrial_Design.pdf',
+};
+
+function syllabusPdfUrl(path: string): string {
+  const inBucket = SYLLABUS_BUCKET_FILES[path];
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (inBucket && base) return `${base}/storage/v1/object/public/syllabus/${inBucket}`;
+  return `/assets/pdfs/${path}`;
+}
+
 function toCourse(row: CourseRow): Course {
   return {
     slug: row.slug,
@@ -38,9 +54,9 @@ function toCourse(row: CourseRow): Course {
     tool: row.tool ?? '',
     title: row.title,
     desc: row.description ?? '',
-    // Phase 1: PDFs are still served from /public. Phase 2 swaps this for a
-    // signed Supabase Storage URL built from the same pdf_storage_path.
-    pdf: row.pdf_storage_path ? `/assets/pdfs/${row.pdf_storage_path}` : '',
+    // Syllabus PDFs live in the public Supabase "syllabus" bucket (keeps every Vercel deployment small).
+    // Any PDF not in the bucket yet is still served from /public/assets/pdfs.
+    pdf: row.pdf_storage_path ? syllabusPdfUrl(row.pdf_storage_path) : '',
     updatedAt: row.updated_at,
   };
 }
