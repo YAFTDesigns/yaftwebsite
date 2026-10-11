@@ -103,3 +103,10 @@
   .price { grid-template-columns: 1fr; }
   .about { grid-template-columns: 1fr; }
 }
+
+.titleRow { display: flex; align-items: center; gap: 16px; }
+.titleLogo { width: 72px; height: 72px; object-fit: contain; flex: none; }
+.dlHead { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.dlHead .titleLogo { width: 56px; height: 56px; }
+.dlHead .dlName { margin: 0; }
+@media (max-width: 600px) { .titleLogo { width: 52px; height: 52px; } }

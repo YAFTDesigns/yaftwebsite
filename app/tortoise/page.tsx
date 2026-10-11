@@ -4,13 +4,17 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import TortoiseBuy from '@/components/TortoiseBuy';
 import { priceFor, formatMinor, TORTOISE_USD_CENTS } from '@/lib/tortoisePricing';
+import { getTortoiseDownloadCount } from '@/lib/tortoiseDownloads';
 import styles from './tortoise.module.css';
+
+// Refresh the download count every 5 minutes.
+export const revalidate = 300;
 
 // Online purchase stays hidden until TORTOISE_CHECKOUT_ENABLED=1 is set in Vercel and the site is redeployed.
 const CHECKOUT_ENABLED = process.env.TORTOISE_CHECKOUT_ENABLED === '1';
 
 const VERSION = '1.0.3';
-const DOWNLOAD_URL = `/downloads/Tortoise_v${VERSION}_Free.zip`;
+const DOWNLOAD_URL = '/api/tortoise/download'; // counts the download, then redirects to the zip
 const DOWNLOAD_SIZE = '187 KB';
 
 export const metadata: Metadata = {
@@ -70,7 +74,8 @@ const CHANGELOG = [
   { v: 'v1.0.0', date: '8 Oct 2026', items: ['First release: A3 layout per panel, Fab A3 template, glass types, review list, DWG/DXF, PDF and Excel BOM'] },
 ];
 
-export default function TortoisePage() {
+export default async function TortoisePage() {
+  const downloads = await getTortoiseDownloadCount();
   const inr = priceFor('INR', 1);
   const usd = TORTOISE_USD_CENTS;
   const jsonLd = {
@@ -104,17 +109,21 @@ export default function TortoisePage() {
                 <Image src="/assets/logos/rhino-logo.png" alt="Rhinoceros 8" width={44} height={44} />
               </div>
               <p className="eyebrow">YAFT Designs &middot; Plugin for Rhino 8</p>
-              <h1>Tortoise</h1>
+              <h1 className={styles.titleRow}>
+                <Image src="/assets/images/tortoise/tortoise-logo.png" alt="" width={72} height={72} className={styles.titleLogo} />
+                Tortoise
+              </h1>
               <p className={styles.lede}>
                 Select your flat glass or panel surfaces and get one dimensioned A3 sheet per panel, plus DWG/DXF, PDFs and an Excel BOM, in one run.
               </p>
               <div className={styles.cta}>
-                <a className="btn-primary" href={DOWNLOAD_URL} download>Download free trial</a>
+                <a className="btn-primary" href={DOWNLOAD_URL}>Download free trial</a>
                 <a className="btn-secondary" href="#buy">Buy a licence</a>
               </div>
               <ul className={styles.facts}>
                 <li>Rhino 8 for Windows</li>
                 <li>v{VERSION}</li>
+                {downloads ? <li>{downloads.toLocaleString('en-IN')} downloads</li> : null}
                 <li>60-day free trial</li>
                 <li>One-time licence, no subscription</li>
               </ul>
@@ -191,9 +200,12 @@ export default function TortoisePage() {
             <h2>Download Tortoise and try it on your own panels</h2>
             <div className={styles.dl}>
               <div className={styles.dlCard}>
-                <p className={styles.dlName}>Tortoise v{VERSION} Free</p>
-                <p className={styles.dlMeta}>Windows &middot; Rhino 8 &middot; {DOWNLOAD_SIZE} zip &middot; 9 Oct 2026</p>
-                <a className="btn-primary" href={DOWNLOAD_URL} download>Download free trial (.zip)</a>
+                <div className={styles.dlHead}>
+                  <Image src="/assets/images/tortoise/tortoise-logo.png" alt="Tortoise logo" width={56} height={56} className={styles.titleLogo} />
+                  <p className={styles.dlName}>Tortoise v{VERSION} Free</p>
+                </div>
+                <p className={styles.dlMeta}>Windows &middot; Rhino 8 &middot; {DOWNLOAD_SIZE} zip &middot; 9 Oct 2026{downloads ? <> &middot; {downloads.toLocaleString('en-IN')} downloads</> : null}</p>
+                <a className="btn-primary" href={DOWNLOAD_URL}>Download free trial (.zip)</a>
                 <p className={styles.small}>Every feature for 60 days, personal and commercial work. After that sheets are marked TRIAL EXPIRED until you enter a licence key. The free edition has no built-in logos, add your own PNG or JPG.</p>
               </div>
               <ol className={styles.install}>

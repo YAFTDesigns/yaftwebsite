@@ -1,7 +1,4 @@
 .badge { position: absolute; left: 63px; bottom: 28px; z-index: 3; display: block; width: 104px; height: 104px; text-decoration: none; }
-.logo { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
-.fast { animation: spin 9s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.badge:hover .fast { animation-duration: 2.5s; }
+.logo { display: block; width: 100%; height: 100%; image-rendering: pixelated; transition: transform .2s ease; }
+.badge:hover .logo { transform: scale(1.06); }
 @media (max-width: 760px) { .badge { left: 20px; bottom: 16px; width: 72px; height: 72px; } }
-@media (prefers-reduced-motion: reduce) { .fast { animation: none; } }
