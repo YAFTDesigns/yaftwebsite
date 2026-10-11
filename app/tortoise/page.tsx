@@ -20,7 +20,7 @@ const DOWNLOAD_SIZE = '187 KB';
 export const metadata: Metadata = {
   title: 'Tortoise for Rhino 8 | Auto-dimensioned Glass and Panel Sheets | YAFT Designs',
   description:
-    'Tortoise is a Rhino 8 plugin that turns flat glass and panel surfaces into dimensioned A3 sheets with PDF, DWG/DXF and Excel BOM output. Free 60-day trial, one-time licence.',
+    'Tortoise is a Rhino 8 plugin for the facade industry: it turns flat glass and panel surfaces into dimensioned A3 sheets with PDF, DWG/DXF and Excel BOM output, for much faster take-off and shop drawings. Free 60-day trial, one-time licence.',
   alternates: { canonical: '/tortoise' },
   openGraph: {
     title: 'Tortoise for Rhino 8',
@@ -44,6 +44,12 @@ const FEATURES = [
   { t: 'Glass, aluminium or other', d: 'Each material keeps its own spec and tolerances. Glass types DGU, TGU and SGU with thickness (for example 6+12+6) are set per sheet in the review list.' },
   { t: 'Review before you export', d: 'Drag the review list to reorder sheets and the sheet and drawing numbers follow. Duplicate, missing, non-planar and invalid panels are caught before any sheet is made.' },
   { t: 'Built for big jobs', d: 'One bad panel never stops the run. Combined PDFs are split in parts of 100 pages for speed and memory, and your settings are saved inside the .3dm.' },
+];
+
+const FACADE = [
+  { t: 'Faster take-off', d: 'Select the panels in your model and run once. No more dimensioning and laying out hundreds of glass or panel drawings by hand.' },
+  { t: 'Shop drawings that match the model', d: 'Sizes, corner angles and side letters are read straight from the Rhino geometry, so every sheet follows the model, and re-running after a design change refreshes them all.' },
+  { t: 'Quantities ready for ordering', d: 'The Excel BOM lists spec, glass type, sizes, areas and quantities, so take-off, ordering and fabrication work from the same data.' },
 ];
 
 const OUTPUTS = [
@@ -114,7 +120,7 @@ export default async function TortoisePage() {
                 Tortoise
               </h1>
               <p className={styles.lede}>
-                Select your flat glass or panel surfaces and get one dimensioned A3 sheet per panel, plus DWG/DXF, PDFs and an Excel BOM, in one run.
+                Select your flat glass or panel surfaces and get one dimensioned A3 sheet per panel, plus DWG/DXF, PDFs and an Excel BOM, in one run. Very useful for the facade industry: much faster take-off and shop drawings.
               </p>
               <div className={styles.cta}>
                 <a className="btn-primary" href={DOWNLOAD_URL}>Download free trial</a>
@@ -155,6 +161,20 @@ export default async function TortoisePage() {
           <h2>From a flat surface to a fabrication sheet</h2>
           <div className={styles.grid}>
             {FEATURES.map((f) => (
+              <article key={f.t} className={styles.card}>
+                <h3>{f.t}</h3>
+                <p>{f.d}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* FACADE INDUSTRY */}
+        <section className={`wrap ${styles.section}`}>
+          <p className="eyebrow">Built for facade work</p>
+          <h2>Very useful for the facade industry: faster take-off and shop drawings</h2>
+          <div className={styles.grid3}>
+            {FACADE.map((f) => (
               <article key={f.t} className={styles.card}>
                 <h3>{f.t}</h3>
                 <p>{f.d}</p>
