@@ -48,22 +48,31 @@ export async function createInvoiceForSale(sale: Sale): Promise<{ invoiceNo: str
   }];
   const totals = computeInvoiceTotals(items, state);
   const mismatch = Math.abs(totals.total * 100 - sale.amountMinor) > 50; // > 50 paise
-  const invoiceNo = await nextInvoiceNo(sale);
-  const { data, error } = await supabase.from('invoices').insert({
-    invoice_no: invoiceNo,
-    date: ddmmyyyy(),
-    client_name: sale.name || sale.email,
-    client_email: sale.email,
-    client_type: sale.gstin ? 'company' : 'individual',
-    client_gst: sale.gstin,
-    client_state: state,
-    items,
-    total: totals.total,
-    advance: totals.total,
-    balance: 0,
-    invoice_type: sale.testMode ? 'test' : 'software',
-    status: 'draft',
-  }).select('id').single();
+  // Numbers are picked "highest + 1", so two simultaneous sales can pick the same one. A unique
+  // index (migration 0075) rejects the second; we then pick again.
+  let invoiceNo = '';
+  let data: { id: string } | null = null;
+  let error: { code?: string; message: string } | null = null;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    invoiceNo = await nextInvoiceNo(sale);
+    ({ data, error } = await supabase.from('invoices').insert({
+      invoice_no: invoiceNo,
+      date: ddmmyyyy(),
+      client_name: sale.name || sale.email,
+      client_email: sale.email,
+      client_type: sale.gstin ? 'company' : 'individual',
+      client_gst: sale.gstin,
+      client_state: state,
+      items,
+      total: totals.total,
+      advance: totals.total,
+      balance: 0,
+      invoice_type: sale.testMode ? 'test' : 'software',
+      status: 'draft',
+    }).select('id').single());
+    if (!error || error.code !== '23505') break;
+    await new Promise((r) => setTimeout(r, 150 + Math.random() * 350));
+  }
   if (error || !data) throw new Error(error?.message ?? 'invoice insert failed');
   await supabase.from('tortoise_payments').update({ invoice_no: invoiceNo }).eq('payment_id', sale.paymentId);
   await logInvoiceEvent({
