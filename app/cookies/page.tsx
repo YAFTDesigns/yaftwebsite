@@ -20,7 +20,7 @@ const CLAUSES = [
   },
   {
     title: 'Analytics Cookies (Google Analytics 4)',
-    body: 'Google Analytics only loads if you click Accept on the cookie banner; your choice is saved in your browser and you can clear it to be asked again. We use Google Analytics 4 to understand how visitors interact with yaftdesigns.com, including which pages are visited, how long visitors stay, and how they arrived at the site. This data is aggregated and anonymous. It helps us improve the site and our course offerings. Google Analytics sets cookies such as _ga and _ga_* on your device. These cookies persist for up to 2 years. You can opt out of Google Analytics tracking by installing the Google Analytics Opt-out Browser Add-on available at tools.google.com/dlpage/gaoptout.',
+    body: 'Google Analytics is on by default. To opt out, use your browser cookie settings or the Google Analytics opt-out add-on. We use Google Analytics 4 to understand how visitors interact with yaftdesigns.com, including which pages are visited, how long visitors stay, and how they arrived at the site. This data is aggregated and anonymous. It helps us improve the site and our course offerings. Google Analytics sets cookies such as _ga and _ga_* on your device. These cookies persist for up to 2 years. You can opt out of Google Analytics tracking by installing the Google Analytics Opt-out Browser Add-on available at tools.google.com/dlpage/gaoptout.',
   },
   {
     title: 'Functional Cookies (Supabase)',
