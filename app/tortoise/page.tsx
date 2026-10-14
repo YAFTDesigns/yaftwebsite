@@ -15,6 +15,7 @@ export const revalidate = 300;
 const CHECKOUT_ENABLED = process.env.TORTOISE_CHECKOUT_ENABLED === '1';
 
 const VERSION = '1.0.3';
+const F4R_URL = 'https://www.food4rhino.com/en/app/tortoise';
 const DOWNLOAD_URL = '/api/tortoise/download'; // counts the download, then redirects to the zip
 const DOWNLOAD_SIZE = '187 KB';
 
@@ -130,6 +131,7 @@ export default async function TortoisePage() {
               <div className={styles.cta}>
                 <a className="btn-primary" href={DOWNLOAD_URL}>Download free trial</a>
                 <a className="btn-secondary" href="#buy">Buy a licence</a>
+                <a className="btn-secondary" href={F4R_URL} target="_blank" rel="noopener noreferrer">Also on Food4Rhino</a>
               </div>
               <ul className={styles.facts}>
                 <li>Rhino 8 for Windows</li>
@@ -246,6 +248,7 @@ export default async function TortoisePage() {
                 </div>
                 <p className={styles.dlMeta}>Windows &middot; Rhino 8 &middot; {DOWNLOAD_SIZE} zip &middot; 9 Oct 2026{downloads ? <> &middot; {downloads.toLocaleString('en-IN')} downloads</> : null}</p>
                 <a className="btn-primary" href={DOWNLOAD_URL}>Download free trial (.zip)</a>
+                <p className={styles.small}>Prefer Food4Rhino? <a href={F4R_URL} target="_blank" rel="noopener noreferrer">Get Tortoise there too</a>.</p>
                 <p className={styles.small}>Every feature for 60 days, personal and commercial work. After that sheets are marked TRIAL EXPIRED until you enter a licence key. The free edition has no built-in logos, add your own PNG or JPG.</p>
               </div>
               <ol className={styles.install}>
