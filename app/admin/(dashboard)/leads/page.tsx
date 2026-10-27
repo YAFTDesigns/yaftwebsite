@@ -214,6 +214,7 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
       {leads.length === 0 ? (
         <p className={styles.empty}>{error ? 'No data available right now.' : 'No leads yet.'}</p>
       ) : (
+        <div style={{ width: 'calc(100vw - 64px)', maxWidth: 1600, position: 'relative', left: '50%', transform: 'translateX(-50%)', overflowX: 'auto' }}>
         <table className={styles.table}>
           <thead>
             <tr>
@@ -280,6 +281,7 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </>
   );
