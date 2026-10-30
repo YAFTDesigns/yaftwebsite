@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import CourseActions from '@/components/CourseActions';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
@@ -86,6 +87,7 @@ export default function Rhino3DAEC() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>6 hours total, split as 3+3 sessions • incl. all taxes</div></div><div className={s.feeAmt}>INR 10,000<div className={s.feeUsd}>approx. $120</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Institutions / colleges</div><div className={s.feeNote}>Custom pricing, travel expenses borne by institution</div></div><div className={s.feeAmt}>Contact us</div></div>
       </div>
+      <CourseActions slug="rhino-aec-climate" title="Rhino3D for AEC and Climate" />
       <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
 
       <hr className={s.divider} />

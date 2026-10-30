@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { isAdminEmail } from './lib/admin';
+import { isAdminUser } from './lib/admin';
 import { decideProxyAction, decideProxyActionNoAuthAvailable } from './lib/admin/proxyDecision';
 
 function applyDecision(
@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
   });
 
   const { data: { user } } = await supabase.auth.getUser();
-  const authorized = isAdminEmail(user?.email);
+  const authorized = isAdminUser(user);
 
   return applyDecision(decideProxyAction(pathname, authorized), request, response);
 }

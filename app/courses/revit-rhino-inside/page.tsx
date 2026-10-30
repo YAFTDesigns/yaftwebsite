@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import CourseActions from '@/components/CourseActions';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
@@ -95,6 +96,7 @@ export default function RevitRhinoInside() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>Rs. 750/hr • 3 days / 9 hrs per week • exclusive of taxes</div></div><div className={s.feeAmt}>INR 40,000 + GST<div className={s.feeUsd}>approx. $480</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>Rs. 1000/hr • exclusive of taxes</div></div><div className={s.feeAmt}>INR 50,000 + GST<div className={s.feeUsd}>approx. $600</div></div></div>
       </div>
+      <CourseActions slug="revit-rhino-inside" title="Revit Architecture + Rhino.Inside" />
       <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
 
       <hr className={s.divider} />

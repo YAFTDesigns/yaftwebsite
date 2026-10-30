@@ -1,5 +1,5 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
-import { isAdminEmail } from '@/lib/admin';
+import { isAdminUser } from '@/lib/admin';
 
 /**
  * Checks whether the current request comes from a logged-in admin,
@@ -21,7 +21,7 @@ export async function isRequestFromAdmin(): Promise<boolean> {
   try {
     const supabase = await getSupabaseServer();
     const { data: { user } } = await supabase.auth.getUser();
-    return isAdminEmail(user?.email);
+    return isAdminUser(user);
   } catch (err) {
     console.error('[requireAdmin] auth check failed:', err);
     return false; // fail closed — if we can't verify, refuse

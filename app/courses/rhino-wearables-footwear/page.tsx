@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import CourseActions from '@/components/CourseActions';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
@@ -92,6 +93,7 @@ export default function RhinoWearablesFootwear() {
       <div className={s.feeBox}>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
       </div>
+      <CourseActions slug="rhino-wearables-footwear" title="Rhino3D for Wearables & Footwear" />
       <div className={s.payNote}>Payment: 50% advance upon blocking of dates, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
 
       <hr className={s.divider} />
