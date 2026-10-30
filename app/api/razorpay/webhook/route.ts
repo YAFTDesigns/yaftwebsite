@@ -4,6 +4,7 @@ import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
 import { newLicenseKey } from '@/lib/tortoiseLicense';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { quantityForPayment } from '@/lib/tortoisePricing';
+import { fulfilCoursePayment } from '@/lib/coursePaymentFulfil';
 import { createInvoiceForSale, sendBuyerKeyEmail, MAX_MACHINES_PER_KEY, type Sale } from '@/lib/tortoiseSale';
 
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
@@ -27,6 +28,10 @@ export async function POST(request: NextRequest) {
   const pay = event.payload?.payment?.entity;
   if (event.event !== 'payment.captured' || !pay) return NextResponse.json({ ok: true, ignored: true });
   const notes = (pay.notes ?? {}) as Record<string, string>;
+  if (notes.product === 'course_payment') {
+    const r = await fulfilCoursePayment(pay, testMode);
+    return NextResponse.json(r.body, { status: r.status });
+  }
   if (notes.product !== 'tortoise') return NextResponse.json({ ok: true, ignored: true });
 
   const paymentId = String(pay.id ?? '');

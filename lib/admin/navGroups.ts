@@ -29,6 +29,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       label: 'Accounting',
       links: [
         { href: '/admin/invoices', label: 'Invoices' },
+        { href: '/admin/payment-plans', label: 'Payment plans' },
         { href: '/admin/invoices/report', label: 'Financial Year Report' },
       ],
     },
