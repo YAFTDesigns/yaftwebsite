@@ -36,6 +36,15 @@ const nextConfig: NextConfig = {
           { key: 'X-Robots-Tag', value: 'noindex, nofollow, noai, noimageai' },
         ],
       },
+      {
+        // Student portal: the page can carry a claim or certificate-verify token in its URL, so no Referer, no caching, no indexing.
+        source: '/:section(student)',
+        headers: [
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+          { key: 'Cache-Control', value: 'private, no-store' },
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noai, noimageai' },
+        ],
+      },
     ];
   },
   async redirects() {
