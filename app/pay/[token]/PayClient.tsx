@@ -21,15 +21,17 @@ function loadCheckout(): Promise<boolean> {
   });
 }
 
-export default function PayClient({ token, label, amount }: { token: string; label: string; amount: number }) {
+type Option = { choice: string; label: string; amount: number };
+
+export default function PayClient({ token, options }: { token: string; options: Option[] }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  async function pay() {
+  async function pay(choice: string) {
     setError(''); setBusy(true);
     try {
-      const res = await fetch(`/api/pay/${token}/order`, { method: 'POST' });
+      const res = await fetch(`/api/pay/${token}/order`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ choice }) });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) { setError(d.error ?? 'Could not start the payment.'); setBusy(false); return; }
       if (!(await loadCheckout()) || !rzp()) { setError('Could not load the payment window. Please try again.'); setBusy(false); return; }
@@ -48,7 +50,11 @@ export default function PayClient({ token, label, amount }: { token: string; lab
   if (done) return <p><strong>Payment received. Thank you.</strong> Your tax invoice will be emailed to you in a few minutes.</p>;
   return (
     <div>
-      <button className="btn-primary" onClick={pay} disabled={busy}>{busy ? 'Please wait...' : `${label}: ₹${fmtFixed2(amount)}`}</button>
+      {options.map((o, i) => (
+        <button key={o.choice} className={i === 0 ? 'btn-primary' : 'btn-secondary'} style={{ marginRight: 10, marginBottom: 8 }} onClick={() => pay(o.choice)} disabled={busy}>
+          {busy ? 'Please wait...' : `${o.label}: ₹${fmtFixed2(o.amount)}`}
+        </button>
+      ))}
       {error && <p style={{ color: '#e55', marginTop: 12 }}>{error}</p>}
     </div>
   );

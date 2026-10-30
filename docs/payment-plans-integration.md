@@ -15,6 +15,7 @@ This is a review against OWASP ASVS / API Security as a framework. It is not a c
 - Razorpay fee/tax is stored on the payment row only. Never netted into a bill or the report. Bank settlements are NOT imported (see gaps).
 - Refunds arrive from Razorpay as "needs review". They change no total until an admin issues a credit note, which reduces the FY it is issued in. Issued credit notes are final (no edit path).
 - Issued bills from plans cannot be edited or trashed in Invoices (409). Correct with a credit note.
+- Every bill is a normal full tax invoice. The word "advance" appears only in the pay portal; bills say "part 1 of 2" / "part 2 of 2". On an instalment plan the client can instead pay everything in one go before paying any advance (one bill, 18% on the full fee). Paying both ways is flagged for refund.
 - Draft/proforma and test bills never count (report and export now exclude `test` as well as `proforma`).
 
 ## Findings

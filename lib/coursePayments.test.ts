@@ -39,6 +39,10 @@ describe('nextDue', () => {
   it('balance is locked until advance is paid', () => {
     expect(nextDue({ structure: 'instalments', paid: ['balance'] })).toBe('advance');
   });
+  it('a client on an instalment plan can pay full instead, before any advance', () => {
+    expect(nextDue({ structure: 'instalments', paid: ['full'] })).toBeNull();
+    expect(computeSchedule(30000, 15000).full).toEqual({ base: 30000, gst: 5400, total: 35400 });
+  });
   it('full plan is one payment', () => {
     expect(nextDue({ structure: 'full', paid: [] })).toBe('full');
     expect(nextDue({ structure: 'full', paid: ['full'] })).toBeNull();
@@ -47,8 +51,8 @@ describe('nextDue', () => {
 
 describe('billDescription', () => {
   it('labels each bill', () => {
-    expect(billDescription('Rhino', 'advance')).toBe('Rhino (advance, 1 of 2)');
-    expect(billDescription('Rhino', 'balance')).toBe('Rhino (balance, 2 of 2)');
+    expect(billDescription('Rhino', 'advance')).toBe('Rhino (part 1 of 2)');
+    expect(billDescription('Rhino', 'balance')).toBe('Rhino (part 2 of 2)');
     expect(billDescription('Rhino', 'full')).toBe('Rhino');
   });
 });

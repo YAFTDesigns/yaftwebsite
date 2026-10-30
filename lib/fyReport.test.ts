@@ -63,6 +63,10 @@ describe('reconcilePlans', () => {
   it('flags an amount difference', () => {
     expect(reconcilePlans([pay({ amount_minor: 1770100 })], [inv], []).some((m) => m.message.includes('differs'))).toBe(true);
   });
+  it('flags a plan paid in full and in instalments', () => {
+    const full = pay({ id: 'pay9', kind: 'full', amount_minor: 3540000, payment_id: 'pay_F' });
+    expect(reconcilePlans([pay(), full], [inv, bill('YAFT-9', '21/03/2026', 30000, { course_payment_id: 'pay9' }) as never], []).some((m) => m.message.includes('AND in instalments'))).toBe(true);
+  });
   it('flags failed sync and unreviewed refunds', () => {
     const m = reconcilePlans([pay({ sync_status: 'failed' })], [inv], [{ id: 'r1', payment_row_id: 'pay1', invoice_id: 'YAFT-1', refund_minor: 590000, status: 'needs_review', total: null }]);
     expect(m.length).toBe(2);

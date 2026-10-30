@@ -17,7 +17,8 @@ export function computeSchedule(baseTotal: number, advanceBase: number | null): 
   if (advanceBase === null) return { structure: 'full', total, advance: null, balance: null, full: total };
   if (!Number.isInteger(advanceBase)) throw new Error('Amounts must be whole rupees');
   if (advanceBase < 1 || advanceBase >= baseTotal) throw new Error('Advance must be more than 0 and less than the full fee');
-  return { structure: 'instalments', total, advance: mk(advanceBase), balance: mk(baseTotal - advanceBase), full: null };
+  // 'full' stays available on an instalment plan: the client may pay everything in one go before paying any advance.
+  return { structure: 'instalments', total, advance: mk(advanceBase), balance: mk(baseTotal - advanceBase), full: total };
 }
 
 export function scheduleFor(plan: PlanShape): Schedule {
@@ -31,15 +32,19 @@ export type PlanProgress = { structure: 'instalments' | 'full'; paid: ReadonlySe
 /** Which payment is due next, or null when the plan is fully paid. */
 export function nextDue(p: PlanProgress): PlanKind | null {
   const paid = new Set(p.paid);
+  if (paid.has('full')) return null;
   if (p.structure === 'full') return paid.has('full') ? null : 'full';
   if (!paid.has('advance')) return 'advance';
   if (!paid.has('balance')) return 'balance';
   return null;
 }
 
-/** Description line printed on each bill. */
+/**
+ * Description line printed on each bill. Every bill is a normal full tax invoice, so the paper never says
+ * "advance"; that word is only a label in the pay portal. Two bills for one course are numbered part 1 / part 2.
+ */
 export function billDescription(base: string, kind: PlanKind): string {
-  if (kind === 'advance') return `${base} (advance, 1 of 2)`;
-  if (kind === 'balance') return `${base} (balance, 2 of 2)`;
+  if (kind === 'advance') return `${base} (part 1 of 2)`;
+  if (kind === 'balance') return `${base} (part 2 of 2)`;
   return base;
 }

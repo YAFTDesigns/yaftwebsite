@@ -40,6 +40,7 @@ describe('advance then balance', () => {
     expect(bills().map((b) => Number(b.total))).toEqual([17700, 17700]);
     expect(bills().every((b) => b.course_plan_id === plan.id)).toBe(true);
     expect(bills()[0].items[0].rate).toBe(15000);
+    expect(bills()[0].items[0].desc).toBe('Rhino3D Training (part 1 of 2)');
     expect(state.emails).toEqual(['YAFT-032026-01', 'YAFT-042026-01']);
     expect((state.db.t('course_payment_plans')[0] as { status: string }).status).toBe('complete');
   });
@@ -70,6 +71,16 @@ describe('upfront full payment', () => {
     await fulfilCoursePayment(captured('order_F', 'pay_F', 3540000), false);
     expect(bills().length).toBe(1); expect(Number(bills()[0].total)).toBe(35400);
     expect(bills()[0].items[0].desc).toBe('Rhino3D Training');
+  });
+});
+
+describe('client chooses full on an instalment plan', () => {
+  it('one bill for the whole fee with 18% on the full amount, plan complete', async () => {
+    const plan = seedPlan(); seedOrder(plan.id, 'full', 3540000, 'order_F');
+    await fulfilCoursePayment(captured('order_F', 'pay_F', 3540000), false);
+    expect(bills().length).toBe(1);
+    expect(Number(bills()[0].total)).toBe(35400); expect(bills()[0].items[0].rate).toBe(30000);
+    expect((state.db.t('course_payment_plans')[0] as { status: string }).status).toBe('complete');
   });
 });
 

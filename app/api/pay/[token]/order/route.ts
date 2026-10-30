@@ -21,7 +21,10 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ token:
   if (Boolean(plan.is_test) !== razorpayConfig().test) return NextResponse.json({ error: 'This payment link is not available right now.' }, { status: 409 });
 
   const { data: paid } = await supabase.from('course_payments').select('kind').eq('plan_id', plan.id).eq('status', 'paid');
-  const due = nextDue({ structure: plan.structure, paid: (paid ?? []).map((r) => r.kind) });
+  let due = nextDue({ structure: plan.structure, paid: (paid ?? []).map((r) => r.kind) });
+  // On an instalment plan the client may choose to pay everything now, but only before paying any advance.
+  const body = await request.json().catch(() => null);
+  if (due === 'advance' && body?.choice === 'full') due = 'full';
   if (!due) return NextResponse.json({ error: 'Nothing is due on this plan.' }, { status: 409 });
 
   const sched = scheduleFor(plan);

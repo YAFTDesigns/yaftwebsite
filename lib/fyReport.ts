@@ -96,6 +96,10 @@ export function reconcilePlans(payments: PaymentRow[], invoices: (ReportInvoice 
     }
     if (p.sync_status === 'failed' || p.sync_status === 'mismatch') out.push({ severity: 'high', where: p.payment_id ?? p.id, message: `Sync status is ${p.sync_status}.` });
   }
+  // A plan paid both ways (full AND advance/balance) means the client was charged twice for the same fee.
+  const byPlan = new Map<string, Set<string>>();
+  for (const p of payments.filter((x) => x.status === 'paid')) byPlan.set(p.plan_id, (byPlan.get(p.plan_id) ?? new Set()).add(p.kind));
+  for (const [plan, kinds] of byPlan) if (kinds.has('full') && (kinds.has('advance') || kinds.has('balance'))) out.push({ severity: 'high', where: plan.slice(0, 8), message: 'Plan was paid in full AND in instalments. Refund the extra amount and raise a credit note.' });
   for (const r of refunds) {
     const pay = payments.find((p) => p.id === r.payment_row_id);
     if (pay && n(r.refund_minor) > n(pay.amount_minor)) out.push({ severity: 'high', where: pay.payment_id ?? pay.id, message: 'Refund is larger than the payment.' });

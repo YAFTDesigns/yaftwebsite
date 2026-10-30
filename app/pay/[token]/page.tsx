@@ -32,17 +32,17 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
           {s.structure === 'full'
             ? row('Full payment', s.full!, kinds.has('full') ? 'Paid' : 'Due now')
             : <>
-                {row('Advance', s.advance!, kinds.has('advance') ? 'Paid' : due === 'advance' ? 'Due now' : 'Pending')}
-                {row('Balance', s.balance!, kinds.has('balance') ? 'Paid' : due === 'balance' ? 'Due now' : 'Locked until the advance is paid')}
-                {row('Course total', s.total, plan.status === 'complete' ? 'Paid in full' : '')}
+                {row('Advance', s.advance!, kinds.has('advance') ? 'Paid' : due === 'advance' ? 'Due now' : kinds.has('full') ? 'Not needed' : 'Pending')}
+                {row('Balance', s.balance!, kinds.has('balance') ? 'Paid' : due === 'balance' ? 'Due now' : kinds.has('full') ? 'Not needed' : 'Locked until the advance is paid')}
+                {row('Pay everything at once', s.total, kinds.has('full') ? 'Paid in full' : due === 'advance' ? 'Option' : '')}
               </>}
         </tbody>
       </table>
       {plan.status === 'cancelled' ? <p>This payment link is no longer active. Please contact us.</p>
-        : due && amountDue ? <PayClient token={token} label={due === 'advance' ? 'Pay advance' : due === 'balance' ? 'Pay balance' : 'Pay full amount'} amount={amountDue.total} />
+        : due && amountDue ? <PayClient token={token} options={due === 'advance' ? [{ choice: 'advance', label: 'Pay advance', amount: s.advance!.total }, { choice: 'full', label: 'Pay full amount', amount: s.total.total }] : [{ choice: due, label: due === 'balance' ? 'Pay balance' : 'Pay full amount', amount: amountDue.total }]} />
         : <p>All paid. Thank you. Your tax invoice was emailed to you.</p>}
       <p style={{ fontSize: 12, opacity: 0.6, marginTop: 28 }}>
-        Secure payment by Razorpay. Each payment gets its own tax invoice, emailed to you. Fees are non-transferable and subject to our <a href="/terms" style={{ textDecoration: 'underline' }}>terms</a>. Questions: yaftdesigns@gmail.com
+        Secure payment by Razorpay. Each payment gets its own tax invoice with GST, emailed to you. Fees are non-transferable and subject to our <a href="/terms" style={{ textDecoration: 'underline' }}>terms</a>. Questions: yaftdesigns@gmail.com
       </p>
     </main>
   );

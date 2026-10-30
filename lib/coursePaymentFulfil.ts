@@ -191,6 +191,14 @@ export async function fulfilCoursePayment(pay: Record<string, unknown>, testMode
   if (!claimed || claimed.length === 0) return { ok: true, status: 200, body: { ok: true, duplicate: true } };
   await logCourseEvent({ planId: row.plan_id, paymentRowId: row.id, razorpayPaymentId: paymentId, event: 'payment_captured', detail: { kind: row.kind, amount_minor: paidAmount } });
 
+  // Full and instalment payments overlapping (two checkouts open at once): money is real, so bill it, but tell the owner.
+  const { data: others } = await supabase.from('course_payments').select('kind').eq('plan_id', row.plan_id).eq('status', 'paid').neq('id', row.id);
+  const otherKinds = (others ?? []).map((o) => o.kind as string);
+  if ((row.kind === 'full' && otherKinds.some((k) => k !== 'full')) || (row.kind !== 'full' && otherKinds.includes('full'))) {
+    await logCourseEvent({ planId: row.plan_id, paymentRowId: row.id, razorpayPaymentId: paymentId, event: 'overlap_full_and_instalments' });
+    await ownerAlert('Course payment: client paid twice (full and instalment)', `<p>Payment ${escapeHtml(paymentId)} overlaps with another payment on the same plan. Both were billed. Refund the extra from Razorpay, then raise a credit note under Admin &gt; Payment plans.</p>`);
+  }
+
   const r = await completeFulfilment(row.id);
   return r.ok ? { ok: true, status: 200, body: { ok: true, invoice: r.invoiceNo, kind: row.kind } } : { ok: false, status: 500, body: { error: 'Fulfilment failed' } };
 }
