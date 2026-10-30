@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import BillingForm, { type Details } from '@/components/BillingForm';
 import { fmtFixed2 } from '@/lib/format';
 import { usdMinorFor } from '@/lib/fx';
 import { computeSchedule } from '@/lib/coursePayments';
 import { advanceFor } from '@/lib/courseCatalog';
+import { applyCombos } from '@/lib/courseCombos';
 
 type Item = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string };
 type Opts = {
@@ -33,10 +34,11 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const chosen = items.filter((i) => picked.includes(i.key));
-  const covered = new Set(chosen.flatMap((i) => i.courseSlugs));
+  const chosenRaw = items.filter((i) => picked.includes(i.key));
+  const covered = new Set(chosenRaw.flatMap((i) => i.courseSlugs));
+  const { items: chosen, applied } = applyCombos(chosenRaw, items);
   const baseTotal = chosen.reduce((s, i) => s + i.feeInr, 0);
-  const sched = useMemo(() => { try { return baseTotal >= 2 ? computeSchedule(baseTotal, advanceFor(baseTotal)) : null; } catch { return null; } }, [baseTotal]);
+  const sched = (() => { try { return baseTotal >= 2 ? computeSchedule(baseTotal, advanceFor(baseTotal)) : null; } catch { return null; } })();
   const usd = (inr: number) => (fx ? usdMinorFor(inr, fx.inrPerUsd, fx.bufferPercent) / 100 : null);
 
   const set = (k: keyof Details, v: string) => setD((x) => ({ ...x, [k]: v }));
@@ -85,6 +87,12 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
           <button type="button" className={currency === 'USD' ? 'btn-primary' : 'btn-secondary'} onClick={() => chooseCurrency('USD')}>USD</button>
           {currency === 'USD' && <span style={{ display: 'block', fontSize: 12, opacity: 0.7, marginTop: 6 }}>US$ is worked out from the live exchange rate when you press Pay and is fixed for that payment. Your tax invoice is issued in INR.</span>}
         </div>
+      )}
+
+      {applied.length > 0 && (
+        <p style={{ marginBottom: 14, fontSize: 14, color: 'var(--brass)' }}>
+          {applied.map((a) => `Combo applied: ${a.title}, you save ₹${fmtFixed2(a.saving)} (before GST).`).join(' ')}
+        </p>
       )}
 
       {sched && (

@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
+import { applyCombos, type CatalogItem } from '@/lib/courseCombos';
 
-export type CatalogItem = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string };
+export type { CatalogItem };
 export const MAX_ITEMS = 6;
 
 /** Courses and bundles that can be bought online: fee set by the admin, switched on, active. */
@@ -22,12 +23,14 @@ export function resolveSelection(catalog: CatalogItem[], keys: unknown): Selecti
   if (!Array.isArray(keys) || keys.length === 0) return { ok: false, error: 'Choose at least one course.' };
   const unique = [...new Set(keys.filter((k): k is string => typeof k === 'string'))];
   if (unique.length > MAX_ITEMS) return { ok: false, error: 'Too many items selected.' };
-  const items: CatalogItem[] = [];
+  const picked: CatalogItem[] = [];
   for (const k of unique) {
     const it = catalog.find((c) => c.key === k);
     if (!it) return { ok: false, error: 'One of the selected courses is no longer available.' };
-    items.push(it);
+    picked.push(it);
   }
+  // Both courses of a combo chosen separately: the combo price applies automatically.
+  const { items } = applyCombos(picked, catalog);
   const seen = new Set<string>();
   for (const it of items) for (const s of it.courseSlugs) {
     if (seen.has(s)) return { ok: false, error: 'A course appears twice (for example on its own and inside a combo). Remove one.' };

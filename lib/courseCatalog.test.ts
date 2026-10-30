@@ -22,6 +22,24 @@ describe('resolveSelection', () => {
     const r = resolveSelection(cat, ['bundle:rh-gh', 'course:revit']);
     expect(r.ok && r.baseTotal).toBe(75000);
   });
+  it('applies the combo automatically when both of its courses are picked separately', () => {
+    const r = resolveSelection(cat, ['course:rhino-architecture', 'course:grasshopper-architecture']);
+    expect(r.ok && r.baseTotal).toBe(55000);
+    expect(r.ok && r.items.map((i) => i.key)).toEqual(['bundle:rh-gh']);
+    expect(r.ok && r.description).toBe('Rhino + Grasshopper');
+  });
+  it('auto-combo leaves other courses alone, and does nothing with only one of the two', () => {
+    const r = resolveSelection(cat, ['course:rhino-architecture', 'course:grasshopper-architecture', 'course:revit']);
+    expect(r.ok && r.baseTotal).toBe(75000);
+    expect(r.ok && r.items.length).toBe(2);
+    const one = resolveSelection(cat, ['course:rhino-architecture', 'course:revit']);
+    expect(one.ok && one.baseTotal).toBe(50000);
+  });
+  it('never applies a combo that would cost more than the courses separately', () => {
+    const dear = cat.map((c) => (c.key === 'bundle:rh-gh' ? { ...c, feeInr: 70000 } : c));
+    const r = resolveSelection(dear, ['course:rhino-architecture', 'course:grasshopper-architecture']);
+    expect(r.ok && r.baseTotal).toBe(65000);
+  });
   it('rejects a course chosen twice, e.g. alone and inside the combo', () => {
     expect(resolveSelection(cat, ['bundle:rh-gh', 'course:rhino-architecture']).ok).toBe(false);
   });
