@@ -23,6 +23,10 @@ describe('validateBillingDetails', () => {
     expect(validateBillingDetails({ ...ok, client_pan: 'ABC123' }).ok).toBe(false);
     expect(validateBillingDetails({ ...ok, client_gst: '12345' }).ok).toBe(false);
   });
+  it('Outside India is accepted only for USD checkouts', () => {
+    expect(validateBillingDetails({ ...ok, client_state: 'Outside India' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_state: 'Outside India' }, { allowOutsideIndia: true }).ok).toBe(true);
+  });
   it('ignores company text on an individual and strips line breaks', () => {
     const r = validateBillingDetails({ ...ok, client_company: 'Sneaky', client_name: 'A\r\nB' });
     expect(r.ok && r.value.client_company).toBeNull();

@@ -14,7 +14,7 @@ type Plan = {
 type PaymentRow = {
   id: string; plan_id: string; kind: PlanKind; amount_minor: number | string; order_id: string; payment_id: string | null; status: string;
   paid_at: string | null; test_mode: boolean; invoice_id: string | null; invoice_no: string | null; invoice_emailed: boolean;
-  sync_status: string; sync_attempts: number;
+  sync_status: string; sync_attempts: number; charge_currency: 'INR' | 'USD'; charge_minor: number | string | null; fx_inr_per_usd: number | string | null;
 };
 
 export type FulfilResult = { ok: boolean; status: number; body: Record<string, unknown> };
@@ -124,7 +124,7 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
       if (row.sync_status !== 'ok') {
         await ownerAlert(
           `${testMode ? '[TEST] ' : ''}Payment received: ${plan.client_name} (${row.kind})`,
-          `<p>${escapeHtml(plan.client_name)} paid the <strong>${row.kind}</strong>: INR ${fmtFixed2(inst.total)} (base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)}) for ${escapeHtml(plan.description)}.</p><p>Bill ${escapeHtml(invoiceNo ?? '')} was emailed to the client (you are on BCC) and is saved under Invoices.</p><p>Payment ${escapeHtml(row.payment_id)}</p>`,
+          `<p>${escapeHtml(plan.client_name)} paid the <strong>${row.kind}</strong>: INR ${fmtFixed2(inst.total)} (base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)})${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''} for ${escapeHtml(plan.description)}.</p><p>Bill ${escapeHtml(invoiceNo ?? '')} was emailed to the client (you are on BCC) and is saved under Invoices.</p><p>Payment ${escapeHtml(row.payment_id)}</p>`,
         );
       }
     }
@@ -167,10 +167,13 @@ export async function fulfilCoursePayment(pay: Record<string, unknown>, testMode
     return r.ok ? { ok: true, status: 200, body: { ok: true, resumed: true } } : { ok: false, status: 500, body: { error: 'Fulfilment failed' } };
   }
 
-  if (paidAmount !== Number(row.amount_minor) || String(pay.currency ?? 'INR') !== 'INR') {
-    await supabase.from('course_payments').update({ sync_status: 'mismatch', sync_error: `Razorpay amount ${paidAmount} differs from instalment ${row.amount_minor}` }).eq('id', row.id);
-    await logCourseEvent({ planId: row.plan_id, paymentRowId: row.id, razorpayPaymentId: paymentId, event: 'amount_mismatch', detail: { paid_minor: paidAmount, expected_minor: Number(row.amount_minor) } });
-    await ownerAlert(`Course payment NOT fulfilled (amount check): ${paymentId}`, `<p>Payment ${escapeHtml(paymentId)} was ${paidAmount / 100} ${escapeHtml(String(pay.currency ?? ''))} but the instalment was ${Number(row.amount_minor) / 100} INR. No bill was created. Check it in Razorpay.</p>`);
+  // What the client was asked to pay: INR bill amount, or the frozen USD quote for USD checkouts.
+  const expectedMinor = Number(row.charge_minor ?? row.amount_minor);
+  const expectedCurrency = row.charge_currency ?? 'INR';
+  if (paidAmount !== expectedMinor || String(pay.currency ?? 'INR') !== expectedCurrency) {
+    await supabase.from('course_payments').update({ sync_status: 'mismatch', sync_error: `Razorpay amount ${paidAmount} ${String(pay.currency ?? '')} differs from the quote ${expectedMinor} ${expectedCurrency}` }).eq('id', row.id);
+    await logCourseEvent({ planId: row.plan_id, paymentRowId: row.id, razorpayPaymentId: paymentId, event: 'amount_mismatch', detail: { paid_minor: paidAmount, expected_minor: expectedMinor, currency: String(pay.currency ?? '') } });
+    await ownerAlert(`Course payment NOT fulfilled (amount check): ${paymentId}`, `<p>Payment ${escapeHtml(paymentId)} was ${paidAmount / 100} ${escapeHtml(String(pay.currency ?? ''))} but the quote was ${expectedMinor / 100} ${expectedCurrency}. No bill was created. Check it in Razorpay.</p>`);
     return { ok: true, status: 200, body: { ok: true, flagged: 'amount' } };
   }
 

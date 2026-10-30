@@ -10,6 +10,8 @@ import CourseVisualLink from '@/components/CourseVisualLink';
 import { COURSE_DETAIL_PAGES, COURSE_INTEREST_OPTIONS } from './courseNav';
 import CourseGateModal from '@/components/CourseGateModal';
 import { getCourses } from '@/lib/courses';
+import { loadCatalog } from '@/lib/courseCatalog';
+import Link from 'next/link';
 import StudentWorkMarquee from '@/components/StudentWorkMarquee';
 import TestimonialsMarquee from '@/components/TestimonialsMarquee';
 import TestimonialForm from '@/components/TestimonialForm';
@@ -61,6 +63,11 @@ const INTEREST_OPTIONS = COURSE_INTEREST_OPTIONS;
 
 export default async function CoursesPage() {
   const courses = await getCourses();
+  // Fees show only while online checkout is switched on; any failure just hides them.
+  const fees = new Map<string, number>();
+  if (process.env.COURSE_CHECKOUT_ENABLED === '1') {
+    try { for (const i of await loadCatalog()) if (i.kind === 'course') fees.set(i.courseSlugs[0], i.feeInr); } catch { /* hide fees */ }
+  }
 
   const FALLBACK_COURSES = [
     { title: 'Rhino3D for Architecture', desc: 'Comprehensive Rhino3D training for architecture students and professionals.' },
@@ -126,7 +133,7 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="section-head">
               <h2>All courses</h2>
-              <p className="note">Batch fees and start dates are shared on enquiry. Full syllabus PDFs are unlocked once, share your email &amp; LinkedIn once to view all of them.</p>
+              <p className="note">Start dates are shared on enquiry, and batch fees where a course does not show one. Full syllabus PDFs are unlocked once, share your email &amp; LinkedIn once to view all of them.</p>
             </div>
 
             <div className={styles.courseGrid}>
@@ -162,7 +169,13 @@ export default async function CoursesPage() {
                         <CourseGateButton href={COURSE_DETAIL_PAGES[course.slug]} course={course.title} slug={course.slug} />
                       </div>
                     )}
+                    {fees.has(course.slug) && (
+                      <p style={{ margin: '0 0 12px', fontSize: 14 }}>
+                        <strong>₹{fees.get(course.slug)!.toLocaleString('en-IN')}</strong> <span style={{ color: 'var(--ink-soft)' }}>+ 18% GST</span>
+                      </p>
+                    )}
                     <div className={styles.courseFoot}>
+                      {fees.has(course.slug) && <Link href={`/enroll?course=${course.slug}`} style={{ marginRight: 12 }}>Enroll</Link>}
                       <EnquireLink course={course.title} />
                     </div>
                   </div>

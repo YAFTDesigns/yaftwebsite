@@ -11,7 +11,9 @@ export type BillingDetails = {
 const str = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/[\r\n\t]+/g, ' ').trim().slice(0, max) : '');
 
 /** Validates what a client types into the billing form. Pure, so it is unit-tested. Returns an error message or the clean values. */
-export function validateBillingDetails(input: unknown): { ok: true; value: BillingDetails } | { ok: false; error: string } {
+export const OUTSIDE_INDIA = 'Outside India';
+
+export function validateBillingDetails(input: unknown, opts: { allowOutsideIndia?: boolean } = {}): { ok: true; value: BillingDetails } | { ok: false; error: string } {
   const b = (input && typeof input === 'object' ? input : {}) as Record<string, unknown>;
   const type = b.client_type === 'company' ? 'company' : 'individual';
   const name = str(b.client_name, 100);
@@ -27,7 +29,8 @@ export function validateBillingDetails(input: unknown): { ok: true; value: Billi
   if (!STRICT_EMAIL_RE.test(email)) return { ok: false, error: 'Enter a valid email. The bill is sent here.' };
   if (type === 'company' && !company) return { ok: false, error: 'Enter the company name.' };
   if (!address || address.length < 8) return { ok: false, error: 'Enter your billing address.' };
-  if (!(INDIAN_STATES as readonly string[]).includes(state)) return { ok: false, error: 'Choose your state (decides how GST is shown on the bill).' };
+  const stateOk = (INDIAN_STATES as readonly string[]).includes(state) || (opts.allowOutsideIndia && state === OUTSIDE_INDIA);
+  if (!stateOk) return { ok: false, error: 'Choose your state (decides how GST is shown on the bill).' };
   if (gst && !GSTIN_RE.test(gst)) return { ok: false, error: 'That GSTIN does not look valid. Leave it blank if you do not have one.' };
   if (pan && !PAN_RE.test(pan)) return { ok: false, error: 'That PAN does not look valid (like ABCDE1234F). Leave it blank if you do not want it on the bill.' };
   if (type === 'company' && !gst && !pan) return { ok: false, error: 'For a company bill, enter the GSTIN or the PAN.' };

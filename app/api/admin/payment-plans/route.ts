@@ -21,8 +21,10 @@ export async function GET() {
   const { data: adjs } = await supabase.from('invoice_adjustments').select('*').order('created_at', { ascending: false }).limit(200);
   const { data: bills } = await supabase.from('invoices').select('id, invoice_no, date, client_name, client_state, invoice_type, items, total, balance, course_plan_id, course_payment_id').not('course_payment_id', 'is', null).is('deleted_at', null);
   const mismatches = reconcilePlans((pays ?? []) as never, (bills ?? []) as (ReportInvoice & { id: string })[], (adjs ?? []) as never);
+  // Checkout attempts that never paid are not shown (they are not enrolments).
+  const visible = (plans ?? []).filter((p) => p.source !== 'enroll' || (pays ?? []).some((x) => x.plan_id === p.id));
   return NextResponse.json({
-    data: (plans ?? []).map((p) => ({ ...p, payments: (pays ?? []).filter((x) => x.plan_id === p.id) })),
+    data: visible.map((p) => ({ ...p, payments: (pays ?? []).filter((x) => x.plan_id === p.id) })),
     adjustments: adjs ?? [], mismatches, testMode: razorpayConfig().test,
   });
 }
