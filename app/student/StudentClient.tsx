@@ -14,8 +14,13 @@ type Card = {
 };
 type Me = {
   profile: { displayName: string | null; certificateName: string | null; phone: string | null; email: string; googleAvatar: string | null };
-  enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number };
+  enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
+  projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
+  certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
 };
+type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
+type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean };
+const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted', under_review: 'Under review', changes_requested: 'Changes requested', approved: 'Approved' };
 
 const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
 const box = { border: '1px solid var(--line)', background: 'var(--paper)', padding: 16, marginBottom: 14 } as const;
@@ -39,6 +44,8 @@ export default function StudentClient() {
   const [link, setLink] = useState('');
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '' });
   const [showProfile, setShowProfile] = useState(false);
+  const [edit, setEdit] = useState<{ key: string; title: string; description: string; links: string; publish: boolean; publicName: string } | null>(null);
+  const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
 
   const load = useCallback(async () => {
     const r = await fetch('/api/student/me', { cache: 'no-store' });
@@ -51,6 +58,11 @@ export default function StudentClient() {
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
+    const vt = p.get('verify');
+    if (vt && /^[A-Za-z0-9_-]{16,40}$/.test(vt)) {
+      fetch(`/api/student/verify/${vt}`, { cache: 'no-store' }).then((r) => r.json()).then((res) => setVerify({ token: vt, res })).catch(() => setVerify({ token: vt, res: { valid: false } }));
+      return;
+    }
     // Initial fetch on mount; state is only set after the request resolves.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     load().then(async () => {
@@ -94,7 +106,42 @@ export default function StudentClient() {
     setMsg(ok ? 'Saved.' : j.error ?? 'Could not save.'); if (ok) { setShowProfile(false); load(); }
   }
 
+  const startEdit = (e: Card, slug: string) => {
+    const pr = me?.projects.find((x) => x.planId === e.planId && x.courseSlug === slug);
+    setEdit({ key: `${e.planId}|${slug}`, title: pr?.latest?.title ?? '', description: pr?.latest?.description ?? '', links: (pr?.latest?.links ?? []).join('\n'), publish: pr?.publishConsent ?? false, publicName: pr?.publicDisplayName ?? me?.profile.displayName ?? '' });
+  };
+  async function saveProject(): Promise<boolean> {
+    if (!edit) return false;
+    const [planId, courseSlug] = edit.key.split('|');
+    const { ok, j } = await post('/api/student/projects/save', { planId, courseSlug, title: edit.title, description: edit.description, links: edit.links.split('\n').map((x) => x.trim()).filter(Boolean) });
+    setMsg(ok ? 'Draft saved.' : j.error ?? 'Could not save.'); if (ok) load(); return ok;
+  }
+  async function submitProject() {
+    if (!edit || !(await saveProject())) return;
+    const [planId, courseSlug] = edit.key.split('|');
+    const { ok, j } = await post('/api/student/projects/submit', { planId, courseSlug, publish: edit.publish, publicName: edit.publicName });
+    setMsg(ok ? 'Submitted for review.' : j.error ?? 'Could not submit.'); if (ok) { setEdit(null); load(); }
+  }
+  async function upload(kind: 'cover' | 'gallery' | 'private', f: File | undefined) {
+    if (!edit || !f) return;
+    const [planId, courseSlug] = edit.key.split('|');
+    const fd = new FormData(); fd.set('file', f); fd.set('planId', planId); fd.set('courseSlug', courseSlug); fd.set('kind', kind);
+    const r = await fetch('/api/student/projects/upload', { method: 'POST', body: fd });
+    const j = await r.json().catch(() => ({}));
+    setMsg(r.ok ? 'Uploaded.' : j.error ?? 'Upload failed.'); if (r.ok) load();
+  }
+
   const wrap = { maxWidth: 860, margin: '0 auto', padding: '64px 20px', color: 'var(--ink)' } as const;
+  if (verify) return (
+    <main style={{ ...wrap, maxWidth: 520 }}>
+      <h1 style={{ fontSize: 26, marginBottom: 12 }}>Certificate check</h1>
+      {!verify.res ? <p>Checking...</p> : verify.res.valid ? (
+        <div style={box}><span style={badge('#4caf50')}>Valid</span><p style={{ marginTop: 10 }}><strong>{verify.res.name}</strong><br />{verify.res.course}<br />{verify.res.date}<br /><span style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{verify.res.certificateId}</span></p></div>
+      ) : verify.res.revoked ? (
+        <div style={box}><span style={badge('#c62828')}>Revoked</span><p style={{ marginTop: 10 }}>This certificate ({verify.res.certificateId}) is no longer valid.</p></div>
+      ) : <div style={box}>We could not find a certificate for this link.</div>}
+    </main>
+  );
   if (state === 'loading') return <main style={wrap}><p>Loading...</p></main>;
 
   if (state === 'out') return (
@@ -116,7 +163,7 @@ export default function StudentClient() {
 
   if (!me) return null;
   const name = me.profile.displayName || me.profile.email;
-  const certsReady: number = 0;
+  const certsReady: number = me.totals.certificates;
   return (
     <main style={wrap}>
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
@@ -206,9 +253,58 @@ export default function StudentClient() {
         ))}
       </>)}
 
-      {(tab === 'My Projects' || tab === 'Certificates & Verification') && (
-        <div style={box}>This section is being built and is not active yet.</div>
-      )}
+      {tab === 'My Projects' && (<>
+        {me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.courseSlugs.length > 0).length === 0 && <div style={box}>Link a course first, then you can submit your project here.</div>}
+        {me.enrolments.filter((e) => e.payStatus !== 'cancelled').flatMap((e) => e.courseSlugs.map((slug) => {
+          const pr = me.projects.find((x) => x.planId === e.planId && x.courseSlug === slug);
+          const key = `${e.planId}|${slug}`;
+          const lat = pr?.latest;
+          const locked = lat?.status === 'submitted' || lat?.status === 'under_review';
+          return (
+            <div key={key} style={box}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <strong>{e.courseSlugs.length > 1 ? slug : e.title}</strong>
+                <span style={badge(lat?.status === 'approved' ? '#4caf50' : lat?.status === 'changes_requested' ? '#ffb300' : '#999')}>{lat ? PSTATUS[lat.status] : 'Not started'}</span>
+              </div>
+              {lat && <p style={{ fontSize: 14, margin: '8px 0 0' }}><strong>{lat.title}</strong> (version {lat.revNo}){pr?.published ? ' · shown on Community Works' : ''}</p>}
+              {lat?.feedback && <p style={{ fontSize: 13, borderLeft: '3px solid var(--brass)', paddingLeft: 10, marginTop: 8 }}>Reviewer note: {lat.feedback}</p>}
+              {lat && <div style={{ fontSize: 12, marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{[lat.coverPath, ...lat.galleryPaths].filter((x): x is string => !!x).map((x) => <a key={x} href={`/api/student/projects/asset?path=${encodeURIComponent(x)}`} target="_blank" rel="noreferrer">image</a>)}{lat.privateFiles.map((f) => <a key={f.path} href={`/api/student/projects/asset?path=${encodeURIComponent(f.path)}`} target="_blank" rel="noreferrer">{f.name} (private)</a>)}</div>}
+              {!locked && edit?.key !== key && <button style={{ ...ghost, marginTop: 10 }} onClick={() => startEdit(e, slug)}>{!lat ? 'Start project' : lat.status === 'approved' ? 'Edit (creates a new version)' : 'Edit'}</button>}
+              {locked && <p style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>Locked while we review it.</p>}
+              {edit?.key === key && (
+                <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
+                  <input style={input} placeholder="Project title" maxLength={120} value={edit.title} onChange={(ev) => setEdit({ ...edit, title: ev.target.value })} />
+                  <textarea style={{ ...input, minHeight: 110 }} placeholder="What did you make and how?" maxLength={4000} value={edit.description} onChange={(ev) => setEdit({ ...edit, description: ev.target.value })} />
+                  <textarea style={{ ...input, minHeight: 60 }} placeholder="Links, one per line (https:// only)" value={edit.links} onChange={(ev) => setEdit({ ...edit, links: ev.target.value })} />
+                  <div style={{ fontSize: 12 }}>Save the draft first, then add files. Cover image <input type="file" accept="image/*" onChange={(ev) => upload('cover', ev.target.files?.[0])} /> Gallery image <input type="file" accept="image/*" onChange={(ev) => upload('gallery', ev.target.files?.[0])} /> Private file (PDF, ZIP, .3dm; only we can see it) <input type="file" accept=".pdf,.zip,.3dm" onChange={(ev) => upload('private', ev.target.files?.[0])} /></div>
+                  <label style={{ fontSize: 13 }}><input type="checkbox" checked={edit.publish} onChange={(ev) => setEdit({ ...edit, publish: ev.target.checked })} /> If approved, you may show this project (cover, gallery, title, description, links) on Community Works. Private files are never shown. You can withdraw this later.</label>
+                  {edit.publish && <input style={input} placeholder="Name to show publicly" maxLength={80} value={edit.publicName} onChange={(ev) => setEdit({ ...edit, publicName: ev.target.value })} />}
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button style={ghost} onClick={saveProject}>Save draft</button><button style={btn} onClick={submitProject}>Submit for review</button><button style={ghost} onClick={() => setEdit(null)}>Close</button></div>
+                </div>
+              )}
+            </div>
+          );
+        }))}
+      </>)}
+
+      {tab === 'Certificates & Verification' && (<>
+        {me.certificates.map((c) => (
+          <div key={c.certificateId} style={box}>
+            <strong>{c.courseTitle}</strong> <span style={badge('#4caf50')}>Issued</span>
+            <div style={{ fontSize: 13, opacity: 0.75, margin: '6px 0' }}>{c.certificateId} · {c.issuedOn}{me.profile.certificateName ? '' : ' · set your certificate name in Profile'}</div>
+            <a href={`/api/student/certificates/${c.certificateId}/pdf`} style={{ ...btn, textDecoration: 'none', display: 'inline-block' }}>Download certificate</a>
+            {c.verifyToken && <p style={{ fontSize: 12, marginTop: 8 }}>Verification link: <code>{typeof window !== 'undefined' ? window.location.origin : ''}/student?verify={c.verifyToken}</code></p>}
+          </div>
+        ))}
+        {me.certStatus.filter((c) => !me.certificates.some((x) => x.planId === c.planId && x.courseSlug === c.courseSlug)).map((c) => (
+          <div key={`${c.planId}|${c.courseSlug}`} style={box}>
+            <strong>{c.courseSlug}</strong> <span style={badge('#999')}>Not yet</span>
+            <p style={{ fontSize: 13, margin: '6px 0 0' }}>Still needed: {c.missing.join(', ') || 'We are preparing it'}.{!me.profile.certificateName && ' Also set your certificate name in Profile.'}</p>
+          </div>
+        ))}
+        {me.certStatus.length === 0 && me.certificates.length === 0 && <div style={box}>No certificates yet.</div>}
+        <p style={{ fontSize: 12, opacity: 0.65 }}>To check a certificate code, use the <a href="/certificates">certificate check page</a>.</p>
+      </>)}
     </main>
   );
 }
