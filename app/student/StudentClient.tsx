@@ -45,12 +45,27 @@ const BTN_CSS = `
 .sp a{color:var(--blueprint)}
 .sp a[style*="background"]{color:#fff}
 .sp h2,.sp h3{font-family:var(--display)}
-.sp-hero{border-bottom:1px solid var(--line);padding:8px 0 30px;margin-bottom:26px}
+.sp-hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);padding:26px 28px;margin-bottom:26px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 50px rgba(0,0,0,.16)}
+.sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(52,184,172,.16),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
-.sp-stat{border:1px solid var(--line);background:var(--paper-2);padding:14px 16px}
-.sp-stat b{display:block;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink)}
+.sp-stat{border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));padding:15px 16px;min-height:78px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.sp-stat b{display:block;font-family:var(--display);font-size:27px;font-weight:600;color:var(--ink)}
 .sp-stat span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.sp-tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px}
+.sp-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px;background:rgba(15,15,15,.72)}
+.sp-next{border:1px solid rgba(52,184,172,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(52,184,172,.09),rgba(255,255,255,.025))!important;box-shadow:0 12px 32px rgba(0,0,0,.12)}
+@supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.sp-hero,.sp-stat,.sp-tabs,.sp-next{backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%)}}
+@media (max-width:680px){
+  .sp-hero{padding:20px 18px;margin-left:-4px;margin-right:-4px}
+  .sp-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .sp-stat{padding:12px 10px;min-width:0}
+  .sp-stat b{font-size:21px}
+  .sp-stat span{font-size:9px;letter-spacing:.06em}
+  .sp-tabs{position:sticky;top:64px;z-index:8;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-18px;margin-right:-18px;padding:0 18px}
+  .sp-tabs::-webkit-scrollbar{display:none}
+  .sp-tabs button{white-space:nowrap!important;padding-left:13px!important;padding-right:13px!important}
+  .sp table{min-width:560px}
+}
+@media (prefers-reduced-motion:reduce){.sp *{scroll-behavior:auto!important;transition:none!important}}
 `;
 function GoogleG() { return (<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.200 0 11.500-2 15.300-5.600l-7.500-5.800c-2.100 1.400-4.800 2.300-7.8 2.300-6.300 0-11.700-4-13.600-9.800l-7.8 6.1C6.500 42.6 14.600 48 24 48z"/></svg>); }
 function LinkedInIn() { return (<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><rect width="24" height="24" rx="3" fill="#fff"/><path fill="#0A66C2" d="M4.500 9h3v10.500h-3zM6 4.200a1.800 1.800 0 110 3.600 1.800 1.800 0 010-3.600zM9.800 9h2.900v1.400h.1c.4-.8 1.400-1.700 2.900-1.700 3.100 0 3.700 2 3.700 4.700v6.1h-3v-5.400c0-1.300 0-2.900-1.800-2.900s-2 1.400-2 2.800v5.500h-3z"/></svg>); }
@@ -255,6 +270,12 @@ export default function StudentClient() {
   if (!me) return null;
   const name = me.profile.displayName || me.profile.email;
   const certsReady: number = me.totals.certificates;
+  const paymentDue = me.enrolments.find((e) => e.nextAction);
+  const revisionNeeded = me.projects.find((p) => p.latest?.status === 'changes_requested');
+  const projectReady = me.enrolments.find((e) =>
+    e.payStatus !== 'unpaid' && e.payStatus !== 'cancelled' &&
+    e.courseSlugs.some((slug) => !me.projects.some((p) => p.planId === e.planId && p.courseSlug === slug))
+  );
   return (
     <main className="sp" style={wrap}>
       <style>{BTN_CSS}</style>
@@ -278,6 +299,40 @@ export default function StudentClient() {
           <div className="sp-stat"><b>{certsReady}</b><span>Certificates</span></div>
         </div>
       </div>
+
+      {me.candidates.length === 0 && paymentDue && (
+        <div className="sp-next" style={box}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
+          <strong>{paymentDue.nextAction === 'pay_balance' ? 'Complete your balance payment' : paymentDue.nextAction === 'pay_full' ? 'Complete your course payment' : 'Confirm your seat'}</strong>
+          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>{paymentDue.title} has {inr(paymentDue.balanceInr)} outstanding.</p>
+          <a href={paymentDue.payUrl} style={{ ...btn, textDecoration: 'none', display: 'inline-block' }}>{paymentDue.nextAction === 'pay_balance' ? 'Pay balance' : paymentDue.nextAction === 'pay_full' ? 'Pay in full' : 'Pay advance'}</a>
+        </div>
+      )}
+      {me.candidates.length === 0 && !paymentDue && revisionNeeded && (
+        <div className="sp-next" style={box}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
+          <strong>Revision requested on your project</strong>
+          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Open My Projects to review the note and submit the next version.</p>
+          <button style={btn} onClick={() => setTab('My Projects')}>Review project</button>
+        </div>
+      )}
+      {me.candidates.length === 0 && !paymentDue && !revisionNeeded && projectReady && (
+        <div className="sp-next" style={box}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
+          <strong>Ready to submit your course project?</strong>
+          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Your payment is active. Submit a project for review when you are ready.</p>
+          <button style={btn} onClick={() => setTab('My Projects')}>Submit project</button>
+        </div>
+      )}
+      {me.candidates.length === 0 && !paymentDue && !revisionNeeded && !projectReady && certsReady > 0 && (
+        <div className="sp-next" style={box}>
+          <div className="eyebrow" style={{ marginBottom: 8 }}>READY FOR YOU</div>
+          <strong>{certsReady === 1 ? 'Your certificate is ready' : 'Your certificates are ready'}</strong>
+          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Download or open the public verification link from Certificates & Verification.</p>
+          <button style={btn} onClick={() => setTab('Certificates & Verification')}>View certificate{certsReady > 1 ? 's' : ''}</button>
+        </div>
+      )}
+
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
 
       {showProfile && (
@@ -301,7 +356,7 @@ export default function StudentClient() {
       )}
 
       {me.candidates.length > 0 && (
-        <div style={{ ...box, borderColor: 'var(--brass)' }}>
+        <div className="sp-next" style={{ ...box, borderColor: 'var(--brass)' }}>
           <strong>We found {me.candidates.length} enrolment{me.candidates.length === 1 ? '' : 's'} paid with {me.profile.email}</strong>
           <ul style={{ margin: '8px 0', paddingLeft: 18, fontSize: 14 }}>{me.candidates.map((c) => <li key={c.planId}>{c.title}</li>)}</ul>
           <button style={btn} onClick={linkCandidates}>Yes, these are mine. Link them</button>
