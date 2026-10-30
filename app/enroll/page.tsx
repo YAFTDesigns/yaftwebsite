@@ -20,10 +20,11 @@ export default async function EnrollPage({ searchParams }: { searchParams: Promi
   return (
     <>
     <SiteHeader active="/courses" />
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '120px 20px 96px', color: 'var(--ink)' }}>
-      <a href="/courses" style={{ fontSize: 14, textDecoration: 'underline', display: 'inline-block', marginBottom: 16 }}>← Back to courses</a>
-      <h1 style={{ fontSize: 30, marginBottom: 8 }}>Enrol in a course</h1>
-      <p style={{ opacity: 0.8, marginBottom: 28 }}>Pick your course or a combo, pay half now or everything at once. You get a tax invoice by email after each payment.</p>
+    <main className="pay-page" style={{ color: 'var(--ink)' }}>
+      <a href="/courses" className="back">← BACK TO COURSES</a>
+      <div className="eyebrow" style={{ marginTop: 22 }}>ENROLMENT</div>
+      <h1>Enrol in a course</h1>
+      <p className="pay-lede">Pick your course or a combo, pay half now or everything at once. You get a tax invoice by email after each payment.</p>
       {!enabled || items.length === 0 ? (
         <p>Online enrolment is opening soon. For now, please <a href={`mailto:${CONTACT_EMAIL}?subject=Course%20enrolment`} style={{ textDecoration: 'underline' }}>email us</a> and we will set it up.</p>
       ) : (

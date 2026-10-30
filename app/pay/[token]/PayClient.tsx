@@ -41,7 +41,7 @@ export default function PayClient({ token, options, initial, locked, outsideOk }
       new (rzp()!)({
         key: j.keyId, order_id: j.orderId, amount: j.amount, currency: j.currency,
         name: 'YAFT Designs', description: 'Course payment',
-        prefill: { name: j.name, email: j.email }, theme: { color: '#1f3a5f' },
+        prefill: { name: j.name, email: j.email }, theme: { color: '#E63946' },
         handler: () => { setDone(true); setBusy(false); },
         modal: { ondismiss: () => setBusy(false) },
       }).open();

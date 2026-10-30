@@ -10,7 +10,7 @@ const label = { display: 'block', fontSize: 12, marginBottom: 4, opacity: 0.8 } 
 /** The client's own billing details for the tax invoice. Shared by the pay link and course checkout. */
 export default function BillingForm({ d, set, disabled, allowOutsideIndia }: { d: Details; set: (k: keyof Details, v: string) => void; disabled?: boolean; allowOutsideIndia?: boolean }) {
   return (
-    <fieldset style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18 }} disabled={disabled}>
+    <fieldset style={{ border: '1px solid var(--line)', borderRadius: 0, padding: 16, marginBottom: 18 }} disabled={disabled}>
       <legend style={{ padding: '0 6px', fontSize: 13 }}>Billing details for your tax invoice</legend>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 12 }}>
         <div><label style={label} htmlFor="b-type">Billing as</label>
