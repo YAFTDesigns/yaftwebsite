@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { isAdminEmail, getAdminEmails } from './admin';
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
+import { isAdminEmail, getAdminEmails, isAdminUser } from './admin';
 
 // isAdminEmail() is the single source of truth for "is this person
 // allowed to do admin things" — used by both the proxy (page + API
@@ -53,5 +53,22 @@ describe('isAdminEmail', () => {
   it('does not accidentally match a substring of an admin email', () => {
     expect(isAdminEmail('yaftdesigns@gmail.com.evil.com')).toBe(false);
     expect(isAdminEmail('notyaftdesigns@gmail.com')).toBe(false);
+  });
+});
+
+describe('isAdminUser (verified admin only)', () => {
+  const OLD = process.env.ADMIN_EMAILS;
+  beforeEach(() => { process.env.ADMIN_EMAILS = 'owner@example.com'; });
+  afterAll(() => { process.env.ADMIN_EMAILS = OLD; });
+  it('accepts an allow-listed, verified address', () => {
+    expect(isAdminUser({ email: 'owner@example.com', email_confirmed_at: '2026-01-01T00:00:00Z' })).toBe(true);
+  });
+  it('rejects an allow-listed address that is NOT verified', () => {
+    expect(isAdminUser({ email: 'owner@example.com', email_confirmed_at: null })).toBe(false);
+    expect(isAdminUser({ email: 'owner@example.com' })).toBe(false);
+  });
+  it('rejects verified strangers and missing users', () => {
+    expect(isAdminUser({ email: 'student@example.com', email_confirmed_at: '2026-01-01T00:00:00Z' })).toBe(false);
+    expect(isAdminUser(null)).toBe(false);
   });
 });
