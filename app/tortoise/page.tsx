@@ -21,7 +21,7 @@ const DOWNLOAD_URL = '/api/tortoise/download'; // counts the download, then redi
 const DOWNLOAD_SIZE = '187 KB';
 
 export const metadata: Metadata = {
-  title: 'Tortoise for Rhino 8 | Auto-dimensioned Glass and Panel Sheets | YAFT Designs',
+  title: 'Tortoise for Rhino 8 | Auto-dimensioned Glass and Panel Sheets',
   description:
     'Tortoise is a Rhino 8 plugin for the facade industry: it turns flat glass and panel surfaces into dimensioned A3 sheets with PDF, DWG/DXF and Excel BOM output, for much faster take-off and shop drawings. Free 60-day trial, one-time licence.',
   alternates: { canonical: '/tortoise' },

@@ -5,7 +5,7 @@ import styles from './terms.module.css';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 export const metadata: Metadata = {
-  title: 'Terms and Conditions | YAFT Designs',
+  title: 'Terms and Conditions',
   description: 'Terms and conditions for training, workshops, consulting services, and the Tortoise plugin offered by YAFT Designs.',
   alternates: { canonical: 'https://www.yaftdesigns.com/terms' },
 };

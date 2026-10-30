@@ -8,7 +8,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Rhino3D for Wearables & Footwear | YAFT Designs',
+  title: 'Rhino3D for Wearables & Footwear',
   description: 'Design footwear, neckwear, wrist and arm bands in Rhino3D. 5-day live workshop covering NURBS topology, form-based modeling, and parametric lattice structures. Authorized Rhino Training Center.',
 };
 

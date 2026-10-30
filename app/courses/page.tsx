@@ -125,7 +125,7 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="eyebrow">COURSES</div>
             <h1>Browse our live courses in Rhino3D, Grasshopper &amp; BIM.</h1>
-            <p className="lede">Hands-on, instructor-led training built around real production workflows, taught by a working computational designer, not a generic syllabus. Available in-person from Coimbatore or remote, as 1:1, group batch, or institutional format.</p>
+            <p className="lede">Hands-on, instructor-led training built around real production workflows, taught by a working computational designer, not a generic syllabus. Available in-person from Coimbatore or remote, as private 1:1 sessions.</p>
             <div className="rating-badge"><span className="stars">★★★★★</span> Authorized Rhino Training Center <strong>, recognized by McNeel &amp; Associates</strong></div>
           </div>
         </section>
@@ -134,7 +134,7 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="section-head">
               <h2>All courses</h2>
-              <p className="note">Start dates are shared on enquiry, and batch fees where a course does not show one. Full syllabus PDFs are unlocked once, share your email &amp; LinkedIn once to view all of them.</p>
+              <p className="note">Start dates are shared on enquiry, and batch fees where a course does not show one. Full syllabus PDFs are unlocked once, share your email or LinkedIn once (one is enough) to view all of them.</p>
             </div>
 
             <div className={styles.courseGrid}>
@@ -210,12 +210,12 @@ export default async function CoursesPage() {
               <div className="req-card">
                 <span className="num">REQ 02</span>
                 <h3>Format &amp; batch size</h3>
-                <p>Choose 1:1 personal training, a small group batch, or an institutional workshop, pricing and pacing adjust accordingly.</p>
+                <p>Sessions are currently private 1:1. For a team or institution, ask about a tailored workshop and we will agree pricing and pacing with you.</p>
               </div>
               <div className="req-card">
                 <span className="num">REQ 03</span>
                 <h3>Payment terms</h3>
-                <p>50% advance to confirm your seat, balance within 7 days of the invoice date. Group batches carry a student discount where noted, ask when you enquire.</p>
+                <p>50% advance to confirm your seat, balance within 7 days of the invoice date.</p>
               </div>
             </div>
           </div>

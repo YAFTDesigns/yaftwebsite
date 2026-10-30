@@ -4,7 +4,7 @@ import { INDIAN_STATES } from '@/lib/indianStates';
 
 export type Details = { client_name: string; client_email: string; client_phone: string; client_type: 'individual' | 'company'; client_company: string; client_gst: string; client_pan: string; client_address: string; client_state: string };
 
-const field = { width: '100%', padding: '10px 12px', fontSize: 15, background: 'var(--paper)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 6 } as const;
+const field = { width: '100%', fontFamily: 'inherit', padding: '10px 12px', fontSize: 15, background: 'var(--paper)', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 6 } as const;
 const label = { display: 'block', fontSize: 12, marginBottom: 4, opacity: 0.8 } as const;
 
 /** The client's own billing details for the tax invoice. Shared by the pay link and course checkout. */
@@ -22,7 +22,8 @@ export default function BillingForm({ d, set, disabled, allowOutsideIndia }: { d
         <div><label style={label} htmlFor="b-gst">GSTIN {d.client_type === 'company' ? '(GSTIN or PAN needed)' : '(optional)'}</label><input id="b-gst" style={field} value={d.client_gst} onChange={(e) => set('client_gst', e.target.value.toUpperCase())} maxLength={15} /></div>
         <div><label style={label} htmlFor="b-pan">PAN {d.client_type === 'company' ? '(GSTIN or PAN needed)' : '(optional)'}</label><input id="b-pan" style={field} value={d.client_pan} onChange={(e) => set('client_pan', e.target.value.toUpperCase())} maxLength={10} /></div>
         <div><label style={label} htmlFor="b-state">State (decides CGST+SGST or IGST)</label>
-          <select id="b-state" style={field} value={d.client_state} onChange={(e) => set('client_state', e.target.value)}>
+          <select id="b-state" style={field} value={d.client_state} required onChange={(e) => set('client_state', e.target.value)}>
+            <option value="" disabled>Select your state</option>
             {allowOutsideIndia && <option>Outside India</option>}
             {INDIAN_STATES.map((s) => <option key={s}>{s}</option>)}
           </select></div>

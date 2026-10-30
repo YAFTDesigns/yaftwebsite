@@ -1,6 +1,7 @@
 'use client';
 
 import { track } from '@/lib/analytics';
+import { goToContact } from '@/lib/contactNav';
 
 // A "start an enquiry" button for a service block. It records a cta_click
 // (service = which offering, cta = where on the page), then jumps to the
@@ -22,7 +23,8 @@ export default function ServiceCta({
     <a
       href="#contact"
       className="enquire"
-      onClick={() => {
+      onClick={(e) => {
+        goToContact(e);
         track('cta_click', { page: window.location.pathname, meta: { service, cta, interest, ...(segment ? { segment } : {}) } });
         const interestSelect = document.getElementById('interestSelect') as HTMLSelectElement | null;
         if (interestSelect && Array.from(interestSelect.options).some((o) => o.value === interest)) interestSelect.value = interest;

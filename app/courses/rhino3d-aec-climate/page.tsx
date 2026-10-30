@@ -8,7 +8,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Rhino3D for AEC and Climate | YAFT Designs',
+  title: 'Rhino3D for AEC and Climate',
   description: 'A focused 2-day workshop on Rhino3D for AEC professionals with Grasshopper climatic analysis and facade optimization using Ladybug.',
 };
 

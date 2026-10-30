@@ -25,7 +25,7 @@ function loadCheckout(): Promise<boolean> {
   });
 }
 
-const blank: Details = { client_name: '', client_email: '', client_phone: '', client_type: 'individual', client_company: '', client_gst: '', client_pan: '', client_address: '', client_state: 'Tamil Nadu' };
+const blank: Details = { client_name: '', client_email: '', client_phone: '', client_type: 'individual', client_company: '', client_gst: '', client_pan: '', client_address: '', client_state: '' };
 
 export default function EnrollClient({ items, fx, preselect }: { items: Item[]; fx: { inrPerUsd: number; bufferPercent: number } | null; preselect?: string }) {
   const [picked, setPicked] = useState<string[]>(() => (preselect && items.some((i) => i.key === `course:${preselect}`) ? [`course:${preselect}`] : []));
@@ -43,7 +43,13 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
 
   const set = (k: keyof Details, v: string) => setD((x) => ({ ...x, [k]: v }));
   const toggle = (key: string) => setPicked((p) => (p.includes(key) ? p.filter((k) => k !== key) : [...p, key]));
-  function chooseCurrency(c: 'INR' | 'USD') { setCurrency(c); set('client_state', c === 'USD' ? 'Outside India' : 'Tamil Nadu'); }
+  // A combo is not a separate thing to buy: it is the discount applied when all its courses are picked. Ticking it ticks those courses.
+  const comboKeys = (i: Item) => i.courseSlugs.map((slug) => `course:${slug}`);
+  const comboOn = (i: Item) => comboKeys(i).every((k) => picked.includes(k));
+  const toggleCombo = (i: Item) => setPicked((p) => (comboOn(i) ? p.filter((k) => !comboKeys(i).includes(k)) : [...new Set([...p, ...comboKeys(i)])]));
+  // Short, clean summary for checkout: cut at a word boundary with a proper ellipsis, never mid-word.
+  const brief = (t: string) => { const x = t.trim(); if (x.length <= 140) return x; const cut = x.slice(0, 140).replace(/\s+\S*$/, ''); return `${cut}…`; };
+  function chooseCurrency(c: 'INR' | 'USD') { setCurrency(c); set('client_state', c === 'USD' ? 'Outside India' : ''); }
   const blocked = (i: Item) => !picked.includes(i.key) && i.courseSlugs.some((s) => covered.has(s));
 
   async function pay(choice: 'advance' | 'full') {
@@ -69,11 +75,12 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
       <fieldset style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18 }}>
         <legend style={{ padding: '0 6px', fontSize: 13 }}>1. Choose your course(s)</legend>
         {items.map((i) => (
-          <label key={i.key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--line)', opacity: blocked(i) ? 0.45 : 1 }}>
-            <input type="checkbox" checked={picked.includes(i.key)} disabled={blocked(i)} onChange={() => toggle(i.key)} style={{ marginTop: 4 }} />
+          <label key={i.key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--line)', opacity: i.kind === 'course' && blocked(i) ? 0.45 : 1 }}>
+            <input type="checkbox" checked={i.kind === 'bundle' ? comboOn(i) : picked.includes(i.key)} disabled={i.kind === 'course' && blocked(i)} onChange={() => (i.kind === 'bundle' ? toggleCombo(i) : toggle(i.key))} style={{ marginTop: 4 }} />
             <span style={{ flex: 1 }}>
               <strong>{i.title}</strong>{i.kind === 'bundle' && <span style={{ marginLeft: 8, fontSize: 11, border: '1px solid var(--brass)', color: 'var(--brass)', borderRadius: 4, padding: '1px 6px' }}>COMBO</span>}
-              {i.description && <span style={{ display: 'block', fontSize: 13, opacity: 0.75 }}>{i.description.slice(0, 140)}</span>}
+              {i.kind === 'bundle' && <span style={{ display: 'block', fontSize: 12, opacity: 0.75 }}>Applied automatically when you select all of these courses.</span>}
+              {i.description && <span style={{ display: 'block', fontSize: 13, opacity: 0.75 }}>{brief(i.description)}</span>}
             </span>
             <span style={{ whiteSpace: 'nowrap' }}>₹{fmtFixed2(i.feeInr)} <span style={{ fontSize: 11, opacity: 0.7 }}>+ GST</span></span>
           </label>
