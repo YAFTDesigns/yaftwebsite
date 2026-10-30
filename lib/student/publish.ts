@@ -44,14 +44,15 @@ export async function publishProject(revisionId: string): Promise<boolean> {
   const admin = getSupabaseAdmin();
   const { data: rev } = await admin.from('project_revisions').select('id, project_id, status, title, description, links, cover_path, gallery_paths').eq('id', revisionId).maybeSingle();
   if (!rev || rev.status !== 'approved') return false;
-  const { data: p } = await admin.from('student_projects').select('id, course_slug, publish_consent, public_display_name, student_id').eq('id', rev.project_id).maybeSingle();
+  const { data: p } = await admin.from('student_projects').select('id, course_slug, publish_consent, public_display_name, student_id, public_role, tool, category, profile_photo_path').eq('id', rev.project_id).maybeSingle();
   if (!p?.publish_consent || !p.public_display_name) return false;
   await admin.from('student_work').update({ deleted_at: new Date().toISOString() }).eq('portal_project_id', p.id).is('deleted_at', null);
   const cover = rev.cover_path ? await copyPublic(admin, { privatePath: rev.cover_path }, 'site-images', 'student-work') : null;
   const gallery: string[] = [];
   for (const g of (rev.gallery_paths ?? []).slice(0, 8)) { const n = await copyPublic(admin, { privatePath: g }, 'site-images', 'student-work'); if (n) gallery.push(n); }
+  const photo = p.profile_photo_path ? await copyPublic(admin, { privatePath: p.profile_photo_path }, 'site-images', 'student-work/photos', 800) : null;
   const { error } = await admin.from('student_work').insert({
-    name: p.public_display_name, role: 'Student', project_title: cleanText(rev.title, 120), tool: toolFor(p.course_slug), category: 'Student project',
+    name: p.public_display_name, role: p.public_role || 'YAFT Designs student', project_title: cleanText(rev.title, 120), tool: p.tool || toolFor(p.course_slug), category: p.category || 'Student project', profile_photo_url: photo,
     description: cleanText(rev.description ?? '', 300) || cleanText(rev.title, 120), image_url: cover, project_image_urls: gallery.length ? gallery : null,
     portfolio_url: (rev.links ?? [])[0] ?? null, status: 'approved', portal_project_id: p.id,
   });

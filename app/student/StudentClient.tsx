@@ -20,7 +20,7 @@ type Me = {
   testimonials: { id: string; planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
 };
 type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
-type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean };
+type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean; role: string | null; tool: string | null; category: string | null; hasProfilePhoto: boolean };
 const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted', under_review: 'Under review', changes_requested: 'Changes requested', approved: 'Approved' };
 
 const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
@@ -46,17 +46,18 @@ export default function StudentClient() {
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [interestOn, setInterestOn] = useState(false);
-  const [edit, setEdit] = useState<{ key: string; title: string; description: string; links: string; publish: boolean; publicName: string } | null>(null);
+  const [edit, setEdit] = useState<{ key: string; name: string; role: string; title: string; tool: string; category: string; description: string; link: string; publish: boolean } | null>(null);
   const [tf, setTf] = useState<{ key: string; quote: string; name: string; noPhoto: boolean } | null>(null);
   const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (): Promise<Me | null> => {
     const r = await fetch('/api/student/me', { cache: 'no-store' });
-    if (r.status === 401) { setState('out'); return; }
-    if (!r.ok) { setMsg('Could not load your account. Please refresh.'); setState('out'); return; }
+    if (r.status === 401) { setState('out'); return null; }
+    if (!r.ok) { setMsg('Could not load your account. Please refresh.'); setState('out'); return null; }
     const j: Me = await r.json();
     setMe(j); setState('in');
     setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '' });
+    return j;
   }, []);
 
   useEffect(() => {
@@ -68,7 +69,14 @@ export default function StudentClient() {
     }
     // Initial fetch on mount; state is only set after the request resolves.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    load().then(async () => {
+    load().then(async (loaded) => {
+      const want = p.get('submit');
+      if (loaded && (want || p.get('tab') === 'projects')) {
+        setTab('My Projects');
+        const hit = want ? loaded.enrolments.find((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid' && e.courseSlugs.includes(want)) : null;
+        if (hit && want) openEditor(loaded, hit, want);
+        else if (want) setMsg('We could not find a paid enrolment for that course on this account yet.');
+      }
       if (p.get('auth') === 'failed') setMsg('Sign-in did not complete. Please try again.');
       const claim = p.get('claim');
       if (claim) {
@@ -113,23 +121,41 @@ export default function StudentClient() {
     setMsg(ok ? 'Saved.' : j.error ?? 'Could not save.'); if (ok) { setShowProfile(false); load(); }
   }
 
-  const startEdit = (e: Card, slug: string) => {
-    const pr = me?.projects.find((x) => x.planId === e.planId && x.courseSlug === slug);
-    setEdit({ key: `${e.planId}|${slug}`, title: pr?.latest?.title ?? '', description: pr?.latest?.description ?? '', links: (pr?.latest?.links ?? []).join('\n'), publish: pr?.publishConsent ?? false, publicName: pr?.publicDisplayName ?? me?.profile.displayName ?? '' });
-  };
+  // Opens the project form for one course, prefilled with what we already know about this student and course.
+  function openEditor(m: Me, e: Card, slug: string) {
+    const pr = m.projects.find((x) => x.planId === e.planId && x.courseSlug === slug);
+    setEdit({
+      key: `${e.planId}|${slug}`, name: pr?.publicDisplayName ?? m.profile.displayName ?? '', role: pr?.role ?? 'YAFT Designs student', title: pr?.latest?.title ?? '',
+      tool: pr?.tool ?? (slug.includes('grasshopper') ? 'grasshopper' : slug.includes('revit') ? 'rir' : 'rhino'), category: pr?.category ?? '',
+      description: pr?.latest?.description ?? '', link: (pr?.latest?.links ?? [])[0] ?? '', publish: pr?.publishConsent ?? false,
+    });
+  }
+  const startEdit = (e: Card, slug: string) => { if (me) openEditor(me, e, slug); };
   async function saveProject(): Promise<boolean> {
     if (!edit) return false;
     const [planId, courseSlug] = edit.key.split('|');
-    const { ok, j } = await post('/api/student/projects/save', { planId, courseSlug, title: edit.title, description: edit.description, links: edit.links.split('\n').map((x) => x.trim()).filter(Boolean) });
+    const { ok, j } = await post('/api/student/projects/save', { planId, courseSlug, title: edit.title, description: edit.description, links: edit.link.trim() ? [edit.link.trim()] : [], role: edit.role, tool: edit.tool, category: edit.category });
     setMsg(ok ? 'Draft saved.' : j.error ?? 'Could not save.'); if (ok) load(); return ok;
+  }
+  async function uploadImages(files: FileList | null, pr: Proj | undefined) {
+    if (!files) return;
+    // First image becomes the cover if there is none yet; the rest go to the gallery. Up to 3 in total.
+    let hasCover = !!pr?.latest?.coverPath;
+    for (const f of Array.from(files).slice(0, 3)) { await upload(hasCover ? 'gallery' : 'cover', f); hasCover = true; }
+  }
+  async function removeFile(path: string) {
+    if (!edit) return;
+    const [planId, courseSlug] = edit.key.split('|');
+    const { ok, j } = await post('/api/student/projects/remove-file', { planId, courseSlug, path });
+    setMsg(ok ? 'Removed.' : j.error ?? 'Could not remove.'); if (ok) load();
   }
   async function submitProject() {
     if (!edit || !(await saveProject())) return;
     const [planId, courseSlug] = edit.key.split('|');
-    const { ok, j } = await post('/api/student/projects/submit', { planId, courseSlug, publish: edit.publish, publicName: edit.publicName });
+    const { ok, j } = await post('/api/student/projects/submit', { planId, courseSlug, publish: edit.publish, publicName: edit.name });
     setMsg(ok ? 'Submitted for review.' : j.error ?? 'Could not submit.'); if (ok) { setEdit(null); load(); }
   }
-  async function upload(kind: 'cover' | 'gallery' | 'private', f: File | undefined) {
+  async function upload(kind: 'cover' | 'gallery' | 'private' | 'profile', f: File | undefined) {
     if (!edit || !f) return;
     const [planId, courseSlug] = edit.key.split('|');
     const fd = new FormData(); fd.set('file', f); fd.set('planId', planId); fd.set('courseSlug', courseSlug); fd.set('kind', kind);
@@ -248,6 +274,7 @@ export default function StudentClient() {
                   <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {e.nextAction && <a href={e.payUrl} style={{ ...btn, textDecoration: 'none' }}>{e.nextAction === 'pay_advance' ? 'Pay advance' : e.nextAction === 'pay_balance' ? 'Pay balance' : 'Pay in full'}</a>}
                     <button style={ghost} onClick={() => setTab('Payments & Bills')}>View bills</button>
+                    {e.payStatus !== 'unpaid' && e.payStatus !== 'cancelled' && e.courseSlugs[0] && <button style={ghost} onClick={() => { setTab('My Projects'); startEdit(e, e.courseSlugs[0]); }}>Submit project</button>}
                   </div>
                   {e.courseSlugs.map((slug) => {
                     const t = me.testimonials.find((x) => x.planId === e.planId && x.courseSlug === slug);
@@ -309,31 +336,45 @@ export default function StudentClient() {
       </>)}
 
       {tab === 'My Projects' && (<>
-        {me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.courseSlugs.length > 0).length === 0 && <div style={box}>Link a course first, then you can submit your project here.</div>}
-        {me.enrolments.filter((e) => e.payStatus !== 'cancelled').flatMap((e) => e.courseSlugs.map((slug) => {
+        <p style={{ fontSize: 13, opacity: 0.8 }}>Your certificate needs an approved project. Fill in the card below the same way as on our Community Works page. We review it, and if you allow it, it is shown there.</p>
+        {me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid' && e.courseSlugs.length > 0).length === 0 && <div style={box}>Once your first payment is in, you can submit your project here.</div>}
+        {me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid').flatMap((e) => e.courseSlugs.map((slug) => {
           const pr = me.projects.find((x) => x.planId === e.planId && x.courseSlug === slug);
           const key = `${e.planId}|${slug}`;
           const lat = pr?.latest;
           const locked = lat?.status === 'submitted' || lat?.status === 'under_review';
+          const imgs = lat ? [lat.coverPath, ...lat.galleryPaths].filter((x): x is string => !!x) : [];
+          const descLeft = edit?.key === key ? 300 - edit.description.length : 300;
+          const label = { display: 'block', fontSize: 12, marginBottom: 4, opacity: 0.8 } as const;
           return (
             <div key={key} style={box}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
                 <strong>{e.courseSlugs.length > 1 ? slug : e.title}</strong>
                 <span style={badge(lat?.status === 'approved' ? '#4caf50' : lat?.status === 'changes_requested' ? '#ffb300' : '#999')}>{lat ? PSTATUS[lat.status] : 'Not started'}</span>
               </div>
+              <div style={{ fontSize: 12, opacity: 0.65, marginTop: 4, wordBreak: 'break-all' }}>Direct link to this form: {typeof window !== 'undefined' ? window.location.origin : ''}/student?submit={slug}</div>
               {lat && <p style={{ fontSize: 14, margin: '8px 0 0' }}><strong>{lat.title}</strong> (version {lat.revNo}){pr?.published ? ' · shown on Community Works' : ''}{pr?.published && <button style={{ ...ghost, marginLeft: 8, padding: '3px 8px', fontSize: 12 }} onClick={() => withdraw('project', pr.id)}>Withdraw from Community Works</button>}</p>}
               {lat?.feedback && <p style={{ fontSize: 13, borderLeft: '3px solid var(--brass)', paddingLeft: 10, marginTop: 8 }}>Reviewer note: {lat.feedback}</p>}
-              {lat && <div style={{ fontSize: 12, marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{[lat.coverPath, ...lat.galleryPaths].filter((x): x is string => !!x).map((x) => <a key={x} href={`/api/student/projects/asset?path=${encodeURIComponent(x)}`} target="_blank" rel="noreferrer">image</a>)}{lat.privateFiles.map((f) => <a key={f.path} href={`/api/student/projects/asset?path=${encodeURIComponent(f.path)}`} target="_blank" rel="noreferrer">{f.name} (private)</a>)}</div>}
-              {!locked && edit?.key !== key && <button style={{ ...ghost, marginTop: 10 }} onClick={() => startEdit(e, slug)}>{!lat ? 'Start project' : lat.status === 'approved' ? 'Edit (creates a new version)' : 'Edit'}</button>}
+              {edit?.key !== key && lat && <div style={{ fontSize: 12, marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{imgs.map((x, i) => <a key={x} href={`/api/student/projects/asset?path=${encodeURIComponent(x)}`} target="_blank" rel="noreferrer">image {i + 1}</a>)}{lat.privateFiles.map((f) => <a key={f.path} href={`/api/student/projects/asset?path=${encodeURIComponent(f.path)}`} target="_blank" rel="noreferrer">{f.name} (private)</a>)}</div>}
+              {!locked && edit?.key !== key && <button style={{ ...ghost, marginTop: 10 }} onClick={() => startEdit(e, slug)}>{!lat ? 'Submit your project' : lat.status === 'approved' ? 'Edit (creates a new version)' : 'Edit'}</button>}
               {locked && <p style={{ fontSize: 12, opacity: 0.7, marginTop: 8 }}>Locked while we review it.</p>}
               {edit?.key === key && (
-                <div style={{ marginTop: 12, display: 'grid', gap: 10 }}>
-                  <input style={input} placeholder="Project title" maxLength={120} value={edit.title} onChange={(ev) => setEdit({ ...edit, title: ev.target.value })} />
-                  <textarea style={{ ...input, minHeight: 110 }} placeholder="What did you make and how?" maxLength={4000} value={edit.description} onChange={(ev) => setEdit({ ...edit, description: ev.target.value })} />
-                  <textarea style={{ ...input, minHeight: 60 }} placeholder="Links, one per line (https:// only)" value={edit.links} onChange={(ev) => setEdit({ ...edit, links: ev.target.value })} />
-                  <div style={{ fontSize: 12 }}>Save the draft first, then add files. Cover image <input type="file" accept="image/*" onChange={(ev) => upload('cover', ev.target.files?.[0])} /> Gallery image <input type="file" accept="image/*" onChange={(ev) => upload('gallery', ev.target.files?.[0])} /> Private file (PDF, ZIP, .3dm; only we can see it) <input type="file" accept=".pdf,.zip,.3dm" onChange={(ev) => upload('private', ev.target.files?.[0])} /></div>
-                  <label style={{ fontSize: 13 }}><input type="checkbox" checked={edit.publish} onChange={(ev) => setEdit({ ...edit, publish: ev.target.checked })} /> If approved, you may show this project (cover, gallery, title, description, links) on Community Works. Private files are never shown. You can withdraw this later.</label>
-                  {edit.publish && <input style={input} placeholder="Name to show publicly" maxLength={80} value={edit.publicName} onChange={(ev) => setEdit({ ...edit, publicName: ev.target.value })} />}
+                <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+                  <div><label style={label}>Your name *</label><input style={input} maxLength={80} value={edit.name} placeholder="Arjun R." onChange={(ev) => setEdit({ ...edit, name: ev.target.value })} /></div>
+                  <div><label style={label}>Role / Institution *</label><input style={input} maxLength={80} value={edit.role} placeholder="M.Arch VIT" onChange={(ev) => setEdit({ ...edit, role: ev.target.value })} /></div>
+                  <div><label style={label}>Project title *</label><input style={input} maxLength={120} value={edit.title} placeholder="Parametric Facade Rationalization" onChange={(ev) => setEdit({ ...edit, title: ev.target.value })} /></div>
+                  <div><label style={label}>Tool used</label><select style={input} value={edit.tool} onChange={(ev) => setEdit({ ...edit, tool: ev.target.value })}><option value="rhino">Rhino3D</option><option value="grasshopper">Grasshopper</option><option value="rir">Rhino.Inside.Revit</option></select></div>
+                  <div><label style={label}>Category</label><input style={input} maxLength={60} value={edit.category} placeholder="Facade, BIM, Fabrication..." onChange={(ev) => setEdit({ ...edit, category: ev.target.value })} /></div>
+                  <div><label style={label}>Description * <span style={{ color: descLeft < 50 ? '#ffb300' : undefined }}>{descLeft} left</span></label><textarea style={{ ...input, minHeight: 90 }} maxLength={300} value={edit.description} placeholder="What you built and how you used the tools." onChange={(ev) => setEdit({ ...edit, description: ev.target.value })} /></div>
+                  <div><label style={label}>Portfolio, LinkedIn or Instagram URL</label><input style={input} value={edit.link} placeholder="https://linkedin.com/in/..." onChange={(ev) => setEdit({ ...edit, link: ev.target.value })} /></div>
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--line)', width: '100%' }} />
+                  <p style={{ fontSize: 12, margin: 0, opacity: 0.75 }}>Save the draft first, then add pictures and files.</p>
+                  <div><label style={label}>Profile photo (optional){pr?.hasProfilePhoto ? ' · added' : ''}</label><input type="file" accept="image/*" onChange={(ev) => upload('profile', ev.target.files?.[0])} /></div>
+                  <div><label style={label}>Project images (optional · 2–3 recommended)</label><input type="file" accept="image/*" multiple onChange={(ev) => uploadImages(ev.target.files, pr)} />
+                    <div style={{ fontSize: 12, marginTop: 6 }}>{imgs.map((x, i) => <span key={x} style={{ marginRight: 12 }}>image {i + 1} <button style={{ ...ghost, padding: '1px 6px', fontSize: 11 }} onClick={() => removeFile(x)}>remove</button></span>)}</div></div>
+                  <div><label style={label}>Supporting files (PDF, ZIP or .3dm; private, only we can see them)</label><input type="file" accept=".pdf,.zip,.3dm" onChange={(ev) => upload('private', ev.target.files?.[0])} />
+                    <div style={{ fontSize: 12, marginTop: 6 }}>{(lat?.privateFiles ?? []).map((f) => <span key={f.path} style={{ marginRight: 12 }}>{f.name} <button style={{ ...ghost, padding: '1px 6px', fontSize: 11 }} onClick={() => removeFile(f.path)}>remove</button></span>)}</div></div>
+                  <label style={{ fontSize: 13 }}><input type="checkbox" checked={edit.publish} onChange={(ev) => setEdit({ ...edit, publish: ev.target.checked })} /> If approved, show this project card (name, role, title, description, images, link and profile photo) on Community Works. Private files are never shown. You can withdraw it later.</label>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button style={ghost} onClick={saveProject}>Save draft</button><button style={btn} onClick={submitProject}>Submit for review</button><button style={ghost} onClick={() => setEdit(null)}>Close</button></div>
                 </div>
               )}
@@ -354,7 +395,7 @@ export default function StudentClient() {
         {me.certStatus.filter((c) => !me.certificates.some((x) => x.planId === c.planId && x.courseSlug === c.courseSlug)).map((c) => (
           <div key={`${c.planId}|${c.courseSlug}`} style={box}>
             <strong>{c.courseSlug}</strong> <span style={badge('#999')}>Not yet</span>
-            <p style={{ fontSize: 13, margin: '6px 0 0' }}>Still needed: {c.missing.join(', ') || 'We are preparing it'}.{!me.profile.certificateName && ' Also set your certificate name in Profile.'}</p>
+            <p style={{ fontSize: 13, margin: '6px 0 0' }}>Still needed: {c.missing.join(', ') || 'We are preparing it'}.{c.missing.includes('Project approval') && <> <a href={`/student?submit=${c.courseSlug}`} style={{ textDecoration: 'underline' }}>Submit your project</a>.</>}{!me.profile.certificateName && ' Also set your certificate name in Profile.'}</p>
           </div>
         ))}
         {me.certStatus.length === 0 && me.certificates.length === 0 && <div style={box}>No certificates yet.</div>}

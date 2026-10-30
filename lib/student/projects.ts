@@ -1,6 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { audit } from './audit';
-import { editMode, validateRevisionInput, type RevisionStatus } from './projectInput';
+import { cardMeta, editMode, validateRevisionInput, type RevisionStatus } from './projectInput';
 
 export type RevisionView = {
   id: string; revNo: number; status: RevisionStatus; title: string; description: string | null; links: string[];
@@ -10,6 +10,7 @@ export type RevisionView = {
 export type ProjectView = {
   id: string; planId: string; courseSlug: string; status: RevisionStatus; publishConsent: boolean; publicDisplayName: string | null;
   published: boolean; latest: RevisionView | null; hasApproved: boolean;
+  role: string | null; tool: string | null; category: string | null; hasProfilePhoto: boolean;
 };
 
 const REV_COLS = 'id, project_id, rev_no, status, title, description, links, cover_path, gallery_paths, private_files, feedback, feedback_released, submitted_at';
@@ -35,14 +36,14 @@ export async function ownsPlan(studentId: string, planId: string): Promise<boole
 
 export async function loadProjects(studentId: string): Promise<ProjectView[]> {
   const admin = getSupabaseAdmin();
-  const { data: projects } = await admin.from('student_projects').select('id, plan_id, course_slug, status, publish_consent, public_display_name, published_revision_id').eq('student_id', studentId);
+  const { data: projects } = await admin.from('student_projects').select('id, plan_id, course_slug, status, publish_consent, public_display_name, published_revision_id, public_role, tool, category, profile_photo_path').eq('student_id', studentId);
   if (!projects?.length) return [];
   const { data: revs } = await admin.from('project_revisions').select(REV_COLS).in('project_id', projects.map((p) => p.id)).order('rev_no', { ascending: false });
   return projects.map((p) => {
     const mine = ((revs ?? []) as RevRow[]).filter((r) => r.project_id === p.id);
     return {
       id: p.id, planId: p.plan_id, courseSlug: p.course_slug, status: p.status, publishConsent: p.publish_consent, publicDisplayName: p.public_display_name,
-      published: !!p.published_revision_id, latest: mine[0] ? toView(mine[0]) : null, hasApproved: mine.some((r) => r.status === 'approved'),
+      published: !!p.published_revision_id, role: p.public_role, tool: p.tool, category: p.category, hasProfilePhoto: !!p.profile_photo_path, latest: mine[0] ? toView(mine[0]) : null, hasApproved: mine.some((r) => r.status === 'approved'),
     };
   });
 }
@@ -68,6 +69,8 @@ export async function saveDraft(student: { id: string }, planId: string, courseS
   if (!v.ok) return { ok: false, error: v.error, status: 400 };
   const project = await getOrCreateProject(student.id, planId, courseSlug);
   if (!project) return { ok: false, error: 'Could not save', status: 500 };
+  const meta = cardMeta(raw, courseSlug);
+  await admin.from('student_projects').update({ public_role: meta.role, tool: meta.tool, category: meta.category || null }).eq('id', project.id);
   const { data: latest } = await admin.from('project_revisions').select('id, rev_no, status, cover_path, gallery_paths, private_files').eq('project_id', project.id).order('rev_no', { ascending: false }).limit(1).maybeSingle();
   const mode = editMode((latest?.status as RevisionStatus | undefined) ?? null);
   if (mode === 'locked') return { ok: false, error: 'This project is being reviewed and cannot be edited right now.', status: 409 };

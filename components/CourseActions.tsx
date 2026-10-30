@@ -27,7 +27,7 @@ export default function CourseActions({ slug, title }: { slug: string; title: st
         <>
           <a href="/student" style={btn}>My course</a>
           {st.nextAction === 'pay_balance' && st.payUrl && <a href={st.payUrl} style={{ ...btn, background: 'var(--ink)', color: 'var(--paper)' }}>Pay balance</a>}
-          <a href="/student" style={btn}>Submit your project</a>
+          <a href={`/student?submit=${encodeURIComponent(slug)}`} style={btn}>Submit your project</a>
         </>
       ) : (
         <a href={`/enroll?course=${encodeURIComponent(slug)}`} style={{ ...btn, background: 'var(--ink)', color: 'var(--paper)' }}

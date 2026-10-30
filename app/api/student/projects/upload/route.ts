@@ -23,11 +23,21 @@ export async function POST(req: NextRequest) {
   const form = await req.formData().catch(() => null);
   const file = form?.get('file');
   const planId = String(form?.get('planId') ?? ''), courseSlug = String(form?.get('courseSlug') ?? ''), kind = String(form?.get('kind') ?? '');
-  if (!(file instanceof File) || !['cover', 'gallery', 'private'].includes(kind)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+  if (!(file instanceof File) || !['cover', 'gallery', 'private', 'profile'].includes(kind)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   if (!(await ownsPlan(s.profile.id, planId))) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   const admin = getSupabaseAdmin();
   const { data: project } = await admin.from('student_projects').select('id').eq('plan_id', planId).eq('course_slug', courseSlug).maybeSingle();
   if (!project) return NextResponse.json({ error: 'Save your project details first.' }, { status: 400 });
+  if (kind === 'profile') {
+    if (file.size > MAX_IMAGE_BYTES) return NextResponse.json({ error: 'Image is larger than 10 MB.' }, { status: 413 });
+    const pimg = await cleanImageUpload(file, 800);
+    if (!pimg) return NextResponse.json({ error: 'That is not a usable image (JPG, PNG, WebP or GIF).' }, { status: 415 });
+    const ppath = `${s.profile.id}/${project.id}/profile/${randomUUID()}.webp`;
+    const pup = await admin.storage.from(BUCKET).upload(ppath, pimg.buffer, { contentType: pimg.contentType, upsert: false });
+    if (pup.error) return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    await admin.from('student_projects').update({ profile_photo_path: ppath }).eq('id', project.id);
+    return NextResponse.json({ ok: true });
+  }
   const { data: rev } = await admin.from('project_revisions').select('id, status, cover_path, gallery_paths, private_files').eq('project_id', project.id).order('rev_no', { ascending: false }).limit(1).maybeSingle();
   if (!rev || editMode(rev.status as RevisionStatus) !== 'edit_in_place') return NextResponse.json({ error: 'Save as a draft first, or wait until the review is finished.' }, { status: 409 });
 
@@ -43,7 +53,7 @@ export async function POST(req: NextRequest) {
     name = name.replace(/\.[^.]*$/, '') + '.' + kindOf.ext;
   } else {
     if (file.size > MAX_IMAGE_BYTES) return NextResponse.json({ error: 'Image is larger than 10 MB.' }, { status: 413 });
-    if (kind === 'gallery' && (rev.gallery_paths ?? []).length >= 8) return NextResponse.json({ error: 'Up to 8 gallery images.' }, { status: 400 });
+    if (kind === 'gallery' && (rev.gallery_paths ?? []).length >= 2) return NextResponse.json({ error: 'Up to 3 project images in total (one cover and two more). Remove one first.' }, { status: 400 });
     const img = await cleanImageUpload(file);
     if (!img) return NextResponse.json({ error: 'That is not a usable image (JPG, PNG, WebP or GIF).' }, { status: 415 });
     bytes = img.buffer; contentType = img.contentType; path = `${folder}/${kind}/${randomUUID()}.webp`;

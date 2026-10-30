@@ -54,3 +54,20 @@ describe('testimonial photo rule', () => {
     expect(photoKind(null)).toBe('none');
   });
 });
+
+import { cardMeta, toolForCourse, DESCRIPTION_MAX } from './projectInput';
+describe('project card fields (mirror the public form)', () => {
+  it('prefills the tool from the course and keeps the same 300 character limit', () => {
+    expect(toolForCourse('grasshopper-architecture')).toBe('grasshopper');
+    expect(toolForCourse('revit-rhino-inside')).toBe('rir');
+    expect(toolForCourse('rhino-architecture')).toBe('rhino');
+    expect(DESCRIPTION_MAX).toBe(300);
+    const r = validateRevisionInput({ title: 't', description: 'x'.repeat(500) });
+    expect(r.ok && r.value.description.length).toBe(300);
+  });
+  it('cleans role and category and ignores an unknown tool', () => {
+    const m = cardMeta({ role: '  M.Arch\u0000 VIT ', tool: 'evil', category: 'Facade' }, 'grasshopper-architecture');
+    expect(m).toEqual({ role: 'M.Arch VIT', tool: 'grasshopper', category: 'Facade' });
+    expect(cardMeta({}, 'rhino-architecture').role).toBe('YAFT Designs student');
+  });
+});
