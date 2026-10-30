@@ -99,19 +99,27 @@ export default function CourseFeesClient() {
 
       <h2 style={h2}>New combo</h2>
       <div style={{ display: 'grid', gap: 10, maxWidth: 560 }}>
-        <input style={field} placeholder="Title, e.g. Rhino + Grasshopper for Architecture" value={nb.title} onChange={(e) => setNb({ ...nb, title: e.target.value })} />
-        <input style={field} placeholder="Slug, e.g. rhino-grasshopper-combo" value={nb.slug} onChange={(e) => setNb({ ...nb, slug: e.target.value.toLowerCase() })} />
-        <input style={field} placeholder="Short description (optional)" value={nb.description} onChange={(e) => setNb({ ...nb, description: e.target.value })} />
-        <input style={field} type="number" min={1} step={1} placeholder="Combo fee in rupees, before GST" value={nb.fee_inr} onChange={(e) => setNb({ ...nb, fee_inr: e.target.value })} />
-        <div style={{ fontSize: 13 }}>Courses in the combo (pick at least two):
+        <div style={{ fontSize: 13 }}>1. Tick the courses in the combo (at least two):
           {courses.map((c) => (
             <label key={c.slug} style={{ display: 'block', marginTop: 4 }}>
-              <input type="checkbox" checked={nb.course_slugs.includes(c.slug)} onChange={(e) => setNb({ ...nb, course_slugs: e.target.checked ? [...nb.course_slugs, c.slug] : nb.course_slugs.filter((s) => s !== c.slug) })} /> {c.title}
+              <input type="checkbox" checked={nb.course_slugs.includes(c.slug)} onChange={(e) => setNb({ ...nb, course_slugs: e.target.checked ? [...nb.course_slugs, c.slug] : nb.course_slugs.filter((s) => s !== c.slug) })} /> {c.title}{c.fee_inr ? <span style={{ opacity: 0.6 }}> (₹{c.fee_inr.toLocaleString('en-IN')})</span> : null}
             </label>
           ))}
+          {nb.course_slugs.length >= 2 && <div style={{ marginTop: 6, fontSize: 12, opacity: 0.75 }}>Separately these cost ₹{courses.filter((c) => nb.course_slugs.includes(c.slug)).reduce((a, c) => a + (c.fee_inr ?? 0), 0).toLocaleString('en-IN')} before GST.</div>}
         </div>
-        <button style={btnStyle('new')} disabled={flash.new === 'saving'} onClick={() => act('new', async () => { const ok = await send('POST', { ...nb, fee_inr: Number(nb.fee_inr) }); if (ok) setNb({ slug: '', title: '', description: '', fee_inr: '', course_slugs: [] }); return ok; })}>{btnLabel('new', 'Create combo')}</button>
-        <p style={{ fontSize: 12, opacity: 0.7 }}>A combo is offered at checkout only while every course inside it is also on sale.</p>
+        <input style={field} type="number" min={1} step={1} placeholder="2. Combo fee in rupees, before GST" value={nb.fee_inr} onChange={(e) => setNb({ ...nb, fee_inr: e.target.value })} />
+        {Number(nb.fee_inr) > 0 && <div style={{ fontSize: 12, opacity: 0.75 }}>{gst(Number(nb.fee_inr))}</div>}
+        <input style={field} placeholder="3. Title (optional, filled from the courses if empty)" value={nb.title} onChange={(e) => setNb({ ...nb, title: e.target.value })} />
+        <input style={field} placeholder="Short description (optional)" value={nb.description} onChange={(e) => setNb({ ...nb, description: e.target.value })} />
+        <button style={btnStyle('new')} disabled={flash.new === 'saving'} onClick={() => act('new', async () => {
+          const picked = courses.filter((c) => nb.course_slugs.includes(c.slug));
+          const title = nb.title.trim() || picked.map((c) => c.title).join(' + ');
+          const slug = (nb.slug || title).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+          const ok = await send('POST', { ...nb, title, slug, fee_inr: Number(nb.fee_inr) });
+          if (ok) setNb({ slug: '', title: '', description: '', fee_inr: '', course_slugs: [] });
+          return ok;
+        })}>{btnLabel('new', 'Create combo')}</button>
+        <p style={{ fontSize: 12, opacity: 0.7 }}>A combo is offered at checkout only while every course inside it is on sale, and only when it is cheaper than buying the courses separately.</p>
       </div>
     </>
   );
