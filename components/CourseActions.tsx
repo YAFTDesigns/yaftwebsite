@@ -20,21 +20,21 @@ export default function CourseActions({ slug, title }: { slug: string; title: st
   }, [slug]);
 
   const corp = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(`Corporate / Team Training enquiry: ${title}`)}&body=${encodeURIComponent(`Hello YAFT Designs,\n\nWe would like to discuss team training for: ${title}\n\nCompany:\nTeam size:\nGoals:\nPreferred dates:\nDelivery (in person / online):\n`)}`;
-  const btn = { display: 'inline-block', padding: '10px 16px', border: '1px solid var(--line)', textDecoration: 'none', fontSize: 14, marginRight: 10, marginBottom: 8, color: 'var(--ink)' } as const;
+  const btn = { display: 'inline-block', padding: '11px 20px', border: '2px solid rgba(255,255,255,0.55)', borderRadius: 4, textDecoration: 'none', fontSize: 14, fontWeight: 600, marginRight: 10, marginBottom: 8, color: 'var(--ink)' } as const;
   return (
     <div style={{ margin: '18px 0' }}>
       {st?.enrolled ? (
         <>
           <a href="/student" style={btn}>My course</a>
-          {st.nextAction === 'pay_balance' && st.payUrl && <a href={st.payUrl} style={{ ...btn, background: 'var(--ink)', color: 'var(--paper)' }}>Pay balance</a>}
+          {st.nextAction === 'pay_balance' && st.payUrl && <a href={st.payUrl} style={{ ...btn, background: 'var(--brass)', borderColor: 'var(--brass)', color: '#fff' }}>Pay balance</a>}
           <a href={`/student?submit=${encodeURIComponent(slug)}`} style={btn}>Submit your project</a>
         </>
       ) : (
-        <a href={`/enroll?course=${encodeURIComponent(slug)}`} style={{ ...btn, background: 'var(--ink)', color: 'var(--paper)' }}
+        <a href={`/enroll?course=${encodeURIComponent(slug)}`} style={{ ...btn, background: 'var(--brass)', borderColor: 'var(--brass)', color: '#fff' }}
            onClick={() => { fetch('/api/student/interest', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ slug, event: 'enroll_clicked' }) }).catch(() => {}); }}>Enroll Now</a>
       )}
       <a href={corp} style={btn}>Corporate / Team Training</a>
-      <a href="/student" style={{ ...btn, border: 'none', textDecoration: 'underline' }}>Student login</a>
+      <a href="/student" style={{ ...btn, border: '2px solid transparent', textDecoration: 'underline' }}>Student login</a>
     </div>
   );
 }

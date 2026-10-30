@@ -27,8 +27,11 @@ const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted'
 const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
 const box = { border: '1px solid var(--line)', background: 'var(--paper)', padding: 16, marginBottom: 14 } as const;
 const input = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '9px 10px', fontSize: 14, width: '100%' } as const;
-const btn = { background: 'var(--ink)', color: 'var(--paper)', border: '1px solid var(--ink)', padding: '9px 14px', fontSize: 14, cursor: 'pointer' } as const;
-const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid var(--line)' } as const;
+const btn = { background: 'var(--brass)', color: '#fff', border: '2px solid var(--brass)', padding: '10px 18px', fontSize: 14, fontWeight: 600, letterSpacing: '0.01em', cursor: 'pointer', borderRadius: 4 } as const;
+const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '2px solid rgba(255,255,255,0.55)' } as const;
+const BTN_CSS = 'main button:not(:disabled):hover,main a[style*="border"]:hover{filter:brightness(1.15)} main button:disabled{opacity:.4;cursor:not-allowed} main button:focus-visible,main a:focus-visible{outline:3px solid var(--blueprint);outline-offset:2px}';
+function GoogleG() { return (<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.200 0 11.500-2 15.300-5.600l-7.500-5.800c-2.100 1.400-4.800 2.300-7.8 2.300-6.300 0-11.700-4-13.600-9.800l-7.8 6.1C6.500 42.6 14.600 48 24 48z"/></svg>); }
+function LinkedInIn() { return (<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><rect width="24" height="24" rx="3" fill="#fff"/><path fill="#0A66C2" d="M4.500 9h3v10.500h-3zM6 4.200a1.800 1.800 0 110 3.600 1.800 1.800 0 010-3.600zM9.800 9h2.900v1.400h.1c.4-.8 1.400-1.700 2.900-1.700 3.100 0 3.700 2 3.700 4.700v6.1h-3v-5.400c0-1.300 0-2.900-1.800-2.900s-2 1.400-2 2.800v5.500h-3z"/></svg>); }
 const badge = (c: string) => ({ display: 'inline-block', fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.05em', padding: '2px 8px', border: `1px solid ${c}`, color: c }) as const;
 const STATUS: Record<Card['payStatus'], [string, string]> = { unpaid: ['Pending checkout', '#ffb300'], advance_paid: ['Advance paid', '#4c8bf5'], paid_in_full: ['Paid in full', '#4caf50'], cancelled: ['Cancelled', '#999'] };
 const inr = (n: number) => `₹${fmtFixed2(n)}`;
@@ -208,11 +211,14 @@ export default function StudentClient() {
 
   if (state === 'out') return (
     <main style={{ ...wrap, maxWidth: 440 }}>
+      <style>{BTN_CSS}</style>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/assets/logos/yaft-square-logo.png" alt="YAFT Designs" width={64} height={64} style={{ display: 'block', marginBottom: 16, borderRadius: 6 }} />
       <h1 style={{ fontSize: 28, marginBottom: 8 }}>Student portal</h1>
       <p style={{ opacity: 0.8, marginBottom: 20 }}>Sign in to see your courses, payments, bills and certificates.</p>
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
       <div style={box}>
-        <button style={{ ...btn, width: '100%' }} onClick={google}>Continue with Google</button>
+        <button style={{ ...btn, width: '100%', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} onClick={google}><GoogleG />Continue with Google</button>
         <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0 16px' }}>We only receive your name, email and picture from Google. Nothing is posted and no contacts are read.</p>
         {sent ? <p style={{ fontSize: 14 }}>Check your inbox. We sent a sign-in link to {email}.</p> : <>
           <input style={input} type="email" placeholder="Or use your email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -228,6 +234,7 @@ export default function StudentClient() {
   const certsReady: number = me.totals.certificates;
   return (
     <main style={wrap}>
+      <style>{BTN_CSS}</style>
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
         {me.profile.googleAvatar
           // eslint-disable-next-line @next/next/no-img-element
@@ -252,7 +259,7 @@ export default function StudentClient() {
             <p style={{ fontSize: 12, opacity: 0.75, margin: '4px 0 8px' }}>Connect your LinkedIn account and you get a blue shield beside your name on testimonials, Community Works and, later, the student forum. It shows you are a real YAFT student. Typing a link is not enough; you sign in to LinkedIn once so we know the account is yours.</p>
             {me.profile.linkedinConnected
               ? <p style={{ fontSize: 13, margin: '0 0 8px' }}>LinkedIn connected ✓</p>
-              : me.profile.linkedinEnabled ? <button style={ghost} onClick={connectLinkedin}>Connect LinkedIn</button> : <p style={{ fontSize: 12, opacity: 0.7 }}>LinkedIn connection is coming soon.</p>}
+              : me.profile.linkedinEnabled ? <button style={{ ...btn, background: '#0A66C2', border: '2px solid #0A66C2' }} onClick={connectLinkedin}><LinkedInIn />Connect LinkedIn</button> : <p style={{ fontSize: 12, opacity: 0.7 }}>LinkedIn connection is coming soon.</p>}
             <label style={{ fontSize: 12, display: 'block', marginTop: 8 }}>Your public LinkedIn address (optional, shown as a link next to your testimonial)<input style={input} placeholder="linkedin.com/in/yourname" value={profile.linkedinUrl} onChange={(e) => setProfile({ ...profile, linkedinUrl: e.target.value })} /></label>
             <label style={{ fontSize: 12, display: 'block', marginTop: 8, opacity: me.profile.linkedinConnected ? 1 : 0.5 }}><input type="checkbox" disabled={!me.profile.linkedinConnected} checked={me.profile.badgeConsent} onChange={(e) => setBadge(e.target.checked)} /> Show the Verified shield (and my LinkedIn link) next to my published testimonials and projects. I can switch this off any time.</label>
           </div>
