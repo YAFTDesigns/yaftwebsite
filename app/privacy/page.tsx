@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import styles from '../terms/terms.module.css';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const metadata: Metadata = {
   title: 'Privacy Policy | YAFT Designs',
   description: 'How YAFT Designs collects, uses, and protects your personal data.',
@@ -52,7 +53,7 @@ const CLAUSES = [
   },
   {
     title: 'Contact Us',
-    body: 'For any questions about this policy or your personal data, email us at yaftdesigns@gmail.com.',
+    body: 'For any questions about this policy or your personal data, email us at ' + CONTACT_EMAIL + '.',
   },
 ];
 

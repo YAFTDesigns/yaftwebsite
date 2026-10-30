@@ -10,6 +10,7 @@ import { COURSE_INTEREST_OPTIONS } from '../courses/courseNav';
 import styles from './faculty.module.css';
 import { assetUrl, imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 const TITLE = 'Yokes Marapa | Authorized Rhino Trainer India';
 const DESCRIPTION =
   'Authorized Rhino Trainer certified by McNeel South Asia. Founder of YAFT Designs, visiting faculty (M.Arch, V-SPARC) at VIT Vellore, with workshops at IIT Kharagpur and NIT Tiruchirappalli.';
@@ -234,7 +235,7 @@ export default async function FacultyPage() {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
               </dl>
             </div>
           </div>

@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import styles from './terms.module.css';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const metadata: Metadata = {
   title: 'Terms and Conditions | YAFT Designs',
   description: 'Terms and conditions for training, workshops, consulting services, and the Tortoise plugin offered by YAFT Designs.',
@@ -52,7 +53,7 @@ const TERMS = [
   },
   {
     title: '11. Privacy and Communications',
-    body: 'By enquiring or registering with YAFT Designs, you consent to receiving communications related to your course, session schedules, updates, and relevant announcements. YAFT Designs does not share your personal data with third parties for marketing purposes. You may request to be removed from our mailing list at any time by writing to yaftdesigns@gmail.com.',
+    body: 'By enquiring or registering with YAFT Designs, you consent to receiving communications related to your course, session schedules, updates, and relevant announcements. YAFT Designs does not share your personal data with third parties for marketing purposes. You may request to be removed from our mailing list at any time by writing to ' + CONTACT_EMAIL + '.',
   },
   {
     title: '12. Limitation of Liability',
@@ -80,7 +81,7 @@ const TERMS = [
   },
   {
     title: '18. Contact',
-    body: 'For questions, clarifications, or concerns regarding these terms, please contact us at yaftdesigns@gmail.com. Studio: Coimbatore, Tamil Nadu, India.',
+    body: 'For questions, clarifications, or concerns regarding these terms, please contact us at ' + CONTACT_EMAIL + '. Studio: Coimbatore, Tamil Nadu, India.',
   },
 ];
 

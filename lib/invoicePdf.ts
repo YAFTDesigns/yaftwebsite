@@ -1,6 +1,7 @@
 import path from 'path';
 import { computeInvoiceTotals, type InvoiceLineItem } from './invoiceMath';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export type InvoicePdfData = {
   invoice_no: string;
   date: string;
@@ -130,7 +131,7 @@ export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
       'Perundurai,Erode Dt, Tamilnadu. - 638052.',
       'Phone: +(91) 97893 03375',
       '',
-      'Email: yaftdesigns@gmail.com',
+      'Email: ' + CONTACT_EMAIL,
     ];
     let fy = 178;
     fromLines.forEach(line => { doc.text(line, M, fy); fy += 14; });
@@ -307,7 +308,7 @@ export async function generatePDF(data: InvoicePdfData): Promise<Buffer> {
     doc.font('Helvetica').fontSize(8).fillColor('#555555')
        .text('If you have any questions about this invoice, please contact', 0, H - 52, { align: 'center' });
     doc.fillColor('#E63946')
-       .text('yaftdesigns@gmail.com', 0, H - 38, { align: 'center' });
+       .text(CONTACT_EMAIL, 0, H - 38, { align: 'center' });
 
     // PAID IN FULL stamp — only when balance is 0 and advance > 0
     const advance = data.advance || 0;

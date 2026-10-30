@@ -1,7 +1,8 @@
 import { Resend } from 'resend';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 const FROM_ADDRESS = 'YAFT Designs <notifications@yaftdesigns.com>';
-const REPLY_TO = 'yaftdesigns@gmail.com';
+const REPLY_TO = CONTACT_EMAIL;
 
 let client: Resend | null = null;
 export function getResendClient(): Resend {

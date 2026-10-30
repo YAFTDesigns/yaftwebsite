@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
       },
       {
         // Private share links: never leak the token in a Referer header.
-        source: '/:section(client-jobs|team-jobs)/:path*',
+        source: '/:section(client-jobs|team-jobs|pay)/:path*',
         headers: [
           { key: 'Referrer-Policy', value: 'no-referrer' },
           { key: 'X-Robots-Tag', value: 'noindex, nofollow, noai, noimageai' },

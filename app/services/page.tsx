@@ -13,6 +13,7 @@ import { resolveServiceImageUrl } from '@/lib/serviceImages';
 import styles from './services.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 const TITLE = 'BIM Consulting & Computational Design Services | India, Australia, Singapore, UAE';
 const DESCRIPTION =
   'Computational design, BIM consulting, parametric facades and digital fabrication services. Active on projects across India, Australia, Singapore, Hong Kong, UAE, Saudi Arabia, Qatar and Oman.';
@@ -289,7 +290,7 @@ export default async function ServicesPage() {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
               </dl>
             </div>
           </div>

@@ -4,29 +4,49 @@ import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
 import { newLicenseKey } from '@/lib/tortoiseLicense';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { quantityForPayment } from '@/lib/tortoisePricing';
+import { fulfilCoursePayment, recordCourseRefund, flagCourseDispute } from '@/lib/coursePaymentFulfil';
 import { createInvoiceForSale, sendBuyerKeyEmail, MAX_MACHINES_PER_KEY, type Sale } from '@/lib/tortoiseSale';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
 export async function POST(request: NextRequest) {
   const { webhookSecret: secret, test: testMode } = razorpayConfig();
-  if (!secret) return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+  if (!secret) {
+    console.error('[razorpay-webhook] rejected: no webhook secret configured for mode', testMode ? 'test' : 'live');
+    return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+  }
 
   const raw = await request.text();
   if (!verifyWebhookSignature(raw, request.headers.get('x-razorpay-signature'), secret)) {
+    console.error('[razorpay-webhook] rejected: signature mismatch, mode', testMode ? 'test' : 'live', 'signature header present:', !!request.headers.get('x-razorpay-signature'));
     return NextResponse.json({ error: 'Bad signature' }, { status: 400 });
   }
 
-  let event: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> } } };
+  let event: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> }; refund?: { entity?: Record<string, unknown> }; dispute?: { entity?: Record<string, unknown> } } };
   try {
     event = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: 'Bad body' }, { status: 400 });
   }
 
-  // Only captured payments for Tortoise matter; acknowledge everything else so Razorpay stops retrying.
+  // Refunds and disputes: only act on course payments; everything else is acknowledged.
+  if (event.event === 'refund.processed' && event.payload?.refund?.entity) {
+    const r = await recordCourseRefund(event.payload.refund.entity);
+    return NextResponse.json(r.body, { status: r.status });
+  }
+  if (event.event?.startsWith('payment.dispute.') && event.payload?.dispute?.entity) {
+    const r = await flagCourseDispute(event.payload.dispute.entity, event.event);
+    return NextResponse.json(r.body, { status: r.status });
+  }
+
+  // Only captured payments matter below; acknowledge everything else so Razorpay stops retrying.
   const pay = event.payload?.payment?.entity;
   if (event.event !== 'payment.captured' || !pay) return NextResponse.json({ ok: true, ignored: true });
   const notes = (pay.notes ?? {}) as Record<string, string>;
+  if (notes.product === 'course_payment') {
+    const r = await fulfilCoursePayment(pay, testMode);
+    return NextResponse.json(r.body, { status: r.status });
+  }
   if (notes.product !== 'tortoise') return NextResponse.json({ ok: true, ignored: true });
 
   const paymentId = String(pay.id ?? '');
@@ -45,7 +65,7 @@ export async function POST(request: NextRequest) {
     if (isEmailConfigured()) {
       try {
         await sendEmail({
-          to: getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com',
+          to: getNotificationBcc()[0] ?? CONTACT_EMAIL,
           subject: `Tortoise payment NOT fulfilled (amount check): ${paymentId}`,
           html: `<p>Payment ${escapeHtml(paymentId)} of ${paidAmount / 100} ${escapeHtml(payCurrency)} matches no Tortoise price, so no key or invoice was created.</p><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;. Check it in Razorpay and issue keys manually in Admin &gt; Tortoise if it is genuine.</p>`,
         });
@@ -136,7 +156,7 @@ export async function POST(request: NextRequest) {
 
   if (isEmailConfigured()) {
     const keyList = keys.map((k) => `<li style="font-family:monospace;font-size:16px;">${escapeHtml(k)}</li>`).join('');
-    const ownerTo = getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com';
+    const ownerTo = getNotificationBcc()[0] ?? CONTACT_EMAIL;
     try {
       if (autoEmail) {
         await sendBuyerKeyEmail({ ...sale, invoiceNo }, { bccOwner: true });

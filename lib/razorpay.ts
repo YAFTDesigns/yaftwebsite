@@ -19,7 +19,8 @@ export function razorpayConfig() {
     test,
     keyId: test ? process.env.RAZORPAY_TEST_KEY_ID : process.env.RAZORPAY_KEY_ID,
     keySecret: test ? process.env.RAZORPAY_TEST_KEY_SECRET : process.env.RAZORPAY_KEY_SECRET,
-    webhookSecret: test ? process.env.RAZORPAY_TEST_WEBHOOK_SECRET : process.env.RAZORPAY_WEBHOOK_SECRET,
+    // trimmed: a pasted secret often carries an invisible trailing space or line break
+    webhookSecret: (test ? process.env.RAZORPAY_TEST_WEBHOOK_SECRET : process.env.RAZORPAY_WEBHOOK_SECRET)?.trim(),
   };
 }
 

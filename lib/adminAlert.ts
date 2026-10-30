@@ -1,9 +1,10 @@
 import { sendEmail, isEmailConfigured } from './email';
 
-const YAFT_EMAIL = 'yaftdesigns@gmail.com';
+import { CONTACT_EMAIL } from '@/lib/contact';
+const YAFT_EMAIL = CONTACT_EMAIL;
 
 /**
- * Sends a low-noise operational alert to the admin inbox (yaftdesigns@gmail.com).
+ * Sends a low-noise operational alert to the admin inbox (CONTACT_EMAIL).
  * Used for things that fail silently otherwise -- e.g. a queued
  * enquiry/invoice that still fails to save on retry, which usually
  * means a real schema or config problem, not a transient blip.

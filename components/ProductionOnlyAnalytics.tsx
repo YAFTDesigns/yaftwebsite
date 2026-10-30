@@ -10,7 +10,7 @@ const GA_MEASUREMENT_ID = 'G-XDVDJC7X24';
 
 // Pages whose URL carries a private share token or admin/auth state must never
 // reach any analytics provider.
-const PRIVATE_PATH = /^\/(client-jobs|team-jobs|admin|auth)(\/|$)/;
+const PRIVATE_PATH = /^\/(client-jobs|team-jobs|pay|admin|auth)(\/|$)/;
 
 // Google Tag Manager flagged "additional domains detected" -- the old
 // gate was process.env.NODE_ENV === 'production' only, which is true

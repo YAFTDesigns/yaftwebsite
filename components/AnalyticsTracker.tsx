@@ -8,7 +8,7 @@ export default function AnalyticsTracker() {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (/^\/(client-jobs|team-jobs|admin|auth)(\/|$)/.test(pathname ?? '')) return;
+    if (/^\/(client-jobs|team-jobs|pay|admin|auth)(\/|$)/.test(pathname ?? '')) return;
     track('page_view', { page: pathname });
   }, [pathname]);
 

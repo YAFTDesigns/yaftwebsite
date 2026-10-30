@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import styles from '../terms/terms.module.css';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const metadata: Metadata = {
   title: 'Cookies Policy | YAFT Designs',
   description: 'How YAFT Designs uses cookies on yaftdesigns.com.',
@@ -44,7 +45,7 @@ const CLAUSES = [
   },
   {
     title: 'Contact',
-    body: 'If you have any questions about how we use cookies, please contact us at yaftdesigns@gmail.com. Studio: Coimbatore, Tamil Nadu, India.',
+    body: 'If you have any questions about how we use cookies, please contact us at ' + CONTACT_EMAIL + '. Studio: Coimbatore, Tamil Nadu, India.',
   },
 ];
 

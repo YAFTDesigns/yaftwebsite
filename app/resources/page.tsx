@@ -9,6 +9,7 @@ import { COURSE_INTEREST_OPTIONS } from '../courses/courseNav';
 import styles from './resources.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 const TITLE = 'Rhino3D & Grasshopper Learning Resources';
 const DESCRIPTION = 'Free Rhino3D, Grasshopper and computational design resources, tutorials, guides and learning materials.';
 
@@ -151,7 +152,7 @@ export default async function ResourcesPage() {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
               </dl>
             </div>
           </div>

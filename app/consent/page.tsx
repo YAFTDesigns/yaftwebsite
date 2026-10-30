@@ -3,6 +3,7 @@ import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import styles from '../terms/terms.module.css';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const metadata: Metadata = {
   title: 'Consent Policy | YAFT Designs',
   description: 'Consent policy for online sessions, recordings, photography, and code of conduct at YAFT Designs.',
@@ -42,7 +43,7 @@ const CLAUSES = [
       'YAFT Designs may photograph workshops, sessions, and events and use these images on our website, LinkedIn, Instagram, YouTube, or other platforms and printed materials.',
       'Similarly, YAFT Designs may record video and audio during sessions and workshops. These recordings may be featured on platforms including but not limited to our website, YouTube, Instagram, and LinkedIn, in both online and offline formats.',
       'By attending or participating in any YAFT Designs session, workshop, or event, you consent to the above uses of your image, voice, and likeness, and exempt YAFT Designs from any breach of privacy claims related to such use.',
-      'If you do not wish to be photographed or recorded, please notify us in writing before the session begins at yaftdesigns@gmail.com.',
+      'If you do not wish to be photographed or recorded, please notify us in writing before the session begins at ' + CONTACT_EMAIL + '.',
     ]
   },
 ];
@@ -87,7 +88,7 @@ export default function ConsentPage() {
               <h2 className={styles.clauseTitle}>Contact</h2>
               <p className={styles.clauseBody}>
                 For questions or concerns regarding this consent policy, please contact us at{' '}
-                <a href="mailto:yaftdesigns@gmail.com" style={{ color: 'var(--brass)' }}>yaftdesigns@gmail.com</a>.
+                <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: 'var(--brass)' }}>{CONTACT_EMAIL}</a>.
                 Studio: Coimbatore, Tamil Nadu, India.
               </p>
             </div>

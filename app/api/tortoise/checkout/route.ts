@@ -5,10 +5,11 @@ import { INDIAN_STATES, GSTIN_RE } from '@/lib/indianStates';
 import { priceFor, MAX_QUANTITY, type Currency } from '@/lib/tortoisePricing';
 import { STRICT_EMAIL_RE } from '@/lib/enquiryFields';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/tortoise/checkout { name, email, quantity, currency } -> Razorpay order for Checkout.js
 export async function POST(request: NextRequest) {
   if (process.env.TORTOISE_CHECKOUT_ENABLED !== '1') {
-    return NextResponse.json({ error: 'Online purchase is not open yet. Please email yaftdesigns@gmail.com.' }, { status: 503 });
+    return NextResponse.json({ error: 'Online purchase is not open yet. Please email ' + CONTACT_EMAIL + '.' }, { status: 503 });
   }
   const limited = await rateLimitShared(request, 'tortoise-checkout', { limit: 10, windowMs: 60_000 });
   if (limited) return limited;
@@ -58,8 +59,8 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error('[tortoise-checkout] order failed:', err);
     const msg = currency === 'USD'
-      ? 'Could not start the USD payment. International payments may not be enabled yet, please email yaftdesigns@gmail.com.'
-      : 'Could not start the payment. Please try again or email yaftdesigns@gmail.com.';
+      ? 'Could not start the USD payment. International payments may not be enabled yet, please email ' + CONTACT_EMAIL + '.'
+      : 'Could not start the payment. Please try again or email ' + CONTACT_EMAIL + '.';
     return NextResponse.json({ error: msg }, { status: 502 });
   }
 }

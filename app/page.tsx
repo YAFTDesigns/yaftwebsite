@@ -22,6 +22,7 @@ import { COURSE_INTEREST_OPTIONS } from './courses/courseNav';
 import styles from './home.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 const TITLE = 'YAFT Designs | Authorized Rhino3D Trainer India, Grasshopper Training Asia Pacific and Middle East';
 const DESCRIPTION =
   'Authorized Rhino3D Training Center based in India. Rhino3D, Grasshopper, BIM and Computational Design training online for architects and designers across India, Australia, Singapore, UAE, Indonesia, Philippines and Japan.';
@@ -90,7 +91,7 @@ const JSON_LD = {
   ],
   contactPoint: {
     '@type': 'ContactPoint',
-    email: 'yaftdesigns@gmail.com',
+    email: CONTACT_EMAIL,
     contactType: 'customer support',
     areaServed: ['IN', 'AU', 'SG', 'ID', 'PH', 'JP', 'HK', 'MY', 'OM', 'AE', 'SA', 'QA', 'BH', 'KW'],
     availableLanguage: ['English', 'Tamil'],
@@ -153,7 +154,7 @@ const LOCAL_BUSINESS_JSON_LD = {
   description: 'Authorized Rhino Training Center offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training and computational design consulting.',
   url: 'https://www.yaftdesigns.com',
   telephone: '',
-  email: 'yaftdesigns@gmail.com',
+  email: CONTACT_EMAIL,
   address: {
     '@type': 'PostalAddress',
     streetAddress: 'Perundurai Industrial Park',
@@ -440,7 +441,7 @@ export default async function HomePage() {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
               </dl>
             </div>
           </div>
