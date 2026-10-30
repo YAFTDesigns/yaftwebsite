@@ -8,6 +8,7 @@ import { getTortoiseDownloadCount } from '@/lib/tortoiseDownloads';
 import styles from './tortoise.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 // Refresh the download count every 5 minutes.
 export const revalidate = 300;
 
@@ -295,12 +296,12 @@ export default async function TortoisePage() {
               <TortoiseBuy />
               <p className={styles.small}>
                 Prefer another way to pay, or need an invoice first? Email{' '}
-                <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a>.
+                <a href={`mailto:${CONTACT_EMAIL}?subject=Tortoise%20licence`}>{CONTACT_EMAIL}</a>.
               </p>
             </>
           ) : (
             <p className={styles.plain}>
-              To buy, email <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20licence">yaftdesigns@gmail.com</a> with your name, company and the number of PCs, and we will send payment details and your key.
+              To buy, email <a href={`mailto:${CONTACT_EMAIL}?subject=Tortoise%20licence`}>{CONTACT_EMAIL}</a> with your name, company and the number of PCs, and we will send payment details and your key.
             </p>
           )}
         </section>
@@ -331,7 +332,7 @@ export default async function TortoisePage() {
             </p>
             <p>
               Found a bug or want a feature? Email{' '}
-              <a href="mailto:yaftdesigns@gmail.com?subject=Tortoise%20feedback">yaftdesigns@gmail.com</a> with a screenshot and, if you can, a small .3dm with a few sample panels.
+              <a href={`mailto:${CONTACT_EMAIL}?subject=Tortoise%20feedback`}>{CONTACT_EMAIL}</a> with a screenshot and, if you can, a small .3dm with a few sample panels.
             </p>
             <p className={styles.small}>Provided as is, with no warranty. Please keep a copy of your model before running.</p>
           </div>

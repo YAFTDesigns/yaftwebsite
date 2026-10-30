@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { fmtFixed2 } from '@/lib/format';
 import BillingForm, { type Details } from '@/components/BillingForm';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 type Opts = {
   key: string; order_id: string; amount: number; currency: string; name: string; description: string;
   prefill: { name: string; email: string }; handler: () => void; modal: { ondismiss: () => void }; theme: { color: string };
@@ -54,7 +55,7 @@ export default function PayClient({ token, options, initial, locked, outsideOk }
     <div>
       {locked ? (
         <p style={{ fontSize: 13, opacity: 0.75, marginBottom: 16 }}>
-          Billing to: {d.client_company || d.client_name}{d.client_gst ? `, GSTIN ${d.client_gst}` : ''}{d.client_pan ? `, PAN ${d.client_pan}` : ''}, {d.client_state}. These details are locked because your first bill is issued. To change them, email yaftdesigns@gmail.com.
+          Billing to: {d.client_company || d.client_name}{d.client_gst ? `, GSTIN ${d.client_gst}` : ''}{d.client_pan ? `, PAN ${d.client_pan}` : ''}, {d.client_state}. These details are locked because your first bill is issued. To change them, email {CONTACT_EMAIL}.
         </p>
       ) : (
         <BillingForm d={d} set={set} disabled={busy} allowOutsideIndia={outsideOk} />

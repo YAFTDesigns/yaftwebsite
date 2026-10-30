@@ -7,6 +7,7 @@ import { quantityForPayment } from '@/lib/tortoisePricing';
 import { fulfilCoursePayment, recordCourseRefund, flagCourseDispute } from '@/lib/coursePaymentFulfil';
 import { createInvoiceForSale, sendBuyerKeyEmail, MAX_MACHINES_PER_KEY, type Sale } from '@/lib/tortoiseSale';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
 export async function POST(request: NextRequest) {
   const { webhookSecret: secret, test: testMode } = razorpayConfig();
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     if (isEmailConfigured()) {
       try {
         await sendEmail({
-          to: getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com',
+          to: getNotificationBcc()[0] ?? CONTACT_EMAIL,
           subject: `Tortoise payment NOT fulfilled (amount check): ${paymentId}`,
           html: `<p>Payment ${escapeHtml(paymentId)} of ${paidAmount / 100} ${escapeHtml(payCurrency)} matches no Tortoise price, so no key or invoice was created.</p><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;. Check it in Razorpay and issue keys manually in Admin &gt; Tortoise if it is genuine.</p>`,
         });
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
 
   if (isEmailConfigured()) {
     const keyList = keys.map((k) => `<li style="font-family:monospace;font-size:16px;">${escapeHtml(k)}</li>`).join('');
-    const ownerTo = getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com';
+    const ownerTo = getNotificationBcc()[0] ?? CONTACT_EMAIL;
     try {
       if (autoEmail) {
         await sendBuyerKeyEmail({ ...sale, invoiceNo }, { bccOwner: true });

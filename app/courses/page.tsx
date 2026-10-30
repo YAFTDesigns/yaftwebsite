@@ -18,6 +18,7 @@ import TestimonialForm from '@/components/TestimonialForm';
 import styles from './courses.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 function formatUpdated(iso: string): string {
   const then = new Date(iso).getTime();
   const now = Date.now();
@@ -232,7 +233,7 @@ export default async function CoursesPage() {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
               </dl>
             </div>
           </div>

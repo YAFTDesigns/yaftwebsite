@@ -7,6 +7,7 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { isAdminEmail } from '@/lib/admin';
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getCronControl, DISABLED_RESPONSE } from '@/lib/cronControls';
+import { CONTACT_EMAIL } from '@/lib/contact';
 import {
   MAX_FAILED_ATTEMPTS,
   buildFollowUpEmail,
@@ -26,7 +27,7 @@ const FOLLOW_UP_TEMPLATE = 'lead_follow_up';
 // mailto List-Unsubscribe so mail clients can offer a built-in opt-out.
 const FOLLOW_UP_FROM = 'Yokes Marapa <yokes@yaftdesigns.com>';
 const FOLLOW_UP_HEADERS = {
-  'List-Unsubscribe': '<mailto:yaftdesigns@gmail.com?subject=Unsubscribe>',
+  'List-Unsubscribe': '<mailto:' + CONTACT_EMAIL + '?subject=Unsubscribe>',
 };
 const MIN_DAYS_SINCE_LAST_CONTACT = 3;
 const MAX_DAYS_SINCE_LAST_CONTACT = 30;

@@ -1,6 +1,7 @@
 import webpush from 'web-push';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 let configured = false;
 
 function ensureConfigured() {
@@ -8,7 +9,7 @@ function ensureConfigured() {
   const publicKey = process.env.VAPID_PUBLIC_KEY;
   const privateKey = process.env.VAPID_PRIVATE_KEY;
   if (!publicKey || !privateKey) return false;
-  webpush.setVapidDetails('mailto:yaftdesigns@gmail.com', publicKey, privateKey);
+  webpush.setVapidDetails('mailto:' + CONTACT_EMAIL, publicKey, privateKey);
   configured = true;
   return true;
 }

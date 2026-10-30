@@ -5,6 +5,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { sendAdminAlert } from '@/lib/adminAlert';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const dynamic = 'force-dynamic';
 
 // Deliberately a reminder, not a full send -- Yokes prefers to review
@@ -98,7 +99,7 @@ async function runReminderCheck() {
 
     await sendAdminAlert(subject, html);
     await supabase.from('email_logs').insert({
-      to_email: 'yaftdesigns@gmail.com',
+      to_email: CONTACT_EMAIL,
       to_name: 'Yokes',
       subject,
       template: reminderTemplate,

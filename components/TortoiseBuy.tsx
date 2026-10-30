@@ -5,6 +5,7 @@ import { priceFor, formatMinor, MAX_QUANTITY, type Currency } from '@/lib/tortoi
 import { INDIAN_STATES } from '@/lib/indianStates';
 import styles from '@/app/tortoise/tortoise.module.css';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 type RazorpayHandlerResponse = { razorpay_payment_id: string };
 type RazorpayOptions = {
   key: string; order_id: string; amount: number; currency: string; name: string; description: string;
@@ -75,7 +76,7 @@ export default function TortoiseBuy() {
         modal: { ondismiss: () => setBusy(false) },
       }).open();
     } catch {
-      setError('Something went wrong. Please try again or email yaftdesigns@gmail.com.');
+      setError('Something went wrong. Please try again or email ' + CONTACT_EMAIL + '.');
     } finally {
       setBusy(false);
     }
@@ -84,7 +85,7 @@ export default function TortoiseBuy() {
   if (paid) {
     return (
       <div className={styles.buy}>
-        <p><strong>Payment received, thank you.</strong> Your licence key and tax invoice will be emailed to {email} shortly. If you do not see it within a day, email yaftdesigns@gmail.com.</p>
+        <p><strong>Payment received, thank you.</strong> Your licence key and tax invoice will be emailed to {email} shortly. If you do not see it within a day, email {CONTACT_EMAIL}.</p>
       </div>
     );
   }

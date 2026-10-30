@@ -8,6 +8,7 @@ import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 import { fmtFixed2 } from '@/lib/format';
 import { loggedIds } from '@/lib/emailLogLookup';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export const dynamic = 'force-dynamic';
 
 const TEMPLATE = 'balance_reminder';
@@ -75,7 +76,7 @@ async function runBalanceReminderCheck() {
   // One row per invoice, so a later run skips each of them -- inserted in one go.
   await supabase.from('email_logs').insert(
     newlyOverdue.map((inv) => ({
-      to_email: 'yaftdesigns@gmail.com',
+      to_email: CONTACT_EMAIL,
       to_name: 'Yokes',
       subject,
       template: TEMPLATE,

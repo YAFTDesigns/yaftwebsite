@@ -8,10 +8,11 @@ import { validateBillingDetails } from '@/lib/billingDetails';
 import { createCourseOrder } from '@/lib/courseOrder';
 import { computeSchedule } from '@/lib/coursePayments';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/enroll/order { items: ['course:slug' | 'bundle:slug'], currency: 'INR'|'USD', choice: 'advance'|'full', details }
 // Individuals only. Creates the payment plan from the catalog prices (never from the browser) and the first Razorpay order.
 export async function POST(request: NextRequest) {
-  if (process.env.COURSE_CHECKOUT_ENABLED !== '1') return NextResponse.json({ error: 'Online enrolment is not open yet. Please email yaftdesigns@gmail.com.' }, { status: 503 });
+  if (process.env.COURSE_CHECKOUT_ENABLED !== '1') return NextResponse.json({ error: 'Online enrolment is not open yet. Please email ' + CONTACT_EMAIL + '.' }, { status: 503 });
   const limited = await rateLimitShared(request, 'enroll-order', { limit: 6, windowMs: 60_000 });
   if (limited) return limited;
 
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
   if (!sel.ok) return NextResponse.json({ error: sel.error }, { status: 400 });
   const v = validateBillingDetails(body?.details, { allowOutsideIndia: currency === 'USD' });
   if (!v.ok) return NextResponse.json({ error: v.error }, { status: 400 });
-  if (v.value.client_type === 'company') return NextResponse.json({ error: 'Company and team training is arranged by email. Please write to yaftdesigns@gmail.com for a personalised quote.' }, { status: 400 });
+  if (v.value.client_type === 'company') return NextResponse.json({ error: 'Company and team training is arranged by email. Please write to ' + CONTACT_EMAIL + ' for a personalised quote.' }, { status: 400 });
 
   // A one-item fee of 1 rupee cannot be split; treat as full payment.
   const canSplit = sel.baseTotal >= 2;

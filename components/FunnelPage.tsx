@@ -8,6 +8,7 @@ import { FUNNEL_CONFIG } from '@/lib/funnels';
 import { FUNNEL_LABELS, type Funnel } from '@/lib/enquiryFields';
 import { imageUrl } from '@/lib/assetUrl';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 export function funnelMetadata(key: Funnel): Metadata {
   const c = FUNNEL_CONFIG[key];
   return {
@@ -85,7 +86,7 @@ export default async function FunnelPage({ funnelKey }: { funnelKey: Funnel }) {
                 <dt>Studio</dt>
                 <dd>Coimbatore, Tamil Nadu, India</dd>
                 <dt>Email</dt>
-                <dd><a href="mailto:yaftdesigns@gmail.com">yaftdesigns@gmail.com</a></dd>
+                <dd><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></dd>
                 <dt>Looking for something else?</dt>
                 <dd>
                   {c.crossLinks.map((k, i) => (

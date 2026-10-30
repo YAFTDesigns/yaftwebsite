@@ -6,6 +6,7 @@ import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { fmtFixed2 } from '@/lib/format';
 
+import { CONTACT_EMAIL } from '@/lib/contact';
 type Plan = {
   id: string; client_name: string; client_email: string; client_phone: string | null; client_type: string;
   client_company: string | null; client_gst: string | null; client_pan: string | null; client_address: string | null; client_state: string; description: string;
@@ -36,7 +37,7 @@ export async function logCourseEvent(e: { planId?: string | null; paymentRowId?:
 
 async function ownerAlert(subject: string, html: string) {
   if (!isEmailConfigured()) return;
-  try { await sendEmail({ to: getNotificationBcc()[0] ?? 'yaftdesigns@gmail.com', subject, html }); }
+  try { await sendEmail({ to: getNotificationBcc()[0] ?? CONTACT_EMAIL, subject, html }); }
   catch (e) { console.error('[course-payment] owner alert failed:', e); }
 }
 
