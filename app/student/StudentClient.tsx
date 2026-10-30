@@ -17,6 +17,7 @@ type Me = {
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
+  testimonials: { planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
 };
 type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
 type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean };
@@ -45,6 +46,7 @@ export default function StudentClient() {
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [edit, setEdit] = useState<{ key: string; title: string; description: string; links: string; publish: boolean; publicName: string } | null>(null);
+  const [tf, setTf] = useState<{ key: string; quote: string; name: string; noPhoto: boolean } | null>(null);
   const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
 
   const load = useCallback(async () => {
@@ -129,6 +131,21 @@ export default function StudentClient() {
     const r = await fetch('/api/student/projects/upload', { method: 'POST', body: fd });
     const j = await r.json().catch(() => ({}));
     setMsg(r.ok ? 'Uploaded.' : j.error ?? 'Upload failed.'); if (r.ok) load();
+  }
+
+  async function submitTestimonial() {
+    if (!tf) return;
+    const [planId, courseSlug] = tf.key.split('|');
+    const { ok, j } = await post('/api/student/testimonials', { planId, courseSlug, quote: tf.quote, publicName: tf.name, noPhoto: tf.noPhoto });
+    setMsg(ok ? 'Thank you. Your testimonial is with us for review.' : j.error ?? 'Could not submit.'); if (ok) { setTf(null); load(); }
+  }
+  async function uploadTestimonialPhoto(f: File | undefined) {
+    if (!tf || !f) return;
+    const [planId, courseSlug] = tf.key.split('|');
+    const fd = new FormData(); fd.set('file', f); fd.set('planId', planId); fd.set('courseSlug', courseSlug);
+    const r = await fetch('/api/student/testimonials/photo', { method: 'POST', body: fd });
+    const j = await r.json().catch(() => ({}));
+    setMsg(r.ok ? 'Photo added.' : j.error ?? 'Upload failed.'); if (r.ok) { setTf({ ...tf, noPhoto: false }); load(); }
   }
 
   const wrap = { maxWidth: 860, margin: '0 auto', padding: '64px 20px', color: 'var(--ink)' } as const;
@@ -221,6 +238,32 @@ export default function StudentClient() {
                     {e.nextAction && <a href={e.payUrl} style={{ ...btn, textDecoration: 'none' }}>{e.nextAction === 'pay_advance' ? 'Pay advance' : e.nextAction === 'pay_balance' ? 'Pay balance' : 'Pay in full'}</a>}
                     <button style={ghost} onClick={() => setTab('Payments & Bills')}>View bills</button>
                   </div>
+                  {e.courseSlugs.map((slug) => {
+                    const t = me.testimonials.find((x) => x.planId === e.planId && x.courseSlug === slug);
+                    const key = `${e.planId}|${slug}`;
+                    return (
+                      <div key={key} style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+                        <strong style={{ fontSize: 13 }}>Testimonial{e.courseSlugs.length > 1 ? `: ${slug}` : ''}</strong>{' '}
+                        {t && <span style={badge(t.status === 'approved' ? '#4caf50' : t.status === 'changes_requested' ? '#ffb300' : '#999')}>{t.status === 'submitted' ? 'With us for review' : t.status.replace('_', ' ')}</span>}
+                        {t?.feedback && <p style={{ fontSize: 13, borderLeft: '3px solid var(--brass)', paddingLeft: 10 }}>Note from us: {t.feedback}</p>}
+                        {t?.status !== 'submitted' && tf?.key !== key && <div><button style={{ ...ghost, marginTop: 8 }} onClick={() => setTf({ key, quote: t?.quote ?? '', name: t?.publicName ?? me.profile.displayName ?? '', noPhoto: t?.photo === 'none' && !!t })}>{t ? 'Edit testimonial' : 'Share a testimonial (optional)'}</button></div>}
+                        {tf?.key === key && (
+                          <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+                            <textarea style={{ ...input, minHeight: 100 }} maxLength={1200} placeholder="How was the course for you?" value={tf.quote} onChange={(ev) => setTf({ ...tf, quote: ev.target.value })} />
+                            <input style={input} maxLength={80} placeholder="Name to show publicly" value={tf.name} onChange={(ev) => setTf({ ...tf, name: ev.target.value })} />
+                            <div style={{ fontSize: 12 }}>Your photo (optional): <input type="file" accept="image/*" onChange={(ev) => uploadTestimonialPhoto(ev.target.files?.[0])} /></div>
+                            <label style={{ fontSize: 12 }}><input type="checkbox" checked={tf.noPhoto} onChange={(ev) => setTf({ ...tf, noPhoto: ev.target.checked })} /> Do not show any photo</label>
+                            <p style={{ fontSize: 12, opacity: 0.75, margin: 0 }}>
+                              By submitting, you agree we may show this text and your name{tf.noPhoto ? '' : ', and your photo'} on our website after we review it.
+                              {!tf.noPhoto && (t?.photo === 'upload' ? ' We will use the photo you uploaded.' : me.profile.googleAvatar ? ' If you do not upload an image, we will use your Google profile picture.' : '')}
+                              {' '}Editing it later sends it back for review. You can ask us to remove it any time. This is never needed for your certificate.
+                            </p>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button style={btn} onClick={submitTestimonial}>Submit</button><button style={ghost} onClick={() => setTf(null)}>Cancel</button></div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>

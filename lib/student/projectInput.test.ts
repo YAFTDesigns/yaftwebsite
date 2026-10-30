@@ -40,3 +40,17 @@ describe('same-origin check', () => {
     expect(sameOrigin(mk({ origin: 'null', host: 'www.yaftdesigns.com' }))).toBe(false);
   });
 });
+
+import { resolvePhoto, photoKind } from './testimonials';
+describe('testimonial photo rule', () => {
+  const g = 'https://lh3.googleusercontent.com/a/x';
+  it('prefers an upload, falls back to the Google picture, and honours "no photo"', () => {
+    expect(resolvePhoto({ uploadedPath: 'u/p.webp', googleAvatar: g, noPhoto: false })).toBe('u/p.webp');
+    expect(resolvePhoto({ uploadedPath: null, googleAvatar: g, noPhoto: false })).toBe(`google:${g}`);
+    expect(resolvePhoto({ uploadedPath: 'u/p.webp', googleAvatar: g, noPhoto: true })).toBeNull();
+    expect(resolvePhoto({ uploadedPath: null, googleAvatar: null, noPhoto: false })).toBeNull();
+    expect(photoKind(`google:${g}`)).toBe('google');
+    expect(photoKind('u/p.webp')).toBe('upload');
+    expect(photoKind(null)).toBe('none');
+  });
+});

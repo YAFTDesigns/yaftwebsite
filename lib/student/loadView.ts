@@ -4,6 +4,7 @@ import { buildEnrolmentCard, type EnrolmentCard, type PlanRow } from './enrolmen
 import { emailCandidates, type Candidate } from './claims';
 import type { PlanKind } from '@/lib/coursePayments';
 import { loadProjects, type ProjectView } from './projects';
+import { loadTestimonials, type TestimonialView } from './testimonials';
 import { certificateEligibility } from './certificateEligibility';
 
 export type BillRow = { invoiceId: string; invoiceNo: string; date: string; taxable: number; gst: number; total: number; kind: 'bill' };
@@ -12,7 +13,7 @@ export type PaymentRow = { kind: PlanKind; paidAt: string | null; amountInr: num
 export type EnrolmentView = EnrolmentCard & { payUrl: string; bills: BillRow[]; payments: PaymentRow[]; creditNotes: CreditNoteRow[]; isTest: boolean };
 export type CertView = { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null };
 export type CertStatus = { planId: string; courseSlug: string; eligible: boolean; missing: string[] };
-export type PortalView = { enrolments: EnrolmentView[]; candidates: Candidate[]; totals: { courses: number; outstandingInr: number; certificates: number }; projects: ProjectView[]; certificates: CertView[]; certStatus: CertStatus[] };
+export type PortalView = { enrolments: EnrolmentView[]; candidates: Candidate[]; totals: { courses: number; outstandingInr: number; certificates: number }; projects: ProjectView[]; certificates: CertView[]; certStatus: CertStatus[]; testimonials: TestimonialView[] };
 
 /** Everything the dashboard shows, read from EXISTING records and scoped to this student's linked plans only. */
 export async function loadPortalView(student: { id: string; email: string }): Promise<PortalView> {
@@ -20,7 +21,7 @@ export async function loadPortalView(student: { id: string; email: string }): Pr
   const { data: links } = await admin.from('student_enrolments').select('plan_id').eq('student_id', student.id);
   const planIds = (links ?? []).map((l) => l.plan_id as string);
   const candidates = await emailCandidates(student.email);
-  if (!planIds.length) return { enrolments: [], candidates, totals: { courses: 0, outstandingInr: 0, certificates: 0 }, projects: [], certificates: [], certStatus: [] };
+  if (!planIds.length) return { enrolments: [], candidates, totals: { courses: 0, outstandingInr: 0, certificates: 0 }, projects: [], certificates: [], certStatus: [], testimonials: [] };
 
   const [plans, pays, invs, adj] = await Promise.all([
     admin.from('course_payment_plans').select('id, token, status, description, course_slugs, currency, is_test, structure, base_total, advance_base').in('id', planIds),
@@ -47,10 +48,11 @@ export async function loadPortalView(student: { id: string; email: string }): Pr
     };
   });
   const live = enrolments.filter((e) => e.payStatus !== 'cancelled');
-  const [projects, certs, rules] = await Promise.all([
+  const [projects, certs, rules, testimonials] = await Promise.all([
     loadProjects(student.id),
     admin.from('certificates').select('certificate_id, course_title, course_suffix, issue_date, plan_id, course_slug, verify_token').eq('student_id', student.id).eq('revoked', false),
     admin.from('course_rules').select('course_slug, requires_full_payment'),
+    loadTestimonials(student.id),
   ]);
   const certificates: CertView[] = (certs.data ?? []).map((c) => ({ certificateId: c.certificate_id, courseTitle: c.course_title || c.course_suffix, issuedOn: c.issue_date, planId: c.plan_id, courseSlug: c.course_slug, verifyToken: c.verify_token }));
   const certStatus: CertStatus[] = live.flatMap((e) => e.courseSlugs.map((slug) => {
@@ -60,5 +62,5 @@ export async function loadPortalView(student: { id: string; email: string }): Pr
     const el = certificateEligibility({ projectState: pr?.hasApproved ? 'approved' : (pr?.status ?? 'none'), payStatus: e.payStatus, requiresFullPayment: needFull, hasLiveCertificate: has });
     return { planId: e.planId, courseSlug: slug, eligible: el.eligible, missing: el.missing };
   }));
-  return { enrolments, candidates, totals: { courses: live.length, outstandingInr: Math.round(live.reduce((a, e) => a + e.balanceInr, 0) * 100) / 100, certificates: certificates.length }, projects, certificates, certStatus };
+  return { enrolments, candidates, totals: { courses: live.length, outstandingInr: Math.round(live.reduce((a, e) => a + e.balanceInr, 0) * 100) / 100, certificates: certificates.length }, projects, certificates, certStatus, testimonials };
 }
