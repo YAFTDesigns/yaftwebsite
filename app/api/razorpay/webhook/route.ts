@@ -4,7 +4,7 @@ import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
 import { newLicenseKey } from '@/lib/tortoiseLicense';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { quantityForPayment } from '@/lib/tortoisePricing';
-import { fulfilCoursePayment } from '@/lib/coursePaymentFulfil';
+import { fulfilCoursePayment, recordCourseRefund, flagCourseDispute } from '@/lib/coursePaymentFulfil';
 import { createInvoiceForSale, sendBuyerKeyEmail, MAX_MACHINES_PER_KEY, type Sale } from '@/lib/tortoiseSale';
 
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
@@ -17,14 +17,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Bad signature' }, { status: 400 });
   }
 
-  let event: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> } } };
+  let event: { event?: string; payload?: { payment?: { entity?: Record<string, unknown> }; refund?: { entity?: Record<string, unknown> }; dispute?: { entity?: Record<string, unknown> } } };
   try {
     event = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: 'Bad body' }, { status: 400 });
   }
 
-  // Only captured payments for Tortoise matter; acknowledge everything else so Razorpay stops retrying.
+  // Refunds and disputes: only act on course payments; everything else is acknowledged.
+  if (event.event === 'refund.processed' && event.payload?.refund?.entity) {
+    const r = await recordCourseRefund(event.payload.refund.entity);
+    return NextResponse.json(r.body, { status: r.status });
+  }
+  if (event.event?.startsWith('payment.dispute.') && event.payload?.dispute?.entity) {
+    const r = await flagCourseDispute(event.payload.dispute.entity, event.event);
+    return NextResponse.json(r.body, { status: r.status });
+  }
+
+  // Only captured payments matter below; acknowledge everything else so Razorpay stops retrying.
   const pay = event.payload?.payment?.entity;
   if (event.event !== 'payment.captured' || !pay) return NextResponse.json({ ok: true, ignored: true });
   const notes = (pay.notes ?? {}) as Record<string, string>;

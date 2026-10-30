@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimitShared } from '@/lib/rateLimitShared';
 import { createOrder, razorpayConfig } from '@/lib/razorpay';
-import { computeSchedule, nextDue, toPaise } from '@/lib/coursePayments';
+import { scheduleFor, nextDue, toPaise } from '@/lib/coursePayments';
 
 // POST /api/pay/<token>/order -> Razorpay order for whichever instalment is due next on this plan.
 // The amount always comes from the plan in the database, never from the browser.
@@ -17,13 +17,15 @@ export async function POST(request: NextRequest, ctx: { params: Promise<{ token:
   if (!plan) return NextResponse.json({ error: 'Invalid link.' }, { status: 404 });
   if (plan.status !== 'active') return NextResponse.json({ error: plan.status === 'complete' ? 'This plan is fully paid.' : 'This payment link is no longer active.' }, { status: 409 });
 
+  // Test plans only work in test mode and live plans only in live mode, so the two never mix.
+  if (Boolean(plan.is_test) !== razorpayConfig().test) return NextResponse.json({ error: 'This payment link is not available right now.' }, { status: 409 });
+
   const { data: paid } = await supabase.from('course_payments').select('kind').eq('plan_id', plan.id).eq('status', 'paid');
-  const kinds = new Set((paid ?? []).map((r) => r.kind));
-  const due = nextDue({ advancePaid: kinds.has('advance'), balancePaid: kinds.has('balance') });
+  const due = nextDue({ structure: plan.structure, paid: (paid ?? []).map((r) => r.kind) });
   if (!due) return NextResponse.json({ error: 'Nothing is due on this plan.' }, { status: 409 });
 
-  const sched = computeSchedule(plan.base_total, plan.advance_base);
-  const amountMinor = toPaise(sched[due].total);
+  const sched = scheduleFor(plan);
+  const amountMinor = toPaise((due === 'advance' ? sched.advance : due === 'balance' ? sched.balance : sched.full)!.total);
   try {
     const order = await createOrder({
       amount: amountMinor, currency: 'INR', receipt: `crs_${Date.now()}`,

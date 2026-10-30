@@ -13,6 +13,8 @@ export type InvoiceRow = {
   total: number | string;
   advance: number | string;
   balance: number | string;
+  course_plan_id?: string | null;
+  course_payment_id?: string | null;
 };
 
 const MONEY_COLS = ['subtotal', 'cgst', 'sgst', 'igst', 'total', 'advance', 'balance'];
@@ -30,6 +32,7 @@ const COLUMNS = [
   { header: 'Total (INR)', key: 'total', width: 13 },
   { header: 'Advance (INR)', key: 'advance', width: 13 },
   { header: 'Balance Due (INR)', key: 'balance', width: 15 },
+  { header: 'Source', key: 'source', width: 18 },
 ];
 
 function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
@@ -60,6 +63,7 @@ function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
       total: Number(inv.total),
       advance: Number(inv.advance) || 0,
       balance: Number(inv.balance) || 0,
+      source: inv.course_payment_id ? 'Razorpay plan' : '',
     });
     MONEY_COLS.forEach((key) => { row.getCell(key).numFmt = '#,##0.00'; });
 
@@ -104,10 +108,12 @@ function fillInvoiceSheet(sheet: ExcelJS.Worksheet, invoices: InvoiceRow[]) {
 // consultancy invoice row, which naturally passes this check on its
 // own since it isn't type 'proforma' at all.
 export function isConfirmedRevenue(inv: InvoiceRow): boolean {
-  return inv.invoice_type !== 'proforma';
+  return inv.invoice_type !== 'proforma' && inv.invoice_type !== 'test';
 }
 
-export async function buildInvoicesWorkbook(invoices: InvoiceRow[]): Promise<Buffer> {
+export type CreditNoteRow = { credit_note_no: string | null; issued_date: string | null; taxable: number | string | null; cgst: number | string | null; sgst: number | string | null; igst: number | string | null; total: number | string | null; reason?: string | null };
+
+export async function buildInvoicesWorkbook(invoices: InvoiceRow[], creditNotes: CreditNoteRow[] = []): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'YAFT Designs';
   wb.created = new Date();
@@ -130,6 +136,22 @@ export async function buildInvoicesWorkbook(invoices: InvoiceRow[]): Promise<Buf
   if (pendingProforma.length > 0) {
     const sheet = wb.addWorksheet('Pending Proforma (Not in Revenue)');
     fillInvoiceSheet(sheet, pendingProforma);
+  }
+
+  // Credit notes sit on their own sheet. They reduce the year they are issued, never the bill's year.
+  if (creditNotes.length > 0) {
+    const sheet = wb.addWorksheet('Credit Notes');
+    sheet.columns = [
+      { header: 'Credit Note No', key: 'no', width: 16 }, { header: 'Date', key: 'date', width: 12 },
+      { header: 'Taxable (INR)', key: 'taxable', width: 14 }, { header: 'CGST', key: 'cgst', width: 10 },
+      { header: 'SGST', key: 'sgst', width: 10 }, { header: 'IGST', key: 'igst', width: 10 },
+      { header: 'Total (INR)', key: 'total', width: 14 }, { header: 'Reason', key: 'reason', width: 40 },
+    ];
+    sheet.getRow(1).font = { bold: true };
+    creditNotes.forEach((c) => {
+      const row = sheet.addRow({ no: c.credit_note_no, date: c.issued_date, taxable: Number(c.taxable) || 0, cgst: Number(c.cgst) || 0, sgst: Number(c.sgst) || 0, igst: Number(c.igst) || 0, total: Number(c.total) || 0, reason: c.reason ?? '' });
+      ['taxable', 'cgst', 'sgst', 'igst', 'total'].forEach((k) => { row.getCell(k).numFmt = '#,##0.00'; });
+    });
   }
 
   const arrayBuffer = await wb.xlsx.writeBuffer();

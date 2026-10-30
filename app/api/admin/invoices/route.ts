@@ -39,6 +39,14 @@ export async function GET(request: NextRequest) {
 // { action: 'soft_delete',    id }
 // { action: 'bulk_soft_delete', ids }
 // { action: 'restore',        id }
+// Bills made from a Razorpay payment are issued records. Correct them with a credit note (Admin > Payment plans),
+// not by editing or trashing them, so the payment, the bill and the financial-year report stay in agreement.
+async function isPlanLinked(supabase: ReturnType<typeof getSupabaseAdmin>, ids: string[]): Promise<boolean> {
+  const { data } = await supabase.from('invoices').select('id').in('id', ids).not('course_payment_id', 'is', null);
+  return (data ?? []).length > 0;
+}
+const PLAN_LINKED_MSG = 'This bill was issued from a Razorpay payment and cannot be edited or trashed. Raise a credit note under Admin > Payment plans instead.';
+
 export async function PATCH(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -150,6 +158,7 @@ export async function PATCH(request: NextRequest) {
     if (!id || typeof advance !== 'number') {
       return NextResponse.json({ error: 'Missing id or advance' }, { status: 400 });
     }
+    if (await isPlanLinked(supabase, [id])) return NextResponse.json({ error: PLAN_LINKED_MSG }, { status: 409 });
     const { data: inv, error: fetchErr } = await supabase
       .from('invoices').select('total, invoice_no').eq('id', id).single();
     if (fetchErr || !inv) return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
@@ -166,6 +175,7 @@ export async function PATCH(request: NextRequest) {
   if (body.action === 'update_details') {
     const { id, items, client_state, advance } = body;
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    if (await isPlanLinked(supabase, [id])) return NextResponse.json({ error: PLAN_LINKED_MSG }, { status: 409 });
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'At least one line item is required' }, { status: 400 });
     }
@@ -202,6 +212,7 @@ export async function PATCH(request: NextRequest) {
   if (body.action === 'soft_delete') {
     const { id } = body;
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+    if (await isPlanLinked(supabase, [id])) return NextResponse.json({ error: PLAN_LINKED_MSG }, { status: 409 });
     const { data: updated, error } = await supabase
       .from('invoices').update({ deleted_at: new Date().toISOString() }).eq('id', id).select('invoice_no').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -214,6 +225,7 @@ export async function PATCH(request: NextRequest) {
     if (!Array.isArray(ids) || ids.length === 0) {
       return NextResponse.json({ error: 'Missing ids array' }, { status: 400 });
     }
+    if (await isPlanLinked(supabase, ids.map(String))) return NextResponse.json({ error: PLAN_LINKED_MSG }, { status: 409 });
     const { data: updated, error } = await supabase
       .from('invoices').update({ deleted_at: new Date().toISOString() }).in('id', ids).select('id, invoice_no');
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
