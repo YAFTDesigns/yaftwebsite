@@ -5,7 +5,7 @@ import CertificateVerify from './CertificateVerify';
 import NextSteps from '@/components/NextSteps';
 
 export const metadata: Metadata = {
-  title: 'Verify a Certificate | YAFT Designs',
+  title: 'Verify a Certificate',
   description: 'Verify the authenticity of a YAFT Designs training certificate using its certificate ID.',
 };
 

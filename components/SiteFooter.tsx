@@ -9,7 +9,14 @@ export default function SiteFooter() {
           </div>
           <div className="fcol">
             <h3>Courses</h3>
-            <p>Rhino3D for Architecture<br />Grasshopper<br />Rhino.Inside.Revit<br />AEC &amp; Climate<br />Wearables &amp; Footwear<br />Industrial Design</p>
+            <p>
+              <a href="/courses/rhino3d-architecture">Rhino3D for Architecture</a><br />
+              <a href="/courses/grasshopper-architecture">Grasshopper for Architecture</a><br />
+              <a href="/courses/revit-rhino-inside">Rhino.Inside.Revit</a><br />
+              <a href="/courses/rhino3d-aec-climate">AEC &amp; Climate</a><br />
+              <a href="/courses/rhino-wearables-footwear">Wearables &amp; Footwear</a><br />
+              <a href="/courses/rhino3d-industrial-design">Industrial Design</a>
+            </p>
           </div>
           <div className="fcol">
             <h3>Company</h3>

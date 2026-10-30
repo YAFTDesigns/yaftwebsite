@@ -2,11 +2,13 @@ import type { Metadata } from 'next';
 import { loadCatalog } from '@/lib/courseCatalog';
 import { getInrPerUsd, fxBufferPercent } from '@/lib/fx';
 import EnrollClient from './EnrollClient';
+import SiteHeader from '@/components/SiteHeader';
+import SiteFooter from '@/components/SiteFooter';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
-  title: 'Enrol | YAFT Designs',
+  title: 'Enrol',
   description: 'Choose your Rhino and Grasshopper courses, see the fee, and enrol online.',
   alternates: { canonical: '/enroll' },
 };
@@ -16,7 +18,10 @@ export default async function EnrollPage({ searchParams }: { searchParams: Promi
   const enabled = process.env.COURSE_CHECKOUT_ENABLED === '1';
   const [items, q] = enabled ? await Promise.all([loadCatalog(), getInrPerUsd()]) : [[], null];
   return (
-    <main style={{ maxWidth: 760, margin: '0 auto', padding: '72px 20px 96px', color: 'var(--ink)' }}>
+    <>
+    <SiteHeader active="/courses" />
+    <main style={{ maxWidth: 760, margin: '0 auto', padding: '120px 20px 96px', color: 'var(--ink)' }}>
+      <a href="/courses" style={{ fontSize: 14, textDecoration: 'underline', display: 'inline-block', marginBottom: 16 }}>← Back to courses</a>
       <h1 style={{ fontSize: 30, marginBottom: 8 }}>Enrol in a course</h1>
       <p style={{ opacity: 0.8, marginBottom: 28 }}>Pick your course or a combo, pay half now or everything at once. You get a tax invoice by email after each payment.</p>
       {!enabled || items.length === 0 ? (
@@ -30,5 +35,7 @@ export default async function EnrollPage({ searchParams }: { searchParams: Promi
           <a href={`mailto:${CONTACT_EMAIL}?subject=Corporate%20Training%20Enquiry`} style={{ textDecoration: 'underline' }}>Email us for personalised training</a>.</p>
       </section>
     </main>
+    <SiteFooter />
+    </>
   );
 }
