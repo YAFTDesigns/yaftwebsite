@@ -11,10 +11,14 @@ import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/razorpay/webhook. Razorpay calls this; the signature is the only authentication.
 export async function POST(request: NextRequest) {
   const { webhookSecret: secret, test: testMode } = razorpayConfig();
-  if (!secret) return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+  if (!secret) {
+    console.error('[razorpay-webhook] rejected: no webhook secret configured for mode', testMode ? 'test' : 'live');
+    return NextResponse.json({ error: 'Not configured' }, { status: 503 });
+  }
 
   const raw = await request.text();
   if (!verifyWebhookSignature(raw, request.headers.get('x-razorpay-signature'), secret)) {
+    console.error('[razorpay-webhook] rejected: signature mismatch, mode', testMode ? 'test' : 'live', 'signature header present:', !!request.headers.get('x-razorpay-signature'));
     return NextResponse.json({ error: 'Bad signature' }, { status: 400 });
   }
 
