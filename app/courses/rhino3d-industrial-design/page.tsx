@@ -8,7 +8,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Rhino3D for Industrial Design | YAFT Designs',
+  title: 'Rhino3D for Industrial Design',
   description: 'Re-Imagining Parametric Design for industrial designers. 5-day Rhino3D workshop covering NURBS, SubD, Grasshopper basics, CNC-ready geometry and parametric digital assembly.',
 };
 

@@ -9,7 +9,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Grasshopper for Architecture | YAFT Designs',
+  title: 'Grasshopper for Architecture',
   description: 'Re-Imagining Parametric Design. 6-day live Grasshopper workshop covering data trees, attractors, surface mapping, and plugins like Ladybug, Kangaroo, and Galapagos.',
 };
 

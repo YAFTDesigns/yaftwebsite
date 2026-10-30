@@ -335,6 +335,8 @@ footer{padding:48px 0 32px;}
     display:flex;position:absolute;top:100%;left:0;right:0;background:var(--paper);
     flex-direction:column;padding:20px 32px;border-bottom:1px solid var(--line);gap:18px;
   }
+  .navlinks.open .nav-drop-menu{position:static;transform:none;min-width:0;width:100%;margin-top:8px;box-shadow:none;}
+  .navlinks.open .nav-drop-btn{justify-content:space-between;}
   .rhino-logo{
     width:32px;height:auto;border-radius:4px;position:absolute;
     top:50%;transform:translate(-50%, -50%);

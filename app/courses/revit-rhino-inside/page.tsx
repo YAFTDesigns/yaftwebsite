@@ -8,7 +8,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Revit Architecture + Rhino.Inside | YAFT Designs',
+  title: 'Revit Architecture + Rhino.Inside',
   description: 'Re-Imagining BIM Design. 6-week comprehensive Revit Architecture course covering 10 modules from basics to collaboration, with Rhino.Inside.Revit integration.',
 };
 

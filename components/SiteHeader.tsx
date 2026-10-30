@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
+import { goToContact } from '@/lib/contactNav';
 
 const RHINO_DIRECTORY_URL =
   'https://www.rhino3d.com/training/sites/1650/?coordinates=[78.476681,22.199166]&radius=2200429.497656352&place_type=country';
@@ -21,9 +22,18 @@ export default function SiteHeader({ active }: { active?: string }) {
 
   // Small delay before closing on mouse-leave so moving the cursor from
   // the label down into the menu doesn't snap it shut mid-transition.
-  function openOnHover(menu: 'projects' | 'resources' | 'for') {
+  // Hover only counts for a real mouse. On touch, a tap fires emulated hover THEN click, which opened and instantly
+  // closed the menu. A click on the arrow after hover-opening keeps the menu open instead of toggling it shut.
+  const hoverOpened = useRef<string | null>(null);
+  function openOnHover(menu: 'projects' | 'resources' | 'for', e?: React.PointerEvent) {
+    if (e && e.pointerType !== 'mouse') return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
+    hoverOpened.current = menu;
     setOpenMenu(menu);
+  }
+  function toggleMenu(menu: 'projects' | 'resources' | 'for') {
+    if (hoverOpened.current === menu) { hoverOpened.current = null; setOpenMenu(menu); return; }
+    setOpenMenu((v) => (v === menu ? null : menu));
   }
   function closeOnHoverOut() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -65,8 +75,10 @@ export default function SiteHeader({ active }: { active?: string }) {
       const insideFor = forRef.current && forRef.current.contains(target);
       if (!insideProjects && !insideResources && !insideFor) setOpenMenu(null);
     }
+    function esc(e: KeyboardEvent) { if (e.key === 'Escape') setOpenMenu(null); }
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('keydown', esc); };
   }, []);
 
   const isProjectsActive = active === '/projects' || active === '/projects/community';
@@ -95,15 +107,15 @@ export default function SiteHeader({ active }: { active?: string }) {
           {SHOW_AUDIENCE_MENU && <div
             className="nav-dropdown"
             ref={forRef}
-            onMouseEnter={() => openOnHover('for')}
-            onMouseLeave={closeOnHoverOut}
+            onPointerEnter={(e) => openOnHover('for', e)}
+            onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeOnHoverOut(); }}
           >
             <span className={`nav-drop-btn${isForActive ? ' active' : ''}`}>
               <button
                 type="button"
                 className="nav-drop-caret"
                 style={{ fontSize: 'inherit', color: 'inherit', padding: 0 }}
-                onClick={() => setOpenMenu(v => v === 'for' ? null : 'for')}
+                onClick={() => toggleMenu('for')}
                 aria-expanded={openMenu === 'for'}
               >
                 Who it&apos;s for <span className="nav-caret" aria-hidden>▾</span>
@@ -125,8 +137,8 @@ export default function SiteHeader({ active }: { active?: string }) {
           <div
             className="nav-dropdown"
             ref={projectsRef}
-            onMouseEnter={() => openOnHover('projects')}
-            onMouseLeave={closeOnHoverOut}
+            onPointerEnter={(e) => openOnHover('projects', e)}
+            onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeOnHoverOut(); }}
           >
             <span className={`nav-drop-btn${isProjectsActive ? ' active' : ''}`}>
               <Link href="/projects" onClick={() => { setOpenMenu(null); setOpen(false); }}>
@@ -135,7 +147,7 @@ export default function SiteHeader({ active }: { active?: string }) {
               <button
                 type="button"
                 className="nav-drop-caret"
-                onClick={() => setOpenMenu(v => v === 'projects' ? null : 'projects')}
+                onClick={() => toggleMenu('projects')}
                 aria-expanded={openMenu === 'projects'}
                 aria-label="Toggle Projects submenu"
               >
@@ -162,8 +174,8 @@ export default function SiteHeader({ active }: { active?: string }) {
           <div
             className="nav-dropdown"
             ref={resourcesRef}
-            onMouseEnter={() => openOnHover('resources')}
-            onMouseLeave={closeOnHoverOut}
+            onPointerEnter={(e) => openOnHover('resources', e)}
+            onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeOnHoverOut(); }}
           >
             <span className={`nav-drop-btn${isResourcesActive ? ' active' : ''}`}>
               <Link href="/resources" onClick={() => { setOpenMenu(null); setOpen(false); }}>
@@ -172,7 +184,7 @@ export default function SiteHeader({ active }: { active?: string }) {
               <button
                 type="button"
                 className="nav-drop-caret"
-                onClick={() => setOpenMenu(v => v === 'resources' ? null : 'resources')}
+                onClick={() => toggleMenu('resources')}
                 aria-expanded={openMenu === 'resources'}
                 aria-label="Toggle Resources submenu"
               >
@@ -195,7 +207,7 @@ export default function SiteHeader({ active }: { active?: string }) {
 
           <Link href="/labs" className={active === '/labs' ? 'active' : undefined} onClick={() => setOpen(false)}>YAFT Labs</Link>
 
-          <a href="#contact" className="cta-btn" onClick={() => setOpen(false)}>Enquire</a>
+          <a href="#contact" className="cta-btn" onClick={(e) => { setOpen(false); goToContact(e); }}>Enquire</a>
           <a href={RHINO_DIRECTORY_URL} target="_blank" rel="noopener">
             <Image className="rhino-logo" src="/assets/logos/rhino_logo.jpeg" alt="Authorized Rhino Training Center" width={32} height={32} />
           </a>

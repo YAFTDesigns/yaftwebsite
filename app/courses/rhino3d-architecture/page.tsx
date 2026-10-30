@@ -8,7 +8,7 @@ import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
-  title: 'Rhino3D for Architecture | YAFT Designs',
+  title: 'Rhino3D for Architecture',
   description: 'Master NURBS modeling, surface design and computational geometry in Rhino3D. 5-day live workshop for architects and designers. Authorized Rhino Training Center.',
 };
 

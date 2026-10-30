@@ -8,7 +8,7 @@ import { getInrPerUsd, usdMinorFor, fxBufferPercent } from '@/lib/fx';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: 'Pay | YAFT Designs', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: 'Pay', robots: { index: false, follow: false } };
 
 export default async function PayPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;

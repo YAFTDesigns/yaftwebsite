@@ -1,13 +1,15 @@
 'use client';
 
 import { track } from '@/lib/analytics';
+import { goToContact } from '@/lib/contactNav';
 
 export default function EnquireLink({ course }: { course: string }) {
   return (
     <a
       href="#contact"
       className="enquire"
-      onClick={() => {
+      onClick={(e) => {
+        goToContact(e);
         track('cta_click', { page: window.location.pathname, meta: { service: 'course', cta: 'course_enquire', interest: course } });
         const select = document.getElementById('interestSelect') as HTMLSelectElement | null;
         if (!select) return;
