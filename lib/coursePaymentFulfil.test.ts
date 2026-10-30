@@ -12,7 +12,7 @@ import { fulfilCoursePayment, completeFulfilment, recordCourseRefund } from './c
 import { summariseFy, reconcilePlans, type ReportInvoice, type PaymentRow } from './fyReport';
 
 function seedPlan(structure: 'instalments' | 'full' = 'instalments') {
-  const plan = { id: state.db.uuid(), token: 't'.repeat(32), client_name: 'SYNTHETIC Student', client_email: 'student@example.com', client_phone: null, client_type: 'individual', client_company: null, client_gst: null, client_state: 'Tamil Nadu', description: 'Rhino3D Training', structure, base_total: 30000, advance_base: structure === 'full' ? null : 15000, status: 'active', is_test: false };
+  const plan = { id: state.db.uuid(), token: 't'.repeat(32), client_name: 'SYNTHETIC Student', client_email: 'student@example.com', client_phone: null, client_type: 'individual', client_company: null, client_gst: '33ABCDE1234F1Z5', client_pan: 'ABCDE1234F', client_address: '12 Test Street, Coimbatore', client_state: 'Tamil Nadu', description: 'Rhino3D Training', structure, base_total: 30000, advance_base: structure === 'full' ? null : 15000, status: 'active', is_test: false };
   state.db.t('course_payment_plans').push(plan);
   return plan;
 }
@@ -40,6 +40,7 @@ describe('advance then balance', () => {
     expect(bills().map((b) => Number(b.total))).toEqual([17700, 17700]);
     expect(bills().every((b) => b.course_plan_id === plan.id)).toBe(true);
     expect(bills()[0].items[0].rate).toBe(15000);
+    expect(bills()[0]).toMatchObject({ client_pan: 'ABCDE1234F', client_gst: '33ABCDE1234F1Z5', client_address: '12 Test Street, Coimbatore' });
     expect(bills()[0].items[0].desc).toBe('Rhino3D Training (part 1 of 2)');
     expect(state.emails).toEqual(['YAFT-032026-01', 'YAFT-042026-01']);
     expect((state.db.t('course_payment_plans')[0] as { status: string }).status).toBe('complete');

@@ -12,6 +12,9 @@ create table if not exists public.course_payment_plans (
   client_type text not null default 'individual',
   client_company text,
   client_gst text,
+  client_pan text,
+  client_address text,
+  details_confirmed_at timestamptz,        -- set when the client has filled in their own billing details
   client_state text not null default 'Tamil Nadu',
   description text not null,
   structure text not null default 'instalments' check (structure in ('instalments','full')),

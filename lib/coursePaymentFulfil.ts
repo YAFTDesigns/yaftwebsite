@@ -8,7 +8,7 @@ import { fmtFixed2 } from '@/lib/format';
 
 type Plan = {
   id: string; client_name: string; client_email: string; client_phone: string | null; client_type: string;
-  client_company: string | null; client_gst: string | null; client_state: string; description: string;
+  client_company: string | null; client_gst: string | null; client_pan: string | null; client_address: string | null; client_state: string; description: string;
   structure: 'instalments' | 'full'; base_total: number; advance_base: number | null; status: string; is_test: boolean;
 };
 type PaymentRow = {
@@ -84,7 +84,7 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
         no = await nextInvoiceNo(testMode, row.payment_id);
         const { data, error } = await supabase.from('invoices').insert({
           invoice_no: no, date: ddmmyyyy(), client_name: plan.client_name, client_email: plan.client_email,
-          client_type: plan.client_type, client_company: plan.client_company, client_gst: plan.client_gst,
+          client_type: plan.client_type, client_company: plan.client_company, client_gst: plan.client_gst, client_pan: plan.client_pan, client_address: plan.client_address,
           client_state: plan.client_state, client_phone: plan.client_phone,
           items: [{ desc: billDescription(plan.description, row.kind), qty: 1, rate: inst.base }],
           total: inst.total, advance: inst.total, balance: 0,

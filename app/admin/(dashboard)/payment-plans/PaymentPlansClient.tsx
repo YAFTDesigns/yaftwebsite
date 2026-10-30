@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import styles from '../admin.module.css';
-import { INDIAN_STATES } from '@/lib/indianStates';
 import { computeSchedule } from '@/lib/coursePayments';
 import { fmtFixed2 } from '@/lib/format';
 
@@ -21,7 +20,7 @@ type Mismatch = { severity: 'high' | 'medium'; where: string; message: string };
 const field = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '8px 10px', fontSize: 14, width: '100%' } as const;
 const btn = { ...field, width: 'auto', cursor: 'pointer', marginRight: 6 } as const;
 const h2 = { fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)', margin: '28px 0 10px' } as const;
-const empty = { client_name: '', client_email: '', client_phone: '', client_type: 'individual', client_company: '', client_gst: '', client_state: 'Tamil Nadu', description: '', base_total: '', advance_base: '' };
+const empty = { client_name: '', client_email: '', client_phone: '', description: '', base_total: '', advance_base: '' };
 const inr = (minor: number) => `₹${fmtFixed2(minor / 100)}`;
 const fmtD = (s: string | null) => (s ? new Date(s).toLocaleDateString('en-GB') : '');
 
@@ -100,7 +99,7 @@ export default function PaymentPlansClient() {
   return (
     <>
       <h1 className={styles.sectionTitle}>Course payment plans</h1>
-      <p style={{ marginBottom: 8, opacity: 0.7, fontSize: 13 }}>Each payment gets its own numbered tax bill, emailed to the client and saved under Invoices, so it flows into the Financial Year Report. Leave the advance blank for a one-time full payment.</p>
+      <p style={{ marginBottom: 8, opacity: 0.7, fontSize: 13 }}>Each payment gets its own numbered tax bill, emailed to the client and saved under Invoices, so it flows into the Financial Year Report. The client fills in their own billing details (company, PAN/GSTIN, address, state) on the pay page. Leave the advance blank for a one-time full payment.</p>
       <p style={{ marginBottom: 16, fontFamily: 'var(--mono)', fontSize: 12, color: testMode ? '#ffb300' : '#4caf50' }}>Razorpay mode: {testMode ? 'TEST (bills are numbered YAFT-TEST and never count in reports)' : 'LIVE'}</p>
       {error && <p style={{ color: '#e55', marginBottom: 12 }}>{error}</p>}
       {notice && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{notice}</p>}
@@ -116,10 +115,6 @@ export default function PaymentPlansClient() {
         <input style={field} placeholder="Client name" value={form.client_name} onChange={(e) => set('client_name', e.target.value)} required />
         <input style={field} type="email" placeholder="Client email" value={form.client_email} onChange={(e) => set('client_email', e.target.value)} required />
         <input style={field} placeholder="Phone (optional)" value={form.client_phone} onChange={(e) => set('client_phone', e.target.value)} />
-        <select style={field} value={form.client_type} onChange={(e) => set('client_type', e.target.value)}><option value="individual">Individual</option><option value="company">Company</option></select>
-        {form.client_type === 'company' && <input style={field} placeholder="Company name" value={form.client_company} onChange={(e) => set('client_company', e.target.value)} required />}
-        <input style={field} placeholder="GSTIN (optional)" value={form.client_gst} onChange={(e) => set('client_gst', e.target.value)} />
-        <select style={field} value={form.client_state} onChange={(e) => set('client_state', e.target.value)}>{INDIAN_STATES.map((s) => <option key={s}>{s}</option>)}</select>
         <input style={field} placeholder="Course (shown on the bills)" value={form.description} onChange={(e) => set('description', e.target.value)} required />
         <input style={field} type="number" min={1} step={1} placeholder="Full fee, base rupees (no GST)" value={form.base_total} onChange={(e) => set('base_total', e.target.value)} required />
         <input style={field} type="number" min={1} step={1} placeholder="Advance, base rupees (blank = full payment)" value={form.advance_base} onChange={(e) => set('advance_base', e.target.value)} />
