@@ -52,7 +52,7 @@ export default function PayClient({ token, options, initial, locked, outsideOk }
 
   if (done) return <p><strong>Payment received. Thank you.</strong> Your tax invoice will be emailed to you in a few minutes.</p>;
   return (
-    <div>
+    <div className="pay-actions">
       {locked ? (
         <p style={{ fontSize: 13, opacity: 0.75, marginBottom: 16 }}>
           Billing to: {d.client_company || d.client_name}{d.client_gst ? `, GSTIN ${d.client_gst}` : ''}{d.client_pan ? `, PAN ${d.client_pan}` : ''}, {d.client_state}. These details are locked because your first bill is issued. To change them, email {CONTACT_EMAIL}.
