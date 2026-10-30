@@ -25,11 +25,33 @@ type Proj = { id: string; planId: string; courseSlug: string; status: string; pu
 const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted', under_review: 'Under review', changes_requested: 'Changes requested', approved: 'Approved' };
 
 const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
-const box = { border: '1px solid var(--line)', background: 'var(--paper)', padding: 16, marginBottom: 14 } as const;
-const input = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '9px 10px', fontSize: 14, width: '100%' } as const;
-const btn = { background: 'var(--brass)', color: '#fff', border: '2px solid var(--brass)', padding: '10px 18px', fontSize: 14, fontWeight: 600, letterSpacing: '0.01em', cursor: 'pointer', borderRadius: 4 } as const;
-const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '2px solid rgba(255,255,255,0.55)' } as const;
-const BTN_CSS = 'main button:not(:disabled):hover,main a[style*="border"]:hover{filter:brightness(1.15)} main button:disabled{opacity:.4;cursor:not-allowed} main button:focus-visible,main a:focus-visible{outline:3px solid var(--blueprint);outline-offset:2px}';
+const box = { border: '1px solid var(--line)', borderLeft: '3px solid var(--blueprint)', background: 'var(--paper-2)', padding: '20px 22px', marginBottom: 16 } as const;
+const input = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '11px 12px', fontSize: 14, width: '100%', fontFamily: 'var(--display)', marginTop: 4 } as const;
+const btn = { background: 'var(--brass)', color: '#fff', border: '1px solid var(--brass)', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 500, cursor: 'pointer', borderRadius: 0 } as const;
+const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid rgba(255,255,255,0.6)' } as const;
+const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '12px 18px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
+const BTN_CSS = `
+.sp{font-family:var(--display);line-height:1.55}
+.sp p,.sp label,.sp td,.sp th,.sp li,.sp div{font-family:var(--display)}
+.sp .mono{font-family:var(--mono)}
+.sp button:not(:disabled):hover,.sp a[style*="border"]:hover{filter:brightness(1.15)}
+.sp button:disabled{opacity:.4;cursor:not-allowed}
+.sp button:focus-visible,.sp a:focus-visible,.sp input:focus-visible,.sp select:focus-visible,.sp textarea:focus-visible{outline:2px solid var(--blueprint);outline-offset:2px}
+.sp input,.sp select,.sp textarea{border-radius:0}
+.sp input:focus,.sp select:focus,.sp textarea:focus{border-color:var(--blueprint)!important}
+.sp table{border-collapse:collapse;width:100%}
+.sp th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.sp td{padding:10px;border-bottom:1px solid var(--line)}
+.sp a{color:var(--blueprint)}
+.sp a[style*="background"]{color:#fff}
+.sp h2,.sp h3{font-family:var(--display)}
+.sp-hero{border-bottom:1px solid var(--line);padding:8px 0 30px;margin-bottom:26px}
+.sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
+.sp-stat{border:1px solid var(--line);background:var(--paper-2);padding:14px 16px}
+.sp-stat b{display:block;font-family:var(--display);font-size:26px;font-weight:600;color:var(--ink)}
+.sp-stat span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.sp-tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px}
+`;
 function GoogleG() { return (<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.6 2.4 30.2 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.8 6.1C12.3 13.5 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.4 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.8-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.200 0 11.500-2 15.300-5.600l-7.500-5.800c-2.100 1.400-4.800 2.300-7.8 2.300-6.300 0-11.700-4-13.600-9.800l-7.8 6.1C6.500 42.6 14.600 48 24 48z"/></svg>); }
 function LinkedInIn() { return (<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><rect width="24" height="24" rx="3" fill="#fff"/><path fill="#0A66C2" d="M4.500 9h3v10.500h-3zM6 4.200a1.800 1.800 0 110 3.600 1.800 1.800 0 010-3.600zM9.800 9h2.900v1.400h.1c.4-.8 1.400-1.700 2.900-1.700 3.100 0 3.700 2 3.700 4.700v6.1h-3v-5.400c0-1.300 0-2.900-1.800-2.900s-2 1.400-2 2.800v5.500h-3z"/></svg>); }
 const badge = (c: string) => ({ display: 'inline-block', fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.05em', padding: '2px 8px', border: `1px solid ${c}`, color: c }) as const;
@@ -196,7 +218,7 @@ export default function StudentClient() {
     setMsg(r.ok ? 'Photo added.' : j.error ?? 'Upload failed.'); if (r.ok) { setTf({ ...tf, noPhoto: false }); load(); }
   }
 
-  const wrap = { maxWidth: 860, margin: '0 auto', padding: '32px 20px 64px', color: 'var(--ink)' } as const;
+  const wrap = { maxWidth: 1040, margin: '0 auto', padding: '28px 32px 72px', color: 'var(--ink)' } as const;
   if (verify) return (
     <main style={{ ...wrap, maxWidth: 520 }}>
       <h1 style={{ fontSize: 26, marginBottom: 12 }}>Certificate check</h1>
@@ -210,12 +232,13 @@ export default function StudentClient() {
   if (state === 'loading') return <main style={wrap}><p>Loading...</p></main>;
 
   if (state === 'out') return (
-    <main style={{ ...wrap, maxWidth: 440 }}>
+    <main className="sp" style={{ ...wrap, maxWidth: 480, paddingTop: 56 }}>
       <style>{BTN_CSS}</style>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src="/assets/logos/yaft-square-logo.png" alt="YAFT Designs" width={64} height={64} style={{ display: 'block', marginBottom: 16, borderRadius: 6 }} />
-      <h1 style={{ fontSize: 28, marginBottom: 8 }}>Student portal</h1>
-      <p style={{ opacity: 0.8, marginBottom: 20 }}>Sign in to see your courses, payments, bills and certificates.</p>
+      <div className="eyebrow" style={{ marginBottom: 14 }}>STUDENT PORTAL</div>
+      <h1 style={{ fontSize: 'clamp(30px,5vw,44px)', lineHeight: 1.08, marginBottom: 12 }}>Your courses, bills and certificates.</h1>
+      <p style={{ color: 'var(--ink-soft)', marginBottom: 24, fontSize: 16 }}>Sign in to see your courses, payments, bills and certificates.</p>
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
       <div style={box}>
         <button style={{ ...btn, width: '100%', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} onClick={google}><GoogleG />Continue with Google</button>
@@ -233,19 +256,27 @@ export default function StudentClient() {
   const name = me.profile.displayName || me.profile.email;
   const certsReady: number = me.totals.certificates;
   return (
-    <main style={wrap}>
+    <main className="sp" style={wrap}>
       <style>{BTN_CSS}</style>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap', marginBottom: 18 }}>
-        {me.profile.googleAvatar
-          // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={me.profile.googleAvatar} alt="" width={48} height={48} referrerPolicy="no-referrer" style={{ borderRadius: '50%' }} />
-          : <div style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)' }}>{initials(name)}</div>}
-        <div style={{ flex: 1, minWidth: 180 }}>
-          <h1 style={{ fontSize: 24, margin: 0 }}>{name}{me.profile.linkedinConnected && me.totals.courses > 0 && <VerifiedBadge size={20} />}</h1>
-          <div style={{ fontSize: 13, opacity: 0.7 }}>{me.totals.courses} course{me.totals.courses === 1 ? '' : 's'} · Outstanding {inr(me.totals.outstandingInr)} · {certsReady} certificate{certsReady === 1 ? '' : 's'} available</div>
+      <div className="sp-hero">
+        <div className="eyebrow" style={{ marginBottom: 16 }}>STUDENT PORTAL</div>
+        <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+          {me.profile.googleAvatar
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={me.profile.googleAvatar} alt="" width={64} height={64} referrerPolicy="no-referrer" style={{ borderRadius: '50%', border: '2px solid var(--blueprint)' }} />
+            : <div style={{ width: 64, height: 64, borderRadius: '50%', border: '2px solid var(--blueprint)', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)' }}>{initials(name)}</div>}
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1, margin: 0 }}>{name}{me.profile.linkedinConnected && me.totals.courses > 0 && <VerifiedBadge size={24} />}</h1>
+            <div className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 6 }}>{me.profile.email}</div>
+          </div>
+          <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
+          <button style={ghost} onClick={signOut}>Sign out</button>
         </div>
-        <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
-        <button style={ghost} onClick={signOut}>Sign out</button>
+        <div className="sp-stats">
+          <div className="sp-stat"><b>{me.totals.courses}</b><span>Courses</span></div>
+          <div className="sp-stat"><b>{inr(me.totals.outstandingInr)}</b><span>Outstanding</span></div>
+          <div className="sp-stat"><b>{certsReady}</b><span>Certificates</span></div>
+        </div>
       </div>
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
 
@@ -278,8 +309,8 @@ export default function StudentClient() {
         </div>
       )}
 
-      <div role="tablist" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-        {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} style={tab === t ? btn : ghost}>{t}</button>)}
+      <div role="tablist" className="sp-tabs">
+        {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>{t}</button>)}
       </div>
 
       {tab === 'My Courses' && (<>
