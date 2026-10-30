@@ -193,7 +193,7 @@ export default function StudentClient() {
     setMsg(r.ok ? 'Photo added.' : j.error ?? 'Upload failed.'); if (r.ok) { setTf({ ...tf, noPhoto: false }); load(); }
   }
 
-  const wrap = { maxWidth: 860, margin: '0 auto', padding: '64px 20px', color: 'var(--ink)' } as const;
+  const wrap = { maxWidth: 860, margin: '0 auto', padding: '32px 20px 64px', color: 'var(--ink)' } as const;
   if (verify) return (
     <main style={{ ...wrap, maxWidth: 520 }}>
       <h1 style={{ fontSize: 26, marginBottom: 12 }}>Certificate check</h1>

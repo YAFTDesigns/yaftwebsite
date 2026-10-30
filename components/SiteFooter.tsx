@@ -25,7 +25,8 @@ export default function SiteFooter() {
               <a href="/terms" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Terms</a><br />
               <a href="/privacy" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Privacy</a><br />
               <a href="/consent" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Consent</a><br />
-              <a href="/cookies" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Cookies</a>
+              <a href="/cookies" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Cookies</a><br />
+              <a href="/student" style={{ display: 'inline-block', padding: '6px 0', color: 'var(--ink-soft)', fontFamily: 'var(--mono)', fontSize: 11 }}>Student login</a>
             </p>
           </div>
         </div>
