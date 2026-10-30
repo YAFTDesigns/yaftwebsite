@@ -215,7 +215,20 @@ export async function recordCourseRefund(refund: Record<string, unknown>): Promi
   const amount = Number(refund.amount ?? 0);
   if (!refundId || !paymentId) return { ok: true, status: 200, body: { ok: true, ignored: true } };
   const { data: row } = await supabase.from('course_payments').select('id, plan_id, invoice_id, test_mode').eq('payment_id', paymentId).maybeSingle();
-  if (!row) return { ok: true, status: 200, body: { ok: true, ignored: true } }; // not a course payment (e.g. Tortoise)
+  if (!row) {
+    // A duplicate payment (second payment for an instalment already paid) was never billed and its Razorpay id was never
+    // stored on a payment row; only the audit trail knows it. Refunding it is the correct fix, so record it as settled.
+    const { data: dup } = await supabase.from('course_payment_events').select('plan_id, payment_row_id').eq('event', 'overpayment').eq('razorpay_payment_id', paymentId).maybeSingle();
+    if (!dup) return { ok: true, status: 200, body: { ok: true, ignored: true } }; // not a course payment (e.g. Tortoise)
+    const { error: dupErr } = await supabase.from('invoice_adjustments').insert({
+      plan_id: dup.plan_id, payment_row_id: dup.payment_row_id, invoice_id: null, razorpay_refund_id: refundId, refund_minor: amount,
+      status: 'dismissed', reason: 'Refund of a duplicate payment that was never billed: no bill was issued, so no credit note is needed.',
+    });
+    if (dupErr) return dupErr.code === '23505' ? { ok: true, status: 200, body: { ok: true, duplicate: true } } : { ok: false, status: 500, body: { error: 'DB error' } };
+    if (dup.payment_row_id) await supabase.from('course_payments').update({ sync_status: 'ok', sync_error: 'Duplicate payment refunded' }).eq('id', dup.payment_row_id).eq('sync_status', 'mismatch');
+    await logCourseEvent({ planId: dup.plan_id, paymentRowId: dup.payment_row_id, razorpayPaymentId: paymentId, event: 'duplicate_payment_refunded', detail: { refund_id: refundId, amount_minor: amount } });
+    return { ok: true, status: 200, body: { ok: true, recorded: true, unbilled_duplicate: true } };
+  }
 
   const { error } = await supabase.from('invoice_adjustments').insert({
     plan_id: row.plan_id, payment_row_id: row.id, invoice_id: row.invoice_id, razorpay_refund_id: refundId, refund_minor: amount,

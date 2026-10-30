@@ -152,6 +152,20 @@ describe('partial refund', () => {
     expect(summariseFy(2025, bills(), adj as never).total).toBe(17700);
     expect(summariseFy(2025, bills(), adj as never).creditTotal).toBe(0);
   });
+  it('refund of a duplicate (never billed) payment is recorded as settled and clears the mismatch', async () => {
+    const plan = seedPlan(); seedOrder(plan.id, 'advance', 1770000, 'order_A'); const second = seedOrder(plan.id, 'advance', 1770000, 'order_B');
+    await fulfilCoursePayment(captured('order_A', 'pay_A', 1770000), false);
+    await fulfilCoursePayment(captured('order_B', 'pay_B', 1770000), false);
+    expect(second.sync_status).toBe('mismatch');
+    const r = await recordCourseRefund({ id: 'rfnd_dup', payment_id: 'pay_B', amount: 1770000 });
+    expect(r.body.unbilled_duplicate).toBe(true);
+    expect((await recordCourseRefund({ id: 'rfnd_dup', payment_id: 'pay_B', amount: 1770000 })).body.duplicate).toBe(true);
+    const adj = state.db.t('invoice_adjustments');
+    expect(adj.length).toBe(1);
+    expect(adj[0].status).toBe('dismissed');
+    expect(second.sync_status).toBe('ok');
+    expect(bills().length).toBe(1);
+  });
   it('ignores refunds for payments that are not course payments', async () => {
     expect((await recordCourseRefund({ id: 'rfnd_x', payment_id: 'pay_tortoise', amount: 100 })).body.ignored).toBe(true);
   });
