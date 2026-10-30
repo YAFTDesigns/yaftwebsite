@@ -4,6 +4,7 @@ import { getStudentSession } from '@/lib/student/session';
 import { sameOrigin } from '@/lib/student/csrf';
 import { cleanName } from '@/lib/student/safe';
 import { audit } from '@/lib/student/audit';
+import { linkedinProfileUrl } from '@/lib/student/verified';
 
 export async function PATCH(req: NextRequest) {
   if (!sameOrigin(req)) return NextResponse.json({ error: 'Bad origin' }, { status: 403 });
@@ -16,6 +17,11 @@ export async function PATCH(req: NextRequest) {
   if ('phone' in b) {
     const ph = typeof b.phone === 'string' ? b.phone.replace(/[^\d+ ]/g, '').trim().slice(0, 20) : '';
     patch.phone = ph || null;
+  }
+  if ('linkedinUrl' in b) {
+    const raw = typeof b.linkedinUrl === 'string' ? b.linkedinUrl.trim() : '';
+    if (raw) { const li = linkedinProfileUrl(raw); if (!li) return NextResponse.json({ error: 'Use your LinkedIn profile address, like linkedin.com/in/yourname' }, { status: 400 }); patch.linkedin_url = li; }
+    else patch.linkedin_url = null;
   }
   const { error } = await getSupabaseAdmin().from('students').update(patch).eq('id', s.profile.id);
   if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });

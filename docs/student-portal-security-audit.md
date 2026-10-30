@@ -80,3 +80,12 @@ Errors log with a `[student-*]` or `[portal-audit]` prefix in Vercel logs. Sugge
 2. Supabase Site URL and redirect URLs; Google consent screen branding verification.
 3. Privacy: retention, minors, export/deletion process.
 4. Leaked-password protection toggle; Vercel protection setting.
+
+## Addendum: Verified student shield (2026-10-31)
+
+- **What "verified" means:** a paid YAFT enrolment AND a LinkedIn account connected through LinkedIn sign-in (OpenID Connect identity on the Supabase account), AND the student's own choice to show it. A LinkedIn address that is only typed is never treated as proof; it is shown as a plain link only when the shield is on.
+- **Source of truth:** `user.identities` from the verified session. `students.linkedin_verified_at` is kept in step on every session read and is cleared if the identity is unlinked.
+- **Consent:** new purpose `public_verified_badge` in the consent ledger (version and time). Switching it off removes the shield and LinkedIn link from already-published testimonials and projects immediately.
+- **Public data added:** a boolean `verified` on `testimonials` and `student_work`, and the existing testimonial LinkedIn link when the student typed one and allowed it. Nothing else.
+- **Limit:** LinkedIn sign-in proves the account is controlled by the person; it does not prove the typed profile address belongs to that same account (LinkedIn does not return the address). The shield text says "enrolled with a connected LinkedIn account", not "identity checked".
+- **Needs owner setup:** create a LinkedIn app with "Sign In with LinkedIn using OpenID Connect", add the client id and secret under Supabase > Authentication > Providers > LinkedIn (OIDC), turn on Supabase "Allow manual linking", then set `LINKEDIN_LOGIN_ENABLED=1` in Vercel. Until then the button shows "coming soon".

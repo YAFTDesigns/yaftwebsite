@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import styles from './TestimonialsMarquee.module.css';
+import VerifiedBadge from './VerifiedBadge';
 
 type Testimonial = {
   quote: string;
@@ -13,6 +14,7 @@ type Testimonial = {
   show_social: boolean;
   photo_url: string;
   rating: number;
+  verified: boolean;
 };
 
 function renderStars(rating: number) {
@@ -75,7 +77,7 @@ export default function TestimonialsMarquee() {
           const fromDb: Testimonial[] = data.map((t: {
             quote: string; name: string; role: string; institution: string | null;
             linkedin_url: string | null; instagram_url: string | null;
-            show_social: boolean | null; photo_url: string | null; rating: number | null;
+            show_social: boolean | null; photo_url: string | null; rating: number | null; verified: boolean | null;
           }) => ({
             quote: t.quote,
             name: t.name,
@@ -85,6 +87,7 @@ export default function TestimonialsMarquee() {
             show_social: t.show_social || false,
             photo_url: t.photo_url || '',
             rating: t.rating || 5.0,
+            verified: t.verified === true,
           }));
           setItems(pickRandom(fromDb, 15));
         }
@@ -114,7 +117,7 @@ export default function TestimonialsMarquee() {
               <div className={styles.person}>
                 <Avatar name={t.name} photo_url={t.photo_url} />
                 <div>
-                  <div className={styles.name}>{t.name}</div>
+                  <div className={styles.name}>{t.name}{t.verified && <VerifiedBadge />}</div>
                   <div className={styles.role}>{t.title}</div>
                   {t.show_social && t.linkedin && (
                     <a href={t.linkedin} target="_blank" rel="noopener" className={styles.liLink}>LinkedIn ↗</a>

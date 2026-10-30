@@ -8,7 +8,7 @@ export async function GET() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from('testimonials')
-    .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating')
+    .select('name, role, institution, quote, linkedin_url, instagram_url, show_social, photo_url, rating, verified')
     .eq('status', 'approved')
     .is('deleted_at', null)
     .order('reviewed_at', { ascending: false })

@@ -71,3 +71,18 @@ describe('project card fields (mirror the public form)', () => {
     expect(cardMeta({}, 'rhino-architecture').role).toBe('YAFT Designs student');
   });
 });
+
+import { linkedinProfileUrl, hasLinkedinIdentity } from './verified';
+describe('LinkedIn verification helpers', () => {
+  it('accepts real profile addresses only', () => {
+    expect(linkedinProfileUrl('linkedin.com/in/arjun-r')).toBe('https://www.linkedin.com/in/arjun-r');
+    expect(linkedinProfileUrl('https://in.linkedin.com/in/arjun-r/')).toBe('https://www.linkedin.com/in/arjun-r');
+    for (const bad of ['https://evil.com/in/arjun', 'https://linkedin.com.evil.com/in/arjun', 'https://www.linkedin.com/company/x', 'javascript:alert(1)', 'https://u:p@linkedin.com/in/arjun', 'http://x', '', 42])
+      expect(linkedinProfileUrl(bad as unknown)).toBeNull();
+  });
+  it('is verified only by a LinkedIn sign-in identity, never by a typed link', () => {
+    expect(hasLinkedinIdentity([{ provider: 'google' }, { provider: 'linkedin_oidc' }])).toBe(true);
+    expect(hasLinkedinIdentity([{ provider: 'google' }])).toBe(false);
+    expect(hasLinkedinIdentity(null)).toBe(false);
+  });
+});

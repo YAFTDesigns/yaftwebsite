@@ -12,6 +12,7 @@ export type StudentWork = {
   description: string;
   image_url: string | null;
   portfolio_url: string | null;
+  verified?: boolean;
 };
 
 export type Publication = {
@@ -40,7 +41,7 @@ export async function getStudentWork(): Promise<StudentWork[]> {
   try {
     const { data, error } = await getSupabasePublic()
       .from('student_work')
-      .select('id,name,role,project_title,tool,category,description,image_url,portfolio_url')
+      .select('id,name,role,project_title,tool,category,description,image_url,portfolio_url,verified')
       .eq('status', 'approved')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });

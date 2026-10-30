@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import VerifiedBadge from './VerifiedBadge';
 import type { StudentWork, Publication, Partner } from '@/lib/feature-wall';
 import styles from './FeatureWall.module.css';
 import { jsonInit } from '@/lib/jsonInit';
@@ -157,7 +158,7 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
                 </div>
                 <div className={styles.scardBody}>
                   <p className={styles.scardTitle}>{s.project_title}</p>
-                  <p className={styles.scardName}>{s.name} · {s.role}</p>
+                  <p className={styles.scardName}>{s.name}{s.verified && <VerifiedBadge size={14} />} · {s.role}</p>
                   <p className={styles.scardDesc}>{s.description}</p>
                   <div className={styles.scardFoot}>
                     <span className={styles.stag}>{s.category}</span>

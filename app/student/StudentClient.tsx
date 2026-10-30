@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
 import { fmtFixed2 } from '@/lib/format';
+import VerifiedBadge from '@/components/VerifiedBadge';
 
 type Card = {
   planId: string; title: string; courseSlugs: string[]; currency: 'INR' | 'USD'; totalInr: number; paidInr: number; balanceInr: number;
@@ -13,7 +14,7 @@ type Card = {
   creditNotes: { creditNoteNo: string; date: string | null; total: number | null }[];
 };
 type Me = {
-  profile: { displayName: string | null; certificateName: string | null; phone: string | null; email: string; googleAvatar: string | null };
+  profile: { displayName: string | null; certificateName: string | null; phone: string | null; email: string; googleAvatar: string | null; linkedinUrl: string | null; linkedinConnected: boolean; linkedinEnabled: boolean; badgeConsent: boolean; verified: boolean };
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
@@ -43,7 +44,7 @@ export default function StudentClient() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState('');
-  const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '' });
+  const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '', linkedinUrl: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [interestOn, setInterestOn] = useState(false);
   const [edit, setEdit] = useState<{ key: string; name: string; role: string; title: string; tool: string; category: string; description: string; link: string; publish: boolean } | null>(null);
@@ -56,7 +57,7 @@ export default function StudentClient() {
     if (!r.ok) { setMsg('Could not load your account. Please refresh.'); setState('out'); return null; }
     const j: Me = await r.json();
     setMe(j); setState('in');
-    setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '' });
+    setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '', linkedinUrl: j.profile.linkedinUrl ?? '' });
     return j;
   }, []);
 
@@ -111,6 +112,14 @@ export default function StudentClient() {
   async function requestClaim() {
     const { j } = await post('/api/student/claim/request', { link });
     setMsg(j.message ?? 'Request received.'); setLink('');
+  }
+  async function connectLinkedin() {
+    const { error } = await getSupabaseBrowser().auth.linkIdentity({ provider: 'linkedin_oidc', options: { redirectTo: redirectTo() } });
+    if (error) setMsg('Could not start the LinkedIn connection. Please try again later.');
+  }
+  async function setBadge(on: boolean) {
+    const { ok, j } = await post('/api/student/badge', { on });
+    setMsg(ok ? (on ? 'Done. The Verified shield can now show next to your published work.' : 'The shield is switched off, and removed from anything already public.') : j.error ?? 'Could not change that.'); if (ok) load();
   }
   async function setInterest(on: boolean) {
     const { ok } = await post('/api/student/interest-consent', { on });
@@ -225,7 +234,7 @@ export default function StudentClient() {
           ? <img src={me.profile.googleAvatar} alt="" width={48} height={48} referrerPolicy="no-referrer" style={{ borderRadius: '50%' }} />
           : <div style={{ width: 48, height: 48, borderRadius: '50%', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)' }}>{initials(name)}</div>}
         <div style={{ flex: 1, minWidth: 180 }}>
-          <h1 style={{ fontSize: 24, margin: 0 }}>{name}</h1>
+          <h1 style={{ fontSize: 24, margin: 0 }}>{name}{me.profile.linkedinConnected && me.totals.courses > 0 && <VerifiedBadge size={20} />}</h1>
           <div style={{ fontSize: 13, opacity: 0.7 }}>{me.totals.courses} course{me.totals.courses === 1 ? '' : 's'} · Outstanding {inr(me.totals.outstandingInr)} · {certsReady} certificate{certsReady === 1 ? '' : 's'} available</div>
         </div>
         <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
@@ -238,6 +247,15 @@ export default function StudentClient() {
           <label style={{ fontSize: 12 }}>Display name<input style={input} value={profile.displayName} maxLength={80} onChange={(e) => setProfile({ ...profile, displayName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Name on certificate (kept separate from your display name)<input style={input} value={profile.certificateName} maxLength={80} onChange={(e) => setProfile({ ...profile, certificateName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Phone (optional)<input style={input} value={profile.phone} maxLength={20} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label>
+          <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
+            <strong style={{ fontSize: 13 }}>Verified student shield <VerifiedBadge /></strong>
+            <p style={{ fontSize: 12, opacity: 0.75, margin: '4px 0 8px' }}>Connect your LinkedIn account and you get a blue shield beside your name on testimonials, Community Works and, later, the student forum. It shows you are a real YAFT student. Typing a link is not enough; you sign in to LinkedIn once so we know the account is yours.</p>
+            {me.profile.linkedinConnected
+              ? <p style={{ fontSize: 13, margin: '0 0 8px' }}>LinkedIn connected ✓</p>
+              : me.profile.linkedinEnabled ? <button style={ghost} onClick={connectLinkedin}>Connect LinkedIn</button> : <p style={{ fontSize: 12, opacity: 0.7 }}>LinkedIn connection is coming soon.</p>}
+            <label style={{ fontSize: 12, display: 'block', marginTop: 8 }}>Your public LinkedIn address (optional, shown as a link next to your testimonial)<input style={input} placeholder="linkedin.com/in/yourname" value={profile.linkedinUrl} onChange={(e) => setProfile({ ...profile, linkedinUrl: e.target.value })} /></label>
+            <label style={{ fontSize: 12, display: 'block', marginTop: 8, opacity: me.profile.linkedinConnected ? 1 : 0.5 }}><input type="checkbox" disabled={!me.profile.linkedinConnected} checked={me.profile.badgeConsent} onChange={(e) => setBadge(e.target.checked)} /> Show the Verified shield (and my LinkedIn link) next to my published testimonials and projects. I can switch this off any time.</label>
+          </div>
           <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0' }}>Signed in as {me.profile.email}. Changing your sign-in email never moves your enrolments.</p>
           <label style={{ fontSize: 12, display: 'block', margin: '8px 0' }}><input type="checkbox" checked={interestOn} onChange={(e) => setInterest(e.target.checked)} /> Remember which courses I look at while signed in, so YAFT can follow up helpfully. Off by default; switching it off deletes what was saved. Browsing alone never counts as marketing consent.</label>
           <button style={btn} onClick={saveProfile}>Save profile</button>

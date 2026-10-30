@@ -2,6 +2,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { cleanImageUpload } from '@/lib/imageUpload';
 import { cleanText } from './safe';
 import { audit } from './audit';
+import { verifiedBadgeFor } from './verified';
 
 type Admin = ReturnType<typeof getSupabaseAdmin>;
 
@@ -51,7 +52,8 @@ export async function publishProject(revisionId: string): Promise<boolean> {
   const gallery: string[] = [];
   for (const g of (rev.gallery_paths ?? []).slice(0, 8)) { const n = await copyPublic(admin, { privatePath: g }, 'site-images', 'student-work'); if (n) gallery.push(n); }
   const photo = p.profile_photo_path ? await copyPublic(admin, { privatePath: p.profile_photo_path }, 'site-images', 'student-work/photos', 800) : null;
-  const { error } = await admin.from('student_work').insert({
+  const badge = await verifiedBadgeFor(p.student_id);
+  const { error } = await admin.from('student_work').insert({ verified: badge.verified,
     name: p.public_display_name, role: p.public_role || 'YAFT Designs student', project_title: cleanText(rev.title, 120), tool: p.tool || toolFor(p.course_slug), category: p.category || 'Student project', profile_photo_url: photo,
     description: cleanText(rev.description ?? '', 300) || cleanText(rev.title, 120), image_url: cover, project_image_urls: gallery.length ? gallery : null,
     portfolio_url: (rev.links ?? [])[0] ?? null, status: 'approved', portal_project_id: p.id,
@@ -77,9 +79,10 @@ export async function approveTestimonial(id: string, adminEmail: string): Promis
     if (stored) photo_url = admin.storage.from('public-assets').getPublicUrl(`testimonials/${stored}`).data.publicUrl;
   }
   await admin.from('testimonials').update({ deleted_at: new Date().toISOString() }).eq('portal_testimonial_id', t.id).is('deleted_at', null);
+  const badge = await verifiedBadgeFor(t.student_id);
   const { data: pub, error } = await admin.from('testimonials').insert({
     name: t.public_display_name || 'Student', role: 'Student', course_taken: course?.title ?? null, quote: t.quote, photo_url,
-    show_social: false, rating: 5.0, source: 'student_portal', status: 'approved', reviewed_at: new Date().toISOString(), portal_testimonial_id: t.id,
+    linkedin_url: badge.verified ? badge.linkedinUrl : null, show_social: badge.verified && !!badge.linkedinUrl, verified: badge.verified, rating: 5.0, source: 'student_portal', status: 'approved', reviewed_at: new Date().toISOString(), portal_testimonial_id: t.id,
   }).select('id').single();
   if (error || !pub) return { ok: false, error: 'Could not publish' };
   await admin.from('student_testimonials').update({ status: 'approved', published_testimonial_id: pub.id, updated_at: new Date().toISOString() }).eq('id', t.id);

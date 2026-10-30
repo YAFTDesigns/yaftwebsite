@@ -1,11 +1,12 @@
 import { getSupabaseServer } from '@/lib/supabase/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { cleanName, safeHttpsLink } from './safe';
+import { hasLinkedinIdentity } from './verified';
 
-export type StudentProfile = { id: string; display_name: string | null; certificate_name: string | null; phone: string | null; avatar_path: string | null };
-export type StudentSession = { userId: string; email: string; profile: StudentProfile; googleAvatar: string | null };
+export type StudentProfile = { id: string; display_name: string | null; certificate_name: string | null; phone: string | null; avatar_path: string | null; linkedin_url: string | null; linkedin_verified_at: string | null };
+export type StudentSession = { userId: string; email: string; profile: StudentProfile; googleAvatar: string | null; linkedinConnected: boolean };
 
-const SEL = 'id, display_name, certificate_name, phone, avatar_path';
+const SEL = 'id, display_name, certificate_name, phone, avatar_path, linkedin_url, linkedin_verified_at';
 
 /**
  * The ONLY way portal code learns who the student is: the verified Supabase session, read on the server.
@@ -28,7 +29,14 @@ export async function getStudentSession(): Promise<StudentSession | null> {
     const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
     const pic = safeHttpsLink(meta.avatar_url ?? meta.picture);
     const googleAvatar = pic && new URL(pic).hostname.endsWith('googleusercontent.com') ? pic : null;
-    return { userId: user.id, email: user.email.toLowerCase(), profile: profile as StudentProfile, googleAvatar };
+    // LinkedIn is "connected" only if the auth account really has a LinkedIn sign-in identity. Keep our record in step with it (also clears it if unlinked).
+    const linkedinConnected = hasLinkedinIdentity(user.identities);
+    if (linkedinConnected !== !!profile.linkedin_verified_at) {
+      const at = linkedinConnected ? new Date().toISOString() : null;
+      await admin.from('students').update({ linkedin_verified_at: at }).eq('id', profile.id);
+      profile = { ...profile, linkedin_verified_at: at };
+    }
+    return { userId: user.id, email: user.email.toLowerCase(), profile: profile as StudentProfile, googleAvatar, linkedinConnected };
   } catch (err) {
     console.error('[student-session] failed:', err);
     return null; // fail closed
