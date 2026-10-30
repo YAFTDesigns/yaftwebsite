@@ -5,6 +5,7 @@ import { adminEmail } from '@/lib/admin/adminEmail';
 import { cleanText } from '@/lib/student/safe';
 import { issueCertificateIfEligible } from '@/lib/student/issueCertificate';
 import { audit } from '@/lib/student/audit';
+import { publishProject, unpublishProject } from '@/lib/student/publish';
 import { sameOrigin } from '@/lib/student/csrf';
 
 // GET: submitted / under-review project revisions. POST { revisionId, decision: 'under_review'|'changes_requested'|'approved', feedback? }
@@ -29,9 +30,14 @@ export async function POST(req: NextRequest) {
   if (!rev || !['submitted', 'under_review'].includes(rev.status)) return NextResponse.json({ error: 'Not awaiting review' }, { status: 409 });
   const proj = rev.student_projects as unknown as { plan_id: string; course_slug: string; publish_consent: boolean };
   await admin.from('project_revisions').update({ status: decision, feedback, feedback_released: decision === 'changes_requested' || (decision === 'approved' && !!feedback), reviewed_by: email, reviewed_at: new Date().toISOString() }).eq('id', rev.id);
-  await admin.from('student_projects').update({ status: decision, ...(decision === 'approved' && proj.publish_consent ? { published_revision_id: rev.id } : {}) }).eq('id', rev.project_id);
+  await admin.from('student_projects').update({ status: decision }).eq('id', rev.project_id);
   await audit({ actor_type: 'admin', actor_ref: email, action: `project_${decision}`, subject: rev.project_id });
   let certificate: unknown = null;
-  if (decision === 'approved') certificate = await issueCertificateIfEligible(proj.plan_id, proj.course_slug, 'auto');
-  return NextResponse.json({ ok: true, certificate });
+  let published = false;
+  if (decision === 'approved') {
+    published = proj.publish_consent ? await publishProject(rev.id) : false;
+    if (!proj.publish_consent) await unpublishProject(rev.project_id, email ?? 'admin');
+    certificate = await issueCertificateIfEligible(proj.plan_id, proj.course_slug, 'auto');
+  }
+  return NextResponse.json({ ok: true, certificate, published });
 }

@@ -186,7 +186,7 @@ export default function FeatureWall({ studentWork, publications, partners }: Pro
           {!showWorkForm
             ? <div className={styles.submitRow}>
                 <button className={styles.submitBtn} onClick={() => setShowWorkForm(true)}>Submit your work →</button>
-                <p className={styles.submitNote}>Trained with YAFT? Share what you built. We&apos;ll feature it here.</p>
+                <p className={styles.submitNote}>Trained with YAFT? Share what you built. We&apos;ll feature it here. Enrolled students can also <a href="/student" style={{ textDecoration: 'underline' }}>submit from their student dashboard</a>.</p>
               </div>
             : <div className={styles.form}>
                 <p className={styles.formTitle}>Submit your project</p>

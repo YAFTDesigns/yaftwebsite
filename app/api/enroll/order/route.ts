@@ -7,6 +7,9 @@ import { loadCatalog, resolveSelection, advanceFor } from '@/lib/courseCatalog';
 import { validateBillingDetails } from '@/lib/billingDetails';
 import { createCourseOrder } from '@/lib/courseOrder';
 import { computeSchedule } from '@/lib/coursePayments';
+import { getStudentSession } from '@/lib/student/session';
+import { recordInterest } from '@/lib/student/interest';
+import { audit } from '@/lib/student/audit';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/enroll/order { items: ['course:slug' | 'bundle:slug'], currency: 'INR'|'USD', choice: 'advance'|'full', details }
@@ -37,6 +40,14 @@ export async function POST(request: NextRequest) {
     details_confirmed_at: new Date().toISOString(),
   }).select('*').single();
   if (error || !plan) { console.error('[enroll] plan insert failed:', error); return NextResponse.json({ error: 'Could not start your enrolment. Please try again.' }, { status: 500 }); }
+
+  // Signed-in verified student: attach this enrolment to their account server-side (identity comes from the session, never from the form).
+  const student = await getStudentSession();
+  if (student) {
+    const { error: linkErr } = await getSupabaseAdmin().from('student_enrolments').insert({ student_id: student.profile.id, plan_id: plan.id, linked_via: 'checkout_signed_in' });
+    if (!linkErr) await audit({ actor_type: 'student', actor_ref: student.profile.id, action: 'enrolment_linked_at_checkout', subject: plan.id });
+    for (const slug of sel.courseSlugs) await recordInterest(student.profile.id, slug, 'checkout_started');
+  }
 
   const r = await createCourseOrder(plan, { choice, details: v.value });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });

@@ -28,7 +28,9 @@ export async function ownsPlan(studentId: string, planId: string): Promise<boole
   const { data } = await admin.from('student_enrolments').select('plan_id, course_payment_plans!inner(status)').eq('student_id', studentId).eq('plan_id', planId).maybeSingle();
   const plan = data?.course_payment_plans as unknown as { status: string } | { status: string }[] | null | undefined;
   const status = Array.isArray(plan) ? plan[0]?.status : plan?.status;
-  return !!data && status !== 'cancelled';
+  if (!data || status === 'cancelled') return false;
+  const { count } = await admin.from('course_payments').select('id', { count: 'exact', head: true }).eq('plan_id', planId).eq('status', 'paid');
+  return (count ?? 0) > 0; // a started-but-unpaid checkout is not an active enrolment
 }
 
 export async function loadProjects(studentId: string): Promise<ProjectView[]> {

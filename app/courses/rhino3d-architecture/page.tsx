@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import CourseActions from '@/components/CourseActions';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 import Lightbox from '@/components/Lightbox';
@@ -95,6 +96,7 @@ export default function Rhino3DArchitecture() {
         <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 23,000 + GST<div className={s.feeUsd}>approx. $276</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 25,000 + GST<div className={s.feeUsd}>approx. $300</div></div></div>
       </div>
+      <CourseActions slug="rhino-architecture" title="Rhino3D for Architecture" />
       <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
       <div className={s.comboOffer}>
         <span className={s.comboOfferTag}>Combo offer</span>

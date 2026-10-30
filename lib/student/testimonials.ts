@@ -5,7 +5,7 @@ import { audit } from './audit';
 
 export const TESTIMONIAL_NOTICE_VERSION = '2026-10-v1';
 
-export type TestimonialView = { planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null };
+export type TestimonialView = { id: string; planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null };
 
 /** Photo rule: the student's own upload wins; otherwise their Google picture is used (the form says so before they submit);
  *  "none" means no photo at all. Stored in photo_path: a private-bucket path, 'google:<https url>', or null. */
@@ -17,8 +17,8 @@ export function resolvePhoto(opts: { uploadedPath: string | null; googleAvatar: 
 export const photoKind = (p: string | null): 'upload' | 'google' | 'none' => (!p ? 'none' : p.startsWith('google:') ? 'google' : 'upload');
 
 export async function loadTestimonials(studentId: string): Promise<TestimonialView[]> {
-  const { data } = await getSupabaseAdmin().from('student_testimonials').select('plan_id, course_slug, status, quote, public_display_name, photo_path, feedback').eq('student_id', studentId);
-  return (data ?? []).map((t) => ({ planId: t.plan_id, courseSlug: t.course_slug, status: t.status, quote: t.quote, publicName: t.public_display_name, photo: photoKind(t.photo_path), feedback: t.status === 'changes_requested' ? t.feedback : null }));
+  const { data } = await getSupabaseAdmin().from('student_testimonials').select('id, plan_id, course_slug, status, quote, public_display_name, photo_path, feedback').eq('student_id', studentId);
+  return (data ?? []).map((t) => ({ id: t.id, planId: t.plan_id, courseSlug: t.course_slug, status: t.status, quote: t.quote, publicName: t.public_display_name, photo: photoKind(t.photo_path), feedback: t.status === 'changes_requested' ? t.feedback : null }));
 }
 
 export async function submitTestimonial(student: { id: string }, googleAvatar: string | null, input: { planId: string; courseSlug: string; quote: unknown; publicName: unknown; noPhoto: boolean }): Promise<{ ok: true } | { ok: false; error: string; status: number }> {

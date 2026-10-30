@@ -47,7 +47,7 @@ export async function loadPortalView(student: { id: string; email: string }): Pr
       isTest: !!p.is_test,
     };
   });
-  const live = enrolments.filter((e) => e.payStatus !== 'cancelled');
+  const live = enrolments.filter((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid'); // unpaid = pending checkout, not active
   const [projects, certs, rules, testimonials] = await Promise.all([
     loadProjects(student.id),
     admin.from('certificates').select('certificate_id, course_title, course_suffix, issue_date, plan_id, course_slug, verify_token').eq('student_id', student.id).eq('revoked', false),

@@ -17,7 +17,7 @@ type Me = {
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
-  testimonials: { planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
+  testimonials: { id: string; planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
 };
 type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
 type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean };
@@ -29,7 +29,7 @@ const input = { background: 'var(--paper)', border: '1px solid var(--line)', col
 const btn = { background: 'var(--ink)', color: 'var(--paper)', border: '1px solid var(--ink)', padding: '9px 14px', fontSize: 14, cursor: 'pointer' } as const;
 const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid var(--line)' } as const;
 const badge = (c: string) => ({ display: 'inline-block', fontSize: 11, fontFamily: 'var(--mono)', textTransform: 'uppercase', letterSpacing: '.05em', padding: '2px 8px', border: `1px solid ${c}`, color: c }) as const;
-const STATUS: Record<Card['payStatus'], [string, string]> = { unpaid: ['Not paid yet', '#ffb300'], advance_paid: ['Advance paid', '#4c8bf5'], paid_in_full: ['Paid in full', '#4caf50'], cancelled: ['Cancelled', '#999'] };
+const STATUS: Record<Card['payStatus'], [string, string]> = { unpaid: ['Pending checkout', '#ffb300'], advance_paid: ['Advance paid', '#4c8bf5'], paid_in_full: ['Paid in full', '#4caf50'], cancelled: ['Cancelled', '#999'] };
 const inr = (n: number) => `₹${fmtFixed2(n)}`;
 const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?';
 
@@ -45,6 +45,7 @@ export default function StudentClient() {
   const [link, setLink] = useState('');
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '' });
   const [showProfile, setShowProfile] = useState(false);
+  const [interestOn, setInterestOn] = useState(false);
   const [edit, setEdit] = useState<{ key: string; title: string; description: string; links: string; publish: boolean; publicName: string } | null>(null);
   const [tf, setTf] = useState<{ key: string; quote: string; name: string; noPhoto: boolean } | null>(null);
   const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
@@ -103,6 +104,10 @@ export default function StudentClient() {
     const { j } = await post('/api/student/claim/request', { link });
     setMsg(j.message ?? 'Request received.'); setLink('');
   }
+  async function setInterest(on: boolean) {
+    const { ok } = await post('/api/student/interest-consent', { on });
+    if (ok) { setInterestOn(on); setMsg(on ? 'Okay, we will remember the courses you look at.' : 'Stopped, and what we had is deleted.'); }
+  }
   async function saveProfile() {
     const { ok, j } = await post('/api/student/profile', profile, 'PATCH');
     setMsg(ok ? 'Saved.' : j.error ?? 'Could not save.'); if (ok) { setShowProfile(false); load(); }
@@ -133,6 +138,11 @@ export default function StudentClient() {
     setMsg(r.ok ? 'Uploaded.' : j.error ?? 'Upload failed.'); if (r.ok) load();
   }
 
+  async function withdraw(kind: 'project' | 'testimonial', id: string) {
+    if (!window.confirm('Take this off the website? You can submit again later.')) return;
+    const { ok, j } = await post('/api/student/withdraw', { kind, id });
+    setMsg(ok ? 'Removed from the website.' : j.error ?? 'Could not remove.'); if (ok) load();
+  }
   async function submitTestimonial() {
     if (!tf) return;
     const [planId, courseSlug] = tf.key.split('|');
@@ -192,7 +202,7 @@ export default function StudentClient() {
           <h1 style={{ fontSize: 24, margin: 0 }}>{name}</h1>
           <div style={{ fontSize: 13, opacity: 0.7 }}>{me.totals.courses} course{me.totals.courses === 1 ? '' : 's'} · Outstanding {inr(me.totals.outstandingInr)} · {certsReady} certificate{certsReady === 1 ? '' : 's'} available</div>
         </div>
-        <button style={ghost} onClick={() => setShowProfile((v) => !v)}>Profile</button>
+        <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
         <button style={ghost} onClick={signOut}>Sign out</button>
       </div>
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
@@ -203,6 +213,7 @@ export default function StudentClient() {
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Name on certificate (kept separate from your display name)<input style={input} value={profile.certificateName} maxLength={80} onChange={(e) => setProfile({ ...profile, certificateName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Phone (optional)<input style={input} value={profile.phone} maxLength={20} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label>
           <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0' }}>Signed in as {me.profile.email}. Changing your sign-in email never moves your enrolments.</p>
+          <label style={{ fontSize: 12, display: 'block', margin: '8px 0' }}><input type="checkbox" checked={interestOn} onChange={(e) => setInterest(e.target.checked)} /> Remember which courses I look at while signed in, so YAFT can follow up helpfully. Off by default; switching it off deletes what was saved. Browsing alone never counts as marketing consent.</label>
           <button style={btn} onClick={saveProfile}>Save profile</button>
         </div>
       )}
@@ -244,6 +255,7 @@ export default function StudentClient() {
                     return (
                       <div key={key} style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
                         <strong style={{ fontSize: 13 }}>Testimonial{e.courseSlugs.length > 1 ? `: ${slug}` : ''}</strong>{' '}
+                        {t?.status === 'approved' && <button style={{ ...ghost, marginLeft: 8, padding: '3px 8px', fontSize: 12 }} onClick={() => withdraw('testimonial', t.id)}>Remove from website</button>}
                         {t && <span style={badge(t.status === 'approved' ? '#4caf50' : t.status === 'changes_requested' ? '#ffb300' : '#999')}>{t.status === 'submitted' ? 'With us for review' : t.status.replace('_', ' ')}</span>}
                         {t?.feedback && <p style={{ fontSize: 13, borderLeft: '3px solid var(--brass)', paddingLeft: 10 }}>Note from us: {t.feedback}</p>}
                         {t?.status !== 'submitted' && tf?.key !== key && <div><button style={{ ...ghost, marginTop: 8 }} onClick={() => setTf({ key, quote: t?.quote ?? '', name: t?.publicName ?? me.profile.displayName ?? '', noPhoto: t?.photo === 'none' && !!t })}>{t ? 'Edit testimonial' : 'Share a testimonial (optional)'}</button></div>}
@@ -309,7 +321,7 @@ export default function StudentClient() {
                 <strong>{e.courseSlugs.length > 1 ? slug : e.title}</strong>
                 <span style={badge(lat?.status === 'approved' ? '#4caf50' : lat?.status === 'changes_requested' ? '#ffb300' : '#999')}>{lat ? PSTATUS[lat.status] : 'Not started'}</span>
               </div>
-              {lat && <p style={{ fontSize: 14, margin: '8px 0 0' }}><strong>{lat.title}</strong> (version {lat.revNo}){pr?.published ? ' · shown on Community Works' : ''}</p>}
+              {lat && <p style={{ fontSize: 14, margin: '8px 0 0' }}><strong>{lat.title}</strong> (version {lat.revNo}){pr?.published ? ' · shown on Community Works' : ''}{pr?.published && <button style={{ ...ghost, marginLeft: 8, padding: '3px 8px', fontSize: 12 }} onClick={() => withdraw('project', pr.id)}>Withdraw from Community Works</button>}</p>}
               {lat?.feedback && <p style={{ fontSize: 13, borderLeft: '3px solid var(--brass)', paddingLeft: 10, marginTop: 8 }}>Reviewer note: {lat.feedback}</p>}
               {lat && <div style={{ fontSize: 12, marginTop: 6, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{[lat.coverPath, ...lat.galleryPaths].filter((x): x is string => !!x).map((x) => <a key={x} href={`/api/student/projects/asset?path=${encodeURIComponent(x)}`} target="_blank" rel="noreferrer">image</a>)}{lat.privateFiles.map((f) => <a key={f.path} href={`/api/student/projects/asset?path=${encodeURIComponent(f.path)}`} target="_blank" rel="noreferrer">{f.name} (private)</a>)}</div>}
               {!locked && edit?.key !== key && <button style={{ ...ghost, marginTop: 10 }} onClick={() => startEdit(e, slug)}>{!lat ? 'Start project' : lat.status === 'approved' ? 'Edit (creates a new version)' : 'Edit'}</button>}
