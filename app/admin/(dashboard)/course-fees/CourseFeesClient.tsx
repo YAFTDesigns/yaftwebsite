@@ -19,6 +19,7 @@ export default function CourseFeesClient() {
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState('');
   const [tick, setTick] = useState(0);
+  const [flash, setFlash] = useState<Record<string, 'saving' | 'saved' | 'error'>>({});
   const [nb, setNb] = useState({ slug: '', title: '', description: '', fee_inr: '', course_slugs: [] as string[] });
 
   useEffect(() => {
@@ -34,6 +35,21 @@ export default function CourseFeesClient() {
     if (res.ok) setTick((t) => t + 1);
     return res.ok;
   }
+  // Per-button feedback: grey "Saving...", green "Saved ✓" for a couple of seconds, red on error.
+  async function act(key: string, run: () => Promise<boolean>) {
+    setFlash((f) => ({ ...f, [key]: 'saving' }));
+    const ok = await run();
+    setFlash((f) => ({ ...f, [key]: ok ? 'saved' : 'error' }));
+    setTimeout(() => setFlash((f) => { const n = { ...f }; delete n[key]; return n; }), 2500);
+  }
+  const btnStyle = (key: string) => {
+    const st = flash[key];
+    if (st === 'saved') return { ...btn, background: '#2e7d32', borderColor: '#2e7d32', color: '#fff' };
+    if (st === 'error') return { ...btn, background: '#c62828', borderColor: '#c62828', color: '#fff' };
+    if (st === 'saving') return { ...btn, opacity: 0.6, cursor: 'wait' };
+    return btn;
+  };
+  const btnLabel = (key: string, label: string) => (flash[key] === 'saved' ? 'Saved ✓' : flash[key] === 'error' ? 'Failed' : flash[key] === 'saving' ? 'Saving...' : label);
   const feeOf = (c: Course) => edits[c.slug] ?? (c.fee_inr === null ? '' : String(c.fee_inr));
   const gst = (n: number) => `GST ₹${fmtFixed2(n * 0.18)}, total ₹${fmtFixed2(n * 1.18)}`;
 
@@ -56,7 +72,7 @@ export default function CourseFeesClient() {
                 <td><input style={{ ...field, width: 120 }} type="number" min={1} step={1} value={feeOf(c)} onChange={(e) => setEdits((x) => ({ ...x, [c.slug]: e.target.value }))} /></td>
                 <td style={{ fontSize: 12 }}>{Number(feeOf(c)) > 0 ? gst(Number(feeOf(c))) : '—'}</td>
                 <td><input type="checkbox" checked={c.checkout_enabled} disabled={!c.fee_inr && !(Number(feeOf(c)) > 0)} onChange={(e) => send('PATCH', { kind: 'course', slug: c.slug, fee_inr: feeOf(c) === '' ? null : Number(feeOf(c)), checkout_enabled: e.target.checked })} /></td>
-                <td><button style={btn} onClick={() => send('PATCH', { kind: 'course', slug: c.slug, fee_inr: feeOf(c) === '' ? null : Number(feeOf(c)), checkout_enabled: c.checkout_enabled })}>Save fee</button></td>
+                <td><button style={btnStyle(c.slug)} disabled={flash[c.slug] === 'saving'} onClick={() => act(c.slug, () => send('PATCH', { kind: 'course', slug: c.slug, fee_inr: feeOf(c) === '' ? null : Number(feeOf(c)), checkout_enabled: c.checkout_enabled }))}>{btnLabel(c.slug, 'Save fee')}</button></td>
               </tr>
             ))}
           </tbody>
@@ -72,7 +88,7 @@ export default function CourseFeesClient() {
               <tr key={b.id}>
                 <td>{b.title}<div style={{ opacity: 0.5, fontSize: 11 }}>{b.slug}</div></td>
                 <td style={{ fontSize: 12 }}>{b.course_slugs.join(', ')}</td>
-                <td><input style={{ ...field, width: 120 }} type="number" min={1} step={1} value={edits[b.id] ?? String(b.fee_inr)} onChange={(e) => setEdits((x) => ({ ...x, [b.id]: e.target.value }))} /><button style={{ ...btn, marginLeft: 6 }} onClick={() => send('PATCH', { kind: 'bundle', id: b.id, fee_inr: Number(edits[b.id] ?? b.fee_inr) })}>Save</button><div style={{ fontSize: 12, opacity: 0.7 }}>{gst(Number(edits[b.id] ?? b.fee_inr))}</div></td>
+                <td><input style={{ ...field, width: 120 }} type="number" min={1} step={1} value={edits[b.id] ?? String(b.fee_inr)} onChange={(e) => setEdits((x) => ({ ...x, [b.id]: e.target.value }))} /><button style={{ ...btnStyle(b.id), marginLeft: 6 }} disabled={flash[b.id] === 'saving'} onClick={() => act(b.id, () => send('PATCH', { kind: 'bundle', id: b.id, fee_inr: Number(edits[b.id] ?? b.fee_inr) }))}>{btnLabel(b.id, 'Save')}</button><div style={{ fontSize: 12, opacity: 0.7 }}>{gst(Number(edits[b.id] ?? b.fee_inr))}</div></td>
                 <td><input type="checkbox" checked={b.active} onChange={(e) => send('PATCH', { kind: 'bundle', id: b.id, active: e.target.checked })} /></td>
               </tr>
             ))}
@@ -94,7 +110,7 @@ export default function CourseFeesClient() {
             </label>
           ))}
         </div>
-        <button style={btn} onClick={async () => { if (await send('POST', { ...nb, fee_inr: Number(nb.fee_inr) })) setNb({ slug: '', title: '', description: '', fee_inr: '', course_slugs: [] }); }}>Create combo</button>
+        <button style={btnStyle('new')} disabled={flash.new === 'saving'} onClick={() => act('new', async () => { const ok = await send('POST', { ...nb, fee_inr: Number(nb.fee_inr) }); if (ok) setNb({ slug: '', title: '', description: '', fee_inr: '', course_slugs: [] }); return ok; })}>{btnLabel('new', 'Create combo')}</button>
         <p style={{ fontSize: 12, opacity: 0.7 }}>A combo is offered at checkout only while every course inside it is also on sale.</p>
       </div>
     </>
