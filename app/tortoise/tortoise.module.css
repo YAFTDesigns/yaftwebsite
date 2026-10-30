@@ -81,10 +81,10 @@
 .small { font-size: 13px !important; }
 
 /* checkout form (components/TortoiseBuy.tsx) */
-.buy { display: grid; gap: 14px; padding: 22px; border: 1px solid var(--line); border-radius: 8px; margin: 0 0 16px; background: var(--paper-2); max-width: 760px; }
+.buy { display: grid; gap: 14px; padding: 24px; border: 1px solid var(--line); border-left: 3px solid var(--blueprint); border-radius: 0; margin: 0 0 16px; background: var(--paper-2); max-width: 760px; }
 .row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 14px; }
-.buy label { min-width: 0; display: grid; gap: 6px; font-family: var(--display); font-size: 14px; color: var(--ink-soft); }
-.buy input, .buy select { width: 100%; min-width: 0; box-sizing: border-box; padding: 11px 12px; font-size: 15px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); font-family: var(--display); }
+.buy label { min-width: 0; display: grid; gap: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); }
+.buy input, .buy select { width: 100%; min-width: 0; box-sizing: border-box; padding: 11px 12px; font-size: 15px; border: 1px solid #3a3a3a; border-radius: 0; background: var(--paper); color: var(--ink); font-family: var(--display); letter-spacing: 0; text-transform: none; }
 .buy input:focus, .buy select:focus { outline: 2px solid var(--blueprint); outline-offset: 1px; }
 .err { color: #ff6b6b !important; }
 

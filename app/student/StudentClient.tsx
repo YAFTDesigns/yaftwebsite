@@ -27,7 +27,7 @@ const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted'
 const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
 const box = { border: '1px solid var(--line)', borderLeft: '3px solid var(--blueprint)', background: 'var(--paper-2)', padding: '20px 22px', marginBottom: 16 } as const;
 const input = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '11px 12px', fontSize: 14, width: '100%', fontFamily: 'var(--display)', marginTop: 4 } as const;
-const btn = { background: 'var(--brass)', color: '#fff', border: '1px solid var(--brass)', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 500, cursor: 'pointer', borderRadius: 0 } as const;
+const btn = { background: '#D42B38', color: '#fff', border: '1px solid #D42B38', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 500, cursor: 'pointer', borderRadius: 0 } as const;
 const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid rgba(255,255,255,0.6)' } as const;
 const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '12px 18px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
 const BTN_CSS = `

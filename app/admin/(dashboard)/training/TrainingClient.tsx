@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from 'react';
 import styles from '../admin.module.css';
 
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
-const field = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '7px 9px', fontSize: 13 } as const;
-const btn = { ...field, cursor: 'pointer', marginRight: 6 } as const;
+const field = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '8px 10px', fontSize: 13, borderRadius: 0 } as const;
+const btn = { ...field, cursor: 'pointer', marginRight: 6, border: '1px solid #777', fontFamily: 'var(--mono)', letterSpacing: '.03em' } as const;
+const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '10px 16px', fontSize: 12, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
 const h2 = { fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)', margin: '24px 0 10px' } as const;
 const TABS = ['Students & Enrolments', 'Courses & Batches', 'Project Reviews', 'Certificates', 'Testimonials', 'Audit log'] as const;
 
@@ -39,7 +40,7 @@ export default function TrainingClient() {
   return (
     <>
       <h1 className={styles.sectionTitle}>Training: students, projects, certificates</h1>
-      <div style={{ marginBottom: 14 }}>{TABS.map((t) => <button key={t} style={{ ...btn, background: tab === t ? 'var(--ink)' : 'var(--paper)', color: tab === t ? 'var(--paper)' : 'var(--ink)' }} onClick={() => setTab(t)}>{t}</button>)}</div>
+      <div style={{ marginBottom: 18, borderBottom: '1px solid var(--line)' }}>{TABS.map((t) => <button key={t} style={tabBtn(tab === t)} onClick={() => setTab(t)}>{t}</button>)}</div>
       {msg && <p style={{ color: 'var(--brass)' }}>{msg}</p>}
 
       {tab === 'Students & Enrolments' && (<>

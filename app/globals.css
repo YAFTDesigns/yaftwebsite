@@ -81,13 +81,13 @@ nav{
 .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
 .cta-btn{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;line-height:1;
-  background:var(--brass-dark);color:var(--paper);
-  padding:10px 18px;border:1px solid var(--ink);
+  background:#D42B38;color:#fff;font-weight:500;
+  padding:10px 18px;border:1px solid #D42B38;
   transition:background .2s,color .2s;
   white-space:nowrap;
   display:inline-flex;align-items:center;justify-content:center;text-align:center;
 }
-.cta-btn:hover{background:var(--brass);border-color:var(--brass);color:var(--paper);}
+.cta-btn:hover{background:var(--brass-dark);border-color:var(--brass-dark);color:#fff;}
 .navtoggle{display:none;flex-direction:column;gap:4px;cursor:pointer;background:none;border:none;}
 .navtoggle span{width:22px;height:2px;background:var(--ink);display:block;}
 .rhino-logo{width:32px;height:auto;border-radius:4px;position:absolute;right:30px;top:50%;transform:translateY(-50%);}
@@ -191,11 +191,11 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 /* ===== BUTTONS ===== */
 .btn-primary{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;
-  background:var(--brass);color:var(--paper);padding:13px 24px;
-  border:1px solid var(--brass);
+  background:#D42B38;color:#fff;font-weight:500;padding:13px 24px;
+  border:1px solid #D42B38;
   transition:background .2s;
 }
-.btn-primary:hover{background:var(--brass-dark);}
+.btn-primary:hover{background:var(--brass-dark);border-color:var(--brass-dark);}
 .btn-primary:disabled{opacity:.6;cursor:default;}
 .btn-secondary{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;
@@ -205,8 +205,8 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 }
 .btn-secondary:hover{background:var(--ink);color:var(--paper);}
 .btn-ghost{
-  font-family:var(--mono);font-size:13px;letter-spacing:.03em;color:var(--ink-soft);
-  padding:13px 20px;border:1px solid var(--line);background:none;cursor:pointer;
+  font-family:var(--mono);font-size:13px;letter-spacing:.03em;color:var(--ink);
+  padding:13px 20px;border:1px solid #555;background:none;cursor:pointer;
 }
 .btn-ghost:hover{color:var(--ink);border-color:var(--ink);}
 .enquire{font-family:var(--mono);font-size:13px;color:var(--brass);border-bottom:1px solid var(--brass);white-space:nowrap;}
@@ -254,11 +254,11 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 .field{margin-bottom:18px;}
 .field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
 .field input,.field select,.field textarea{
-  width:100%;background:transparent;border:none;border-bottom:1px solid var(--line);
-  padding:8px 2px;font-family:var(--body);font-size:15px;color:var(--ink);
+  width:100%;background:var(--paper);border:1px solid #3a3a3a;border-radius:0;
+  padding:11px 12px;font-family:var(--display);font-size:15px;color:var(--ink);
 }
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brass);}
-.field input::placeholder, .field textarea::placeholder { color: #555; }
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blueprint);box-shadow:0 0 0 1px var(--blueprint);}
+.field input::placeholder, .field textarea::placeholder { color: #777; }
 .field select option{background:var(--paper-2);color:var(--ink);}
 .contact-info dt{font-family:var(--mono);font-size:11px;text-transform:uppercase;color:var(--blueprint);margin-top:22px;letter-spacing:.05em;}
 .contact-info dd{font-size:16px;margin-top:4px;}
