@@ -3,7 +3,6 @@
 /** Strip control characters and collapse whitespace; cap the length. Output is plain text and is always rendered as text. */
 export function cleanText(input: unknown, max: number): string {
   if (typeof input !== 'string') return '';
-  // eslint-disable-next-line no-control-regex
   return input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F​-‏‪-‮⁦-⁩]/g, '').replace(/[ \t]+/g, ' ').trim().slice(0, max);
 }
 
