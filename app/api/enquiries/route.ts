@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { upsertLead } from '@/lib/leads';
 import { rateLimit } from '@/lib/rateLimit';
 import { pushEnquiryToQueue } from '@/lib/queue';
+import { sendAdminAlert } from '@/lib/adminAlert';
 import { sendEmail, renderTemplate, isEmailConfigured, escapeHtml, safeDisplayName } from '@/lib/email';
 import { sendPushToAll } from '@/lib/webPush';
 import { getErrorMessage } from '@/lib/errorMessage';
@@ -164,6 +165,13 @@ export async function POST(request: NextRequest) {
         resend_email_id: resendEmailId,
       });
     }
+
+    // Owner alert (awaited so serverless does not cut it off). Never blocks the visitor.
+    const row = (k: string, v: string | null | undefined) => (v ? `<tr><td style="padding:3px 12px 3px 0;color:#666;">${k}</td><td style="padding:3px 0;">${escapeHtml(v)}</td></tr>` : '');
+    await sendAdminAlert(
+      `New enquiry: ${safeDisplayName(name) || name}${interest ? ` (${interest})` : ''}`.slice(0, 150),
+      `<table style="font-family:Arial,sans-serif;font-size:14px;">${row('Name', name)}${row('Email', email)}${row('Phone', phone)}${row('Course', interest)}${row('Type', segment)}${row('Organisation', organisation)}${row('Page', sourcePage)}</table><p style="font-family:Arial,sans-serif;font-size:14px;white-space:pre-wrap;">${escapeHtml(message)}</p><p style="font-family:Arial,sans-serif;font-size:12px;color:#888;">Reply to the client directly at ${escapeHtml(email)}. Also in Admin, Leads.</p>`,
+    ).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (err) {
