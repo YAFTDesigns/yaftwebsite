@@ -36,6 +36,13 @@ export default async function PayPage({ params }: { params: Promise<{ token: str
       <div className="eyebrow">SECURE PAYMENT</div>
       <h1>{plan.description}</h1>
       <p className="pay-lede">Billed to <strong>{plan.client_name}</strong>. Each payment gets its own GST tax invoice by email.</p>
+      {due && amountDue && (
+        <div className="pay-focus-card">
+          <span className="pay-focus-kicker">AMOUNT DUE NOW</span>
+          <strong>₹{fmtFixed2(amountDue.total)}</strong>
+          <span>Base ₹{fmtFixed2(amountDue.base)} + GST ₹{fmtFixed2(amountDue.gst)}</span>
+        </div>
+      )}
       <table className="pay-table">
         <thead><tr><th>Instalment</th><th>Base</th><th>GST 18%</th><th>Total</th><th>Status</th></tr></thead>
         <tbody>

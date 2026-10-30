@@ -72,7 +72,7 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
 
   return (
     <div>
-      <fieldset style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18 }}>
+      <fieldset className="pay-choice-card" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18 }}>
         <legend style={{ padding: '0 6px', fontSize: 13 }}>1. Choose your course(s)</legend>
         {items.map((i) => (
           <label key={i.key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--line)', opacity: i.kind === 'course' && blocked(i) ? 0.45 : 1 }}>
@@ -103,7 +103,7 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
       )}
 
       {sched && (
-        <div style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18, fontSize: 14, lineHeight: 1.9 }}>
+        <div className="pay-summary" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18, fontSize: 14, lineHeight: 1.9 }}>
           <div>Course fee: <strong>₹{fmtFixed2(sched.total.base)}</strong></div>
           <div>GST 18%: <strong>₹{fmtFixed2(sched.total.gst)}</strong></div>
           <div>Total: <strong>{money(sched.total.total)}</strong></div>
