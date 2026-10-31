@@ -15,7 +15,6 @@ type Plan = {
   base_total: number; advance_base: number | null; status: string; is_test: boolean; payments: Pay[];
 };
 type Adj = { id: string; plan_id: string; refund_minor: number; status: string; credit_note_no: string | null; issued_date: string | null; total: number | null; reason: string | null; is_test: boolean };
-type Mismatch = { severity: 'high' | 'medium'; where: string; message: string };
 
 const field = { background: 'var(--paper)', border: '1px solid var(--line)', color: 'var(--ink)', padding: '8px 10px', fontSize: 14, width: '100%' } as const;
 const btn = { ...field, width: 'auto', cursor: 'pointer', marginRight: 6 } as const;
@@ -27,7 +26,6 @@ const fmtD = (s: string | null) => (s ? new Date(s).toLocaleDateString('en-GB') 
 export default function PaymentPlansClient() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [adjs, setAdjs] = useState<Adj[]>([]);
-  const [mismatches, setMismatches] = useState<Mismatch[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [form, setForm] = useState(empty);
   const [error, setError] = useState('');
@@ -40,7 +38,7 @@ export default function PaymentPlansClient() {
     let live = true;
     fetch('/api/admin/payment-plans').then((r) => r.json()).then((j) => {
       if (!live) return;
-      setPlans(j.data ?? []); setAdjs(j.adjustments ?? []); setMismatches(j.mismatches ?? []); setTestMode(!!j.testMode);
+      setPlans(j.data ?? []); setAdjs(j.adjustments ?? []); setTestMode(!!j.testMode);
     }).catch(() => { if (live) setError('Could not load plans'); });
     return () => { live = false; };
   }, [tick]);
@@ -103,13 +101,6 @@ export default function PaymentPlansClient() {
       <p style={{ marginBottom: 16, fontFamily: 'var(--mono)', fontSize: 12, color: testMode ? '#ffb300' : '#4caf50' }}>Razorpay mode: {testMode ? 'TEST (bills are numbered YAFT-TEST and never count in reports)' : 'LIVE'}</p>
       {error && <p style={{ color: '#e55', marginBottom: 12 }}>{error}</p>}
       {notice && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{notice}</p>}
-
-      {mismatches.length > 0 && (
-        <div style={{ border: '1px solid #5a1a1a', background: '#2a0a0a', borderRadius: 8, padding: '12px 16px', marginBottom: 20 }}>
-          <p style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#e55', marginBottom: 6 }}>Needs review ({mismatches.length})</p>
-          <ul style={{ fontSize: 13, paddingLeft: 18, lineHeight: 1.7 }}>{mismatches.map((m, i) => <li key={i}><strong>{m.where}</strong>: {m.message}</li>)}</ul>
-        </div>
-      )}
 
       <form onSubmit={create} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10, marginBottom: 10 }}>
         <input style={field} placeholder="Client name" value={form.client_name} onChange={(e) => set('client_name', e.target.value)} required />

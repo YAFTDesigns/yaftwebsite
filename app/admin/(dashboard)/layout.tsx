@@ -9,6 +9,8 @@ import styles from './admin.module.css';
 
 export const dynamic = 'force-dynamic';
 
+import AccountsBell from '@/components/admin/AccountsBell';
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Defence in depth: the proxy normally gates /admin, but fail closed here too
   // (covers missing Supabase config or a proxy mismatch).
@@ -31,6 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminSubNav counts={counts} />
       </header>
       <main className={styles.main}>{children}</main>
+      <AccountsBell />
     </div>
   );
 }
