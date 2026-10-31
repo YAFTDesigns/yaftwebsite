@@ -25,7 +25,7 @@ export default function BillingForm({ d, set, disabled, allowOutsideIndia }: { d
         {company && <div><label style={label} htmlFor="b-co">Company name *</label><input id="b-co" required style={field} value={d.client_company} onChange={(e) => set('client_company', e.target.value)} autoComplete="organization" /></div>}
         <div><label style={label} htmlFor="b-name">{company ? 'Contact person' : 'Name on the bill'}</label><input id="b-name" style={field} value={d.client_name} onChange={(e) => set('client_name', e.target.value)} autoComplete="name" /></div>
         <div><label style={label} htmlFor="b-email">Email</label><input id="b-email" type="email" style={field} value={d.client_email} onChange={(e) => set('client_email', e.target.value)} autoComplete="email" /><div style={hint}>Your bill is sent here</div></div>
-        <div><label style={label} htmlFor="b-phone">Phone <span style={{ opacity: 0.6 }}>(optional)</span></label><input id="b-phone" style={field} value={d.client_phone} onChange={(e) => set('client_phone', e.target.value)} autoComplete="tel" /></div>
+        <div><label style={label} htmlFor="b-phone">Phone *</label><input id="b-phone" required type="tel" style={field} value={d.client_phone} onChange={(e) => set('client_phone', e.target.value)} autoComplete="tel" /></div>
       </div>
 
       <div style={group}>2. Tax details</div>

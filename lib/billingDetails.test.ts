@@ -1,10 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { validateBillingDetails } from './billingDetails';
 
-const ok = { client_name: 'Test Student', client_email: 'Student@Example.com', client_type: 'individual', client_pan: 'ABCDE1234F', client_address: '12 Test Street, Coimbatore', client_state: 'Tamil Nadu' };
+const ok = { client_name: 'Test Student', client_email: 'Student@Example.com', client_type: 'individual', client_phone: '+91 98765 43210', client_pan: 'ABCDE1234F', client_address: '12 Test Street, Coimbatore', client_state: 'Tamil Nadu' };
 const GST = '33ABCDE1234F1Z5';
 
 describe('validateBillingDetails', () => {
+  it('a phone number is mandatory', () => {
+    expect(validateBillingDetails({ ...ok, client_phone: '' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_phone: '123' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_phone: undefined }).ok).toBe(false);
+  });
   it('an individual must give a valid PAN', () => {
     expect(validateBillingDetails({ ...ok, client_pan: '' }).ok).toBe(false);
     expect(validateBillingDetails({ ...ok, client_pan: undefined }).ok).toBe(false);

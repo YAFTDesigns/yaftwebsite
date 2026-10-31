@@ -27,6 +27,7 @@ export function validateBillingDetails(input: unknown, opts: { allowOutsideIndia
 
   if (!name) return { ok: false, error: 'Enter your name as it should appear on the bill.' };
   if (!STRICT_EMAIL_RE.test(email)) return { ok: false, error: 'Enter a valid email. The bill is sent here.' };
+  if (phone.replace(/\D/g, '').length < 7) return { ok: false, error: 'Enter a phone number we can reach you on.' };
   if (type === 'company' && !company) return { ok: false, error: 'Enter the company name.' };
   if (!address || address.length < 8) return { ok: false, error: 'Enter your billing address.' };
   const stateOk = (INDIAN_STATES as readonly string[]).includes(state) || (opts.allowOutsideIndia && state === OUTSIDE_INDIA);
