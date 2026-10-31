@@ -115,7 +115,7 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
     if (!row.invoice_emailed) {
       const { data: inv } = await supabase.from('invoices').select('*').eq('id', invoiceId).maybeSingle();
       if (inv) {
-        const res = await sendInvoiceEmail({ ...toInvoicePdfData(inv), grand_total: Number(inv.total) } as InvoiceForEmail);
+        const res = await sendInvoiceEmail({ ...toInvoicePdfData(inv), grand_total: Number(inv.total) } as InvoiceForEmail, { attachPdf: false });
         if (res.status === 'failed') throw new Error('bill email failed to send');
         if (res.status === 'sent') {
           await supabase.from('course_payments').update({ invoice_emailed: true }).eq('id', row.id);
@@ -125,7 +125,7 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
       if (row.sync_status !== 'ok') {
         await ownerAlert(
           `${testMode ? '[TEST] ' : ''}Payment received: ${plan.client_name} (${row.kind})`,
-          `<p>${escapeHtml(plan.client_name)} paid the <strong>${row.kind}</strong>: INR ${fmtFixed2(inst.total)} (base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)})${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''} for ${escapeHtml(plan.description)}.</p><p>Bill ${escapeHtml(invoiceNo ?? '')} was emailed to the client (you are on BCC) and is saved under Invoices.</p><p>Payment ${escapeHtml(row.payment_id)}</p>`,
+          `<p>${escapeHtml(plan.client_name)} paid the <strong>${row.kind}</strong>: INR ${fmtFixed2(inst.total)} (base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)})${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''} for ${escapeHtml(plan.description)}.</p><p>Bill ${escapeHtml(invoiceNo ?? '')} was emailed to the client as a link to their student portal (no PDF attached; you are on BCC). Download the PDF from Admin > Invoices if they ask.</p><p>Payment ${escapeHtml(row.payment_id)}</p>`,
         );
       }
     }

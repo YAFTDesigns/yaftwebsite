@@ -21,7 +21,9 @@ export type SendInvoiceEmailResult = {
 // (POST /api/invoices) and the scheduled-send cron can't drift into
 // two different emails for the same kind of invoice. Whichever caller
 // invokes this, the client gets the identical email.
-export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoiceEmailResult> {
+export async function sendInvoiceEmail(data: InvoiceForEmail, opts: { attachPdf?: boolean } = {}): Promise<SendInvoiceEmailResult> {
+  // attachPdf=false (course payments): no PDF in the mail; the student views and downloads it in the student portal instead.
+  const attachPdf = opts.attachPdf !== false;
   const pdfBuffer = await generatePDF(data);
   const pdfBase64 = pdfBuffer.toString('base64');
 
@@ -55,7 +57,8 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
 
   const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#111;">
   <p style="font-size:14px;line-height:1.8;margin:0 0 12px;">Hi ${data.client_name},</p>
-  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${isProformaEmail ? 'Please find attached your proforma invoice from YAFT Designs. This is for your reference and is not a tax document.' : 'Please find attached your invoice for YAFT Designs training. Thank you for training with us.'}</p>
+  <p style="font-size:14px;line-height:1.8;margin:0 0 20px;">${attachPdf ? (isProformaEmail ? 'Please find attached your proforma invoice from YAFT Designs. This is for your reference and is not a tax document.' : 'Please find attached your invoice for YAFT Designs training. Thank you for training with us.') : 'Thank you for your payment. Your invoice is ready in your YAFT student portal. Sign in with this email address and open <strong>Payments &amp; Bills</strong> to view and download it any time.'}</p>
+  ${attachPdf ? '' : '<a href="https://www.yaftdesigns.com/student" style="display:inline-block;background:#E63946;color:#fff;font-size:13px;padding:11px 22px;border-radius:6px;text-decoration:none;margin-bottom:20px;">Open student portal &rarr;</a>'}
   <table style="font-size:13px;border-collapse:collapse;width:100%;margin-bottom:16px;">
     <tr style="background:#f8f8f8;"><td style="padding:8px 12px;color:#888;">Invoice No</td><td style="padding:8px 12px;font-weight:600;">${data.invoice_no}</td></tr>
     <tr><td style="padding:8px 12px;color:#888;">Date</td><td style="padding:8px 12px;">${data.date}</td></tr>
@@ -116,10 +119,10 @@ export async function sendInvoiceEmail(data: InvoiceForEmail): Promise<SendInvoi
       subject,
       html: htmlBody,
       bcc: getNotificationBcc(),
-      attachments: [{
+      ...(attachPdf ? { attachments: [{
         filename: `${isProformaEmail ? 'YAFT_Proforma' : 'YAFT_Invoice'}_${data.invoice_no}.pdf`,
         content: pdfBase64,
-      }],
+      }] } : {}),
     });
     resendEmailId = result.id;
   } catch (mailErr) {
