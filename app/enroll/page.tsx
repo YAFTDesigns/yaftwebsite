@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { loadCatalog } from '@/lib/courseCatalog';
 import { getInrPerUsd, fxBufferPercent } from '@/lib/fx';
 import EnrollClient from './EnrollClient';
+import EnrollGate from './EnrollGate';
 import SiteHeader from '@/components/SiteHeader';
 import SiteFooter from '@/components/SiteFooter';
 
@@ -28,7 +29,7 @@ export default async function EnrollPage({ searchParams }: { searchParams: Promi
       {!enabled || items.length === 0 ? (
         <p>Online enrolment is opening soon. For now, please <a href={`mailto:${CONTACT_EMAIL}?subject=Course%20enrolment`} style={{ textDecoration: 'underline' }}>email us</a> and we will set it up.</p>
       ) : (
-        <EnrollClient items={items} fx={q ? { inrPerUsd: q.inrPerUsd, bufferPercent: fxBufferPercent() } : null} preselect={course} />
+        <EnrollGate course={course}><EnrollClient items={items} fx={q ? { inrPerUsd: q.inrPerUsd, bufferPercent: fxBufferPercent() } : null} preselect={course} /></EnrollGate>
       )}
       <section style={{ marginTop: 48, fontSize: 14, opacity: 0.85 }}>
         <h2 style={{ fontSize: 18, marginBottom: 8 }}>Corporate / team training</h2>
