@@ -1,5 +1,5 @@
 // Pure helpers (no server imports) shared by the checkout page and the order API, so what the client sees is what is charged.
-export type CatalogItem = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string };
+export type CatalogItem = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string; image?: string; tool?: string; level?: string; duration?: string };
 
 export type ComboResult = { items: CatalogItem[]; applied: { title: string; saving: number }[] };
 

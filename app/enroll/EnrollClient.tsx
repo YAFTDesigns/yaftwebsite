@@ -8,7 +8,7 @@ import { computeSchedule } from '@/lib/coursePayments';
 import { advanceFor } from '@/lib/courseCatalog';
 import { applyCombos } from '@/lib/courseCombos';
 
-type Item = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string };
+type Item = { key: string; kind: 'course' | 'bundle'; title: string; feeInr: number; courseSlugs: string[]; description: string; image?: string; tool?: string; level?: string; duration?: string };
 type Opts = {
   key: string; order_id: string; amount: number; currency: string; name: string; description: string;
   prefill: { name: string; email: string }; handler: () => void; modal: { ondismiss: () => void }; theme: { color: string };
@@ -72,24 +72,53 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
 
   return (
     <div>
-      <fieldset className="pay-choice-card" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18 }}>
-        <legend style={{ padding: '0 6px', fontSize: 13 }}>1. Choose your course(s)</legend>
-        {items.map((i) => (
-          <label key={i.key} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '10px 0', borderBottom: '1px solid var(--line)', opacity: i.kind === 'course' && blocked(i) ? 0.45 : 1 }}>
-            <input type="checkbox" checked={i.kind === 'bundle' ? comboOn(i) : picked.includes(i.key)} disabled={i.kind === 'course' && blocked(i)} onChange={() => (i.kind === 'bundle' ? toggleCombo(i) : toggle(i.key))} style={{ marginTop: 4 }} />
-            <span style={{ flex: 1 }}>
-              <strong>{i.title}</strong>{i.kind === 'bundle' && <span style={{ marginLeft: 8, fontSize: 11, border: '1px solid var(--brass)', color: 'var(--brass)', borderRadius: 4, padding: '1px 6px' }}>COMBO</span>}
-              {i.kind === 'bundle' && <span style={{ display: 'block', fontSize: 12, opacity: 0.75 }}>Applied automatically when you select all of these courses.</span>}
-              {i.description && <span style={{ display: 'block', fontSize: 13, opacity: 0.75 }}>{brief(i.description)}</span>}
-            </span>
-            <span style={{ whiteSpace: 'nowrap' }}>₹{fmtFixed2(i.feeInr)} <span style={{ fontSize: 11, opacity: 0.7 }}>+ GST</span></span>
-          </label>
-        ))}
-      </fieldset>
+      <section className="enrol-catalog" aria-labelledby="course-picker-title">
+        <div className="enrol-catalog-head">
+          <div>
+            <div className="eyebrow">01 · CHOOSE YOUR PATH</div>
+            <h2 id="course-picker-title">Pick the course that matches where you want to go next.</h2>
+          </div>
+          <p>Select one course or build a pathway. If an eligible combo is cheaper, YAFT applies it automatically.</p>
+        </div>
+
+        <div className="enrol-course-grid">
+          {items.map((i) => {
+            const selected = i.kind === 'bundle' ? comboOn(i) : picked.includes(i.key);
+            const disabled = i.kind === 'course' && blocked(i);
+            const slug = i.courseSlugs[0] ?? '';
+            const icon = slug.includes('revit') ? 'BIM' : slug.includes('climate') ? 'SUN' : slug.includes('wearables') ? '3D' : slug.includes('industrial') ? 'ID' : slug.includes('grasshopper') ? 'GH' : i.kind === 'bundle' ? 'R+G' : 'R3D';
+            return (
+              <label key={i.key} className={`enrol-course-card${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}${i.kind === 'bundle' ? ' is-combo' : ''}`}>
+                <input className="enrol-course-check" type="checkbox" checked={selected} disabled={disabled} onChange={() => (i.kind === 'bundle' ? toggleCombo(i) : toggle(i.key))} />
+                <span className="enrol-course-media" aria-hidden="true">
+                  {i.image ? <img src={i.image} alt="" loading="lazy" /> : <span className="enrol-course-fallback">{icon}</span>}
+                  <span className="enrol-course-shade" />
+                  <span className="enrol-course-icon">{icon}</span>
+                  {i.kind === 'bundle' && <span className="enrol-course-featured">Best pathway</span>}
+                  {selected && <span className="enrol-course-selected">Selected ✓</span>}
+                </span>
+                <span className="enrol-course-body">
+                  <span className="enrol-course-meta">
+                    {i.tool && <span>{i.tool}</span>}
+                    {i.duration && <span>{i.duration}</span>}
+                    {i.level && <span>{i.level}</span>}
+                  </span>
+                  <strong className="enrol-course-title">{i.title}</strong>
+                  {i.description && <span className="enrol-course-desc">{brief(i.description)}</span>}
+                  <span className="enrol-course-bottom">
+                    <span className="enrol-course-price">₹{fmtFixed2(i.feeInr)} <small>+ GST</small></span>
+                    <span className="enrol-course-action">{selected ? 'Added to your plan' : disabled ? 'Included in selected combo' : 'Select course →'}</span>
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      </section>
 
       {fx && (
-        <div style={{ marginBottom: 18, fontSize: 14 }}>
-          Pay in:{' '}
+        <div className="enrol-currency" style={{ marginBottom: 18, fontSize: 14 }}>
+          <span className="enrol-currency-label">Payment currency</span>
           <button type="button" className={currency === 'INR' ? 'btn-primary' : 'btn-secondary'} onClick={() => chooseCurrency('INR')} style={{ marginRight: 8 }}>INR</button>
           <button type="button" className={currency === 'USD' ? 'btn-primary' : 'btn-secondary'} onClick={() => chooseCurrency('USD')}>USD</button>
           {currency === 'USD' && <span style={{ display: 'block', fontSize: 12, opacity: 0.7, marginTop: 6 }}>US$ is worked out from the live exchange rate when you press Pay and is fixed for that payment. Your tax invoice is issued in INR.</span>}
@@ -103,13 +132,21 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
       )}
 
       {sched && (
-        <div className="pay-summary" style={{ border: '1px solid var(--line)', borderRadius: 8, padding: 16, marginBottom: 18, fontSize: 14, lineHeight: 1.9 }}>
-          <div>Course fee: <strong>₹{fmtFixed2(sched.total.base)}</strong></div>
-          <div>GST 18%: <strong>₹{fmtFixed2(sched.total.gst)}</strong></div>
-          <div>Total: <strong>{money(sched.total.total)}</strong></div>
-          <hr style={{ border: 'none', borderTop: '1px solid var(--line)', margin: '8px 0' }} />
-          <div>Pay half now: ₹{fmtFixed2(sched.advance!.base)} + GST ₹{fmtFixed2(sched.advance!.gst)} = <strong>{money(sched.advance!.total)}</strong></div>
-          <div>Second half later: ₹{fmtFixed2(sched.balance!.base)} + GST ₹{fmtFixed2(sched.balance!.gst)} = <strong>{money(sched.balance!.total)}</strong> (the link is shown after your first payment)</div>
+        <div className="pay-summary enrol-summary">
+          <div className="enrol-summary-head">
+            <div>
+              <span className="pay-focus-kicker">YOUR SELECTION</span>
+              <strong>{chosen.map((i) => i.title).join(' + ')}</strong>
+            </div>
+            <div className="enrol-summary-total">{money(sched.total.total)}</div>
+          </div>
+          <div className="enrol-summary-grid">
+            <div><span>Course fee</span><strong>₹{fmtFixed2(sched.total.base)}</strong></div>
+            <div><span>GST 18%</span><strong>₹{fmtFixed2(sched.total.gst)}</strong></div>
+            <div><span>Pay now</span><strong>{money(sched.advance!.total)}</strong></div>
+            <div><span>Later</span><strong>{money(sched.balance!.total)}</strong></div>
+          </div>
+          <p className="enrol-summary-note">You can pay 50% now and the balance later, or complete the full payment today. GST invoice is issued after payment.</p>
         </div>
       )}
 
