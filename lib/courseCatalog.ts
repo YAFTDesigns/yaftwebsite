@@ -1,5 +1,7 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { applyCombos, type CatalogItem } from '@/lib/courseCombos';
+import { getSiteImageUrl } from '@/lib/supabase/storage';
+import { localAssetToUrl } from '@/lib/assetUrl';
 
 export type { CatalogItem };
 export const MAX_ITEMS = 6;
@@ -7,12 +9,19 @@ export const MAX_ITEMS = 6;
 /** Courses and bundles that can be bought online: fee set by the admin, switched on, active. */
 export async function loadCatalog(): Promise<CatalogItem[]> {
   const supabase = getSupabaseAdmin();
-  const { data: courses } = await supabase.from('courses').select('slug, title, description, fee_inr, checkout_enabled, active').eq('active', true).eq('checkout_enabled', true).not('fee_inr', 'is', null);
+  const { data: courses } = await supabase.from('courses').select('slug, title, description, fee_inr, checkout_enabled, active, image_path, tool, level, duration').eq('active', true).eq('checkout_enabled', true).not('fee_inr', 'is', null);
   const { data: bundles } = await supabase.from('course_bundles').select('slug, title, description, course_slugs, fee_inr, active, sort').eq('active', true).order('sort', { ascending: true });
-  const singles: CatalogItem[] = (courses ?? []).map((c) => ({ key: `course:${c.slug}`, kind: 'course', title: c.title, feeInr: Number(c.fee_inr), courseSlugs: [c.slug], description: c.description ?? '' }));
+  const singles: CatalogItem[] = (courses ?? []).map((c) => ({
+    key: `course:${c.slug}`, kind: 'course', title: c.title, feeInr: Number(c.fee_inr), courseSlugs: [c.slug], description: c.description ?? '',
+    image: c.image_path ? (c.image_path.startsWith('/') ? localAssetToUrl(c.image_path) : getSiteImageUrl(c.image_path)) : undefined,
+    tool: c.tool ?? undefined, level: c.level ?? undefined, duration: c.duration ?? undefined,
+  }));
   const sellable = new Set(singles.map((s) => s.courseSlugs[0]));
   // A bundle is only offered if every course in it is itself on sale.
-  const combos: CatalogItem[] = (bundles ?? []).filter((b) => (b.course_slugs as string[]).every((s) => sellable.has(s))).map((b) => ({ key: `bundle:${b.slug}`, kind: 'bundle', title: b.title, feeInr: Number(b.fee_inr), courseSlugs: b.course_slugs as string[], description: b.description ?? '' }));
+  const combos: CatalogItem[] = (bundles ?? []).filter((b) => (b.course_slugs as string[]).every((s) => sellable.has(s))).map((b) => {
+    const child = singles.find((s) => (b.course_slugs as string[]).includes(s.courseSlugs[0]));
+    return { key: `bundle:${b.slug}`, kind: 'bundle', title: b.title, feeInr: Number(b.fee_inr), courseSlugs: b.course_slugs as string[], description: b.description ?? '', image: child?.image, tool: 'Rhino3D · Grasshopper', level: 'Complete pathway' };
+  });
   return [...combos, ...singles];
 }
 
