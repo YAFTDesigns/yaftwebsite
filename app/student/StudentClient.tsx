@@ -51,6 +51,8 @@ const BTN_CSS = `
 .sp-stat{border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));padding:15px 16px;min-height:78px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
 .sp-stat b{display:block;font-family:var(--display);font-size:27px;font-weight:600;color:var(--ink)}
 .sp-stat span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.sp-skel{height:78px;border:1px solid var(--line);background:linear-gradient(90deg,var(--paper-2) 25%,#222 50%,var(--paper-2) 75%);background-size:200% 100%;animation:spsh 1.2s linear infinite}
+@keyframes spsh{to{background-position:-200% 0}}
 .sp-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px;background:rgba(15,15,15,.72)}
 .sp-next{border:1px solid rgba(52,184,172,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(52,184,172,.09),rgba(255,255,255,.025))!important;box-shadow:0 12px 32px rgba(0,0,0,.12)}
 @supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.sp-hero,.sp-stat,.sp-tabs,.sp-next{backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%)}}
@@ -244,7 +246,16 @@ export default function StudentClient() {
       ) : <div style={box}>We could not find a certificate for this link.</div>}
     </main>
   );
-  if (state === 'loading') return <main style={wrap}><p>Loading...</p></main>;
+  if (state === 'loading') return (
+    <main className="sp" style={wrap} aria-busy="true">
+      <style>{BTN_CSS}</style>
+      <div className="sp-hero">
+        <div className="eyebrow" style={{ marginBottom: 16 }}>STUDENT PORTAL</div>
+        <p className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Loading your dashboard...</p>
+        <div className="sp-stats">{[0, 1, 2].map((i) => <div key={i} className="sp-skel" />)}</div>
+      </div>
+    </main>
+  );
 
   if (state === 'out') return (
     <main className="sp" style={{ ...wrap, maxWidth: 480, paddingTop: 56 }}>

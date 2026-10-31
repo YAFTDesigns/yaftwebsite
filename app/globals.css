@@ -199,6 +199,7 @@ section{padding:72px 0;border-bottom:1px solid var(--line);}
 .btn-primary:disabled{opacity:.6;cursor:default;}
 .btn-secondary{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;
+  background:transparent;cursor:pointer;
   color:var(--ink);padding:13px 24px;
   border:1px solid var(--ink);
   transition:all .2s;
