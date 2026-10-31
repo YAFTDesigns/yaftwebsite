@@ -175,6 +175,9 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
 
       <BillingForm d={d} set={set} disabled={busy} allowOutsideIndia={currency === 'USD'} />
       <p style={{ fontSize: 12, opacity: 0.7, marginBottom: 14 }}>Individual enrolment. Company or team training is arranged by email (see below).</p>
+      <div style={{ borderLeft: '3px solid var(--blueprint)', background: 'rgba(64,224,208,.06)', padding: '12px 16px', marginBottom: 18, fontSize: 14, lineHeight: 1.6 }}>
+        <strong>Individual billing and private sessions:</strong> please discuss the class timings and schedule with your respective mentor first. Once you both have agreed on the dates and times, go ahead and pay the advance.
+      </div>
 
       <button className="btn-primary" style={{ marginRight: 10, marginBottom: 8 }} disabled={busy || !sched} onClick={() => pay('advance')}>{busy ? 'Please wait...' : 'Pay 50% now'}</button>
       <button className="btn-secondary" style={{ marginBottom: 8 }} disabled={busy || !sched} onClick={() => pay('full')}>{busy ? 'Please wait...' : 'Pay full amount'}</button>
