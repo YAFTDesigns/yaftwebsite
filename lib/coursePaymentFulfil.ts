@@ -51,8 +51,9 @@ async function nextInvoiceNo(testMode: boolean, paymentId: string): Promise<stri
   if (testMode) return `YAFT-TEST-${paymentId.slice(-8).toUpperCase()}`;
   const ist = new Date(Date.now() + 5.5 * 3600_000);
   const mmyyyy = String(ist.getUTCMonth() + 1).padStart(2, '0') + ist.getUTCFullYear();
-  const { data } = await getSupabaseAdmin().from('invoices').select('invoice_no').like('invoice_no', `YAFT-${mmyyyy}-%`);
-  const used = (data ?? []).map((r) => parseInt(String(r.invoice_no).split('-').pop() ?? '0', 10)).filter((n) => !Number.isNaN(n));
+  // The running number carries on across months (..., 21, 22, 23), so take the highest real YAFT-MMYYYY-NN ever issued (no PF or TEST ones) and add one.
+  const { data } = await getSupabaseAdmin().from('invoices').select('invoice_no').like('invoice_no', 'YAFT-%');
+  const used = (data ?? []).map((r) => /^YAFT-\d{6}-(\d+)$/.exec(String(r.invoice_no))?.[1]).filter(Boolean).map((n) => parseInt(n as string, 10));
   return `YAFT-${mmyyyy}-${String((used.length ? Math.max(...used) : 0) + 1).padStart(2, '0')}`;
 }
 

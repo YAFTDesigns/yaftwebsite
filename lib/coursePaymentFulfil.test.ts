@@ -36,13 +36,13 @@ describe('advance then balance', () => {
     vi.setSystemTime(new Date('2026-04-10T06:00:00Z'));
     expect((await fulfilCoursePayment(captured('order_B', 'pay_B', 1770000), false)).ok).toBe(true);
 
-    expect(bills().map((b) => b.invoice_no)).toEqual(['YAFT-032026-01', 'YAFT-042026-01']);
+    expect(bills().map((b) => b.invoice_no)).toEqual(['YAFT-032026-01', 'YAFT-042026-02']);
     expect(bills().map((b) => Number(b.total))).toEqual([17700, 17700]);
     expect(bills().every((b) => b.course_plan_id === plan.id)).toBe(true);
     expect(bills()[0].items[0].rate).toBe(15000);
     expect(bills()[0]).toMatchObject({ client_pan: 'ABCDE1234F', client_gst: '33ABCDE1234F1Z5', client_address: '12 Test Street, Coimbatore' });
     expect(bills()[0].items[0].desc).toBe('Rhino3D Training (part 1 of 2)');
-    expect(state.emails).toEqual(['YAFT-032026-01', 'YAFT-042026-01']);
+    expect(state.emails).toEqual(['YAFT-032026-01', 'YAFT-042026-02']);
     expect((state.db.t('course_payment_plans')[0] as { status: string }).status).toBe('complete');
   });
 
