@@ -25,10 +25,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             YAFT <span>Admin</span>
           </Link>
           <AdminNav counts={counts} />
-          <a href="https://www.yaftdesigns.com" target="_blank" rel="noopener noreferrer" className="btn-ghost">
-            View website ↗
-          </a>
-          <SignOutButton />
+          <div className={styles.actions}>
+            <a href="https://www.yaftdesigns.com" target="_blank" rel="noopener noreferrer" className="btn-ghost">
+              View website ↗
+            </a>
+            <SignOutButton />
+          </div>
         </div>
         <AdminSubNav counts={counts} />
       </header>
