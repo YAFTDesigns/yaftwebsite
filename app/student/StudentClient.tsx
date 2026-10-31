@@ -13,7 +13,7 @@ type Card = {
   creditNotes: { creditNoteNo: string; date: string | null; total: number | null }[];
 };
 type Me = {
-  profile: { displayName: string | null; certificateName: string | null; phone: string | null; email: string; googleAvatar: string | null; linkedinUrl: string | null; linkedinConnected: boolean; linkedinEnabled: boolean; badgeConsent: boolean; verified: boolean };
+  profile: { displayName: string | null; certificateName: string | null; phone: string | null; email: string; googleAvatar: string | null; linkedinUrl: string | null; occupation: 'professional' | 'student' | null; designation: string | null; organisation: string | null; college: string | null; studyField: string | null; linkedinConnected: boolean; linkedinEnabled: boolean; badgeConsent: boolean; verified: boolean };
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
@@ -44,6 +44,9 @@ const BTN_CSS = `
 .sp a{color:var(--blueprint)}
 .sp a[style*="background"]{color:#fff}
 .sp h2,.sp h3{font-family:var(--display)}
+.sp-iconbtn{position:relative;display:inline-grid;place-items:center;width:46px;height:46px;background:transparent;border:1px solid #fff;color:#fff;cursor:pointer;padding:0}
+.sp-iconbtn:hover{background:rgba(255,255,255,.1)}
+.sp-dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border-radius:50%;background:#E63946;border:2px solid #0A0A0A}
 .sp-shield{position:absolute;top:-8px;right:-10px;display:inline-flex;cursor:default;outline:none}
 .sp-shield.inl{position:relative;top:auto;right:auto;vertical-align:middle;margin-left:8px}
 .sp-shield.on{cursor:default}
@@ -96,7 +99,7 @@ export default function StudentClient() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState('');
-  const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '', linkedinUrl: '' });
+  const [profile, setProfile] = useState<{ displayName: string; certificateName: string; phone: string; linkedinUrl: string; occupation: '' | 'professional' | 'student'; designation: string; organisation: string; college: string; studyField: string }>({ displayName: '', certificateName: '', phone: '', linkedinUrl: '', occupation: '', designation: '', organisation: '', college: '', studyField: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [agree, setAgree] = useState(false);
   const [edit, setEdit] = useState<{ key: string; name: string; role: string; title: string; tool: string; category: string; description: string; link: string; publish: boolean } | null>(null);
@@ -112,7 +115,7 @@ export default function StudentClient() {
     try {
       if (localStorage.getItem('yaft_interest_pref') === '1') { localStorage.removeItem('yaft_interest_pref'); fetch('/api/student/interest-consent', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: true }) }).catch(() => {}); }
     } catch { /* storage unavailable */ }
-    setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '', linkedinUrl: j.profile.linkedinUrl ?? '' });
+    setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '', linkedinUrl: j.profile.linkedinUrl ?? '', occupation: j.profile.occupation ?? '', designation: j.profile.designation ?? '', organisation: j.profile.organisation ?? '', college: j.profile.college ?? '', studyField: j.profile.studyField ?? '' });
     return j;
   }, []);
 
@@ -303,6 +306,8 @@ export default function StudentClient() {
 
   if (!me) return null;
   const name = me.profile.displayName || me.profile.email;
+  const pp = me.profile;
+  const profileDone = !!pp.occupation && (pp.occupation === 'professional' ? !!(pp.designation && pp.organisation) : !!(pp.college && pp.studyField));
   const certsReady: number = me.totals.certificates;
   const paymentDue = me.enrolments.find((e) => e.nextAction);
   const revisionNeeded = me.projects.find((p) => p.latest?.status === 'changes_requested');
@@ -335,8 +340,13 @@ export default function StudentClient() {
             <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1, margin: 0 }}>{name}</h1>
             <div className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 6 }}>{me.profile.email}</div>
           </div>
-          <button style={ghost} onClick={() => setShowProfile((v) => !v)}>Profile</button>
-          <button style={ghost} onClick={signOut}>Sign out</button>
+          <button type="button" className="sp-iconbtn" aria-label={profileDone ? 'Profile' : 'Profile: please complete your details'} title={profileDone ? 'Profile' : 'Complete your profile'} onClick={() => setShowProfile((v) => !v)}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" /></svg>
+            {!profileDone && <span className="sp-dot" aria-hidden="true" />}
+          </button>
+          <button type="button" className="sp-iconbtn" aria-label="Sign out" title="Sign out" onClick={signOut}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5" /><path d="M21 12H9" /></svg>
+          </button>
         </div>
         <div className="sp-stats">
           <div className="sp-stat"><b>{me.totals.courses}</b><span>Courses</span></div>
@@ -385,6 +395,22 @@ export default function StudentClient() {
           <label style={{ fontSize: 12 }}>Display name<input style={input} value={profile.displayName} maxLength={80} onChange={(e) => setProfile({ ...profile, displayName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Name on certificate (kept separate from your display name)<input style={input} value={profile.certificateName} maxLength={80} onChange={(e) => setProfile({ ...profile, certificateName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Phone (optional)<input style={input} value={profile.phone} maxLength={20} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label>
+          <div style={{ borderTop: '1px solid var(--line)', marginTop: 16, paddingTop: 14 }}>
+            <strong style={{ fontSize: 13 }}>About you {!profileDone && <span style={{ color: '#E63946', fontSize: 12, fontWeight: 400 }}>(please complete)</span>}</strong>
+            <div style={{ display: 'flex', gap: 10, margin: '10px 0' }}>
+              {(['professional', 'student'] as const).map((k) => (
+                <button type="button" key={k} style={{ ...ghost, ...(profile.occupation === k ? { background: '#fff', color: '#0A0A0A' } : {}) }} onClick={() => setProfile({ ...profile, occupation: k })}>{k === 'professional' ? 'Working professional' : 'Student'}</button>
+              ))}
+            </div>
+            {profile.occupation === 'professional' && <>
+              <label style={{ fontSize: 12, display: 'block' }}>Designation<input style={input} value={profile.designation} maxLength={100} placeholder="e.g. Senior Architect" onChange={(e) => setProfile({ ...profile, designation: e.target.value })} /></label>
+              <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Company<input style={input} value={profile.organisation} maxLength={120} placeholder="Where you work" onChange={(e) => setProfile({ ...profile, organisation: e.target.value })} /></label>
+            </>}
+            {profile.occupation === 'student' && <>
+              <label style={{ fontSize: 12, display: 'block' }}>College or university<input style={input} value={profile.college} maxLength={150} onChange={(e) => setProfile({ ...profile, college: e.target.value })} /></label>
+              <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Course and year<input style={input} value={profile.studyField} maxLength={120} placeholder="e.g. B.Arch, 3rd year" onChange={(e) => setProfile({ ...profile, studyField: e.target.value })} /></label>
+            </>}
+          </div>
           <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
             <strong style={{ fontSize: 13 }}>Verified student shield <span className={'sp-shield inl' + (me.profile.linkedinConnected ? ' on' : '')} tabIndex={0} role="img" aria-label={me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Link LinkedIn to get verified'} onClick={() => { if (!me.profile.linkedinConnected && me.profile.linkedinEnabled) connectLinkedin(); }}><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" className="sp-shield-bg" /><path d="m8.2 12.2 2.6 2.6 5-5.2" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="sp-tip">{me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Link LinkedIn to get verified'}</span></span></strong>
             <p style={{ fontSize: 12, opacity: 0.75, margin: '4px 0 8px' }}>Connect your LinkedIn account and you get a blue shield beside your name on testimonials, Community Works and, later, the student forum. It shows you are a real YAFT student. Typing a link is not enough; you sign in to LinkedIn once so we know the account is yours.</p>

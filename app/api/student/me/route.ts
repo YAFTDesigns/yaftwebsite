@@ -16,7 +16,7 @@ export async function GET() {
     verifiedBadgeFor(s.profile.id),
   ]);
   return NextResponse.json({
-    profile: { displayName: s.profile.display_name, certificateName: s.profile.certificate_name, phone: s.profile.phone, email: s.email, googleAvatar: s.googleAvatar, linkedinUrl: s.profile.linkedin_url, linkedinConnected: s.linkedinConnected, linkedinEnabled: process.env.LINKEDIN_LOGIN_ENABLED === '1', badgeConsent: c?.granted === true, verified: badge.verified },
+    profile: { displayName: s.profile.display_name, certificateName: s.profile.certificate_name, phone: s.profile.phone, email: s.email, googleAvatar: s.googleAvatar, linkedinUrl: s.profile.linkedin_url, occupation: s.profile.occupation, designation: s.profile.designation, organisation: s.profile.organisation, college: s.profile.college, studyField: s.profile.study_field, linkedinConnected: s.linkedinConnected, linkedinEnabled: process.env.LINKEDIN_LOGIN_ENABLED === '1', badgeConsent: c?.granted === true, verified: badge.verified },
     ...view,
   }, { headers: NO_STORE });
 }

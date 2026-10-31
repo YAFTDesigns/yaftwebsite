@@ -3,10 +3,10 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { cleanName, safeHttpsLink } from './safe';
 import { hasLinkedinIdentity } from './verified';
 
-export type StudentProfile = { id: string; display_name: string | null; certificate_name: string | null; phone: string | null; avatar_path: string | null; linkedin_url: string | null; linkedin_verified_at: string | null };
+export type StudentProfile = { id: string; display_name: string | null; certificate_name: string | null; phone: string | null; avatar_path: string | null; linkedin_url: string | null; linkedin_verified_at: string | null; occupation: 'professional' | 'student' | null; designation: string | null; organisation: string | null; college: string | null; study_field: string | null };
 export type StudentSession = { userId: string; email: string; profile: StudentProfile; googleAvatar: string | null; linkedinConnected: boolean };
 
-const SEL = 'id, display_name, certificate_name, phone, avatar_path, linkedin_url, linkedin_verified_at';
+const SEL = 'id, display_name, certificate_name, phone, avatar_path, linkedin_url, linkedin_verified_at, occupation, designation, organisation, college, study_field';
 
 /**
  * The ONLY way portal code learns who the student is: the verified Supabase session, read on the server.

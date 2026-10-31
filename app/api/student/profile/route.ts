@@ -18,6 +18,12 @@ export async function PATCH(req: NextRequest) {
     const ph = typeof b.phone === 'string' ? b.phone.replace(/[^\d+ ]/g, '').trim().slice(0, 20) : '';
     patch.phone = ph || null;
   }
+  if ('occupation' in b) patch.occupation = b.occupation === 'professional' || b.occupation === 'student' ? b.occupation : null;
+  const txt = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, max) : '') || null;
+  if ('designation' in b) patch.designation = txt(b.designation, 100);
+  if ('organisation' in b) patch.organisation = txt(b.organisation, 120);
+  if ('college' in b) patch.college = txt(b.college, 150);
+  if ('studyField' in b) patch.study_field = txt(b.studyField, 120);
   if ('linkedinUrl' in b) {
     const raw = typeof b.linkedinUrl === 'string' ? b.linkedinUrl.trim() : '';
     if (raw) { const li = linkedinProfileUrl(raw); if (!li) return NextResponse.json({ error: 'Use your LinkedIn profile address, like linkedin.com/in/yourname' }, { status: 400 }); patch.linkedin_url = li; }
