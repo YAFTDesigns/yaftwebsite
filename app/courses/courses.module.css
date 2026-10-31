@@ -88,13 +88,13 @@
   padding:14px 16px;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s;
 }
 .enrollBtn:hover{background:#1858BF;border-color:#1858BF;}
-.courseFoot a.enquire{
+.courseFoot a:global(.enquire){
   display:flex;align-items:center;justify-content:center;
   background:#000;color:#fff;border:1px solid #3a3a3a;border-bottom:1px solid #3a3a3a;
   font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
   padding:14px 16px;text-decoration:none;cursor:pointer;transition:background .15s,border-color .15s;
 }
-.courseFoot a.enquire:hover{background:#D42B38;border-color:#D42B38;color:#fff;}
+.courseFoot a:global(.enquire):hover{background:#D42B38;border-color:#D42B38;color:#fff;}
 
 @media (max-width:980px){
   .courseGrid{grid-template-columns:repeat(2,1fr);}
