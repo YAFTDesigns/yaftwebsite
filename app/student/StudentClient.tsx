@@ -379,7 +379,7 @@ export default function StudentClient() {
             <label style={{ fontSize: 12, display: 'block', marginTop: 8, opacity: me.profile.linkedinConnected ? 1 : 0.5 }}><input type="checkbox" disabled={!me.profile.linkedinConnected} checked={me.profile.badgeConsent} onChange={(e) => setBadge(e.target.checked)} /> Show the Verified shield (and my LinkedIn link) next to my published testimonials and projects. I can switch this off any time.</label>
           </div>
           <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0' }}>Signed in as {me.profile.email}. Changing your sign-in email never moves your enrolments.</p>
-          <label style={{ fontSize: 12, display: 'block', margin: '8px 0' }}><input type="checkbox" checked={interestOn} onChange={(e) => setInterest(e.target.checked)} /> Remember which courses I look at while signed in, so YAFT can follow up helpfully. Off by default; switching it off deletes what was saved. Browsing alone never counts as marketing consent.</label>
+          <label style={{ fontSize: 12, display: 'block', margin: '8px 0' }}><input type="checkbox" checked={interestOn} onChange={(e) => setInterest(e.target.checked)} /> Let YAFT remember the courses I view, so it can suggest the right ones. Turn off any time and it is deleted.</label>
           <button style={btn} onClick={saveProfile}>Save profile</button>
         </div>
       )}
