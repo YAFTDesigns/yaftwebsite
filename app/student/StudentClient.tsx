@@ -98,9 +98,7 @@ export default function StudentClient() {
   const [link, setLink] = useState('');
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '', linkedinUrl: '' });
   const [showProfile, setShowProfile] = useState(false);
-  const [interestOn, setInterestOn] = useState(false);
   const [agree, setAgree] = useState(false);
-  const [wantInterest, setWantInterest] = useState(false);
   const [edit, setEdit] = useState<{ key: string; name: string; role: string; title: string; tool: string; category: string; description: string; link: string; publish: boolean } | null>(null);
   const [tf, setTf] = useState<{ key: string; quote: string; name: string; noPhoto: boolean } | null>(null);
   const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
@@ -112,7 +110,7 @@ export default function StudentClient() {
     const j: Me = await r.json();
     setMe(j); setState('in');
     try {
-      if (localStorage.getItem('yaft_interest_pref') === '1') { localStorage.removeItem('yaft_interest_pref'); fetch('/api/student/interest-consent', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: true }) }).then(() => setInterestOn(true)).catch(() => {}); }
+      if (localStorage.getItem('yaft_interest_pref') === '1') { localStorage.removeItem('yaft_interest_pref'); fetch('/api/student/interest-consent', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: true }) }).catch(() => {}); }
     } catch { /* storage unavailable */ }
     setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '', linkedinUrl: j.profile.linkedinUrl ?? '' });
     return j;
@@ -148,7 +146,7 @@ export default function StudentClient() {
   }, [load]);
 
   const redirectTo = () => `${window.location.origin}/auth/callback?next=/student`;
-  function rememberChoices() { try { if (wantInterest) localStorage.setItem('yaft_interest_pref', '1'); else localStorage.removeItem('yaft_interest_pref'); } catch { /* ignore */ } }
+  function rememberChoices() { try { localStorage.setItem('yaft_interest_pref', '1'); } catch { /* ignore */ } }
   async function google() { rememberChoices(); await getSupabaseBrowser().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo(), queryParams: { prompt: 'select_account' } } }); }
   async function emailLink() {
     setBusy(true); setMsg(''); rememberChoices();
@@ -178,10 +176,6 @@ export default function StudentClient() {
   async function setBadge(on: boolean) {
     const { ok, j } = await post('/api/student/badge', { on });
     setMsg(ok ? (on ? 'Done. The Verified shield can now show next to your published work.' : 'The shield is switched off, and removed from anything already public.') : j.error ?? 'Could not change that.'); if (ok) load();
-  }
-  async function setInterest(on: boolean) {
-    const { ok } = await post('/api/student/interest-consent', { on });
-    if (ok) { setInterestOn(on); setMsg(on ? 'Okay, we will remember the courses you look at.' : 'Stopped, and what we had is deleted.'); }
   }
   async function saveProfile() {
     const { ok, j } = await post('/api/student/profile', profile, 'PATCH');
@@ -286,11 +280,7 @@ export default function StudentClient() {
         <div style={{ marginBottom: 18, display: 'grid', gap: 10 }}>
           <label style={{ fontSize: 13, display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
             <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 3 }} />
-            <span>I agree to the <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Privacy Policy</a>. <span style={{ opacity: 0.6 }}>(required)</span></span>
-          </label>
-          <label style={{ fontSize: 13, display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
-            <input type="checkbox" checked={wantInterest} onChange={(e) => setWantInterest(e.target.checked)} style={{ marginTop: 3 }} />
-            <span>Suggest courses based on what I view. <span style={{ opacity: 0.6 }}>(optional, off any time)</span></span>
+            <span>I agree to the <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Privacy Policy</a>. <span style={{ opacity: 0.6 }}>(required)</span><br /><span style={{ opacity: 0.6, fontSize: 12 }}>By signing in you also let YAFT remember the courses you view, to suggest relevant ones.</span></span>
           </label>
         </div>
         <button style={{ ...btn, width: '100%', opacity: agree ? 1 : 0.45, cursor: agree ? 'pointer' : 'not-allowed', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} disabled={!agree} onClick={google}><GoogleG />Continue with Google</button>
@@ -338,7 +328,7 @@ export default function StudentClient() {
             <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1, margin: 0 }}>{name}</h1>
             <div className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 6 }}>{me.profile.email}</div>
           </div>
-          <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
+          <button style={ghost} onClick={() => setShowProfile((v) => !v)}>Profile</button>
           <button style={ghost} onClick={signOut}>Sign out</button>
         </div>
         <div className="sp-stats">
@@ -398,7 +388,6 @@ export default function StudentClient() {
             <label style={{ fontSize: 12, display: 'block', marginTop: 8, opacity: me.profile.linkedinConnected ? 1 : 0.5 }}><input type="checkbox" disabled={!me.profile.linkedinConnected} checked={me.profile.badgeConsent} onChange={(e) => setBadge(e.target.checked)} /> Show the Verified shield (and my LinkedIn link) next to my published testimonials and projects. I can switch this off any time.</label>
           </div>
           <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0' }}>Signed in as {me.profile.email}. Changing your sign-in email never moves your enrolments.</p>
-          <label style={{ fontSize: 12, display: 'block', margin: '8px 0' }}><input type="checkbox" checked={interestOn} onChange={(e) => setInterest(e.target.checked)} /> Let YAFT remember the courses I view, so it can suggest the right ones. Turn off any time and it is deleted.</label>
           <button style={btn} onClick={saveProfile}>Save profile</button>
         </div>
       )}
