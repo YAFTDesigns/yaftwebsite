@@ -45,6 +45,13 @@ const BTN_CSS = `
 .sp a{color:var(--blueprint)}
 .sp a[style*="background"]{color:#fff}
 .sp h2,.sp h3{font-family:var(--display)}
+.sp-shield{position:absolute;top:-8px;right:-10px;display:inline-flex;cursor:default;outline:none}
+.sp-shield.on{cursor:default}
+.sp-shield:not(.on){cursor:pointer}
+.sp-shield-bg{fill:#6b7280;stroke:#0A0A0A;stroke-width:1.5}
+.sp-shield.on .sp-shield-bg{fill:#1f6feb}
+.sp-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#0A0A0A;color:#fff;border:1px solid #40E0D0;padding:7px 11px;font:12px var(--mono);opacity:0;pointer-events:none;transition:opacity .12s;z-index:20}
+.sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
 .sp-hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);padding:26px 28px;margin-bottom:26px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 50px rgba(0,0,0,.16)}
 .sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(52,184,172,.16),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
@@ -293,12 +300,23 @@ export default function StudentClient() {
       <div className="sp-hero">
         <div className="eyebrow" style={{ marginBottom: 16 }}>STUDENT PORTAL</div>
         <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
-          {me.profile.googleAvatar
-            // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={me.profile.googleAvatar} alt="" width={64} height={64} referrerPolicy="no-referrer" style={{ borderRadius: '50%', border: '2px solid var(--blueprint)' }} />
-            : <div style={{ width: 64, height: 64, borderRadius: '50%', border: '2px solid var(--blueprint)', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)' }}>{initials(name)}</div>}
+          <div style={{ position: 'relative', width: 64, height: 64, flex: 'none' }}>
+            {me.profile.googleAvatar
+              // eslint-disable-next-line @next/next/no-img-element
+              ? <img src={me.profile.googleAvatar} alt="" width={64} height={64} referrerPolicy="no-referrer" style={{ borderRadius: '50%', border: '2px solid var(--blueprint)' }} />
+              : <div style={{ width: 64, height: 64, borderRadius: '50%', border: '2px solid var(--blueprint)', display: 'grid', placeItems: 'center', fontFamily: 'var(--mono)' }}>{initials(name)}</div>}
+            <span className={'sp-shield' + (me.profile.linkedinConnected ? ' on' : '')} tabIndex={0} role="img"
+              aria-label={me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Not verified. Link LinkedIn to get verified'}
+              onClick={() => { if (!me.profile.linkedinConnected && me.profile.linkedinEnabled) connectLinkedin(); }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" className="sp-shield-bg" />
+                <path d="m8.2 12.2 2.6 2.6 5-5.2" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className="sp-tip">{me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Link LinkedIn to get verified'}</span>
+            </span>
+          </div>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1, margin: 0 }}>{name}{me.profile.linkedinConnected && me.totals.courses > 0 && <VerifiedBadge size={24} />}</h1>
+            <h1 style={{ fontSize: 'clamp(28px,4vw,42px)', lineHeight: 1.1, margin: 0 }}>{name}</h1>
             <div className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)', marginTop: 6 }}>{me.profile.email}</div>
           </div>
           <button style={ghost} onClick={() => { setShowProfile((v) => !v); fetch('/api/student/interest-consent').then((r) => r.json()).then((j) => setInterestOn(!!j.on)).catch(() => {}); }}>Profile</button>
