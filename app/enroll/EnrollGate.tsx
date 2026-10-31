@@ -2,6 +2,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
 
+// Same scattered plus-marks texture as the YAFT Labs hero, spread over the full width here.
+const PLUS_COLS = 12, PLUS_ROWS = 7;
+const PLUS_MARKS = Array.from({ length: PLUS_COLS * PLUS_ROWS }, (_, i) => {
+  const col = i % PLUS_COLS, row = Math.floor(i / PLUS_COLS);
+  const jx = ((i * 37) % 11) / 11 - 0.5, jy = ((i * 53) % 13) / 13 - 0.5;
+  return { x: ((col + 0.5 + jx * 0.5) / PLUS_COLS) * 100, y: ((row + 0.5 + jy * 0.5) / PLUS_ROWS) * 100, size: 10 + ((i * 7) % 5) * 3, delay: (i % 9) * 0.8 };
+});
+
 function GoogleG() { return (<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true" style={{ marginRight: 10, verticalAlign: 'middle' }}><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.800 2.400 30.300 0 24 0 14.600 0 6.500 5.400 2.600 13.200l7.900 6.100C12.400 13.600 17.700 9.500 24 9.500z"/><path fill="#4285F4" d="M46.500 24.500c0-1.600-.1-3.100-.4-4.500H24v9h12.700c-.6 3-2.300 5.500-4.800 7.200l7.600 5.900c4.500-4.200 7-10.300 7-17.600z"/><path fill="#FBBC05" d="M10.500 28.700c-.5-1.400-.8-3-.8-4.700s.3-3.300.8-4.700l-7.900-6.100C.9 16.500 0 20.100 0 24s.9 7.500 2.600 10.800l7.900-6.100z"/><path fill="#34A853" d="M24 48c6.500 0 11.900-2.100 15.900-5.800l-7.600-5.900c-2.100 1.400-4.900 2.300-8.300 2.300-6.300 0-11.600-4.100-13.500-9.800l-7.900 6.100C6.500 42.600 14.600 48 24 48z"/></svg>); }
 
 // Step 1 of enrolling: register (sign in) first. Signed-in students go straight to choosing a course.
@@ -43,12 +51,18 @@ export default function EnrollGate({ course, children }: { course?: string; chil
   if (state === 'in') return <>{children}</>;
   if (state === 'loading') return <p className="mono" style={{ fontSize: 12, color: 'var(--ink-soft)' }}>Checking your account...</p>;
   return (
+    <div className="eg-stage">
+      <div className="eg-plus" aria-hidden="true">
+        {PLUS_MARKS.map((m, i) => (
+          <svg key={i} className={i % 4 === 0 ? 'eg-spin' : 'eg-still'} style={{ left: `${m.x}%`, top: `${m.y}%`, width: m.size, height: m.size, animationDelay: `${m.delay}s` }} viewBox="0 0 24 24"><path d="M11 2h2v9h9v2h-9v9h-2v-9H2v-2h9V2z" fill="currentColor" /></svg>
+        ))}
+      </div>
     <section className="eg-card">
-      <style>{`.eg-card{position:relative;overflow:hidden;isolation:isolate;max-width:480px;margin-top:8px;padding:28px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.03));box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.05)}
+      <style>{`.eg-card{position:relative;overflow:hidden;isolation:isolate;width:100%;max-width:480px;margin:0 auto;padding:28px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.03));box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.05)}
 .eg-card:before{content:"";position:absolute;inset:-40% auto auto -20%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(64,224,208,.22),transparent 70%);z-index:-1;pointer-events:none}
 .eg-card:after{content:"";position:absolute;z-index:-1;right:-40px;top:-30px;width:340px;height:250px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right bottom/contain;opacity:.12;pointer-events:none}
 @supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.eg-card{backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%)}}
-.eg-card .btn-secondary{border-radius:10px}.eg-card .field{border-radius:10px;background:rgba(0,0,0,.35)}`}</style>
+.eg-stage{position:relative;display:flex;justify-content:center;padding:36px 0;margin-top:8px;border:1px solid var(--line);background:#0A0A0A;overflow:hidden}.eg-plus{position:absolute;inset:0;pointer-events:none}.eg-still,.eg-spin{position:absolute;color:#3a3a3a}@keyframes egSpin{0%,82%{transform:rotate(0)}92%,100%{transform:rotate(360deg)}}.eg-spin{animation:egSpin 7s ease-in-out infinite}.eg-card{position:relative;z-index:1}.eg-card .btn-secondary{border-radius:10px}.eg-card .field{border-radius:10px;background:rgba(0,0,0,.35)}`}</style>
       <div className="eyebrow" style={{ marginBottom: 10 }}>STEP 1 OF 2</div>
       <h2 style={{ fontSize: 22, margin: '0 0 8px' }}>Register to enrol</h2>
       <p style={{ color: 'var(--ink-soft)', fontSize: 14, margin: '0 0 16px' }}>Create your student account first. After that you pick your course and pay. Your bills and certificate will be waiting in your student portal.</p>
@@ -68,5 +82,6 @@ export default function EnrollGate({ course, children }: { course?: string; chil
       </>}
       <p style={{ fontSize: 12, opacity: 0.65, marginTop: 14 }}>Already registered? Sign in the same way and you go straight to choosing your course.</p>
     </section>
+    </div>
   );
 }
