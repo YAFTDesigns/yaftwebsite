@@ -23,7 +23,7 @@
 .priceSub { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
 .priceUsd { font-size: 12px; color: var(--ink-soft); font-family: var(--mono); margin-top: 2px; }
 .ctaBtns { display: flex; gap: 10px; flex-wrap: wrap; }
-.btnPrimary { background: var(--blueprint); color: #fff; border: none; border-radius: 6px; padding: 11px 26px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
+.btnPrimary { background: var(--blueprint); color: #0A0A0A; border: none; border-radius: 6px; padding: 11px 26px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
 .btnOutline { background: transparent; color: var(--blueprint); border: 1px solid var(--blueprint); border-radius: 6px; padding: 11px 26px; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-block; }
 .divider { border: none; border-top: 0.5px solid var(--line); margin: 36px 0; }
 .sectionLabel { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--blueprint); font-weight: 500; font-family: var(--mono); margin-bottom: 16px; }

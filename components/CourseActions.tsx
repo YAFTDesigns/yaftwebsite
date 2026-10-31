@@ -26,11 +26,11 @@ export default function CourseActions({ slug, title }: { slug: string; title: st
       {st?.enrolled ? (
         <>
           <a href="/student" style={btn}>My course</a>
-          {st.nextAction === 'pay_balance' && st.payUrl && <a href={st.payUrl} style={{ ...btn, background: 'var(--brass)', borderColor: 'var(--brass)', color: '#fff' }}>Pay balance</a>}
+          {st.nextAction === 'pay_balance' && st.payUrl && <a href={st.payUrl} style={{ ...btn, background: '#D42B38', borderColor: '#D42B38', color: '#fff' }}>Pay balance</a>}
           <a href={`/student?submit=${encodeURIComponent(slug)}`} style={btn}>Submit your project</a>
         </>
       ) : (
-        <a href={`/enroll?course=${encodeURIComponent(slug)}`} style={{ ...btn, background: 'var(--brass)', borderColor: 'var(--brass)', color: '#fff' }}
+        <a href={`/enroll?course=${encodeURIComponent(slug)}`} style={{ ...btn, background: '#D42B38', borderColor: '#D42B38', color: '#fff' }}
            onClick={() => { fetch('/api/student/interest', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ slug, event: 'enroll_clicked' }) }).catch(() => {}); }}>Enroll Now</a>
       )}
       <a href={corp} style={btn}>Corporate / Team Training</a>

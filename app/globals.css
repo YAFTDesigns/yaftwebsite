@@ -78,6 +78,8 @@ nav{
   transition:border-color .2s,color .2s;
 }
 .navlinks a:hover{color:var(--ink);border-color:var(--brass);}
+.navlinks a.cta-btn{color:#fff;padding:10px 18px;border:1px solid #D42B38;}
+.navlinks a.cta-btn:hover{color:#fff;border-color:var(--brass-dark);}
 .navlinks a.active{color:var(--ink);border-color:var(--blueprint);}
 .cta-btn{
   font-family:var(--mono);font-size:13px;letter-spacing:.03em;line-height:1;
