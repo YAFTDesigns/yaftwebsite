@@ -50,7 +50,7 @@ const BTN_CSS = `
 .sp-shield:not(.on){cursor:pointer}
 .sp-shield-bg{fill:#6b7280;stroke:#0A0A0A;stroke-width:1.5}
 .sp-shield.on .sp-shield-bg{fill:#1f6feb}
-.sp-tip{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#0A0A0A;color:#fff;border:1px solid #40E0D0;padding:7px 11px;font:12px var(--mono);opacity:0;pointer-events:none;transition:opacity .12s;z-index:20}
+.sp-tip{position:absolute;top:calc(100% + 8px);left:0;white-space:nowrap;background:#4b5563;color:#fff;border-radius:6px;padding:7px 12px;font:12px var(--mono);box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .12s;z-index:20}
 .sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
 .sp-hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);padding:26px 28px;margin-bottom:26px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 50px rgba(0,0,0,.16)}
 .sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(52,184,172,.16),transparent 68%);pointer-events:none}
