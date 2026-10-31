@@ -13,9 +13,10 @@ const SHOW_AUDIENCE_MENU = false;
 
 export default function SiteHeader({ active }: { active?: string }) {
   const [open, setOpen] = useState(false);
-  const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | 'for' | null>(null);
+  const [openMenu, setOpenMenu] = useState<'projects' | 'resources' | 'for' | 'trainings' | null>(null);
   const [hidden, setHidden] = useState(false);
   const projectsRef = useRef<HTMLDivElement>(null);
+  const trainingsRef = useRef<HTMLDivElement>(null);
   const resourcesRef = useRef<HTMLDivElement>(null);
   const forRef = useRef<HTMLDivElement>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -25,13 +26,13 @@ export default function SiteHeader({ active }: { active?: string }) {
   // Hover only counts for a real mouse. On touch, a tap fires emulated hover THEN click, which opened and instantly
   // closed the menu. A click on the arrow after hover-opening keeps the menu open instead of toggling it shut.
   const hoverOpened = useRef<string | null>(null);
-  function openOnHover(menu: 'projects' | 'resources' | 'for', e?: React.PointerEvent) {
+  function openOnHover(menu: 'projects' | 'resources' | 'for' | 'trainings', e?: React.PointerEvent) {
     if (e && e.pointerType !== 'mouse') return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     hoverOpened.current = menu;
     setOpenMenu(menu);
   }
-  function toggleMenu(menu: 'projects' | 'resources' | 'for') {
+  function toggleMenu(menu: 'projects' | 'resources' | 'for' | 'trainings') {
     if (hoverOpened.current === menu) { hoverOpened.current = null; setOpenMenu(menu); return; }
     setOpenMenu((v) => (v === menu ? null : menu));
   }
@@ -73,7 +74,8 @@ export default function SiteHeader({ active }: { active?: string }) {
       const insideProjects = projectsRef.current && projectsRef.current.contains(target);
       const insideResources = resourcesRef.current && resourcesRef.current.contains(target);
       const insideFor = forRef.current && forRef.current.contains(target);
-      if (!insideProjects && !insideResources && !insideFor) setOpenMenu(null);
+      const insideTrainings = trainingsRef.current && trainingsRef.current.contains(target);
+      if (!insideProjects && !insideResources && !insideFor && !insideTrainings) setOpenMenu(null);
     }
     function esc(e: KeyboardEvent) { if (e.key === 'Escape') setOpenMenu(null); }
     document.addEventListener('mousedown', handler);
@@ -81,6 +83,7 @@ export default function SiteHeader({ active }: { active?: string }) {
     return () => { document.removeEventListener('mousedown', handler); document.removeEventListener('keydown', esc); };
   }, []);
 
+  const isTrainingsActive = active === '/services' || active === '/student';
   const isProjectsActive = active === '/projects' || active === '/projects/community';
   const FOR_LINKS = [
     { href: '/individuals', label: 'Individuals', sub: 'Students and working professionals' },
@@ -101,7 +104,41 @@ export default function SiteHeader({ active }: { active?: string }) {
 
         <div className={`navlinks${open ? ' open' : ''}`} id="navlinks">
           <Link href="/courses"  className={active === '/courses'  ? 'active' : undefined} onClick={() => setOpen(false)}>Courses</Link>
-          <Link href="/services" className={active === '/services' ? 'active' : undefined} onClick={() => setOpen(false)}>Services</Link>
+
+          {/* Trainings dropdown: the label opens Workshops & Services by default */}
+          <div
+            className="nav-dropdown"
+            ref={trainingsRef}
+            onPointerEnter={(e) => openOnHover('trainings', e)}
+            onPointerLeave={(e) => { if (e.pointerType === 'mouse') closeOnHoverOut(); }}
+          >
+            <span className={`nav-drop-btn${isTrainingsActive ? ' active' : ''}`}>
+              <Link href="/services" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                Trainings
+              </Link>
+              <button
+                type="button"
+                className="nav-drop-caret"
+                onClick={() => toggleMenu('trainings')}
+                aria-expanded={openMenu === 'trainings'}
+                aria-label="Toggle Trainings submenu"
+              >
+                <span className="nav-caret" aria-hidden>▾</span>
+              </button>
+            </span>
+            {openMenu === 'trainings' && (
+              <div className="nav-drop-menu">
+                <Link href="/services" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                  <span className="nav-drop-label">Workshops &amp; Services</span>
+                  <span className="nav-drop-sub">Workshops, team training and consulting</span>
+                </Link>
+                <Link href="/student" className="nav-drop-item" onClick={() => { setOpenMenu(null); setOpen(false); }}>
+                  <span className="nav-drop-label">Student Portal</span>
+                  <span className="nav-drop-sub">Your courses, bills and certificates</span>
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Who it's for dropdown */}
           {SHOW_AUDIENCE_MENU && <div
