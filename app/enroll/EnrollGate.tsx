@@ -46,7 +46,7 @@ export default function EnrollGate({ course, children }: { course?: string; chil
     <section className="eg-card">
       <style>{`.eg-card{position:relative;overflow:hidden;isolation:isolate;max-width:480px;margin-top:8px;padding:28px;border:1px solid rgba(255,255,255,.18);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.03));box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.28),inset 0 -1px 0 rgba(255,255,255,.05)}
 .eg-card:before{content:"";position:absolute;inset:-40% auto auto -20%;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(64,224,208,.22),transparent 70%);z-index:-1;pointer-events:none}
-.eg-card:after{content:"";position:absolute;z-index:-1;right:-40px;bottom:-30px;width:340px;height:250px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right bottom/contain;opacity:.12;pointer-events:none}
+.eg-card:after{content:"";position:absolute;z-index:-1;right:-40px;bottom:110px;width:340px;height:250px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right bottom/contain;opacity:.12;pointer-events:none}
 @supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.eg-card{backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%)}}
 .eg-card .btn-secondary{border-radius:10px}.eg-card .field{border-radius:10px;background:rgba(0,0,0,.35)}`}</style>
       <div className="eyebrow" style={{ marginBottom: 10 }}>STEP 1 OF 2</div>
