@@ -17,15 +17,20 @@ export async function GET() {
   const supabase = getSupabaseAdmin();
   const { data: plans, error } = await supabase.from('course_payment_plans').select('*').order('created_at', { ascending: false }).limit(200);
   if (error) return NextResponse.json({ error: 'Could not load plans' }, { status: 500 });
-  const { data: pays } = await supabase.from('course_payments').select('id, plan_id, kind, status, paid_at, payment_id, amount_minor, invoice_id, invoice_no, invoice_emailed, sync_status, sync_error, sync_attempts, gateway_fee_minor, gateway_tax_minor, test_mode').eq('status', 'paid');
+  const { data: allPays } = await supabase.from('course_payments').select('id, plan_id, kind, status, paid_at, payment_id, amount_minor, invoice_id, invoice_no, invoice_emailed, sync_status, sync_error, sync_attempts, gateway_fee_minor, gateway_tax_minor, test_mode').eq('status', 'paid');
   const { data: adjs } = await supabase.from('invoice_adjustments').select('*').order('created_at', { ascending: false }).limit(200);
   const { data: bills } = await supabase.from('invoices').select('id, invoice_no, date, client_name, client_state, invoice_type, items, total, balance, course_plan_id, course_payment_id').not('course_payment_id', 'is', null).is('deleted_at', null);
-  const mismatches = reconcilePlans((pays ?? []) as never, (bills ?? []) as (ReportInvoice & { id: string })[], (adjs ?? []) as never);
+  // A payment whose bill was deleted in admin (a test payment) is retired: it drops out of the checks and the plan list.
+  const { data: retired } = await supabase.from('invoices').select('course_payment_id').not('course_payment_id', 'is', null).not('deleted_at', 'is', null);
+  const retiredIds = new Set((retired ?? []).map((r) => r.course_payment_id as string));
+  const pays = (allPays ?? []).filter((x) => !retiredIds.has(x.id as string));
+  const adjsLive = (adjs ?? []).filter((a) => !retiredIds.has((a as { payment_row_id?: string }).payment_row_id as string));
+  const mismatches = reconcilePlans((pays ?? []) as never, (bills ?? []) as (ReportInvoice & { id: string })[], adjsLive as never);
   // Checkout attempts that never paid are not shown (they are not enrolments).
   const visible = (plans ?? []).filter((p) => p.source !== 'enroll' || (pays ?? []).some((x) => x.plan_id === p.id));
   return NextResponse.json({
     data: visible.map((p) => ({ ...p, payments: (pays ?? []).filter((x) => x.plan_id === p.id) })),
-    adjustments: adjs ?? [], mismatches, testMode: razorpayConfig().test,
+    adjustments: adjsLive, mismatches, testMode: razorpayConfig().test,
   });
 }
 
