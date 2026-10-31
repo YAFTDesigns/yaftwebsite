@@ -33,6 +33,7 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
   const [d, setD] = useState<Details>(blank);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
 
   const chosenRaw = items.filter((i) => picked.includes(i.key));
   const covered = new Set(chosenRaw.flatMap((i) => i.courseSlugs));
@@ -79,6 +80,7 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
 
   return (
     <div>
+      {step === 1 && <>
       <section className="enrol-catalog" aria-labelledby="course-picker-title">
         <div className="enrol-catalog-head">
           <div>
@@ -122,6 +124,20 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
           })}
         </div>
       </section>
+      <div className="enrol-step-actions">
+        <div>
+          <span className="pay-focus-kicker">STEP 1 OF 2</span>
+          <strong>{chosen.length > 0 ? `${chosen.length} selection${chosen.length > 1 ? 's' : ''} ready` : 'Choose at least one course'}</strong>
+        </div>
+        <button className="btn-primary" type="button" disabled={!sched} onClick={() => { setError(''); setStep(2); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Continue to billing →</button>
+      </div>
+      </>}
+
+      {step === 2 && <>
+      <div className="enrol-step-two-head">
+        <button type="button" className="btn-ghost" onClick={() => { setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>← Change course</button>
+        <div><span className="pay-focus-kicker">STEP 2 OF 2</span><strong>Billing & payment</strong></div>
+      </div>
 
       {fx && (
         <div className="enrol-currency" style={{ marginBottom: 18, fontSize: 14 }}>
@@ -166,6 +182,7 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
       <p style={{ fontSize: 12, opacity: 0.6, marginTop: 20 }}>
         By paying you agree to our <a href="/terms" style={{ textDecoration: 'underline' }}>terms</a>. Your details are used only for your enrolment and tax invoice (<a href="/privacy" style={{ textDecoration: 'underline' }}>privacy</a>). Secure payment by Razorpay.
       </p>
+      </>}
     </div>
   );
 }
