@@ -171,7 +171,7 @@ export default async function CoursesPage() {
                       </div>
                     )}
                     <div className={styles.courseFoot}>
-                      {fees.has(course.slug) && <Link href={`/enroll?course=${course.slug}`} style={{ marginRight: 12 }}>Enroll</Link>}
+                      {fees.has(course.slug) && <Link href={`/enroll?course=${course.slug}`} className={styles.enrollBtn}>Enroll</Link>}
                       <EnquireLink course={course.title} />
                     </div>
                   </div>
