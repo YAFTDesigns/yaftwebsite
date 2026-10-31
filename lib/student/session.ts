@@ -35,6 +35,8 @@ export async function getStudentSession(): Promise<StudentSession | null> {
       const at = linkedinConnected ? new Date().toISOString() : null;
       await admin.from('students').update({ linkedin_verified_at: at }).eq('id', profile.id);
       profile = { ...profile, linkedin_verified_at: at };
+      // Linking LinkedIn is itself the consent to show the shield; unlinking withdraws it (the cleanup of public items is done by /api/student/badge).
+      if (linkedinConnected) await admin.from('student_consents').insert({ student_id: profile.id, purpose: 'public_verified_badge', version: '2026-10-v1', granted: true });
     }
     return { userId: user.id, email: user.email.toLowerCase(), profile: profile as StudentProfile, googleAvatar, linkedinConnected };
   } catch (err) {

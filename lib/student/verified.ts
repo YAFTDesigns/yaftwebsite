@@ -23,7 +23,8 @@ export async function verifiedBadgeFor(studentId: string): Promise<{ verified: b
   const { data: st } = await a.from('students').select('linkedin_url, linkedin_verified_at').eq('id', studentId).maybeSingle();
   if (!st?.linkedin_verified_at) return { verified: false, linkedinUrl: null };
   const { data: consent } = await a.from('student_consents').select('granted').eq('student_id', studentId).eq('purpose', 'public_verified_badge').order('created_at', { ascending: false }).limit(1).maybeSingle();
-  if (consent?.granted !== true) return { verified: false, linkedinUrl: null };
+  // Linking LinkedIn is the consent; only an explicit later "off" (set when the student unlinks) hides the shield.
+  if (consent?.granted === false) return { verified: false, linkedinUrl: null };
   const { data: links } = await a.from('student_enrolments').select('plan_id').eq('student_id', studentId);
   const ids = (links ?? []).map((l) => l.plan_id as string);
   if (!ids.length) return { verified: false, linkedinUrl: null };

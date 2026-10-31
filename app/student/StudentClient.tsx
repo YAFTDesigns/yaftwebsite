@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
 import { fmtFixed2 } from '@/lib/format';
-import VerifiedBadge from '@/components/VerifiedBadge';
 
 type Card = {
   planId: string; title: string; courseSlugs: string[]; currency: 'INR' | 'USD'; totalInr: number; paidInr: number; balanceInr: number;
@@ -46,6 +45,7 @@ const BTN_CSS = `
 .sp a[style*="background"]{color:#fff}
 .sp h2,.sp h3{font-family:var(--display)}
 .sp-shield{position:absolute;top:-8px;right:-10px;display:inline-flex;cursor:default;outline:none}
+.sp-shield.inl{position:relative;top:auto;right:auto;vertical-align:middle;margin-left:8px}
 .sp-shield.on{cursor:default}
 .sp-shield:not(.on){cursor:pointer}
 .sp-shield-bg{fill:#6b7280;stroke:#0A0A0A;stroke-width:1.5}
@@ -173,9 +173,16 @@ export default function StudentClient() {
     const { error } = await getSupabaseBrowser().auth.linkIdentity({ provider: 'linkedin_oidc', options: { redirectTo: redirectTo() } });
     if (error) setMsg('Could not start the LinkedIn connection. Please try again later.');
   }
-  async function setBadge(on: boolean) {
-    const { ok, j } = await post('/api/student/badge', { on });
-    setMsg(ok ? (on ? 'Done. The Verified shield can now show next to your published work.' : 'The shield is switched off, and removed from anything already public.') : j.error ?? 'Could not change that.'); if (ok) load();
+  async function unlinkLinkedin() {
+    if (!window.confirm('Unlink this LinkedIn account? Your Verified shield will be removed until you link again.')) return;
+    const sb = getSupabaseBrowser();
+    const { data } = await sb.auth.getUserIdentities();
+    const id = data?.identities?.find((i) => i.provider === 'linkedin_oidc');
+    if (!id) { setMsg('No LinkedIn account is linked.'); load(); return; }
+    const { error } = await sb.auth.unlinkIdentity(id);
+    if (error) { setMsg('Could not unlink. You need another sign-in method (such as Google) before LinkedIn can be removed.'); return; }
+    await post('/api/student/badge', { on: false });
+    setMsg('LinkedIn unlinked. You can link a different account any time.'); load();
   }
   async function saveProfile() {
     const { ok, j } = await post('/api/student/profile', profile, 'PATCH');
@@ -379,13 +386,12 @@ export default function StudentClient() {
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Name on certificate (kept separate from your display name)<input style={input} value={profile.certificateName} maxLength={80} onChange={(e) => setProfile({ ...profile, certificateName: e.target.value })} /></label>
           <label style={{ fontSize: 12, display: 'block', marginTop: 10 }}>Phone (optional)<input style={input} value={profile.phone} maxLength={20} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} /></label>
           <div style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line)' }}>
-            <strong style={{ fontSize: 13 }}>Verified student shield <VerifiedBadge /></strong>
+            <strong style={{ fontSize: 13 }}>Verified student shield <span className={'sp-shield inl' + (me.profile.linkedinConnected ? ' on' : '')} tabIndex={0} role="img" aria-label={me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Link LinkedIn to get verified'} onClick={() => { if (!me.profile.linkedinConnected && me.profile.linkedinEnabled) connectLinkedin(); }}><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z" className="sp-shield-bg" /><path d="m8.2 12.2 2.6 2.6 5-5.2" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg><span className="sp-tip">{me.profile.linkedinConnected ? 'Verified with LinkedIn' : 'Link LinkedIn to get verified'}</span></span></strong>
             <p style={{ fontSize: 12, opacity: 0.75, margin: '4px 0 8px' }}>Connect your LinkedIn account and you get a blue shield beside your name on testimonials, Community Works and, later, the student forum. It shows you are a real YAFT student. Typing a link is not enough; you sign in to LinkedIn once so we know the account is yours.</p>
             {me.profile.linkedinConnected
-              ? <p style={{ fontSize: 13, margin: '0 0 8px' }}>LinkedIn connected ✓</p>
+              ? <p style={{ fontSize: 13, margin: '0 0 8px' }}>LinkedIn connected ✓ <button type="button" style={{ ...ghost, marginLeft: 10, padding: '6px 12px' }} onClick={unlinkLinkedin}>Unlink LinkedIn</button></p>
               : me.profile.linkedinEnabled ? <button style={{ ...btn, background: '#0A66C2', border: '2px solid #0A66C2' }} onClick={connectLinkedin}><LinkedInIn />Connect LinkedIn</button> : <p style={{ fontSize: 12, opacity: 0.7 }}>LinkedIn connection is coming soon.</p>}
             <label style={{ fontSize: 12, display: 'block', marginTop: 8 }}>Your public LinkedIn address (optional, shown as a link next to your testimonial)<input style={input} placeholder="linkedin.com/in/yourname" value={profile.linkedinUrl} onChange={(e) => setProfile({ ...profile, linkedinUrl: e.target.value })} /></label>
-            <label style={{ fontSize: 12, display: 'block', marginTop: 8, opacity: me.profile.linkedinConnected ? 1 : 0.5 }}><input type="checkbox" disabled={!me.profile.linkedinConnected} checked={me.profile.badgeConsent} onChange={(e) => setBadge(e.target.checked)} /> Show the Verified shield (and my LinkedIn link) next to my published testimonials and projects. I can switch this off any time.</label>
           </div>
           <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0' }}>Signed in as {me.profile.email}. Changing your sign-in email never moves your enrolments.</p>
           <button style={btn} onClick={saveProfile}>Save profile</button>
