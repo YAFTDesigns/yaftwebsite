@@ -5,7 +5,7 @@ import s from './course.module.css';
 
 export type GalleryImage = { src: string; caption: string };
 
-export default function CourseGallery({ groupKey, images }: { groupKey: string; images: GalleryImage[] }) {
+export default function CourseGallery({ groupKey, images, wide }: { groupKey: string; images: GalleryImage[]; wide?: boolean }) {
   if (images.length === 0) return null;
 
   return (
@@ -14,7 +14,7 @@ export default function CourseGallery({ groupKey, images }: { groupKey: string; 
         <button
           key={img.src}
           type="button"
-          className={s.galleryThumb}
+          className={wide ? `${s.galleryThumb} ${s.galleryWide}` : s.galleryThumb}
           onClick={() =>
             window.dispatchEvent(
               new CustomEvent<LightboxOpenDetail>(OPEN_LIGHTBOX_EVENT, { detail: { groupKey, index: i } })

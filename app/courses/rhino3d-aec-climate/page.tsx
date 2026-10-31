@@ -10,7 +10,7 @@ import { imageUrl } from '@/lib/assetUrl';
 
 export const metadata: Metadata = {
   title: 'Rhino3D for AEC and Climate',
-  description: 'A focused 2-day workshop on Rhino3D for AEC professionals with Grasshopper climatic analysis and facade optimization using Ladybug.',
+  description: 'A focused 2-day workshop on Rhino3D for AEC professionals with Grasshopper climate, daylight and comfort analysis using Ladybug and Honeybee, and facade optimisation with Galapagos.',
 };
 
 const COURSE_JSON_LD = {
@@ -24,6 +24,21 @@ const COURSE_JSON_LD = {
     { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P2D', offers: { '@type': 'Offer', category: 'Individual / group training', price: '10000', priceCurrency: 'INR' } },
   ],
 };
+
+const CL = '/assets/courses/climate';
+const GALLERY = [
+  { src: imageUrl('courses/rhino-aec-climate-1.jpg'), caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
+  { src: imageUrl('courses/rhino-aec-climate-2.jpg'), caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
+];
+const WORKFLOW = [
+  { src: `${CL}/test-building.webp`, caption: 'Test building in Rhino: two storey house with glazed gable, terrace and solar panel array. This geometry is analysed, then converted into a Honeybee model.' },
+  { src: `${CL}/sun-path.webp`, caption: 'LB SunPath around the site: analemma loops for every hour, coloured by dry bulb temperature, with the analysis period set in Grasshopper' },
+  { src: `${CL}/direct-sun-hours.webp`, caption: 'Direct sun hours on floor plates and terrace, with trees and terrain as context' },
+  { src: `${CL}/incident-radiation.webp`, caption: 'Incident radiation on the glazed gable, floors and terrace. Warmer colour, more radiation (kWh/m2)' },
+  { src: `${CL}/radiation-sky-dome.webp`, caption: 'Sky dome of solar radiation by direction: which sun is helpful and which is harmful. Credit: Chris Mackey, Ladybug Tools' },
+  { src: `${CL}/honeybee-solar-study.webp`, caption: 'Honeybee solar study on a faceted pavilion: sensor grid, model and run settings' },
+  { src: `${CL}/honeybee-view-analysis.webp`, caption: 'View based analysis with Radiance: image at a chosen date and hour with false colour legend' },
+];
 
 export default function Rhino3DAEC() {
   return (
@@ -39,12 +54,12 @@ export default function Rhino3DAEC() {
       <span className={s.tag}>Authorized Rhino Training Center</span>
       <h1 className={s.headline}>Rhino3D for AEC + Climate</h1>
       <p className={s.subtitle}>A Design Re-Thinking Workshop</p>
-      <p className={s.desc}>A focused workshop for AEC professionals covering Rhino3D fundamentals and Grasshopper-based climatic analysis and facade optimization. Learn to analyze building orientation and optimize facades with respect to radiation data using Ladybug.</p>
+      <p className={s.desc}>Design with the sun. A focused workshop for AEC professionals covering Rhino3D fundamentals and Grasshopper-based climate, daylight and comfort analysis with Ladybug and Honeybee. Learn to read sun paths, direct sun hours and incident radiation, then optimise building orientation, facades and shading with Galapagos.</p>
       <div className={s.badges}>
         <span className={s.badge}>2 days / 10 to 15 hours</span>
         <span className={s.badge}>AEC professionals</span>
         <span className={s.badge}>Live online / On-site</span>
-        <span className={s.badge}>Ladybug included</span>
+        <span className={s.badge}>Ladybug + Honeybee included</span>
       </div>
       <div className={s.ctaBar}>
         <div>
@@ -61,7 +76,22 @@ export default function Rhino3DAEC() {
 
       <p className={s.sectionLabel}>What you will learn</p>
       <div className={s.outcomesGrid}>
-        {"Rhino3D fundamentals for AEC workflows,Rhino object types, interface and curve modeling,Grasshopper for climatic analysis and optimisation,Facade design with climate data using Ladybug,Building orientation analysis and optimisation,Radiation analysis on super-structures".split(',').map(o => (
+        {"Rhino3D fundamentals for AEC workflows,Rhino object types, interface and curve modeling,Grasshopper for climatic analysis and optimisation,Sun path, psychrometric chart and daylight hours with Ladybug,Incident radiation and radiation benefit on facades and glazing,Honeybee models for daylight and thermal comfort,Optimising shading, fins and orientation with Galapagos,Building orientation analysis and optimisation,Facade design with climate data".split(',').map(o => (
+          <div key={o} className={s.outcomeItem}><span className={s.check}>✓</span><span>{o}</span></div>
+        ))}
+      </div>
+
+      <hr className={s.divider} />
+      <p className={s.sectionLabel}>What we will calculate</p>
+      <div className={s.outcomesGrid}>
+        {[
+          'Sun path: sun position for every hour of the year',
+          'Psychrometric chart: comfort hours and passive strategies',
+          'Daylight hours: direct sun on floors and facades',
+          'Incident radiation: kWh/m2 on roof, walls and glazing',
+          'Internal comfort: operative temperature inside zones',
+          'Optimisation: Galapagos finds the best shading',
+        ].map((o) => (
           <div key={o} className={s.outcomeItem}><span className={s.check}>✓</span><span>{o}</span></div>
         ))}
       </div>
@@ -69,17 +99,17 @@ export default function Rhino3DAEC() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course schedule</p>
       <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 01</span><span className={s.dayTitle}>Introduction to Rhino3D for AEC</span></div><div className={s.dayItem}>Introduction to Rhino object types and interface</div><div className={s.dayItem}>Curve creation and modeling</div></div>
-      <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 02</span><span className={s.dayTitle}>Grasshopper: climatic analysis and optimisation</span></div><div className={s.dayItem}>Facade designing: building analysis with respect to climate data</div><div className={s.dayItem}>Optimising facade and orientation with respect to radiation received by the super-structure</div><div className={s.dayItem}>Case study: Al Bahar Towers</div></div>
+      <div className={s.dayCard}><div className={s.dayHeader}><span className={s.dayNum}>Day 02</span><span className={s.dayTitle}>Grasshopper: climatic analysis and optimisation</span></div><div className={s.dayItem}>Climate data and sun path, direct sun hours and incident radiation with Ladybug</div><div className={s.dayItem}>Radiation benefit: helpful and harmful sun, and what it means for facade form, massing and shading depth</div><div className={s.dayItem}>Facade designing: building analysis with respect to climate data</div><div className={s.dayItem}>Optimising facade and orientation with respect to radiation received by the super-structure</div><div className={s.dayItem}>Honeybee model from Rhino volumes: daylight with Radiance, thermal comfort with EnergyPlus</div><div className={s.dayItem}>Galapagos search: overhang depth, fin angle, glazing ratio and rotation</div><div className={s.dayItem}>Case study: Al Bahar Towers</div></div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course gallery</p>
       <CourseGallery
         groupKey="rhino3d-aec-climate"
-        images={[
-          { src: imageUrl('courses/rhino-aec-climate-1.jpg'), caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
-          { src: imageUrl('courses/rhino-aec-climate-2.jpg'), caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
-        ]}
+        images={GALLERY}
       />
+
+      <p className={s.sectionLabel} style={{ marginTop: 28 }}>Ladybug and Honeybee workflow</p>
+      <CourseGallery groupKey="rhino3d-aec-climate-workflow" wide images={WORKFLOW} />
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
@@ -126,15 +156,10 @@ export default function Rhino3DAEC() {
     </main>
 
       <Lightbox
-        groups={[{
-          key: 'rhino3d-aec-climate',
-          title: 'Rhino3D for AEC & Climate',
-          role: 'Course gallery',
-          photos: [
-            { src: imageUrl('courses/rhino-aec-climate-1.jpg'), caption: 'Facade patterning with climate-driven perforation and grasshopper canvas' },
-            { src: imageUrl('courses/rhino-aec-climate-2.jpg'), caption: 'Ladybug climatic analysis controlling facade opening with respect to solar radiation, referencing Al Bahar Towers' },
-          ],
-        }]}
+        groups={[
+          { key: 'rhino3d-aec-climate', title: 'Rhino3D for AEC & Climate', role: 'Course gallery', photos: GALLERY },
+          { key: 'rhino3d-aec-climate-workflow', title: 'Ladybug and Honeybee workflow', role: 'Course gallery', photos: WORKFLOW },
+        ]}
       />
       <SiteFooter />
     </>
