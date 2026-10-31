@@ -31,8 +31,12 @@ export function validateBillingDetails(input: unknown, opts: { allowOutsideIndia
   if (!address || address.length < 8) return { ok: false, error: 'Enter your billing address.' };
   const stateOk = (INDIAN_STATES as readonly string[]).includes(state) || (opts.allowOutsideIndia && state === OUTSIDE_INDIA);
   if (!stateOk) return { ok: false, error: 'Choose your state (decides how GST is shown on the bill).' };
-  if (gst && !GSTIN_RE.test(gst)) return { ok: false, error: 'That GSTIN does not look valid. Leave it blank if you do not have one.' };
-  if (pan && !PAN_RE.test(pan)) return { ok: false, error: 'That PAN does not look valid (like ABCDE1234F). Leave it blank if you do not want it on the bill.' };
-  if (type === 'company' && !gst && !pan) return { ok: false, error: 'For a company bill, enter the GSTIN or the PAN.' };
+  // Indian tax rules: an individual must give a PAN; a company must give a GSTIN (and the company name, checked above).
+  // Billing outside India (USD checkouts) has neither, so it is exempt.
+  const abroad = state === OUTSIDE_INDIA;
+  if (!abroad && type === 'individual' && !pan) return { ok: false, error: 'Enter your PAN (like ABCDE1234F). It is needed for the tax invoice.' };
+  if (!abroad && type === 'company' && !gst) return { ok: false, error: 'Enter the company GSTIN. It is needed for a company tax invoice.' };
+  if (gst && !GSTIN_RE.test(gst)) return { ok: false, error: 'That GSTIN does not look valid (15 characters).' };
+  if (pan && !PAN_RE.test(pan)) return { ok: false, error: 'That PAN does not look valid (like ABCDE1234F).' };
   return { ok: true, value: { client_name: name, client_email: email, client_phone: phone || null, client_type: type, client_company: company || null, client_gst: gst || null, client_pan: pan || null, client_address: address, client_state: state } };
 }

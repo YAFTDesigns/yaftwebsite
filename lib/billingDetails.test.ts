@@ -1,10 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { validateBillingDetails } from './billingDetails';
 
-const ok = { client_name: 'Test Student', client_email: 'Student@Example.com', client_type: 'individual', client_address: '12 Test Street, Coimbatore', client_state: 'Tamil Nadu' };
+const ok = { client_name: 'Test Student', client_email: 'Student@Example.com', client_type: 'individual', client_pan: 'ABCDE1234F', client_address: '12 Test Street, Coimbatore', client_state: 'Tamil Nadu' };
+const GST = '33ABCDE1234F1Z5';
 
 describe('validateBillingDetails', () => {
-  it('accepts an individual with no PAN or GSTIN and cleans the email', () => {
+  it('an individual must give a valid PAN', () => {
+    expect(validateBillingDetails({ ...ok, client_pan: '' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_pan: undefined }).ok).toBe(false);
+  });
+  it('accepts an individual with a PAN and no GSTIN, and cleans the email', () => {
     const r = validateBillingDetails(ok);
     expect(r.ok && r.value.client_email).toBe('student@example.com');
     expect(r.ok && r.value.client_gst).toBeNull();
@@ -14,10 +19,14 @@ describe('validateBillingDetails', () => {
     expect(validateBillingDetails({ ...ok, client_address: 'x' }).ok).toBe(false);
     expect(validateBillingDetails({ ...ok, client_state: 'Atlantis' }).ok).toBe(false);
   });
-  it('a company needs a name and a GSTIN or PAN', () => {
-    expect(validateBillingDetails({ ...ok, client_type: 'company' }).ok).toBe(false);
-    expect(validateBillingDetails({ ...ok, client_type: 'company', client_company: 'Acme Pvt Ltd' }).ok).toBe(false);
-    expect(validateBillingDetails({ ...ok, client_type: 'company', client_company: 'Acme Pvt Ltd', client_pan: 'abcde1234f' }).ok).toBe(true);
+  it('a company needs a name and a GSTIN (a PAN alone is not enough)', () => {
+    expect(validateBillingDetails({ ...ok, client_type: 'company', client_pan: '' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_type: 'company', client_company: 'Acme Pvt Ltd', client_pan: 'abcde1234f' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_type: 'company', client_gst: GST, client_pan: '' }).ok).toBe(false);
+    expect(validateBillingDetails({ ...ok, client_type: 'company', client_company: 'Acme Pvt Ltd', client_gst: GST, client_pan: '' }).ok).toBe(true);
+  });
+  it('billing outside India needs neither PAN nor GSTIN', () => {
+    expect(validateBillingDetails({ ...ok, client_pan: '', client_state: 'Outside India' }, { allowOutsideIndia: true }).ok).toBe(true);
   });
   it('rejects malformed PAN and GSTIN', () => {
     expect(validateBillingDetails({ ...ok, client_pan: 'ABC123' }).ok).toBe(false);
