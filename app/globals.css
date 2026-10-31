@@ -465,30 +465,34 @@ footer{padding:48px 0 32px;}
 .enrol-catalog-head h2{font-size:clamp(24px,3vw,34px);line-height:1.12;margin-top:12px;max-width:720px}
 .enrol-catalog-head p{color:var(--ink-soft);font-size:14px;line-height:1.65;max-width:420px}
 .enrol-course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-.enrol-course-card{position:relative;display:flex;flex-direction:column;min-height:360px;border:1px solid rgba(255,255,255,.11);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.012));cursor:pointer;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
-.enrol-course-card:hover{transform:translateY(-3px);border-color:rgba(64,224,208,.45);box-shadow:0 18px 50px rgba(0,0,0,.28)}
-.enrol-course-card.is-selected{border-color:var(--blueprint);box-shadow:0 0 0 1px rgba(64,224,208,.18),0 22px 60px rgba(0,0,0,.34);background:linear-gradient(180deg,rgba(64,224,208,.07),rgba(255,255,255,.018))}
-.enrol-course-card.is-combo{grid-column:span 2;min-height:300px}
+.enrol-course-card{position:relative;display:flex;flex-direction:column;min-height:360px;border:1px solid rgba(255,255,255,.10);background:#111;cursor:pointer;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
+.enrol-course-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28);box-shadow:0 16px 42px rgba(0,0,0,.24)}
+.enrol-course-card.is-selected{border-color:var(--blueprint);box-shadow:0 0 0 1px rgba(64,224,208,.16),0 22px 60px rgba(0,0,0,.34);background:linear-gradient(180deg,rgba(64,224,208,.08),rgba(255,255,255,.02))}
+.enrol-course-card.is-combo{grid-column:span 2;min-height:300px;border-top:2px solid var(--brass)}
 .enrol-course-card.is-disabled{opacity:.42;cursor:not-allowed;transform:none;filter:saturate(.6)}
 .enrol-course-check{position:absolute;opacity:0;pointer-events:none}
 .enrol-course-media{position:relative;display:block;height:190px;overflow:hidden;background:#111}
 .enrol-course-card.is-combo .enrol-course-media{height:220px}
-.enrol-course-media img{width:100%;height:100%;object-fit:cover;filter:saturate(.85) contrast(1.04);transform:scale(1.01);transition:transform .35s ease,filter .35s ease}
-.enrol-course-card:hover .enrol-course-media img{transform:scale(1.035);filter:saturate(1) contrast(1.06)}
+.enrol-course-media img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) saturate(0) contrast(1.08) brightness(.82);transform:scale(1.01);transition:transform .35s ease,filter .35s ease}
+.enrol-course-card:hover .enrol-course-media img{transform:scale(1.025);filter:grayscale(1) saturate(0) contrast(1.1) brightness(.9)}
+.enrol-course-card.is-selected .enrol-course-media img{filter:grayscale(0) saturate(1) contrast(1.04) brightness(.96)}
 .enrol-course-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.55))}
 .enrol-course-icon{position:absolute;left:16px;top:16px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;border:1px solid rgba(255,255,255,.28);background:rgba(7,7,7,.58);backdrop-filter:blur(10px);padding:7px 9px;color:#fff}
 .enrol-course-featured,.enrol-course-selected{position:absolute;right:16px;top:16px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:7px 9px;border:1px solid rgba(255,255,255,.2);background:rgba(7,7,7,.62);backdrop-filter:blur(10px)}
-.enrol-course-featured{color:#fff;border-color:rgba(230,57,70,.72)}
+.enrol-course-featured{color:#fff;border-color:rgba(230,57,70,.72);background:rgba(20,20,20,.82)}
 .enrol-course-selected{color:var(--blueprint);border-color:rgba(64,224,208,.72)}
-.enrol-course-body{display:flex;flex-direction:column;gap:10px;padding:18px 18px 20px;flex:1}
+.enrol-course-body{display:flex;flex-direction:column;gap:10px;padding:20px 20px 22px;flex:1;border-top:1px solid rgba(255,255,255,.06)}
 .enrol-course-meta{display:flex;gap:7px;flex-wrap:wrap}
-.enrol-course-meta span{font-family:var(--mono)!important;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);border:1px solid rgba(255,255,255,.09);padding:4px 7px}
-.enrol-course-title{font-family:var(--display);font-size:20px;line-height:1.18}
+.enrol-course-meta span{font-family:var(--mono)!important;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);border:0;border-right:1px solid rgba(255,255,255,.12);padding:0 8px 0 0}
+.enrol-course-meta span:last-child{border-right:0}
+.enrol-course-title{font-family:var(--display);font-size:21px;line-height:1.18;letter-spacing:-.015em}
 .enrol-course-desc{color:var(--ink-soft);font-size:13px;line-height:1.58;display:block;max-width:94%}
 .enrol-course-bottom{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-top:auto;padding-top:8px}
-.enrol-course-price{font-family:var(--display)!important;font-size:20px;font-weight:600;white-space:nowrap}
+.enrol-course-price{font-family:var(--display)!important;font-size:20px;font-weight:600;white-space:nowrap;color:var(--ink)}
+.enrol-course-card.is-selected .enrol-course-price{color:var(--blueprint)}
 .enrol-course-price small{font-size:10px;font-weight:400;color:var(--ink-soft)}
-.enrol-course-action{font-family:var(--mono)!important;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--blueprint);text-align:right}
+.enrol-course-action{font-family:var(--mono)!important;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);text-align:right}
+.enrol-course-card.is-selected .enrol-course-action{color:var(--blueprint)}
 .enrol-currency{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:15px 0 20px;border-top:1px solid var(--line)}
 .enrol-currency-label{font-family:var(--mono)!important;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
 .enrol-summary{margin-top:6px}
