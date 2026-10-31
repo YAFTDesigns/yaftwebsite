@@ -53,6 +53,8 @@ const BTN_CSS = `
 .sp-tip{position:absolute;top:calc(100% + 8px);left:0;white-space:nowrap;background:#4b5563;color:#fff;border-radius:6px;padding:7px 12px;font:12px var(--mono);box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .12s;z-index:20}
 .sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
 .sp-hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);padding:26px 28px;margin-bottom:26px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 50px rgba(0,0,0,.16)}
+.sp-hero{isolation:isolate}
+.sp-hero:after{content:"";position:absolute;z-index:-1;right:-30px;bottom:-34px;width:340px;height:250px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right bottom/contain;opacity:.10;pointer-events:none}
 .sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(52,184,172,.16),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
 .sp-stat{border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));padding:15px 16px;min-height:78px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
@@ -64,6 +66,7 @@ const BTN_CSS = `
 .sp-next{border:1px solid rgba(52,184,172,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(52,184,172,.09),rgba(255,255,255,.025))!important;box-shadow:0 12px 32px rgba(0,0,0,.12)}
 @supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.sp-hero,.sp-stat,.sp-tabs,.sp-next{backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%)}}
 @media (max-width:680px){
+  .sp-hero:after{width:200px;height:150px;opacity:.08}
   .sp-hero{padding:20px 18px;margin-left:-4px;margin-right:-4px}
   .sp-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .sp-stat{padding:12px 10px;min-width:0}
