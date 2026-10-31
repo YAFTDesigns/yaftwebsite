@@ -5,6 +5,8 @@ import { toInvoicePdfData } from '@/lib/invoicePdf';
 import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { fmtFixed2 } from '@/lib/format';
+import { loadLiveBills } from '@/lib/liveBills';
+import { sendPushToAll } from '@/lib/webPush';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 type Plan = {
@@ -35,9 +37,12 @@ export async function logCourseEvent(e: { planId?: string | null; paymentRowId?:
   } catch (err) { console.error('[course-payment] event log failed:', err); }
 }
 
-async function ownerAlert(subject: string, html: string) {
+// Where the "payment received" alerts go. WhatsApp needs the paid WhatsApp Business API, so email (plus a phone push to subscribed admin devices) is used.
+const PAYMENT_ALERT_TO = (process.env.PAYMENT_ALERT_EMAIL || 'yaftdesigns@gmail.com').trim();
+
+async function ownerAlert(subject: string, html: string, to: string = getNotificationBcc()[0] ?? CONTACT_EMAIL) {
   if (!isEmailConfigured()) return;
-  try { await sendEmail({ to: getNotificationBcc()[0] ?? CONTACT_EMAIL, subject, html }); }
+  try { await sendEmail({ to, subject, html }); }
   catch (e) { console.error('[course-payment] owner alert failed:', e); }
 }
 
@@ -123,10 +128,27 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
         }
       }
       if (row.sync_status !== 'ok') {
+        const [lb] = await loadLiveBills(1, row.id).catch(() => []);
+        const inr = (n: number) => `INR ${fmtFixed2(n)}`;
+        const tag = testMode ? '[TEST] ' : '';
+        const left = lb ? lb.balanceInr : null;
         await ownerAlert(
-          `${testMode ? '[TEST] ' : ''}Payment received: ${plan.client_name} (${row.kind})`,
-          `<p>${escapeHtml(plan.client_name)} paid the <strong>${row.kind}</strong>: INR ${fmtFixed2(inst.total)} (base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)})${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''} for ${escapeHtml(plan.description)}.</p><p>Bill ${escapeHtml(invoiceNo ?? '')} was emailed to the client as a link to their student portal (no PDF attached; you are on BCC). Download the PDF from Admin > Invoices if they ask.</p><p>Payment ${escapeHtml(row.payment_id)}</p>`,
+          `${tag}Payment received: ${plan.client_name}, ${inr(inst.total)} (${row.kind})`,
+          `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#111">
+<h3 style="margin:0 0 10px">${tag}Payment received</h3>
+<table style="border-collapse:collapse;font-size:14px">
+<tr><td style="padding:3px 14px 3px 0;color:#666">Student</td><td><strong>${escapeHtml(plan.client_name)}</strong> (${escapeHtml(plan.client_email)}${plan.client_phone ? `, ${escapeHtml(plan.client_phone)}` : ''})</td></tr>
+<tr><td style="padding:3px 14px 3px 0;color:#666">Course</td><td>${escapeHtml(plan.description)}</td></tr>
+<tr><td style="padding:3px 14px 3px 0;color:#666">Paid now (${row.kind})</td><td><strong>${inr(inst.total)}</strong> = base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)}${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''}</td></tr>
+${lb ? `<tr><td style="padding:3px 14px 3px 0;color:#666">Course total</td><td>${inr(lb.courseTotalInr)}</td></tr>
+<tr><td style="padding:3px 14px 3px 0;color:#666">Paid so far</td><td>${inr(lb.paidSoFarInr)}</td></tr>
+<tr><td style="padding:3px 14px 3px 0;color:#666">Left to pay</td><td><strong>${inr(lb.balanceInr)}</strong>${lb.balanceInr === 0 ? ' (fully paid)' : ''}</td></tr>` : ''}
+<tr><td style="padding:3px 14px 3px 0;color:#666">Bill</td><td>${escapeHtml(invoiceNo ?? '')} (sent to the student as a student-portal link)</td></tr>
+<tr><td style="padding:3px 14px 3px 0;color:#666">Payment id</td><td>${escapeHtml(row.payment_id)}</td></tr></table>
+<p style="margin:14px 0 0"><a href="https://www.yaftdesigns.com/admin/training">Open Admin > Training > Live bills</a></p></div>`,
+          PAYMENT_ALERT_TO,
         );
+        sendPushToAll({ title: `${tag}Payment: ${plan.client_name} ${inr(inst.total)}`, body: `${plan.description}${left !== null ? `. Left: ${inr(left)}` : ''}`, url: '/admin/training' }).catch(() => {});
       }
     }
 
