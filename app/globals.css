@@ -576,3 +576,17 @@ footer{padding:48px 0 32px;}
   .enrol-step-actions strong{font-size:14px}
   .enrol-step-actions .btn-primary{padding:10px 16px}
 }
+
+/* ===== SINGLE-PAGE ENROLMENT SCROLL FLOW ===== */
+.enrol-scroll-cue{display:flex;align-items:center;justify-content:space-between;gap:24px;margin:12px 0 30px;padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,255,255,.015)}
+.enrol-scroll-cue>div{display:grid;gap:5px}
+.enrol-scroll-cue strong{font-family:var(--display);font-size:15px;color:var(--ink-soft);font-weight:500}
+.enrol-scroll-cue.is-ready{border-color:rgba(64,224,208,.25);background:linear-gradient(90deg,rgba(64,224,208,.055),rgba(255,255,255,.01))}
+.enrol-scroll-cue.is-ready strong{color:var(--ink)}
+.enrol-scroll-button{display:inline-flex;align-items:center;gap:12px;border:0;background:none;color:var(--blueprint);font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;cursor:pointer;padding:10px 0}
+.enrol-scroll-button span:last-child{font-size:22px;line-height:1;animation:enrolArrow 1.5s ease-in-out infinite}
+.enrol-scroll-button:disabled{opacity:.35;cursor:not-allowed}
+.enrol-billing-anchor{scroll-margin-top:96px}
+@keyframes enrolArrow{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media(prefers-reduced-motion:reduce){.enrol-scroll-button span:last-child{animation:none}}
+@media(max-width:760px){.enrol-scroll-cue{align-items:flex-start;flex-direction:column}.enrol-scroll-button{width:100%;justify-content:space-between}}
