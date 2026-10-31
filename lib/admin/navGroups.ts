@@ -29,8 +29,8 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
     {
       label: 'Training',
       links: [
-        { href: '/admin/training', label: 'Students & Live bills' },
-        { href: '/admin/courses', label: 'Courses' },
+        { href: '/admin/training', label: 'Students & payments' },
+        { href: '/admin/courses', label: 'Courses & syllabus' },
         { href: '/admin/course-fees', label: 'Course fees' },
         { href: '/admin/workshops', label: 'Workshops' },
         { href: '/admin/certificates', label: 'Certificates' },
@@ -45,27 +45,32 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     {
-      label: 'Marketing',
+      label: 'Website',
       links: [
-        { href: '/admin/testimonials', label: 'Testimonials', badge: counts.pendingTestimonials },
-        { href: '/admin/community', label: 'Community', badge: counts.pendingApprovals },
         { href: '/admin/projects', label: 'Projects' },
-        { href: '/admin/services', label: 'Services page images' },
+        { href: '/admin/services', label: 'Page images' },
+        { href: '/admin/testimonials', label: 'Testimonials', badge: counts.pendingTestimonials },
+        { href: '/admin/community', label: 'Community posts', badge: counts.pendingApprovals },
+      ],
+    },
+    {
+      label: 'Messages',
+      links: [
+        { href: '/admin/inbox', label: 'Inbox' },
+        { href: '/admin/emails', label: 'Sent emails', badge: counts.failedEmails },
         { href: '/admin/automation', label: 'Automation' },
       ],
     },
     {
       label: 'YAFT Labs',
       links: [
-        { href: '/admin/labs', label: 'Scripts & Categories' },
-        { href: '/admin/tortoise', label: 'Tortoise licences' },
+        { href: '/admin/labs', label: 'Scripts' },
+        { href: '/admin/tortoise', label: 'Tortoise sales' },
       ],
     },
     {
       label: 'Admin',
       links: [
-        { href: '/admin/inbox', label: 'Inbox' },
-        { href: '/admin/emails', label: 'Emails', badge: counts.failedEmails },
         { href: '/admin/team', label: 'Team' },
         { href: '/admin/analytics', label: 'Analytics' },
       ],
