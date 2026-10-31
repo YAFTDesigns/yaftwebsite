@@ -166,7 +166,7 @@ export default async function CoursesPage() {
                       {formatUpdated(course.updatedAt)}
                     </p>
                     {COURSE_DETAIL_PAGES[course.slug] && (
-                      <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--line)' }}>
+                      <div style={{ marginBottom: 12 }}>
                         <CourseGateButton href={COURSE_DETAIL_PAGES[course.slug]} course={course.title} slug={course.slug} />
                       </div>
                     )}
