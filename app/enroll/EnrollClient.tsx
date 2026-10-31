@@ -68,7 +68,14 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
     } catch { setError('Something went wrong. Please try again.'); setBusy(false); }
   }
 
-  const money = (inr: number) => `₹${fmtFixed2(inr)}${currency === 'USD' && usd(inr) ? ` (about US$${usd(inr)})` : ''}`;
+  const money = (inr: number) => `₹${fmtFixed2(inr)}${currency === 'USD' && usd(inr) ? ` (about US${usd(inr)})` : ''}`;
+  const displayItems = [...items].sort((a, b) => {
+    const aSelected = a.kind === 'bundle' ? comboOn(a) : picked.includes(a.key);
+    const bSelected = b.kind === 'bundle' ? comboOn(b) : picked.includes(b.key);
+    if (aSelected !== bSelected) return aSelected ? -1 : 1;
+    if (a.kind !== b.kind) return a.kind === 'bundle' ? -1 : 1;
+    return 0;
+  });
 
   return (
     <div>
@@ -82,13 +89,13 @@ export default function EnrollClient({ items, fx, preselect }: { items: Item[]; 
         </div>
 
         <div className="enrol-course-grid">
-          {items.map((i) => {
+          {displayItems.map((i, index) => {
             const selected = i.kind === 'bundle' ? comboOn(i) : picked.includes(i.key);
             const disabled = i.kind === 'course' && blocked(i);
             const slug = i.courseSlugs[0] ?? '';
             const icon = slug.includes('revit') ? 'BIM' : slug.includes('climate') ? 'SUN' : slug.includes('wearables') ? '3D' : slug.includes('industrial') ? 'ID' : slug.includes('grasshopper') ? 'GH' : i.kind === 'bundle' ? 'R+G' : 'R3D';
             return (
-              <label key={i.key} className={`enrol-course-card${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}${i.kind === 'bundle' ? ' is-combo' : ''}`}>
+              <label key={i.key} className={`enrol-course-card tile-${index % 7}${selected ? ' is-selected is-featured' : ''}${disabled ? ' is-disabled' : ''}${i.kind === 'bundle' ? ' is-combo' : ''}`}>
                 <input className="enrol-course-check" type="checkbox" checked={selected} disabled={disabled} onChange={() => (i.kind === 'bundle' ? toggleCombo(i) : toggle(i.key))} />
                 <span className="enrol-course-media" aria-hidden="true">
                   {i.image ? <img src={i.image} alt="" loading="lazy" /> : <span className="enrol-course-fallback">{icon}</span>}
