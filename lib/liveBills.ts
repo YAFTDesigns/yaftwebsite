@@ -13,7 +13,12 @@ export async function loadLiveBills(limit = 40, onlyPaymentId?: string): Promise
   const a = getSupabaseAdmin();
   let q = a.from('course_payments').select('id, plan_id, kind, amount_minor, paid_at, invoice_no, test_mode, sync_status').eq('status', 'paid').order('paid_at', { ascending: false, nullsFirst: false }).limit(limit);
   if (onlyPaymentId) q = a.from('course_payments').select('id, plan_id, kind, amount_minor, paid_at, invoice_no, test_mode, sync_status').eq('id', onlyPaymentId).limit(1);
-  const { data: pays } = await q;
+  const { data: raw } = await q;
+  // Payments whose bill was deleted in admin (e.g. test payments) drop out of the live list.
+  const nos = (raw ?? []).map((p) => p.invoice_no as string | null).filter(Boolean) as string[];
+  const { data: gone } = nos.length ? await a.from('invoices').select('invoice_no').in('invoice_no', nos).not('deleted_at', 'is', null) : { data: [] as { invoice_no: string }[] };
+  const goneSet = new Set((gone ?? []).map((g) => g.invoice_no));
+  const pays = onlyPaymentId ? raw : (raw ?? []).filter((p) => !p.invoice_no || !goneSet.has(p.invoice_no as string));
   if (!pays?.length) return [];
   const planIds = [...new Set(pays.map((p) => p.plan_id as string))];
   const [{ data: plans }, { data: allPaid }] = await Promise.all([
