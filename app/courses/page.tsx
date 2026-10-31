@@ -134,7 +134,7 @@ export default async function CoursesPage() {
           <div className="wrap">
             <div className="section-head">
               <h2>All courses</h2>
-              <p className="note">Start dates are shared on enquiry, and batch fees where a course does not show one. Full syllabus PDFs are unlocked once, share your email or LinkedIn once (one is enough) to view all of them.</p>
+              <p className="note">Fees and start dates are shared on enquiry or when you enrol. Full syllabus PDFs are unlocked once, share your email or LinkedIn once (one is enough) to view all of them.</p>
             </div>
 
             <div className={styles.courseGrid}>
@@ -169,11 +169,6 @@ export default async function CoursesPage() {
                       <div style={{ marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid var(--line)' }}>
                         <CourseGateButton href={COURSE_DETAIL_PAGES[course.slug]} course={course.title} slug={course.slug} />
                       </div>
-                    )}
-                    {fees.has(course.slug) && (
-                      <p style={{ margin: '0 0 12px', fontSize: 14 }}>
-                        <strong>₹{fees.get(course.slug)!.toLocaleString('en-IN')}</strong> <span style={{ color: 'var(--ink-soft)' }}>+ 18% GST</span>
-                      </p>
                     )}
                     <div className={styles.courseFoot}>
                       {fees.has(course.slug) && <Link href={`/enroll?course=${course.slug}`} style={{ marginRight: 12 }}>Enroll</Link>}
