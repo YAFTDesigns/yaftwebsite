@@ -464,12 +464,25 @@ footer{padding:48px 0 32px;}
 .enrol-catalog-head{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:40px;align-items:end;margin:8px 0 28px}
 .enrol-catalog-head h2{font-size:clamp(24px,3vw,34px);line-height:1.12;margin-top:12px;max-width:720px}
 .enrol-catalog-head p{color:var(--ink-soft);font-size:14px;line-height:1.65;max-width:420px}
-.enrol-course-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
-.enrol-course-card{position:relative;display:flex;flex-direction:column;min-height:360px;border:1px solid rgba(255,255,255,.10);background:#111;cursor:pointer;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
+.enrol-course-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-flow:dense;gap:18px;align-items:stretch}
+.enrol-course-card{position:relative;display:flex;flex-direction:column;min-height:300px;grid-column:span 4;border:1px solid rgba(255,255,255,.10);background:#111;cursor:pointer;overflow:hidden;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease,background .22s ease}
 .enrol-course-card:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.28);box-shadow:0 16px 42px rgba(0,0,0,.24)}
 .enrol-course-card.is-selected{border-color:var(--blueprint);box-shadow:0 0 0 1px rgba(64,224,208,.16),0 22px 60px rgba(0,0,0,.34);background:linear-gradient(180deg,rgba(64,224,208,.08),rgba(255,255,255,.02))}
-.enrol-course-card.is-combo{grid-column:span 2;min-height:300px;border-top:2px solid var(--brass)}
+.enrol-course-card.is-combo{grid-column:span 8;min-height:320px;border-top:2px solid var(--brass)}
 .enrol-course-card.is-disabled{opacity:.42;cursor:not-allowed;transform:none;filter:saturate(.6)}
+.enrol-course-card.is-featured{grid-column:span 8;grid-row:span 2;min-height:520px}
+.enrol-course-card.tile-1{grid-column:span 4}
+.enrol-course-card.tile-2{grid-column:span 4}
+.enrol-course-card.tile-3{grid-column:span 4}
+.enrol-course-card.tile-4{grid-column:span 5}
+.enrol-course-card.tile-5{grid-column:span 3}
+.enrol-course-card.tile-6{grid-column:span 4}
+.enrol-course-card.is-featured .enrol-course-media{height:300px}
+.enrol-course-card.is-featured .enrol-course-title{font-size:28px}
+.enrol-course-card.is-featured .enrol-course-desc{font-size:14px;max-width:80%}
+.enrol-course-card:not(.is-selected) .enrol-course-media img{filter:grayscale(1) saturate(0) contrast(1.08) brightness(.72)}
+.enrol-course-card.is-selected .enrol-course-media img{filter:grayscale(0) saturate(1.05) contrast(1.05) brightness(.98)}
+
 .enrol-course-check{position:absolute;opacity:0;pointer-events:none}
 .enrol-course-media{position:relative;display:block;height:190px;overflow:hidden;background:#111}
 .enrol-course-card.is-combo .enrol-course-media{height:220px}
@@ -506,11 +519,11 @@ footer{padding:48px 0 32px;}
 .enrol-summary-grid strong{font-size:14px}
 .enrol-summary-note{font-size:12px!important;color:var(--ink-soft);margin-top:14px}
 @supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.enrol-course-card.is-selected,.enrol-course-icon,.enrol-course-featured,.enrol-course-selected{backdrop-filter:blur(14px) saturate(125%);-webkit-backdrop-filter:blur(14px) saturate(125%)}}
-@media (max-width:980px){.pay-page{max-width:900px}.enrol-course-grid{grid-template-columns:1fr 1fr}.enrol-course-media{height:170px}.enrol-course-card.is-combo .enrol-course-media{height:190px}}
+@media (max-width:980px){.pay-page{max-width:900px}.enrol-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.enrol-course-card,.enrol-course-card.tile-1,.enrol-course-card.tile-2,.enrol-course-card.tile-3,.enrol-course-card.tile-4,.enrol-course-card.tile-5,.enrol-course-card.tile-6{grid-column:auto}.enrol-course-card.is-featured,.enrol-course-card.is-combo{grid-column:span 2;grid-row:auto}.enrol-course-media{height:170px}.enrol-course-card.is-featured .enrol-course-media,.enrol-course-card.is-combo .enrol-course-media{height:210px}}
 @media (max-width:760px){
   .enrol-catalog-head{grid-template-columns:1fr;gap:12px}
   .enrol-course-grid{grid-template-columns:1fr}
-  .enrol-course-card.is-combo{grid-column:auto}
+  .enrol-course-card,.enrol-course-card.is-featured,.enrol-course-card.is-combo{grid-column:auto;grid-row:auto;min-height:0}
   .enrol-course-media,.enrol-course-card.is-combo .enrol-course-media{height:160px}
   .enrol-summary-head{flex-direction:column}
   .enrol-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
