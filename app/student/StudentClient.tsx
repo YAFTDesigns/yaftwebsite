@@ -96,6 +96,8 @@ export default function StudentClient() {
   const [profile, setProfile] = useState({ displayName: '', certificateName: '', phone: '', linkedinUrl: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [interestOn, setInterestOn] = useState(false);
+  const [agree, setAgree] = useState(false);
+  const [wantInterest, setWantInterest] = useState(false);
   const [edit, setEdit] = useState<{ key: string; name: string; role: string; title: string; tool: string; category: string; description: string; link: string; publish: boolean } | null>(null);
   const [tf, setTf] = useState<{ key: string; quote: string; name: string; noPhoto: boolean } | null>(null);
   const [verify, setVerify] = useState<{ token: string; res: null | { valid: boolean; revoked?: boolean; name?: string; course?: string; date?: string; certificateId?: string } } | null>(null);
@@ -106,6 +108,9 @@ export default function StudentClient() {
     if (!r.ok) { setMsg('Could not load your account. Please refresh.'); setState('out'); return null; }
     const j: Me = await r.json();
     setMe(j); setState('in');
+    try {
+      if (localStorage.getItem('yaft_interest_pref') === '1') { localStorage.removeItem('yaft_interest_pref'); fetch('/api/student/interest-consent', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: true }) }).then(() => setInterestOn(true)).catch(() => {}); }
+    } catch { /* storage unavailable */ }
     setProfile({ displayName: j.profile.displayName ?? '', certificateName: j.profile.certificateName ?? '', phone: j.profile.phone ?? '', linkedinUrl: j.profile.linkedinUrl ?? '' });
     return j;
   }, []);
@@ -140,9 +145,10 @@ export default function StudentClient() {
   }, [load]);
 
   const redirectTo = () => `${window.location.origin}/auth/callback?next=/student`;
-  async function google() { await getSupabaseBrowser().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo(), queryParams: { prompt: 'select_account' } } }); }
+  function rememberChoices() { try { if (wantInterest) localStorage.setItem('yaft_interest_pref', '1'); else localStorage.removeItem('yaft_interest_pref'); } catch { /* ignore */ } }
+  async function google() { rememberChoices(); await getSupabaseBrowser().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo(), queryParams: { prompt: 'select_account' } } }); }
   async function emailLink() {
-    setBusy(true); setMsg('');
+    setBusy(true); setMsg(''); rememberChoices();
     const { error } = await getSupabaseBrowser().auth.signInWithOtp({ email: email.trim(), options: { emailRedirectTo: redirectTo(), shouldCreateUser: true } });
     setBusy(false);
     if (error) setMsg('Could not send the link. Check the address and try again.'); else setSent(true);
@@ -274,11 +280,21 @@ export default function StudentClient() {
       <p style={{ color: 'var(--ink-soft)', marginBottom: 24, fontSize: 16 }}>Sign in to see your courses, payments, bills and certificates.</p>
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
       <div style={box}>
-        <button style={{ ...btn, width: '100%', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} onClick={google}><GoogleG />Continue with Google</button>
+        <div style={{ marginBottom: 18, display: 'grid', gap: 10 }}>
+          <label style={{ fontSize: 13, display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
+            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} style={{ marginTop: 3 }} />
+            <span>I agree to the <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Privacy Policy</a>. <span style={{ opacity: 0.6 }}>(required)</span></span>
+          </label>
+          <label style={{ fontSize: 13, display: 'flex', gap: 10, alignItems: 'flex-start', cursor: 'pointer' }}>
+            <input type="checkbox" checked={wantInterest} onChange={(e) => setWantInterest(e.target.checked)} style={{ marginTop: 3 }} />
+            <span>Suggest courses based on what I view. <span style={{ opacity: 0.6 }}>(optional, off any time)</span></span>
+          </label>
+        </div>
+        <button style={{ ...btn, width: '100%', opacity: agree ? 1 : 0.45, cursor: agree ? 'pointer' : 'not-allowed', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} disabled={!agree} onClick={google}><GoogleG />Continue with Google</button>
         <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0 16px' }}>We only receive your name, email and picture from Google. Nothing is posted and no contacts are read.</p>
         {sent ? <p style={{ fontSize: 14 }}>Check your inbox. We sent a sign-in link to {email}.</p> : <>
           <input style={input} type="email" placeholder="Or use your email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <button style={{ ...ghost, width: '100%', marginTop: 8 }} disabled={busy || !email.includes('@')} onClick={emailLink}>{busy ? 'Sending...' : 'Email me a sign-in link'}</button>
+          <button style={{ ...ghost, width: '100%', marginTop: 8 }} disabled={!agree || busy || !email.includes('@')} onClick={emailLink}>{busy ? 'Sending...' : 'Email me a sign-in link'}</button>
         </>}
       </div>
       <p style={{ fontSize: 12, opacity: 0.65 }}>Paid as a guest earlier? Sign in with the same email, then confirm your enrolment on the next screen.</p>
