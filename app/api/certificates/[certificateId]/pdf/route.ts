@@ -37,6 +37,7 @@ export async function GET(
       courseSuffix: data.course_suffix,
       durationHours: data.duration_hours,
       certificateId: data.certificate_id,
+      company: data.company ?? null,
     });
 
     return new NextResponse(new Uint8Array(pdfBuffer), {

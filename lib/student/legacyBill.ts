@@ -45,6 +45,10 @@ export async function claimByBill(student: { id: string; userId: string; email: 
   // only training bills can open a course (not consulting, workshop or other work)
   if ((inv.invoice_type || 'training') !== 'training') return 'pending';
 
+  // A corporate bill (one bill, many certificates) belongs to the company, not to one student: never link it to a portal account.
+  const { count: corp } = await admin.from('certificates').select('id', { count: 'exact', head: true }).eq('batch_ref', billNo);
+  if ((corp ?? 0) > 0) return 'pending';
+
   let planId: string | null = inv.course_plan_id ?? null;
   let token: string | null = null;
   if (planId) {

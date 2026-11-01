@@ -43,6 +43,8 @@ async function generateCertificateId(supabase: ReturnType<typeof getSupabaseAdmi
 
 // POST /api/admin/certificates
 // { student_name, student_email?, course_key, course_suffix, duration_hours, issue_date?, notes? }
+const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
+
 export async function POST(request: NextRequest) {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -55,6 +57,32 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = getSupabaseAdmin();
+  const company = clean(body.company, 120) || null;
+  const batch_ref = clean(body.batch_ref, 60).toUpperCase() || null;
+
+  // Corporate batch: one bill, many people. participants = [{ name, email? }], issued one after another so the numbers run in sequence.
+  if (Array.isArray(body.participants)) {
+    const people = (body.participants as { name?: unknown; email?: unknown }[])
+      .map((p) => ({ name: clean(p?.name, 120), email: clean(p?.email, 160) }))
+      .filter((p) => p.name);
+    if (!people.length || people.length > 100) return NextResponse.json({ error: 'Add between 1 and 100 participants.' }, { status: 400 });
+    if (!company) return NextResponse.json({ error: 'Company name is required for a corporate batch.' }, { status: 400 });
+    try {
+      const made: { certificate_id: string; student_name: string }[] = [];
+      for (const p of people) {
+        const certificate_id = await generateCertificateId(supabase);
+        const { error } = await supabase.from('certificates').insert({
+          certificate_id, student_name: p.name, student_email: p.email || null, course_key: body.course_key, course_suffix: body.course_suffix,
+          duration_hours: String(body.duration_hours), issue_date: body.issue_date || new Date().toISOString().slice(0, 10), notes: body.notes || null, company, batch_ref,
+        });
+        if (error) return NextResponse.json({ error: `Stopped after ${made.length} certificate(s): ${error.message}`, made }, { status: 500 });
+        made.push({ certificate_id, student_name: p.name });
+      }
+      return NextResponse.json({ ok: true, count: made.length, made, batch_ref });
+    } catch (err) {
+      return NextResponse.json({ error: getErrorMessage(err) || 'Failed to generate certificate IDs' }, { status: 500 });
+    }
+  }
 
   try {
     const certificate_id = await generateCertificateId(supabase);
@@ -67,6 +95,8 @@ export async function POST(request: NextRequest) {
       duration_hours: String(body.duration_hours),
       issue_date: body.issue_date || new Date().toISOString().slice(0, 10),
       notes: body.notes || null,
+      company,
+      batch_ref,
     }).select('*').single();
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -35,6 +35,7 @@ export type CertificateData = {
   courseSuffix: string;    // e.g. "FOR ARCHITECTURE"
   durationHours: string;   // e.g. "30"
   certificateId: string;   // e.g. "YAFT202607-05" (full string, no separate prefix)
+  company?: string | null; // corporate batches: printed as "Employee of <company>" under the name
 };
 
 export async function generateCertificatePDF(data: CertificateData): Promise<Buffer> {
@@ -54,6 +55,12 @@ export async function generateCertificatePDF(data: CertificateData): Promise<Buf
     // Student name -- sits on the dotted line above "has participated..."
     doc.font('Helvetica-Bold').fontSize(psize(56)).fillColor(ink)
        .text(data.studentName.toUpperCase(), px(271), py(1090), { lineBreak: false });
+
+    // Corporate batches: the company the participant belongs to, between the intro line and the course row
+    if (data.company) {
+      doc.font('Helvetica').fontSize(psize(44)).fillColor('#444444')
+         .text(`Employee of ${data.company.toUpperCase()}`, px(271), py(1330), { lineBreak: false });
+    }
 
     // Course line -- accent-colored product name + dark suffix, single row
     const accent = COURSE_ACCENTS[data.courseKey] ?? COURSE_ACCENTS.default;
