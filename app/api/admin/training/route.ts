@@ -45,6 +45,15 @@ export async function POST(req: NextRequest) {
       const { error } = await a.from('course_rules').upsert(row, { onConflict: 'course_slug' });
       return error ? NextResponse.json({ error: 'Could not save' }, { status: 500 }) : done('course_rule_saved', b.slug, { requires_full_payment: row.requires_full_payment });
     }
+    case 'unlink_enrolment': {
+      if (!uuid(b.studentId) || !uuid(b.planId)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+      // A live certificate is a public record: revoke it first, so unlinking never leaves a valid certificate for a course the student no longer holds.
+      const { data: live } = await a.from('certificates').select('certificate_id').eq('student_id', b.studentId).eq('plan_id', b.planId).eq('revoked', false).limit(1);
+      if (live?.length) return NextResponse.json({ error: 'This student has a live certificate for it. Revoke the certificate first, then unlink.' }, { status: 409 });
+      const { data: gone } = await a.from('student_enrolments').delete().eq('student_id', b.studentId).eq('plan_id', b.planId).select('id');
+      if (!gone?.length) return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+      return done('enrolment_unlinked', b.planId, { studentId: b.studentId });
+    }
     case 'resolve_claim': {
       if (!uuid(b.reviewId) || !['approved', 'rejected'].includes(b.decision)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
       const { data: r } = await a.from('claim_reviews').select('id, user_id, plan_id, status').eq('id', b.reviewId).maybeSingle();

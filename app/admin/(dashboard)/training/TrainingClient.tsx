@@ -90,7 +90,7 @@ export default function TrainingClient() {
         <table className={styles.table}><thead><tr><th>Name</th><th>Certificate name</th><th>Enrolments</th><th>Joined</th></tr></thead><tbody>
           {(d.students ?? []).map((s: Json) => {
             const mine = (d.links ?? []).filter((l: Json) => l.student_id === s.id);
-            return <tr key={s.id}><td>{s.display_name ?? '-'}</td><td>{s.certificate_name ?? '-'}</td><td>{mine.map((l: Json) => <div key={l.plan_id} style={{ fontSize: 12 }}>{l.course_payment_plans?.description} ({l.linked_via})</div>)}</td><td>{new Date(s.created_at).toLocaleDateString('en-IN')}</td></tr>;
+            return <tr key={s.id}><td>{s.display_name ?? '-'}</td><td>{s.certificate_name ?? '-'}</td><td>{mine.map((l: Json) => <div key={l.plan_id} style={{ fontSize: 12 }}>{l.course_payment_plans?.description} ({l.linked_via}){' '}<button style={{ ...btn, padding: '2px 8px', fontSize: 11 }} onClick={() => { if (window.confirm(`Unlink "${l.course_payment_plans?.description}" from ${s.display_name ?? 'this student'}? They will lose access to it in the portal. Payments and bills stay as they are.`)) post({ action: 'unlink_enrolment', studentId: l.student_id, planId: l.plan_id }); }}>Unlink</button></div>)}</td><td>{new Date(s.created_at).toLocaleDateString('en-IN')}</td></tr>;
           })}
         </tbody></table>
       </>)}
