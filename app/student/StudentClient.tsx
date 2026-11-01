@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getSupabaseBrowser } from '@/lib/supabase/browser';
 import { fmtFixed2 } from '@/lib/format';
+import { COURSE_NAV_LIST } from '@/app/courses/courseNav';
 
 type Card = {
   planId: string; title: string; courseSlugs: string[]; currency: 'INR' | 'USD'; totalInr: number; paidInr: number; balanceInr: number;
@@ -99,6 +100,8 @@ export default function StudentClient() {
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [link, setLink] = useState('');
+  const [billNo, setBillNo] = useState('');
+  const [billCourse, setBillCourse] = useState('');
   const [profile, setProfile] = useState<{ displayName: string; certificateName: string; phone: string; linkedinUrl: string; occupation: '' | 'professional' | 'student'; designation: string; organisation: string; college: string; studyField: string }>({ displayName: '', certificateName: '', phone: '', linkedinUrl: '', occupation: '', designation: '', organisation: '', college: '', studyField: '' });
   const [showProfile, setShowProfile] = useState(false);
   const [agree, setAgree] = useState(false);
@@ -171,6 +174,11 @@ export default function StudentClient() {
   async function requestClaim() {
     const { j } = await post('/api/student/claim/request', { link });
     setMsg(j.message ?? 'Request received.'); setLink('');
+  }
+  async function claimBill() {
+    const { ok, j } = await post('/api/student/claim/bill', { billNo, courseSlug: billCourse });
+    setMsg(j.message ?? j.error ?? (ok ? 'Request received.' : 'Could not check that bill.'));
+    if (ok) { setBillNo(''); if (j.linked) load(); }
   }
   async function connectLinkedin() {
     const { error } = await getSupabaseBrowser().auth.linkIdentity({ provider: 'linkedin_oidc', options: { redirectTo: redirectTo() } });
@@ -488,6 +496,16 @@ export default function StudentClient() {
             </div>
           );
         })}
+        <div style={box}>
+          <strong>Studied with us before the portal? Enter your bill number</strong>
+          <p style={{ fontSize: 13, opacity: 0.75, margin: '6px 0' }}>Find it on the bill we gave you (like YAFT-102026-21). We check it, and your course appears here so you can submit your project and get your certificate.</p>
+          <input style={input} placeholder="YAFT-MMYYYY-NN" value={billNo} onChange={(e) => setBillNo(e.target.value)} />
+          <select style={{ ...input, marginTop: 8 }} value={billCourse} onChange={(e) => setBillCourse(e.target.value)}>
+            <option value="">Choose your course</option>
+            {COURSE_NAV_LIST.map((c) => <option key={c.dbSlug} value={c.dbSlug}>{c.title}</option>)}
+          </select>
+          <button style={{ ...ghost, marginTop: 8 }} disabled={!billNo.trim() || !billCourse} onClick={claimBill}>Check my bill</button>
+        </div>
         <div style={box}>
           <strong>Paid under a different email?</strong>
           <p style={{ fontSize: 13, opacity: 0.75, margin: '6px 0' }}>Paste the payment link you received. We email a one-time confirmation to the billing address on that payment.</p>

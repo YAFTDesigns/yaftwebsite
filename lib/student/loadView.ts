@@ -24,7 +24,7 @@ export async function loadPortalView(student: { id: string; email: string }): Pr
   if (!planIds.length) return { enrolments: [], candidates, totals: { courses: 0, outstandingInr: 0, certificates: 0 }, projects: [], certificates: [], certStatus: [], testimonials: [] };
 
   const [plans, pays, invs, adj] = await Promise.all([
-    admin.from('course_payment_plans').select('id, token, status, description, course_slugs, currency, is_test, structure, base_total, advance_base').in('id', planIds),
+    admin.from('course_payment_plans').select('id, token, status, description, course_slugs, currency, is_test, structure, base_total, advance_base, source').in('id', planIds),
     admin.from('course_payments').select('plan_id, kind, status, paid_at, amount_minor').in('plan_id', planIds).eq('status', 'paid'),
     admin.from('invoices').select('id, invoice_no, date, items, client_state, course_plan_id').in('course_plan_id', planIds),
     admin.from('invoice_adjustments').select('plan_id, credit_note_no, issued_date, total').in('plan_id', planIds).eq('status', 'issued'),
