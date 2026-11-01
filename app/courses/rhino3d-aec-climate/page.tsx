@@ -149,7 +149,7 @@ export default function Rhino3DAEC() {
       <hr className={s.divider} />
       <div className={s.ctaBottom}>
         <p className={s.ctaBottomText}>Interested in a workshop for your institution or team?</p>
-        <a href="/courses#enquire" className={s.btnPrimary}>Get in touch</a>
+        <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
       </div>
     </div>
       <CourseSidebarNav current="/courses/rhino3d-aec-climate" />
