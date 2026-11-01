@@ -11,6 +11,19 @@ export function parseBillNo(input: unknown): string | null {
   return /^YAFT-\d{6}-\d{1,4}$/.test(s) ? s : null;
 }
 
+/** Which course(s) a bill's line text is about. Empty when the wording is not recognisable. */
+export function coursesInBill(items: unknown): string[] {
+  const text = (Array.isArray(items) ? items : []).map((i) => String((i as { desc?: unknown })?.desc ?? '')).join(' | ').toLowerCase();
+  const out = new Set<string>();
+  if (/grasshopper/.test(text)) out.add('grasshopper-architecture');
+  if (/revit|rhino\.inside/.test(text)) out.add('revit-rhino-inside');
+  if (/climate|aec|ladybug/.test(text)) out.add('rhino-aec-climate');
+  if (/industrial/.test(text)) out.add('rhino-industrial-design');
+  if (/wearable|footwear/.test(text)) out.add('rhino-wearables-footwear');
+  if (/rhino/.test(text) && /architecture/.test(text) && !/revit/.test(text)) out.add('rhino-architecture');
+  return [...out];
+}
+
 export type BillClaim = 'linked' | 'pending' | 'invalid';
 
 /**
@@ -25,10 +38,12 @@ export async function claimByBill(student: { id: string; userId: string; email: 
   const course = COURSE_NAV_LIST.find((c) => c.dbSlug === courseSlug);
   if (!billNo || !course) return 'invalid';
   const admin = getSupabaseAdmin();
-  const { data: inv } = await admin.from('invoices').select('id, invoice_no, client_name, client_email, client_phone, client_state, total, course_plan_id, course_payment_id').eq('invoice_no', billNo).is('deleted_at', null).maybeSingle();
+  const { data: inv } = await admin.from('invoices').select('id, invoice_no, client_name, client_email, client_phone, client_state, total, balance, items, invoice_type, course_plan_id, course_payment_id').eq('invoice_no', billNo).is('deleted_at', null).maybeSingle();
   if (!inv) return 'pending';
   // bills made by the website's own checkout already belong to a plan with a pay trail; those use the normal email/claim flow
   if (inv.course_payment_id) return 'pending';
+  // only training bills can open a course (not consulting, workshop or other work)
+  if ((inv.invoice_type || 'training') !== 'training') return 'pending';
 
   let planId: string | null = inv.course_plan_id ?? null;
   let token: string | null = null;
@@ -51,6 +66,15 @@ export async function claimByBill(student: { id: string; userId: string; email: 
     planId = plan.id as string;
     const { data: set } = await admin.from('invoices').update({ course_plan_id: planId }).eq('id', inv.id).is('course_plan_id', null).select('id');
     if (!set?.length) { await admin.from('course_payment_plans').delete().eq('id', planId); return 'pending'; }
+  }
+
+  // Anything that does not look fully settled and matching goes to a person instead of linking.
+  const detected = coursesInBill(inv.items);
+  const owes = Number(inv.balance) > 0;
+  const mismatch = detected.length > 0 && !detected.includes(course.dbSlug);
+  if (owes || mismatch) {
+    await admin.from('claim_reviews').insert({ user_id: student.userId, plan_id: planId, note: `Bill ${billNo}: ${owes ? `still shows a balance of Rs ${Number(inv.balance)}` : `bill wording suggests ${detected.join(', ')}`}; student chose ${course.title}. Check, then link or reject.` });
+    return 'pending';
   }
 
   const billEmail = String(inv.client_email || '').trim().toLowerCase();

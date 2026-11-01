@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
   if (!s) return NextResponse.json({ error: 'Not signed in' }, { status: 401 });
   const limited = await rateLimitShared(req, 'student-claim-bill', { limit: 5, windowMs: 60 * 60_000 });
   if (limited) return limited;
+  const daily = await rateLimitShared(req, 'student-claim-bill-day', { limit: 10, windowMs: 24 * 60 * 60_000 });
+  if (daily) return daily;
   const b = await req.json().catch(() => ({}));
   const r = await claimByBill({ id: s.profile.id, userId: s.userId, email: s.email }, b.billNo, b.courseSlug);
   if (r === 'invalid') return NextResponse.json({ error: 'Enter your bill number (like YAFT-102026-21) and choose your course.' }, { status: 400 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseBillNo } from './legacyBill';
+import { parseBillNo, coursesInBill } from './legacyBill';
 import { buildEnrolmentCard } from './enrolmentView';
 
 describe('parseBillNo', () => {
@@ -22,5 +22,17 @@ describe('legacy plan card', () => {
   });
   it('a normal plan with no payments is still unpaid', () => {
     expect(buildEnrolmentCard({ ...plan, source: 'enroll', status: 'active' }, []).payStatus).toBe('unpaid');
+  });
+});
+
+describe('coursesInBill', () => {
+  it('reads real bill wording', () => {
+    expect(coursesInBill([{ desc: 'Rhino3D for Architecture' }, { desc: 'Grasshopper for Computational Design' }]).sort()).toEqual(['grasshopper-architecture', 'rhino-architecture']);
+    expect(coursesInBill([{ desc: 'Wearables & Product Design' }])).toEqual(['rhino-wearables-footwear']);
+    expect(coursesInBill([{ desc: 'Rhino3D for AEC & Climate' }])).toEqual(['rhino-aec-climate']);
+  });
+  it('returns nothing for wording it does not know', () => {
+    expect(coursesInBill([{ desc: 'Consulting' }])).toEqual([]);
+    expect(coursesInBill(null)).toEqual([]);
   });
 });
