@@ -69,7 +69,7 @@ export default function Rhino3DAEC() {
           <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
-          <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
+          <a href="/courses#contact" className={s.btnOutline}>Enquire now</a>
           <a href="https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/syllabus/Rhino_3D_Training_for_AEC_for_Climate.pdf" className={s.btnPrimary}>Download syllabus</a>
         </div>
       </div>
@@ -149,7 +149,7 @@ export default function Rhino3DAEC() {
       <hr className={s.divider} />
       <div className={s.ctaBottom}>
         <p className={s.ctaBottomText}>Interested in a workshop for your institution or team?</p>
-        <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
+        <a href="/courses#contact" className={s.btnPrimary}>Enquire now</a>
       </div>
     </div>
       <CourseSidebarNav current="/courses/rhino3d-aec-climate" />

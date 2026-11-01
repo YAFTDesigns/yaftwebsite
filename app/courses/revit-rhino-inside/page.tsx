@@ -59,7 +59,7 @@ export default function RevitRhinoInside() {
           <div className={s.priceUsd}>approx. rates · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
-          <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
+          <a href="/courses#contact" className={s.btnOutline}>Enquire now</a>
           <a href="https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/syllabus/Revit_Architecture_Rhino_Insider.pdf" className={s.btnPrimary}>Download syllabus</a>
         </div>
       </div>
@@ -129,7 +129,7 @@ export default function RevitRhinoInside() {
       <hr className={s.divider} />
       <div className={s.ctaBottom}>
         <p className={s.ctaBottomText}>Ready to start? Reach out and we will schedule a free intro call.</p>
-        <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
+        <a href="/courses#contact" className={s.btnPrimary}>Enquire now</a>
       </div>
     </div>
       <CourseSidebarNav current="/courses/revit-rhino-inside" />

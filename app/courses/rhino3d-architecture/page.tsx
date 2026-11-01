@@ -60,7 +60,7 @@ export default function Rhino3DArchitecture() {
           <div className={s.priceUsd}>approx. rates · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
-          <a href="/courses#enquire" className={s.btnOutline}>Enquire now</a>
+          <a href="/courses#contact" className={s.btnOutline}>Enquire now</a>
           <a href="https://rjvadqwqgqouihuydlnu.supabase.co/storage/v1/object/public/syllabus/Rhino_3D_Training_for_Architecture.pdf" className={s.btnPrimary}>Download syllabus</a>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function Rhino3DArchitecture() {
       <hr className={s.divider} />
       <div className={s.ctaBottom}>
         <p className={s.ctaBottomText}>Ready to start? Reach out and we will schedule a free intro call.</p>
-        <a href="/courses#enquire" className={s.btnPrimary}>Enquire now</a>
+        <a href="/courses#contact" className={s.btnPrimary}>Enquire now</a>
       </div>
     </div>
       <CourseSidebarNav current="/courses/rhino3d-architecture" />
