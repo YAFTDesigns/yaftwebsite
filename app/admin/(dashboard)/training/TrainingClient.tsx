@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import styles from '../admin.module.css';
+import ClassesPanel from './ClassesPanel';
 
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const field = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '8px 10px', fontSize: 13, borderRadius: 0 } as const;
@@ -18,21 +19,6 @@ export default function TrainingClient() {
   const [msg, setMsg] = useState('');
   const [fb, setFb] = useState<Record<string, string>>({});
   const [rule, setRule] = useState<Record<string, Json>>({});
-  const [classes, setClasses] = useState<Json[]>([]);
-  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_ids: [] as string[], weekdays: [] as number[], notify: true });
-  const [roster, setRoster] = useState<Record<string, Json[]>>({});
-  const [ed, setEd] = useState<Json | null>(null);
-  const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); setClasses(j.sessions ?? []); setRoster(j.roster ?? {}); } }, []);
-  async function classAct(body: Json) {
-    const r = await fetch('/api/admin/training/classes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
-    const j = await r.json().catch(() => ({}));
-    setMsg(r.ok ? 'Done.' : j.error ?? 'Failed');
-    if (r.ok && body.action === 'create') setNc((x: Json) => ({ ...x, title: '', starts_at: '', repeat_count: '1', weekdays: [] }));
-    if (r.ok && body.action === 'create') setMsg(`Added ${j.count} class${j.count > 1 ? 'es' : ''}${j.emailed ? ` and emailed ${j.emailed} student${j.emailed > 1 ? 's' : ''}` : ''}.`);
-    if (r.ok && (body.action === 'reschedule' || body.action === 'update')) setEd(null);
-    if (r.ok && body.action === 'reschedule') setMsg(`Moved ${j.moved} class${j.moved > 1 ? 'es' : ''}${j.emailed ? ' and emailed the student' : ''}.`);
-    loadClasses();
-  }
 
   const load = useCallback(async () => {
     const [a, b] = await Promise.all([fetch('/api/admin/training'), fetch('/api/admin/student-projects')]);
@@ -51,8 +37,6 @@ export default function TrainingClient() {
     return () => { live = false; clearInterval(t); };
   }, [tab]);
 
-  useEffect(() => { // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (tab === 'Classes') loadClasses(); }, [tab, loadClasses]);
 
   async function act(url: string, body: Json) {
     const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
@@ -130,73 +114,7 @@ export default function TrainingClient() {
         </tbody></table></div>
       </>)}
 
-      {tab === 'Classes' && (<>
-        <p style={{ fontSize: 13, opacity: 0.75 }}>Add live classes with the Meet link. Students see them in their portal and join through a tracked button, so attendance is logged automatically. Times are India time. To make a weekly series, set how many classes and the gap in days.</p>
-        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', maxWidth: 900, marginBottom: 20 }}>
-          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value, student_ids: [] })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
-          <div style={{ gridColumn: '1 / -1', fontSize: 13 }}>For:{' '}
-            <span style={{ opacity: 0.7 }}>{nc.student_ids.length ? `Private session (${nc.student_ids.length} of max 3)` : 'Whole course, everyone enrolled. Tick up to 3 students below to make it private.'}</span>
-            <div style={{ marginTop: 4 }}>{(roster[nc.course_slug] ?? []).map((r: Json) => (
-              <label key={r.studentId} style={{ marginRight: 14, display: 'inline-block' }}><input type="checkbox" checked={nc.student_ids.includes(r.studentId)} disabled={!nc.student_ids.includes(r.studentId) && nc.student_ids.length >= 3} onChange={(e) => setNc({ ...nc, student_ids: e.target.checked ? [...nc.student_ids, r.studentId] : nc.student_ids.filter((x: string) => x !== r.studentId) })} /> {r.name}</label>))}
-              {nc.course_slug && !(roster[nc.course_slug] ?? []).length && <span style={{ opacity: 0.6 }}>No paid students in this course yet.</span>}</div>
-          </div>
-          <input style={field} placeholder="Title (optional, uses the course name)" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
-          <input style={field} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} />
-          <input style={field} placeholder="Minutes" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} />
-          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="https://meet.google.com/xxx-xxxx-xxx" value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} />
-          <input style={field} placeholder="How many classes" value={nc.repeat_count} onChange={(e) => setNc({ ...nc, repeat_count: e.target.value })} />
-          <div style={{ gridColumn: '1 / -1', fontSize: 13 }}>Repeat on:{' '}
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((n, i) => (
-              <label key={n} style={{ marginRight: 10 }}><input type="checkbox" checked={nc.weekdays.includes(i)} onChange={(e) => setNc({ ...nc, weekdays: e.target.checked ? [...nc.weekdays, i] : nc.weekdays.filter((x: number) => x !== i) })} /> {n}</label>))}
-            <span style={{ opacity: 0.6 }}> (leave all unticked to repeat every </span><input style={{ ...field, width: 50, padding: '4px 6px' }} value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} /><span style={{ opacity: 0.6 }}> days)</span>
-          </div>
-          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
-          <label style={{ fontSize: 13, gridColumn: '1 / -1' }}><input type="checkbox" checked={nc.notify} onChange={(e) => setNc({ ...nc, notify: e.target.checked })} /> Email the student{nc.student_ids.length === 1 ? '' : 's'} that classes are scheduled</label>
-          <div><button style={btn} onClick={() => classAct({ action: 'create', ...nc })}>Add class{Number(nc.repeat_count) > 1 ? 'es' : ''}</button></div>
-        </div>
-        {ed && (
-          <div style={{ border: '1px solid var(--line)', padding: 14, marginBottom: 16, maxWidth: 900 }}>
-            <strong style={{ fontSize: 13 }}>Reschedule: {ed.title}</strong>
-            <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', marginTop: 8 }}>
-              <input style={field} type="datetime-local" value={ed.starts_at} onChange={(e) => setEd({ ...ed, starts_at: e.target.value })} />
-              <input style={field} placeholder="Minutes" value={ed.duration_min} onChange={(e) => setEd({ ...ed, duration_min: e.target.value })} />
-              {ed.series && <select style={field} value={ed.scope} onChange={(e) => setEd({ ...ed, scope: e.target.value })}><option value="one">Only this class</option><option value="following">This and all later classes in the series (shift by the same amount)</option></select>}
-              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Title" value={ed.title} onChange={(e) => setEd({ ...ed, title: e.target.value })} />
-              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="New Meet link (optional, leave blank to keep the current one)" value={ed.meet_url} onChange={(e) => setEd({ ...ed, meet_url: e.target.value })} />
-              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student" value={ed.notes} onChange={(e) => setEd({ ...ed, notes: e.target.value })} />
-              {ed.private && <label style={{ fontSize: 13 }}><input type="checkbox" checked={ed.notify} onChange={(e) => setEd({ ...ed, notify: e.target.checked })} /> Email the student{ed.private ? '(s)' : ''} about the new time</label>}
-            </div>
-            <div style={{ marginTop: 10 }}>
-              <button style={btn} onClick={async () => { await classAct({ action: 'update', id: ed.id, title: ed.title, notes: ed.notes, ...(ed.meet_url?.trim() ? { meet_url: ed.meet_url } : {}) }); await classAct({ action: 'reschedule', id: ed.id, starts_at: ed.starts_at, duration_min: ed.duration_min, scope: ed.scope, notify: ed.notify }); }}>Save changes</button>
-              <button style={btn} onClick={() => setEd(null)}>Close</button>
-            </div>
-          </div>
-        )}
-        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>For</th><th>Class</th><th colSpan={2}>Attendance (click a name to change)</th><th>Links</th><th></th></tr></thead><tbody>
-          {classes.map((c) => (
-            <tr key={c.id}>
-              <td>{new Date(c.starts_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
-              <td>{(d.courses ?? []).find((x: Json) => x.slug === c.course_slug)?.title ?? c.course_slug}</td>
-              <td>{c.forName ? `Private: ${c.forName}` : 'Everyone'}</td>
-              <td>{c.title}{c.notes ? <div style={{ fontSize: 11, opacity: 0.7 }}>{c.notes}</div> : null}</td>
-              <td colSpan={2}>
-                <strong>{c.joined.length}</strong> of {c.enrolledCount} present
-                <div style={{ marginTop: 4 }}>{(c.people ?? []).map((p: Json) => (
-                  <button key={p.studentId} title={p.present ? 'Present. Click to mark absent.' : 'Not joined. Click to mark present.'} onClick={() => classAct({ action: 'mark_attendance', id: c.id, student_id: p.studentId, present: !p.present })}
-                    style={{ ...btn, marginBottom: 4, fontSize: 11, padding: '3px 8px', color: p.present ? '#4caf50' : 'var(--ink-soft)', borderColor: p.present ? '#4caf50' : '#555' }}>
-                    {p.present ? '✓' : '○'} {p.name}{p.manual ? ' (marked)' : p.times > 1 ? ` (x${p.times})` : ''}
-                  </button>))}</div>
-              </td>
-              <td>
-                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', meet_url: '', series: true, private: !!c.student_ids, notify: !!c.student_ids }); }}>Reschedule</button>
-                <button style={btn} onClick={() => { const v = window.prompt('Meet link', c.meet_url); if (v) classAct({ action: 'update', id: c.id, meet_url: v }); }}>Meet link</button>
-                <button style={btn} onClick={() => { const v = window.prompt('Recording link (shown to students after class)', c.recording_url ?? ''); if (v !== null) classAct({ action: 'update', id: c.id, recording_url: v }); }}>Recording</button>
-              </td>
-              <td><button style={btn} onClick={() => { if (window.confirm('Cancel this class? Students will no longer see it.')) classAct({ action: 'cancel', id: c.id }); }}>Cancel</button></td>
-            </tr>))}
-          {classes.length === 0 && <tr><td colSpan={8} style={{ opacity: 0.6 }}>No classes yet.</td></tr>}
-        </tbody></table></div>
-      </>)}
+      {tab === 'Classes' && <ClassesPanel courses={d.courses ?? []} />}
 
       {tab === 'Project Reviews' && (<>
         {!projects.length && <p>No projects waiting.</p>}
