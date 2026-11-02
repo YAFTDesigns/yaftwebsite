@@ -135,7 +135,7 @@ export default function TrainingClient() {
         <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', maxWidth: 900, marginBottom: 20 }}>
           <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value, student_id: '' })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
           <select style={field} value={nc.student_id} onChange={(e) => setNc({ ...nc, student_id: e.target.value })}><option value="">Whole course (everyone enrolled)</option>{(roster[nc.course_slug] ?? []).map((r: Json) => <option key={r.studentId} value={r.studentId}>Private: {r.name}</option>)}</select>
-          <input style={field} placeholder="Class title, e.g. Session" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
+          <input style={field} placeholder="Title (optional, uses the course name)" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
           <input style={field} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} />
           <input style={field} placeholder="Minutes" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} />
           <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="https://meet.google.com/xxx-xxxx-xxx" value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} />

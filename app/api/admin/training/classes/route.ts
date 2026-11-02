@@ -82,14 +82,15 @@ export async function POST(req: NextRequest) {
 
   if (b.action === 'create') {
     const slug = cleanText(b.course_slug, 80);
-    const title = cleanText(b.title, 120);
+    let title = cleanText(b.title, 120);
     const meet = cleanMeetUrl(b.meet_url);
     const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
     const dur = Math.round(Number(b.duration_min));
-    if (!slug || !title || !m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'Course, title, start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
+    if (!slug || !m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'Course, start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
     if (!meet) return NextResponse.json({ error: 'Meeting link must be an https Google Meet, Zoom or Teams link.' }, { status: 400 });
-    const { data: course } = await a.from('courses').select('slug').eq('slug', slug).maybeSingle();
+    const { data: course } = await a.from('courses').select('slug, title').eq('slug', slug).maybeSingle();
     if (!course) return NextResponse.json({ error: 'Unknown course.' }, { status: 400 });
+    if (!title) title = cleanText(course.title, 100) || 'Class';
     let studentId: string | null = null;
     if (b.student_id) {
       if (!uuid(b.student_id)) return NextResponse.json({ error: 'Bad student.' }, { status: 400 });
