@@ -6,6 +6,7 @@ import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { fmtFixed2 } from '@/lib/format';
 import { loadLiveBills } from '@/lib/liveBills';
+import { sendPaymentClassEmail } from '@/lib/student/classEmail';
 import { brandedEmail, brandedRows } from '@/lib/emailLayout';
 import { sendPushToAll } from '@/lib/webPush';
 
@@ -13,7 +14,7 @@ import { CONTACT_EMAIL } from '@/lib/contact';
 type Plan = {
   id: string; client_name: string; client_email: string; client_phone: string | null; client_type: string;
   client_company: string | null; client_gst: string | null; client_pan: string | null; client_address: string | null; client_state: string; description: string;
-  structure: 'instalments' | 'full'; base_total: number; advance_base: number | null; status: string; is_test: boolean;
+  structure: 'instalments' | 'full'; base_total: number; advance_base: number | null; status: string; is_test: boolean; course_slugs?: string[] | null;
 };
 type PaymentRow = {
   id: string; plan_id: string; kind: PlanKind; amount_minor: number | string; order_id: string; payment_id: string | null; status: string;
@@ -155,6 +156,7 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
           PAYMENT_ALERT_TO,
         );
         sendPushToAll({ title: `${tag}Payment: ${plan.client_name} ${inr(inst.total)}`, body: `${plan.description}${left !== null ? `. Left: ${inr(left)}` : ''}`, url: '/admin/training' }).catch(() => {});
+        if (row.kind !== 'balance') await sendPaymentClassEmail({ id: plan.id, client_name: plan.client_name, client_email: plan.client_email, description: plan.description, course_slugs: plan.course_slugs ?? null }, testMode);
       }
     }
 
