@@ -59,7 +59,7 @@ const BTN_CSS = `
 .sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
 .sp-hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:22px;background:#fff;box-shadow:0 8px 28px rgba(16,24,40,.07)}
 .sp-hero{isolation:isolate}
-.sp-hero:after{content:"";position:absolute;z-index:-1;right:-10px;top:40%;transform:translateY(-60%);width:440px;height:320px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right center/contain;opacity:.22;pointer-events:none;filter:invert(1) brightness(.35)}
+.sp-hero:after{content:"";position:absolute;z-index:-1;right:128px;top:14px;width:150px;height:126px;background:url(/assets/logos/rhino-app-icon-flipped.png) no-repeat right center/contain;opacity:.5;pointer-events:none}
 .sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(14,143,132,.10),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
 .sp-stat{border:1px solid var(--line);border-radius:12px;background:#f7f8fa;padding:15px 16px;min-height:78px}
@@ -70,12 +70,12 @@ const BTN_CSS = `
 .sp-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px;background:transparent}
 .sp-next{border:1px solid rgba(14,143,132,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(14,143,132,.07),#fff)!important}
 @media (max-width:680px){
-  .sp-hero:after{width:220px;height:160px;opacity:.16}
+  .sp-hero:after{right:14px;top:14px;width:130px;height:110px;opacity:.3}
   .sp-hero{padding:20px 18px;margin-left:-4px;margin-right:-4px}
   .sp-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .sp-stat{padding:12px 10px;min-width:0}
   .sp-stat b{font-size:15px;white-space:nowrap}
-  .sp-hero:after{opacity:.14}
+  .sp-hero:after{opacity:.3}
   .sp-stat span{font-size:9px;letter-spacing:.06em}
   .sp-tabs{position:sticky;top:64px;z-index:8;background:var(--paper);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-18px;margin-right:-18px;padding:0 18px}
   .sp-tabs::-webkit-scrollbar{display:none}
