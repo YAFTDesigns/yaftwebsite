@@ -7,7 +7,7 @@ export const JOIN_CLOSES_MIN_AFTER = 30;
 
 export type ClassView = {
   id: string; courseSlug: string; title: string; startsAt: string; endsAt: string; notes: string | null;
-  recordingUrl: string | null; state: 'upcoming' | 'open' | 'past'; attended: boolean; joinedAt: string | null;
+  recordingUrl: string | null; isPrivate: boolean; state: 'upcoming' | 'open' | 'past'; attended: boolean; joinedAt: string | null;
 };
 export type ClassesView = { sessions: ClassView[]; attendance: Record<string, { held: number; attended: number }> };
 
@@ -42,14 +42,14 @@ export function stateOf(startsAt: string, endsAt: string, now = Date.now()): 'up
 export async function loadClasses(studentId: string, slugs: Set<string>): Promise<ClassesView> {
   if (!slugs.size) return { sessions: [], attendance: {} };
   const admin = getSupabaseAdmin();
-  const { data: rows } = await admin.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, notes, recording_url')
-    .in('course_slug', [...slugs]).is('cancelled_at', null).order('starts_at', { ascending: true }).limit(300);
+  const { data: rows } = await admin.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, notes, recording_url, student_id')
+    .in('course_slug', [...slugs]).is('cancelled_at', null).or(`student_id.is.null,student_id.eq.${studentId}`).order('starts_at', { ascending: true }).limit(300);
   const ids = (rows ?? []).map((r) => r.id as string);
   const { data: att } = ids.length ? await admin.from('class_attendance').select('session_id, first_joined_at').eq('student_id', studentId).in('session_id', ids) : { data: [] as { session_id: string; first_joined_at: string }[] };
   const joined = new Map((att ?? []).map((a) => [a.session_id, a.first_joined_at]));
   const sessions: ClassView[] = (rows ?? []).map((r) => {
     const state = stateOf(r.starts_at, r.ends_at);
-    return { id: r.id, courseSlug: r.course_slug, title: r.title, startsAt: r.starts_at, endsAt: r.ends_at, notes: r.notes, recordingUrl: state === 'past' ? r.recording_url : null, state, attended: joined.has(r.id), joinedAt: joined.get(r.id) ?? null };
+    return { id: r.id, courseSlug: r.course_slug, title: r.title, startsAt: r.starts_at, endsAt: r.ends_at, notes: r.notes, recordingUrl: state === 'past' ? r.recording_url : null, isPrivate: !!r.student_id, state, attended: joined.has(r.id), joinedAt: joined.get(r.id) ?? null };
   });
   const attendance: Record<string, { held: number; attended: number }> = {};
   for (const s of sessions) {

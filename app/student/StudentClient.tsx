@@ -18,7 +18,7 @@ type Me = {
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
-  classes: { sessions: { id: string; courseSlug: string; title: string; startsAt: string; endsAt: string; notes: string | null; recordingUrl: string | null; state: 'upcoming' | 'open' | 'past'; attended: boolean; joinedAt: string | null }[]; attendance: Record<string, { held: number; attended: number }> };
+  classes: { sessions: { id: string; courseSlug: string; title: string; startsAt: string; endsAt: string; notes: string | null; recordingUrl: string | null; isPrivate: boolean; state: 'upcoming' | 'open' | 'past'; attended: boolean; joinedAt: string | null }[]; attendance: Record<string, { held: number; attended: number }> };
   testimonials: { id: string; planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
 };
 type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
@@ -530,7 +530,7 @@ export default function StudentClient() {
           {next && (
             <div style={box}>
               <div style={{ fontSize: 12, opacity: 0.65, textTransform: 'uppercase', letterSpacing: '.05em' }}>{next.state === 'open' ? 'Class is open' : 'Next class'}</div>
-              <strong style={{ fontSize: 17 }}>{next.title}</strong>
+              <strong style={{ fontSize: 17 }}>{next.title}</strong>{next.isPrivate && <span style={{ fontSize: 11, marginLeft: 8, opacity: 0.7 }}>PRIVATE SESSION</span>}
               <div style={{ fontSize: 13, opacity: 0.8, margin: '4px 0 10px' }}>{fmt(next.startsAt)} IST{next.notes ? ` · ${next.notes}` : ''}</div>
               <form method="post" action={`/api/student/classes/${next.id}/join`} target="_blank">
                 <button type="submit" style={{ ...btn, opacity: next.state === 'open' ? 1 : 0.4, cursor: next.state === 'open' ? 'pointer' : 'not-allowed' }} disabled={next.state !== 'open'}>Join class</button>
@@ -550,7 +550,7 @@ export default function StudentClient() {
                   <thead><tr style={{ textAlign: 'left' }}><th>Class</th><th>When (IST)</th><th>Status</th><th></th></tr></thead>
                   <tbody>{rows.map((c) => (
                     <tr key={c.id}>
-                      <td>{c.title}</td><td>{fmt(c.startsAt)}</td>
+                      <td>{c.title}{c.isPrivate ? ' (private)' : ''}</td><td>{fmt(c.startsAt)}</td>
                       <td>{c.state === 'past' ? (c.attended ? 'Attended' : 'Missed') : c.state === 'open' ? 'Open now' : 'Upcoming'}</td>
                       <td>{c.recordingUrl ? <a href={c.recordingUrl} target="_blank" rel="noopener noreferrer">Recording</a> : ''}</td>
                     </tr>))}</tbody>

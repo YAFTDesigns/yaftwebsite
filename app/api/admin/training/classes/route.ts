@@ -6,6 +6,8 @@ import { sameOrigin } from '@/lib/student/csrf';
 import { cleanText } from '@/lib/student/safe';
 import { audit } from '@/lib/student/audit';
 import { cleanMeetUrl, cleanHttps } from '@/lib/student/classes';
+import { sendEmail, isEmailConfigured, escapeHtml } from '@/lib/email';
+import { brandedEmail } from '@/lib/emailLayout';
 
 const NO_STORE = { 'Cache-Control': 'private, no-store' };
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
@@ -30,24 +32,26 @@ async function rosterBySlug() {
 export async function GET() {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const a = getSupabaseAdmin();
-  const { data: sessions } = await a.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, meet_url, recording_url, notes, cancelled_at').is('cancelled_at', null).order('starts_at', { ascending: false }).limit(200);
+  const { data: sessions } = await a.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, meet_url, recording_url, notes, cancelled_at, student_id, series_id').is('cancelled_at', null).order('starts_at', { ascending: false }).limit(200);
   const ids = (sessions ?? []).map((s) => s.id as string);
   const [{ data: att }, roster] = await Promise.all([
     ids.length ? a.from('class_attendance').select('session_id, student_id, first_joined_at, join_count').in('session_id', ids) : Promise.resolve({ data: [] as { session_id: string; student_id: string; first_joined_at: string; join_count: number }[] }),
     rosterBySlug(),
   ]);
   const out = (sessions ?? []).map((s) => {
-    const enrolled = roster[s.course_slug] ?? [];
+    const all = roster[s.course_slug] ?? [];
+    const enrolled = s.student_id ? all.filter((e) => e.studentId === s.student_id) : all;
     const joined = (att ?? []).filter((x) => x.session_id === s.id);
     const joinedIds = new Set(joined.map((j) => j.student_id));
     return {
       ...s,
       enrolledCount: enrolled.length,
+      forName: s.student_id ? (all.find((e) => e.studentId === s.student_id)?.name ?? 'One student') : null,
       joined: enrolled.filter((e) => joinedIds.has(e.studentId)).map((e) => ({ name: e.name, at: joined.find((j) => j.student_id === e.studentId)?.first_joined_at, times: joined.find((j) => j.student_id === e.studentId)?.join_count })),
       absent: enrolled.filter((e) => !joinedIds.has(e.studentId)).map((e) => e.name),
     };
   });
-  return NextResponse.json({ sessions: out }, { headers: NO_STORE });
+  return NextResponse.json({ sessions: out, roster }, { headers: NO_STORE });
 }
 
 export async function POST(req: NextRequest) {
@@ -61,29 +65,84 @@ export async function POST(req: NextRequest) {
     const slug = cleanText(b.course_slug, 80);
     const title = cleanText(b.title, 120);
     const meet = cleanMeetUrl(b.meet_url);
-    const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
+    const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
     const dur = Math.round(Number(b.duration_min));
     if (!slug || !title || !m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'Course, title, start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
     if (!meet) return NextResponse.json({ error: 'Meeting link must be an https Google Meet, Zoom or Teams link.' }, { status: 400 });
     const { data: course } = await a.from('courses').select('slug').eq('slug', slug).maybeSingle();
     if (!course) return NextResponse.json({ error: 'Unknown course.' }, { status: 400 });
-    const first = new Date(`${m[1]}T${m[2]}:00+05:30`).getTime(); // admin enters India time
-    const count = Math.min(Math.max(Math.round(Number(b.repeat_count) || 1), 1), 40);
+    let studentId: string | null = null;
+    if (b.student_id) {
+      if (!uuid(b.student_id)) return NextResponse.json({ error: 'Bad student.' }, { status: 400 });
+      const roster = await rosterBySlug();
+      if (!(roster[slug] ?? []).some((e) => e.studentId === b.student_id)) return NextResponse.json({ error: 'That student is not enrolled (paid) in this course.' }, { status: 400 });
+      studentId = b.student_id;
+    }
+    const count = Math.min(Math.max(Math.round(Number(b.repeat_count) || 1), 1), 60);
+    const days: number[] = Array.isArray(b.weekdays) ? b.weekdays.map(Number).filter((n: number) => n >= 0 && n <= 6) : [];
     const step = Math.min(Math.max(Math.round(Number(b.step_days) || 7), 1), 30);
-    const rows = Array.from({ length: count }, (_, i) => {
-      const start = first + i * step * 86_400_000;
-      return { course_slug: slug, title: count > 1 ? `${title} ${i + 1}` : title, starts_at: new Date(start).toISOString(), ends_at: new Date(start + dur * 60_000).toISOString(), meet_url: meet, notes: cleanText(b.notes, 500) || null, created_by: who };
-    });
+    // India has no daylight saving, so a fixed +05:30 offset is exact. Dates are walked as plain calendar days.
+    const y = +m[1], mo = +m[2], d0 = +m[3];
+    const starts: number[] = [];
+    for (let i = 0; i < 800 && starts.length < count; i++) {
+      const day = new Date(Date.UTC(y, mo - 1, d0 + i));
+      if (days.length ? !days.includes(day.getUTCDay()) : (count > 1 && i % step !== 0)) continue;
+      const ymd = day.toISOString().slice(0, 10);
+      starts.push(new Date(`${ymd}T${m[4]}:00+05:30`).getTime());
+    }
+    if (!starts.length) return NextResponse.json({ error: 'No dates came out of that pattern.' }, { status: 400 });
+    const seriesId = crypto.randomUUID();
+    const rows = starts.map((st, i) => ({ course_slug: slug, title: starts.length > 1 ? `${title} ${i + 1}` : title, starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString(), meet_url: meet, notes: cleanText(b.notes, 500) || null, created_by: who, student_id: studentId, series_id: seriesId }));
     const { error } = await a.from('class_sessions').insert(rows);
     if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
-    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count } });
-    return NextResponse.json({ ok: true, count });
+    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count: rows.length, private: !!studentId } });
+    return NextResponse.json({ ok: true, count: rows.length });
+  }
+  if (b.action === 'reschedule') {
+    if (!uuid(b.id)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+    const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
+    const dur = Math.round(Number(b.duration_min));
+    if (!m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'A new start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
+    const { data: cur } = await a.from('class_sessions').select('id, title, starts_at, series_id, student_id, course_slug').eq('id', b.id).is('cancelled_at', null).maybeSingle();
+    if (!cur) return NextResponse.json({ error: 'Class not found.' }, { status: 404 });
+    const newStart = new Date(`${m[1]}T${m[2]}:00+05:30`).getTime();
+    const delta = newStart - new Date(cur.starts_at).getTime();
+    let targets = [{ id: cur.id as string, starts_at: cur.starts_at as string }];
+    if (b.scope === 'following' && cur.series_id) {
+      const { data: later } = await a.from('class_sessions').select('id, starts_at').eq('series_id', cur.series_id).is('cancelled_at', null).gt('starts_at', cur.starts_at).order('starts_at');
+      targets = [...targets, ...(later ?? []).map((l) => ({ id: l.id as string, starts_at: l.starts_at as string }))];
+    }
+    for (const t of targets) {
+      const st = new Date(t.starts_at).getTime() + delta;
+      const { error } = await a.from('class_sessions').update({ starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString() }).eq('id', t.id);
+      if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
+    }
+    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_session_rescheduled', subject: cur.id, detail: { moved: targets.length } });
+    let emailed = false;
+    if (b.notify && cur.student_id && isEmailConfigured()) {
+      try {
+        const { data: st } = await a.from('students').select('user_id, display_name').eq('id', cur.student_id).maybeSingle();
+        const { data: u } = st ? await a.auth.admin.getUserById(st.user_id) : { data: null };
+        const to = u?.user?.email;
+        if (to) {
+          const fmt = (t: number) => new Date(t).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+          await sendEmail({ to, subject: 'Your YAFT class has been rescheduled', html: brandedEmail({
+            heading: 'Class rescheduled',
+            bodyHtml: `<p>Hi ${escapeHtml(st?.display_name || 'there')},</p><p><strong>${escapeHtml(String(cur.title))}</strong> has moved.</p><p>Was: ${escapeHtml(fmt(new Date(cur.starts_at).getTime()))} IST<br>Now: <strong>${escapeHtml(fmt(newStart))} IST</strong>${targets.length > 1 ? `<br>The ${targets.length - 1} later class${targets.length > 2 ? 'es have' : ' has'} moved by the same amount.` : ''}</p><p>You can see every class and the Join button in your student portal.</p>`,
+            cta: { label: 'Open student portal', href: 'https://www.yaftdesigns.com/student' },
+          }) });
+          emailed = true;
+        }
+      } catch (e) { console.error('[classes] reschedule email failed:', e); }
+    }
+    return NextResponse.json({ ok: true, moved: targets.length, emailed });
   }
   if (b.action === 'update') {
     if (!uuid(b.id)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
     const patch: Record<string, unknown> = {};
     if (b.meet_url !== undefined) { const u = cleanMeetUrl(b.meet_url); if (!u) return NextResponse.json({ error: 'Meeting link must be an https Google Meet, Zoom or Teams link.' }, { status: 400 }); patch.meet_url = u; }
     if (b.recording_url !== undefined) patch.recording_url = cleanHttps(b.recording_url);
+    if (b.title !== undefined) { const t = cleanText(b.title, 120); if (!t) return NextResponse.json({ error: 'Title cannot be empty.' }, { status: 400 }); patch.title = t; }
     if (b.notes !== undefined) patch.notes = cleanText(b.notes, 500) || null;
     const { error } = await a.from('class_sessions').update(patch).eq('id', b.id);
     if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });

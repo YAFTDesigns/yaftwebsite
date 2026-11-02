@@ -19,13 +19,17 @@ export default function TrainingClient() {
   const [fb, setFb] = useState<Record<string, string>>({});
   const [rule, setRule] = useState<Record<string, Json>>({});
   const [classes, setClasses] = useState<Json[]>([]);
-  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '' });
-  const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) setClasses((await r.json()).sessions ?? []); }, []);
+  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_id: '', weekdays: [] as number[] });
+  const [roster, setRoster] = useState<Record<string, Json[]>>({});
+  const [ed, setEd] = useState<Json | null>(null);
+  const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); setClasses(j.sessions ?? []); setRoster(j.roster ?? {}); } }, []);
   async function classAct(body: Json) {
     const r = await fetch('/api/admin/training/classes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     const j = await r.json().catch(() => ({}));
     setMsg(r.ok ? 'Done.' : j.error ?? 'Failed');
-    if (r.ok && body.action === 'create') setNc((x: Json) => ({ ...x, title: '', starts_at: '', repeat_count: '1' }));
+    if (r.ok && body.action === 'create') setNc((x: Json) => ({ ...x, title: '', starts_at: '', repeat_count: '1', weekdays: [] }));
+    if (r.ok && (body.action === 'reschedule' || body.action === 'update')) setEd(null);
+    if (r.ok && body.action === 'reschedule') setMsg(`Moved ${j.moved} class${j.moved > 1 ? 'es' : ''}${j.emailed ? ' and emailed the student' : ''}.`);
     loadClasses();
   }
 
@@ -128,31 +132,55 @@ export default function TrainingClient() {
       {tab === 'Classes' && (<>
         <p style={{ fontSize: 13, opacity: 0.75 }}>Add live classes with the Meet link. Students see them in their portal and join through a tracked button, so attendance is logged automatically. Times are India time. To make a weekly series, set how many classes and the gap in days.</p>
         <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', maxWidth: 900, marginBottom: 20 }}>
-          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
+          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value, student_id: '' })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
+          <select style={field} value={nc.student_id} onChange={(e) => setNc({ ...nc, student_id: e.target.value })}><option value="">Whole course (everyone enrolled)</option>{(roster[nc.course_slug] ?? []).map((r: Json) => <option key={r.studentId} value={r.studentId}>Private: {r.name}</option>)}</select>
           <input style={field} placeholder="Class title, e.g. Session" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
           <input style={field} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} />
           <input style={field} placeholder="Minutes" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} />
           <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="https://meet.google.com/xxx-xxxx-xxx" value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} />
           <input style={field} placeholder="How many classes" value={nc.repeat_count} onChange={(e) => setNc({ ...nc, repeat_count: e.target.value })} />
-          <input style={field} placeholder="Gap in days" value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} />
-          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Note for students (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
+          <div style={{ gridColumn: '1 / -1', fontSize: 13 }}>Repeat on:{' '}
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((n, i) => (
+              <label key={n} style={{ marginRight: 10 }}><input type="checkbox" checked={nc.weekdays.includes(i)} onChange={(e) => setNc({ ...nc, weekdays: e.target.checked ? [...nc.weekdays, i] : nc.weekdays.filter((x: number) => x !== i) })} /> {n}</label>))}
+            <span style={{ opacity: 0.6 }}> (leave all unticked to repeat every </span><input style={{ ...field, width: 50, padding: '4px 6px' }} value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} /><span style={{ opacity: 0.6 }}> days)</span>
+          </div>
+          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
           <div><button style={btn} onClick={() => classAct({ action: 'create', ...nc })}>Add class{Number(nc.repeat_count) > 1 ? 'es' : ''}</button></div>
         </div>
-        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>Class</th><th>Joined</th><th>Not joined</th><th>Links</th><th></th></tr></thead><tbody>
+        {ed && (
+          <div style={{ border: '1px solid var(--line)', padding: 14, marginBottom: 16, maxWidth: 900 }}>
+            <strong style={{ fontSize: 13 }}>Reschedule: {ed.title}</strong>
+            <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', marginTop: 8 }}>
+              <input style={field} type="datetime-local" value={ed.starts_at} onChange={(e) => setEd({ ...ed, starts_at: e.target.value })} />
+              <input style={field} placeholder="Minutes" value={ed.duration_min} onChange={(e) => setEd({ ...ed, duration_min: e.target.value })} />
+              {ed.series && <select style={field} value={ed.scope} onChange={(e) => setEd({ ...ed, scope: e.target.value })}><option value="one">Only this class</option><option value="following">This and all later classes in the series (shift by the same amount)</option></select>}
+              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Title" value={ed.title} onChange={(e) => setEd({ ...ed, title: e.target.value })} />
+              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student" value={ed.notes} onChange={(e) => setEd({ ...ed, notes: e.target.value })} />
+              {ed.private && <label style={{ fontSize: 13 }}><input type="checkbox" checked={ed.notify} onChange={(e) => setEd({ ...ed, notify: e.target.checked })} /> Email the student about the new time</label>}
+            </div>
+            <div style={{ marginTop: 10 }}>
+              <button style={btn} onClick={async () => { await classAct({ action: 'update', id: ed.id, title: ed.title, notes: ed.notes }); await classAct({ action: 'reschedule', id: ed.id, starts_at: ed.starts_at, duration_min: ed.duration_min, scope: ed.scope, notify: ed.notify }); }}>Save changes</button>
+              <button style={btn} onClick={() => setEd(null)}>Close</button>
+            </div>
+          </div>
+        )}
+        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>For</th><th>Class</th><th>Joined</th><th>Not joined</th><th>Links</th><th></th></tr></thead><tbody>
           {classes.map((c) => (
             <tr key={c.id}>
               <td>{new Date(c.starts_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
               <td>{(d.courses ?? []).find((x: Json) => x.slug === c.course_slug)?.title ?? c.course_slug}</td>
-              <td>{c.title}</td>
+              <td>{c.forName ? `Private: ${c.forName}` : 'Everyone'}</td>
+              <td>{c.title}{c.notes ? <div style={{ fontSize: 11, opacity: 0.7 }}>{c.notes}</div> : null}</td>
               <td><strong>{c.joined.length}</strong> of {c.enrolledCount}<div style={{ fontSize: 11, opacity: 0.7 }}>{c.joined.map((j: Json) => `${j.name}${j.times > 1 ? ` (x${j.times})` : ''}`).join(', ')}</div></td>
               <td style={{ fontSize: 11, opacity: 0.7 }}>{c.absent.join(', ') || '-'}</td>
               <td>
+                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', series: true, private: !!c.student_id, notify: !!c.student_id }); }}>Reschedule</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Meet link', c.meet_url); if (v) classAct({ action: 'update', id: c.id, meet_url: v }); }}>Meet link</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Recording link (shown to students after class)', c.recording_url ?? ''); if (v !== null) classAct({ action: 'update', id: c.id, recording_url: v }); }}>Recording</button>
               </td>
               <td><button style={btn} onClick={() => { if (window.confirm('Cancel this class? Students will no longer see it.')) classAct({ action: 'cancel', id: c.id }); }}>Cancel</button></td>
             </tr>))}
-          {classes.length === 0 && <tr><td colSpan={7} style={{ opacity: 0.6 }}>No classes yet.</td></tr>}
+          {classes.length === 0 && <tr><td colSpan={8} style={{ opacity: 0.6 }}>No classes yet.</td></tr>}
         </tbody></table></div>
       </>)}
 
