@@ -8,7 +8,7 @@ const field = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 
 const btn = { ...field, cursor: 'pointer', marginRight: 6, border: '1px solid #777', fontFamily: 'var(--mono)', letterSpacing: '.03em' } as const;
 const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '10px 16px', fontSize: 12, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
 const h2 = { fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)', margin: '24px 0 10px' } as const;
-const TABS = ['Live bills', 'Students & Enrolments', 'Courses & Batches', 'Project Reviews', 'Certificates', 'Testimonials', 'Audit log'] as const;
+const TABS = ['Live bills', 'Students & Enrolments', 'Courses & Batches', 'Classes', 'Project Reviews', 'Certificates', 'Testimonials', 'Audit log'] as const;
 
 export default function TrainingClient() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('Live bills');
@@ -18,6 +18,16 @@ export default function TrainingClient() {
   const [msg, setMsg] = useState('');
   const [fb, setFb] = useState<Record<string, string>>({});
   const [rule, setRule] = useState<Record<string, Json>>({});
+  const [classes, setClasses] = useState<Json[]>([]);
+  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '' });
+  const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) setClasses((await r.json()).sessions ?? []); }, []);
+  async function classAct(body: Json) {
+    const r = await fetch('/api/admin/training/classes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    setMsg(r.ok ? 'Done.' : j.error ?? 'Failed');
+    if (r.ok && body.action === 'create') setNc((x: Json) => ({ ...x, title: '', starts_at: '', repeat_count: '1' }));
+    loadClasses();
+  }
 
   const load = useCallback(async () => {
     const [a, b] = await Promise.all([fetch('/api/admin/training'), fetch('/api/admin/student-projects')]);
@@ -35,6 +45,9 @@ export default function TrainingClient() {
     const t = setInterval(pull, 30000);
     return () => { live = false; clearInterval(t); };
   }, [tab]);
+
+  useEffect(() => { // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (tab === 'Classes') loadClasses(); }, [tab, loadClasses]);
 
   async function act(url: string, body: Json) {
     const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
@@ -109,6 +122,37 @@ export default function TrainingClient() {
               <td><input style={{ ...field, width: 150 }} placeholder="FOR ARCHITECTURE" value={r.cert_suffix ?? ''} onChange={(e) => setR(c.slug, 'cert_suffix', e.target.value)} /></td>
               <td><input style={{ ...field, width: 50 }} value={r.cert_hours ?? ''} onChange={(e) => setR(c.slug, 'cert_hours', e.target.value)} /></td>
               <td><button style={btn} onClick={() => post({ action: 'set_rule', slug: c.slug, ...r })}>Save</button></td></tr>); })}
+        </tbody></table></div>
+      </>)}
+
+      {tab === 'Classes' && (<>
+        <p style={{ fontSize: 13, opacity: 0.75 }}>Add live classes with the Meet link. Students see them in their portal and join through a tracked button, so attendance is logged automatically. Times are India time. To make a weekly series, set how many classes and the gap in days.</p>
+        <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', maxWidth: 900, marginBottom: 20 }}>
+          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
+          <input style={field} placeholder="Class title, e.g. Session" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
+          <input style={field} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} />
+          <input style={field} placeholder="Minutes" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} />
+          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="https://meet.google.com/xxx-xxxx-xxx" value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} />
+          <input style={field} placeholder="How many classes" value={nc.repeat_count} onChange={(e) => setNc({ ...nc, repeat_count: e.target.value })} />
+          <input style={field} placeholder="Gap in days" value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} />
+          <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Note for students (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
+          <div><button style={btn} onClick={() => classAct({ action: 'create', ...nc })}>Add class{Number(nc.repeat_count) > 1 ? 'es' : ''}</button></div>
+        </div>
+        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>Class</th><th>Joined</th><th>Not joined</th><th>Links</th><th></th></tr></thead><tbody>
+          {classes.map((c) => (
+            <tr key={c.id}>
+              <td>{new Date(c.starts_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
+              <td>{(d.courses ?? []).find((x: Json) => x.slug === c.course_slug)?.title ?? c.course_slug}</td>
+              <td>{c.title}</td>
+              <td><strong>{c.joined.length}</strong> of {c.enrolledCount}<div style={{ fontSize: 11, opacity: 0.7 }}>{c.joined.map((j: Json) => `${j.name}${j.times > 1 ? ` (x${j.times})` : ''}`).join(', ')}</div></td>
+              <td style={{ fontSize: 11, opacity: 0.7 }}>{c.absent.join(', ') || '-'}</td>
+              <td>
+                <button style={btn} onClick={() => { const v = window.prompt('Meet link', c.meet_url); if (v) classAct({ action: 'update', id: c.id, meet_url: v }); }}>Meet link</button>
+                <button style={btn} onClick={() => { const v = window.prompt('Recording link (shown to students after class)', c.recording_url ?? ''); if (v !== null) classAct({ action: 'update', id: c.id, recording_url: v }); }}>Recording</button>
+              </td>
+              <td><button style={btn} onClick={() => { if (window.confirm('Cancel this class? Students will no longer see it.')) classAct({ action: 'cancel', id: c.id }); }}>Cancel</button></td>
+            </tr>))}
+          {classes.length === 0 && <tr><td colSpan={7} style={{ opacity: 0.6 }}>No classes yet.</td></tr>}
         </tbody></table></div>
       </>)}
 

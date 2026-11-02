@@ -18,13 +18,14 @@ type Me = {
   enrolments: Card[]; candidates: { planId: string; title: string; createdAt: string }[]; totals: { courses: number; outstandingInr: number; certificates: number };
   projects: Proj[]; certificates: { certificateId: string; courseTitle: string; issuedOn: string; planId: string; courseSlug: string; verifyToken: string | null }[];
   certStatus: { planId: string; courseSlug: string; eligible: boolean; missing: string[] }[];
+  classes: { sessions: { id: string; courseSlug: string; title: string; startsAt: string; endsAt: string; notes: string | null; recordingUrl: string | null; state: 'upcoming' | 'open' | 'past'; attended: boolean; joinedAt: string | null }[]; attendance: Record<string, { held: number; attended: number }> };
   testimonials: { id: string; planId: string; courseSlug: string; status: string; quote: string | null; publicName: string | null; photo: 'upload' | 'google' | 'none'; feedback: string | null }[];
 };
 type Rev = { id: string; revNo: number; status: string; title: string; description: string | null; links: string[]; coverPath: string | null; galleryPaths: string[]; privateFiles: { path: string; name: string; size: number }[]; feedback: string | null };
 type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean; role: string | null; tool: string | null; category: string | null; hasProfilePhoto: boolean };
 const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted', under_review: 'Under review', changes_requested: 'Changes requested', approved: 'Approved' };
 
-const TABS = ['My Courses', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
+const TABS = ['My Courses', 'Classes', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
 const box = { border: '1px solid var(--line)', borderLeft: '3px solid var(--blueprint)', background: 'var(--paper-2)', padding: '20px 22px', marginBottom: 16 } as const;
 const input = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '11px 12px', fontSize: 14, width: '100%', fontFamily: 'var(--display)', marginTop: 4 } as const;
 const btn = { background: '#D42B38', color: '#fff', border: '1px solid #D42B38', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 500, cursor: 'pointer', borderRadius: 0 } as const;
@@ -93,7 +94,7 @@ const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((
 export default function StudentClient() {
   const [me, setMe] = useState<Me | null>(null);
   const [state, setState] = useState<'loading' | 'out' | 'in'>('loading');
-  const [tab, setTab] = useState<(typeof TABS)[number]>('My Courses');
+  const [tab, setTab] = useState<(typeof TABS)[number]>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('class') ? 'Classes' : 'My Courses'));
   const [open, setOpen] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
   const [email, setEmail] = useState('');
@@ -513,6 +514,52 @@ export default function StudentClient() {
           <button style={{ ...ghost, marginTop: 8 }} disabled={!link.trim()} onClick={requestClaim}>Send confirmation</button>
         </div>
       </>)}
+
+      {tab === 'Classes' && (() => {
+        const fmt = (iso: string) => new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+        const flash = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('class') : null;
+        const FLASH: Record<string, string> = { notyet: 'That class is not open yet. The Join button opens 15 minutes before the start.', ended: 'That class has ended.', notenrolled: 'That class is not part of your courses.', invalid: 'That class is no longer available.' };
+        const all = me.classes.sessions;
+        const slugs = [...new Set(me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid').flatMap((e) => e.courseSlugs))];
+        const titleOf = (slug: string) => me.enrolments.find((e) => e.courseSlugs.includes(slug))?.title ?? slug;
+        const next = all.find((c) => c.state !== 'past');
+        return (<>
+          {flash && FLASH[flash] && <div style={box}>{FLASH[flash]}</div>}
+          {slugs.length === 0 && <div style={box}>Your live classes will appear here once your first payment is in.</div>}
+          {slugs.length > 0 && all.length === 0 && <div style={box}>No classes are scheduled yet. We will add them here with the Join link.</div>}
+          {next && (
+            <div style={box}>
+              <div style={{ fontSize: 12, opacity: 0.65, textTransform: 'uppercase', letterSpacing: '.05em' }}>{next.state === 'open' ? 'Class is open' : 'Next class'}</div>
+              <strong style={{ fontSize: 17 }}>{next.title}</strong>
+              <div style={{ fontSize: 13, opacity: 0.8, margin: '4px 0 10px' }}>{fmt(next.startsAt)} IST{next.notes ? ` · ${next.notes}` : ''}</div>
+              <form method="post" action={`/api/student/classes/${next.id}/join`} target="_blank">
+                <button type="submit" style={{ ...btn, opacity: next.state === 'open' ? 1 : 0.4, cursor: next.state === 'open' ? 'pointer' : 'not-allowed' }} disabled={next.state !== 'open'}>Join class</button>
+                {next.state !== 'open' && <span style={{ fontSize: 12, opacity: 0.65, marginLeft: 10 }}>Opens 15 minutes before the start</span>}
+              </form>
+            </div>
+          )}
+          {slugs.map((slug) => {
+            const rows = all.filter((c) => c.courseSlug === slug);
+            const at = me.classes.attendance[slug];
+            if (!rows.length) return null;
+            return (
+              <div key={slug} style={box}>
+                <strong>{titleOf(slug)}</strong>
+                {at && at.held > 0 && <div style={{ fontSize: 13, opacity: 0.8, margin: '4px 0 8px' }}>Attendance: {at.attended} of {at.held} classes ({Math.round((at.attended / at.held) * 100)}%)</div>}
+                <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                  <thead><tr style={{ textAlign: 'left' }}><th>Class</th><th>When (IST)</th><th>Status</th><th></th></tr></thead>
+                  <tbody>{rows.map((c) => (
+                    <tr key={c.id}>
+                      <td>{c.title}</td><td>{fmt(c.startsAt)}</td>
+                      <td>{c.state === 'past' ? (c.attended ? 'Attended' : 'Missed') : c.state === 'open' ? 'Open now' : 'Upcoming'}</td>
+                      <td>{c.recordingUrl ? <a href={c.recordingUrl} target="_blank" rel="noopener noreferrer">Recording</a> : ''}</td>
+                    </tr>))}</tbody>
+                </table></div>
+              </div>
+            );
+          })}
+        </>);
+      })()}
 
       {tab === 'Payments & Bills' && (<>
         {me.enrolments.length === 0 && <div style={box}>Nothing to show yet.</div>}
