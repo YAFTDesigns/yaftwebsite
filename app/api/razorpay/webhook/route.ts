@@ -1,3 +1,4 @@
+import { brandedEmail } from "@/lib/emailLayout";
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { verifyWebhookSignature, razorpayConfig } from '@/lib/razorpay';
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
         await sendEmail({
           to: getNotificationBcc()[0] ?? CONTACT_EMAIL,
           subject: `Tortoise payment NOT fulfilled (amount check): ${paymentId}`,
-          html: `<p>Payment ${escapeHtml(paymentId)} of ${paidAmount / 100} ${escapeHtml(payCurrency)} matches no Tortoise price, so no key or invoice was created.</p><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;. Check it in Razorpay and issue keys manually in Admin &gt; Tortoise if it is genuine.</p>`,
+          html: brandedEmail({ bodyHtml: `<p>Payment ${escapeHtml(paymentId)} of ${paidAmount / 100} ${escapeHtml(payCurrency)} matches no Tortoise price, so no key or invoice was created.</p><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;. Check it in Razorpay and issue keys manually in Admin &gt; Tortoise if it is genuine.</p>` }),
         });
       } catch (e) { console.error('[razorpay-webhook] amount alert email failed:', e); }
     }
@@ -165,9 +166,9 @@ export async function POST(request: NextRequest) {
         await sendEmail({
           to: ownerTo,
           subject: `${testMode ? '[TEST] ' : ''}Tortoise sale: ${email.replace(/[\r\n]+/g, ' ')}`,
-          html: `<p>Payment ${escapeHtml(paymentId)} captured (${Number(pay.amount) / 100} ${escapeHtml(currency)}).</p>
+          html: brandedEmail({ bodyHtml: `<p>Payment ${escapeHtml(paymentId)} captured (${Number(pay.amount) / 100} ${escapeHtml(currency)}).</p>
 <p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;${notes.company ? ` (${escapeHtml(String(notes.company).slice(0, 120))})` : ' (individual)'}${notes.state ? `, ${escapeHtml(notes.state)}` : ''}. Key${keys.length > 1 ? 's' : ''} created:</p><ul>${keyList}</ul>
-<p>Auto-emailing to the buyer is OFF. Use Admin &gt; Tortoise &gt; Sales &gt; Resend to send the key${invoiceNo ? ' and invoice ' + escapeHtml(invoiceNo) : ''}.</p>`,
+<p>Auto-emailing to the buyer is OFF. Use Admin &gt; Tortoise &gt; Sales &gt; Resend to send the key${invoiceNo ? ' and invoice ' + escapeHtml(invoiceNo) : ''}.</p>`, cta: { label: 'Open Tortoise sales', href: 'https://www.yaftdesigns.com/admin/tortoise' } }),
         });
       }
     } catch (mailErr) {
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest) {
         await sendEmail({
           to: ownerTo,
           subject: `${testMode ? '[TEST] ' : ''}Tortoise sale needs attention: ${paymentId}`,
-          html: `<ul>${alerts.map((a) => `<li>${escapeHtml(a)}</li>`).join('')}</ul><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p>`,
+          html: brandedEmail({ bodyHtml: `<ul>${alerts.map((a) => `<li>${escapeHtml(a)}</li>`).join('')}</ul><p>Buyer: ${escapeHtml(name)} &lt;${escapeHtml(email)}&gt;</p>` }),
         });
       } catch (e) { console.error('[razorpay-webhook] alert email failed:', e); }
     }

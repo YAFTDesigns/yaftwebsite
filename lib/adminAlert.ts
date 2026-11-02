@@ -1,4 +1,5 @@
 import { sendEmail, isEmailConfigured } from './email';
+import { brandedEmail } from './emailLayout';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 const YAFT_EMAIL = CONTACT_EMAIL;
@@ -16,7 +17,7 @@ const YAFT_EMAIL = CONTACT_EMAIL;
 export async function sendAdminAlert(subject: string, html: string): Promise<void> {
   if (!isEmailConfigured()) return;
   try {
-    await sendEmail({ to: YAFT_EMAIL, subject, html });
+    await sendEmail({ to: YAFT_EMAIL, subject, html: html.includes('max-width:560px') ? html : brandedEmail({ bodyHtml: html }) });
   } catch (err) {
     console.error('[adminAlert] failed to send:', err);
   }

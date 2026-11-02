@@ -6,6 +6,7 @@ import { logInvoiceEvent } from '@/lib/invoiceLog';
 import { sendEmail, isEmailConfigured, escapeHtml, getNotificationBcc } from '@/lib/email';
 import { fmtFixed2 } from '@/lib/format';
 import { loadLiveBills } from '@/lib/liveBills';
+import { brandedEmail, brandedRows } from '@/lib/emailLayout';
 import { sendPushToAll } from '@/lib/webPush';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
@@ -42,7 +43,7 @@ const PAYMENT_ALERT_TO = (process.env.PAYMENT_ALERT_EMAIL || 'yaftdesigns@gmail.
 
 async function ownerAlert(subject: string, html: string, to: string = getNotificationBcc()[0] ?? CONTACT_EMAIL) {
   if (!isEmailConfigured()) return;
-  try { await sendEmail({ to, subject, html }); }
+  try { await sendEmail({ to, subject, html: html.includes('max-width:560px') ? html : brandedEmail({ bodyHtml: html }) }); }
   catch (e) { console.error('[course-payment] owner alert failed:', e); }
 }
 
@@ -135,18 +136,22 @@ export async function completeFulfilment(rowId: string): Promise<{ ok: boolean; 
         const left = lb ? lb.balanceInr : null;
         await ownerAlert(
           `${tag}Payment received: ${plan.client_name}, ${inr(inst.total)} (${row.kind})`,
-          `<div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.6;color:#111">
-<h3 style="margin:0 0 10px">${tag}Payment received</h3>
-<table style="border-collapse:collapse;font-size:14px">
-<tr><td style="padding:3px 14px 3px 0;color:#666">Student</td><td><strong>${escapeHtml(plan.client_name)}</strong> (${escapeHtml(plan.client_email)}${plan.client_phone ? `, ${escapeHtml(plan.client_phone)}` : ''})</td></tr>
-<tr><td style="padding:3px 14px 3px 0;color:#666">Course</td><td>${escapeHtml(plan.description)}</td></tr>
-<tr><td style="padding:3px 14px 3px 0;color:#666">Paid now (${row.kind})</td><td><strong>${inr(inst.total)}</strong> = base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)}${row.charge_currency === 'USD' ? `, charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''}</td></tr>
-${lb ? `<tr><td style="padding:3px 14px 3px 0;color:#666">Course total</td><td>${inr(lb.courseTotalInr)}</td></tr>
-<tr><td style="padding:3px 14px 3px 0;color:#666">Paid so far</td><td>${inr(lb.paidSoFarInr)}</td></tr>
-<tr><td style="padding:3px 14px 3px 0;color:#666">Left to pay</td><td><strong>${inr(lb.balanceInr)}</strong>${lb.balanceInr === 0 ? ' (fully paid)' : ''}</td></tr>` : ''}
-<tr><td style="padding:3px 14px 3px 0;color:#666">Bill</td><td>${escapeHtml(invoiceNo ?? '')} (sent to the student as a student-portal link)</td></tr>
-<tr><td style="padding:3px 14px 3px 0;color:#666">Payment id</td><td>${escapeHtml(row.payment_id)}</td></tr></table>
-<p style="margin:14px 0 0"><a href="https://www.yaftdesigns.com/admin/training">Open Admin > Training > Live bills</a></p></div>`,
+          brandedEmail({
+            heading: `${tag}Payment received`,
+            bodyHtml: brandedRows([
+              ['Student', `<strong>${escapeHtml(plan.client_name)}</strong><br>${escapeHtml(plan.client_email)}${plan.client_phone ? `<br>${escapeHtml(plan.client_phone)}` : ''}`],
+              ['Course', escapeHtml(plan.description)],
+              [`Paid now (${row.kind})`, `<strong>${inr(inst.total)}</strong><br>Base ${fmtFixed2(inst.base)} + GST ${fmtFixed2(inst.gst)}${row.charge_currency === 'USD' ? `<br>Charged US$${Number(row.charge_minor) / 100} at ${Number(row.fx_inr_per_usd)} INR per USD` : ''}`],
+              ...(lb ? [
+                ['Course total', inr(lb.courseTotalInr)] as [string, string],
+                ['Paid so far', inr(lb.paidSoFarInr)] as [string, string],
+                ['Left to pay', `<strong>${inr(lb.balanceInr)}</strong>${lb.balanceInr === 0 ? ' (fully paid)' : ''}`] as [string, string],
+              ] : []),
+              ['Bill', `${escapeHtml(invoiceNo ?? '')}<br>Sent to the student as a student-portal link`],
+              ['Payment id', escapeHtml(row.payment_id)],
+            ]),
+            cta: { label: 'Open Live bills', href: 'https://www.yaftdesigns.com/admin/training' },
+          }),
           PAYMENT_ALERT_TO,
         );
         sendPushToAll({ title: `${tag}Payment: ${plan.client_name} ${inr(inst.total)}`, body: `${plan.description}${left !== null ? `. Left: ${inr(left)}` : ''}`, url: '/admin/training' }).catch(() => {});
