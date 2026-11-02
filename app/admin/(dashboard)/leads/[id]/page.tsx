@@ -20,7 +20,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const [{ data: enquiries }, { data: notes }, { data: syllabus }, { data: emails }] = await Promise.all([
     supabase.from('enquiries').select('id, created_at, course_interest, message, phone, need, organisation, audience, funnel, source_page, details').eq('lead_id', id).order('created_at', { ascending: false }),
     supabase.from('lead_notes').select('id, kind, body, created_at').eq('lead_id', id).order('created_at', { ascending: false }).limit(100),
-    supabase.from('syllabus_requests').select('course_slug, requested_at').eq('lead_id', id).order('requested_at', { ascending: false }).limit(10),
+    supabase.from('syllabus_requests').select('course_slug, requested_at').eq('lead_id', id).order('requested_at', { ascending: false }).limit(50),
     supabase.from('email_logs').select('id, created_at, template, subject, status').eq('to_email', lead.email).order('created_at', { ascending: false }).limit(10),
   ]);
 
@@ -78,7 +78,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <div style={box}>
             <div style={h}>Other activity</div>
             <p style={{ fontSize: 13, lineHeight: 1.6 }}>
-              Syllabus unlocks: {(syllabus ?? []).length === 0 ? 'none' : (syllabus ?? []).map((s) => s.course_slug).join(', ')}
+              Syllabus unlocks: {(syllabus ?? []).length === 0 ? 'none' : (syllabus ?? []).map((s) => `${s.course_slug} (${new Date(s.requested_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })})`).join(', ')}{(syllabus ?? []).length > 1 ? ` · ${(syllabus ?? []).length} times in total` : ''}
               <br />Emails sent to them: {(emails ?? []).length === 0 ? 'none' : (emails ?? []).map((m) => `${m.template ?? m.subject} (${m.status})`).join(', ')}
             </p>
           </div>

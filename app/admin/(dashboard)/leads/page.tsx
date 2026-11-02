@@ -33,7 +33,7 @@ type TimeOnSite = { seconds: number; pageViews: number } | null;
 
 type EnquiryContext = { segment: string | null; phone: string | null };
 
-async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite>; syllabusByLead: Record<string, string[]>; enquiryByLead: Record<string, EnquiryContext> }> {
+async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOnSite: Record<string, TimeOnSite>; syllabusByLead: Record<string, { title: string; count: number; last: string }[]>; enquiryByLead: Record<string, EnquiryContext> }> {
   const supabase = getSupabaseAdmin();
   const result = await safeQuery<Lead[]>(
     supabase
@@ -80,7 +80,7 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
           .in('lead_id', leadIds),
         supabase
           .from('syllabus_requests')
-          .select('lead_id, course_slug, courses(title)')
+          .select('lead_id, course_slug, requested_at, courses(title)')
           .in('lead_id', leadIds),
         supabase
           .from('enquiries')
@@ -112,7 +112,7 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
   // wasn't surfaced here yet. Some leads request more than one
   // course's syllabus (one has done it 7 times), so this is a
   // deduped list per lead, not a single value.
-  const syllabusByLead: Record<string, string[]> = {};
+  const syllabusByLead: Record<string, { title: string; count: number; last: string }[]> = {};
   if (syllabusRes) {
     const { data: syllabusRows, error: syllabusError } = syllabusRes;
 
@@ -131,7 +131,10 @@ async function getLeads(): Promise<{ leads: Lead[]; error: string | null; timeOn
         const courseRow = Array.isArray(coursesField) ? coursesField[0] : coursesField;
         const title = courseRow?.title ?? (row.course_slug as string);
         if (!syllabusByLead[leadId]) syllabusByLead[leadId] = [];
-        if (!syllabusByLead[leadId].includes(title)) syllabusByLead[leadId].push(title);
+        const at = row.requested_at as string;
+        const hit = syllabusByLead[leadId].find((x) => x.title === title);
+        if (hit) { hit.count += 1; if (at > hit.last) hit.last = at; }
+        else syllabusByLead[leadId].push({ title, count: 1, last: at });
       }
     }
   }
@@ -260,7 +263,14 @@ export default async function AdminLeadsPage({ searchParams }: { searchParams: P
                 <td>{lead.proposal_status === 'none' ? '—' : PROPOSAL_LABELS[lead.proposal_status]}</td>
                 <td>{lead.payment_status === 'none' ? '—' : PAYMENT_LABELS[lead.payment_status]}</td>
                 <td>{enquiryByLead[lead.id]?.phone ?? '—'}</td>
-                <td>{syllabusByLead[lead.id]?.join(', ') || '—'}</td>
+                <td>
+                  {syllabusByLead[lead.id]?.length ? syllabusByLead[lead.id].map((x) => (
+                    <div key={x.title}>
+                      {x.title}{x.count > 1 ? <strong style={{ color: '#e8a33d' }}> ×{x.count}</strong> : ''}
+                      <span style={{ opacity: 0.5, fontSize: 11 }}> {new Date(x.last).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short' })}</span>
+                    </div>
+                  )) : '—'}
+                </td>
                 <td>
                   {timeOnSite[lead.id] ? (
                     <>
