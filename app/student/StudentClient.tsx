@@ -59,7 +59,16 @@ const BTN_CSS = `
 .sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
 .sp-hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:22px;background:#fff;box-shadow:0 8px 28px rgba(16,24,40,.07)}
 .sp-hero{isolation:isolate}
-.sp-hero:after{content:"";position:absolute;z-index:-1;right:-10px;top:40%;transform:translateY(-60%);width:440px;height:320px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right center/contain;opacity:.22;pointer-events:none;filter:invert(1) brightness(.35)}
+.sp-hero:after{content:"";position:absolute;z-index:-1;right:-10px;top:40%;transform:translateY(-60%);width:440px;height:320px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right center/contain;opacity:.2;pointer-events:none}
+.sp-hero{background:#0c0d10;border-color:#23262d;box-shadow:0 8px 28px rgba(16,24,40,.18);--ink:#f4f5f7;--ink-soft:#a7aebb;--line:#2b2f37}
+.sp-hero{color:#f4f5f7}
+.sp-hero h1{color:#f4f5f7}
+.sp-hero .sp-stat{background:rgba(255,255,255,.05)}
+.sp-hero .sp-iconbtn{background:rgba(255,255,255,.07);color:#f4f5f7}
+.sp-hero .sp-iconbtn:hover{background:rgba(255,255,255,.14)}
+.sp-hero .sp-dot{border-color:#0c0d10}
+.sp-hero .sp-shield-bg{stroke:#0c0d10}
+.sp-hero:before{background:radial-gradient(circle,rgba(14,143,132,.22),transparent 68%)}
 .sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(14,143,132,.10),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
 .sp-stat{border:1px solid var(--line);border-radius:12px;background:#f7f8fa;padding:15px 16px;min-height:78px}
