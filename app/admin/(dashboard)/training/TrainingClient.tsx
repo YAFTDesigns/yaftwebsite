@@ -19,7 +19,7 @@ export default function TrainingClient() {
   const [fb, setFb] = useState<Record<string, string>>({});
   const [rule, setRule] = useState<Record<string, Json>>({});
   const [classes, setClasses] = useState<Json[]>([]);
-  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_id: '', weekdays: [] as number[] });
+  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_id: '', weekdays: [] as number[], notify: true });
   const [roster, setRoster] = useState<Record<string, Json[]>>({});
   const [ed, setEd] = useState<Json | null>(null);
   const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); setClasses(j.sessions ?? []); setRoster(j.roster ?? {}); } }, []);
@@ -28,6 +28,7 @@ export default function TrainingClient() {
     const j = await r.json().catch(() => ({}));
     setMsg(r.ok ? 'Done.' : j.error ?? 'Failed');
     if (r.ok && body.action === 'create') setNc((x: Json) => ({ ...x, title: '', starts_at: '', repeat_count: '1', weekdays: [] }));
+    if (r.ok && body.action === 'create') setMsg(`Added ${j.count} class${j.count > 1 ? 'es' : ''}${j.emailed ? ` and emailed ${j.emailed} student${j.emailed > 1 ? 's' : ''}` : ''}.`);
     if (r.ok && (body.action === 'reschedule' || body.action === 'update')) setEd(null);
     if (r.ok && body.action === 'reschedule') setMsg(`Moved ${j.moved} class${j.moved > 1 ? 'es' : ''}${j.emailed ? ' and emailed the student' : ''}.`);
     loadClasses();
@@ -145,6 +146,7 @@ export default function TrainingClient() {
             <span style={{ opacity: 0.6 }}> (leave all unticked to repeat every </span><input style={{ ...field, width: 50, padding: '4px 6px' }} value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} /><span style={{ opacity: 0.6 }}> days)</span>
           </div>
           <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
+          <label style={{ fontSize: 13, gridColumn: '1 / -1' }}><input type="checkbox" checked={nc.notify} onChange={(e) => setNc({ ...nc, notify: e.target.checked })} /> Email the student{nc.student_id ? '' : 's'} that classes are scheduled</label>
           <div><button style={btn} onClick={() => classAct({ action: 'create', ...nc })}>Add class{Number(nc.repeat_count) > 1 ? 'es' : ''}</button></div>
         </div>
         {ed && (

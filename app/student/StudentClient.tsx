@@ -525,8 +525,14 @@ export default function StudentClient() {
         const next = all.find((c) => c.state !== 'past');
         return (<>
           {flash && FLASH[flash] && <div style={box}>{FLASH[flash]}</div>}
-          {slugs.length === 0 && <div style={box}>Your live classes will appear here once your first payment is in.</div>}
-          {slugs.length > 0 && all.length === 0 && <div style={box}>No classes are scheduled yet. We will add them here with the Join link.</div>}
+          {me.enrolments.some((e) => e.payStatus === 'unpaid') && slugs.length === 0 && <div style={box}><strong>Payment is being processed.</strong><div style={{ fontSize: 13, opacity: 0.8, marginTop: 4 }}>If you have just paid, this usually takes under a minute. Refresh this page. Once it is confirmed, your classes and the Join link will appear here and we will email you.</div></div>}
+          {me.enrolments.length === 0 && <div style={box}>Your live classes will appear here once your first payment is in.</div>}
+          {slugs.filter((slug) => !all.some((c) => c.courseSlug === slug)).map((slug) => (
+            <div key={slug} style={box}>
+              <strong>{titleOf(slug)}</strong>
+              <div style={{ fontSize: 13, opacity: 0.85, marginTop: 6 }}>Payment received. Your class schedule and Meet link are being prepared. We will email you as soon as they are ready, and they will appear here with a Join button.</div>
+            </div>
+          ))}
           {next && (
             <div style={box}>
               <div style={{ fontSize: 12, opacity: 0.65, textTransform: 'uppercase', letterSpacing: '.05em' }}>{next.state === 'open' ? 'Class is open' : 'Next class'}</div>

@@ -29,6 +29,25 @@ async function rosterBySlug() {
   return map;
 }
 
+
+/** Emails the given students (by student id). Never throws; returns how many were sent. */
+async function emailStudents(studentIds: string[], subject: string, heading: string, bodyHtml: string): Promise<number> {
+  if (!isEmailConfigured() || !studentIds.length) return 0;
+  const a = getSupabaseAdmin();
+  const { data: sts } = await a.from('students').select('id, user_id, display_name').in('id', studentIds.slice(0, 100));
+  let sent = 0;
+  for (const st of sts ?? []) {
+    try {
+      const { data: u } = await a.auth.admin.getUserById(st.user_id as string);
+      const to = u?.user?.email;
+      if (!to) continue;
+      await sendEmail({ to, subject, html: brandedEmail({ heading, bodyHtml: `<p>Hi ${escapeHtml((st.display_name as string) || 'there')},</p>${bodyHtml}`, cta: { label: 'Open student portal', href: 'https://www.yaftdesigns.com/student' } }) });
+      sent += 1;
+    } catch (e) { console.error('[classes] student email failed:', e); }
+  }
+  return sent;
+}
+
 export async function GET() {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const a = getSupabaseAdmin();
@@ -96,7 +115,16 @@ export async function POST(req: NextRequest) {
     const { error } = await a.from('class_sessions').insert(rows);
     if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count: rows.length, private: !!studentId } });
-    return NextResponse.json({ ok: true, count: rows.length });
+    let emailed = 0;
+    if (b.notify !== false) {
+      const roster = await rosterBySlug();
+      const ids = studentId ? [studentId] : (roster[slug] ?? []).map((e) => e.studentId);
+      const first = new Date(starts[0]).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+      emailed = await emailStudents([...new Set(ids)], 'Your YAFT classes are scheduled',
+        studentId ? 'Your private classes are scheduled' : 'Your classes are scheduled',
+        `<p><strong>${escapeHtml(title)}</strong>: ${rows.length} class${rows.length > 1 ? 'es' : ''}, first on <strong>${escapeHtml(first)} IST</strong>.</p><p>Open your student portal and go to <strong>Classes</strong>. The Join button opens 15 minutes before each class, and your attendance is recorded when you join.</p>`);
+    }
+    return NextResponse.json({ ok: true, count: rows.length, emailed });
   }
   if (b.action === 'reschedule') {
     if (!uuid(b.id)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
