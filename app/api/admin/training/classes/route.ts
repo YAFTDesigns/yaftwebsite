@@ -51,7 +51,7 @@ async function emailStudents(studentIds: string[], subject: string, heading: str
 export async function GET() {
   if (!(await isRequestFromAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   const a = getSupabaseAdmin();
-  const { data: sessions } = await a.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, meet_url, recording_url, notes, cancelled_at, student_id, series_id').is('cancelled_at', null).order('starts_at', { ascending: false }).limit(200);
+  const { data: sessions } = await a.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, meet_url, recording_url, notes, cancelled_at, student_ids, series_id').is('cancelled_at', null).order('starts_at', { ascending: false }).limit(200);
   const ids = (sessions ?? []).map((s) => s.id as string);
   const [{ data: att }, roster] = await Promise.all([
     ids.length ? a.from('class_attendance').select('session_id, student_id, first_joined_at, join_count').in('session_id', ids) : Promise.resolve({ data: [] as { session_id: string; student_id: string; first_joined_at: string; join_count: number }[] }),
@@ -59,13 +59,14 @@ export async function GET() {
   ]);
   const out = (sessions ?? []).map((s) => {
     const all = roster[s.course_slug] ?? [];
-    const enrolled = s.student_id ? all.filter((e) => e.studentId === s.student_id) : all;
+    const only = s.student_ids as string[] | null;
+    const enrolled = only ? all.filter((e) => only.includes(e.studentId)) : all;
     const joined = (att ?? []).filter((x) => x.session_id === s.id);
     const joinedIds = new Set(joined.map((j) => j.student_id));
     return {
       ...s,
       enrolledCount: enrolled.length,
-      forName: s.student_id ? (all.find((e) => e.studentId === s.student_id)?.name ?? 'One student') : null,
+      forName: only ? (enrolled.map((e) => e.name).join(', ') || 'Selected students') : null,
       joined: enrolled.filter((e) => joinedIds.has(e.studentId)).map((e) => ({ name: e.name, at: joined.find((j) => j.student_id === e.studentId)?.first_joined_at, times: joined.find((j) => j.student_id === e.studentId)?.join_count })),
       absent: enrolled.filter((e) => !joinedIds.has(e.studentId)).map((e) => e.name),
     };
@@ -91,12 +92,14 @@ export async function POST(req: NextRequest) {
     const { data: course } = await a.from('courses').select('slug, title').eq('slug', slug).maybeSingle();
     if (!course) return NextResponse.json({ error: 'Unknown course.' }, { status: 400 });
     if (!title) title = cleanText(course.title, 100) || 'Class';
-    let studentId: string | null = null;
-    if (b.student_id) {
-      if (!uuid(b.student_id)) return NextResponse.json({ error: 'Bad student.' }, { status: 400 });
+    let studentIds: string[] | null = null;
+    const wanted: unknown[] = Array.isArray(b.student_ids) ? b.student_ids : b.student_id ? [b.student_id] : [];
+    if (wanted.length) {
+      if (wanted.length > 3 || !wanted.every(uuid)) return NextResponse.json({ error: 'Choose 1 to 3 students for a private session.' }, { status: 400 });
       const roster = await rosterBySlug();
-      if (!(roster[slug] ?? []).some((e) => e.studentId === b.student_id)) return NextResponse.json({ error: 'That student is not enrolled (paid) in this course.' }, { status: 400 });
-      studentId = b.student_id;
+      const okIds = new Set((roster[slug] ?? []).map((e) => e.studentId));
+      if (!(wanted as string[]).every((id) => okIds.has(id))) return NextResponse.json({ error: 'Every student must be enrolled (paid) in this course.' }, { status: 400 });
+      studentIds = [...new Set(wanted as string[])];
     }
     const count = Math.min(Math.max(Math.round(Number(b.repeat_count) || 1), 1), 60);
     const days: number[] = Array.isArray(b.weekdays) ? b.weekdays.map(Number).filter((n: number) => n >= 0 && n <= 6) : [];
@@ -112,17 +115,17 @@ export async function POST(req: NextRequest) {
     }
     if (!starts.length) return NextResponse.json({ error: 'No dates came out of that pattern.' }, { status: 400 });
     const seriesId = crypto.randomUUID();
-    const rows = starts.map((st, i) => ({ course_slug: slug, title: starts.length > 1 ? `${title} ${i + 1}` : title, starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString(), meet_url: meet, notes: cleanText(b.notes, 500) || null, created_by: who, student_id: studentId, series_id: seriesId }));
+    const rows = starts.map((st, i) => ({ course_slug: slug, title: starts.length > 1 ? `${title} ${i + 1}` : title, starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString(), meet_url: meet, notes: cleanText(b.notes, 500) || null, created_by: who, student_ids: studentIds, series_id: seriesId }));
     const { error } = await a.from('class_sessions').insert(rows);
     if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
-    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count: rows.length, private: !!studentId } });
+    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count: rows.length, private: !!studentIds } });
     let emailed = 0;
     if (b.notify !== false) {
       const roster = await rosterBySlug();
-      const ids = studentId ? [studentId] : (roster[slug] ?? []).map((e) => e.studentId);
+      const ids = studentIds ?? (roster[slug] ?? []).map((e) => e.studentId);
       const first = new Date(starts[0]).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
       emailed = await emailStudents([...new Set(ids)], 'Your YAFT classes are scheduled',
-        studentId ? 'Your private classes are scheduled' : 'Your classes are scheduled',
+        studentIds ? 'Your private classes are scheduled' : 'Your classes are scheduled',
         `<p><strong>${escapeHtml(title)}</strong>: ${rows.length} class${rows.length > 1 ? 'es' : ''}, first on <strong>${escapeHtml(first)} IST</strong>.</p><p>Open your student portal and go to <strong>Classes</strong>. The Join button opens 15 minutes before each class, and your attendance is recorded when you join.</p>`);
     }
     return NextResponse.json({ ok: true, count: rows.length, emailed });
@@ -132,7 +135,7 @@ export async function POST(req: NextRequest) {
     const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
     const dur = Math.round(Number(b.duration_min));
     if (!m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'A new start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
-    const { data: cur } = await a.from('class_sessions').select('id, title, starts_at, series_id, student_id, course_slug').eq('id', b.id).is('cancelled_at', null).maybeSingle();
+    const { data: cur } = await a.from('class_sessions').select('id, title, starts_at, series_id, student_ids, course_slug').eq('id', b.id).is('cancelled_at', null).maybeSingle();
     if (!cur) return NextResponse.json({ error: 'Class not found.' }, { status: 404 });
     const newStart = new Date(`${m[1]}T${m[2]}:00+05:30`).getTime();
     const delta = newStart - new Date(cur.starts_at).getTime();
@@ -148,21 +151,12 @@ export async function POST(req: NextRequest) {
     }
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_session_rescheduled', subject: cur.id, detail: { moved: targets.length } });
     let emailed = false;
-    if (b.notify && cur.student_id && isEmailConfigured()) {
-      try {
-        const { data: st } = await a.from('students').select('user_id, display_name').eq('id', cur.student_id).maybeSingle();
-        const { data: u } = st ? await a.auth.admin.getUserById(st.user_id) : { data: null };
-        const to = u?.user?.email;
-        if (to) {
-          const fmt = (t: number) => new Date(t).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
-          await sendEmail({ to, subject: 'Your YAFT class has been rescheduled', html: brandedEmail({
-            heading: 'Class rescheduled',
-            bodyHtml: `<p>Hi ${escapeHtml(st?.display_name || 'there')},</p><p><strong>${escapeHtml(String(cur.title))}</strong> has moved.</p><p>Was: ${escapeHtml(fmt(new Date(cur.starts_at).getTime()))} IST<br>Now: <strong>${escapeHtml(fmt(newStart))} IST</strong>${targets.length > 1 ? `<br>The ${targets.length - 1} later class${targets.length > 2 ? 'es have' : ' has'} moved by the same amount.` : ''}</p><p>You can see every class and the Join button in your student portal.</p>`,
-            cta: { label: 'Open student portal', href: 'https://www.yaftdesigns.com/student' },
-          }) });
-          emailed = true;
-        }
-      } catch (e) { console.error('[classes] reschedule email failed:', e); }
+    const group = (cur.student_ids as string[] | null) ?? [];
+    if (b.notify && group.length) {
+      const fmt = (t: number) => new Date(t).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+      const n = await emailStudents(group, 'Your YAFT class has been rescheduled', 'Class rescheduled',
+        `<p><strong>${escapeHtml(String(cur.title))}</strong> has moved.</p><p>Was: ${escapeHtml(fmt(new Date(cur.starts_at).getTime()))} IST<br>Now: <strong>${escapeHtml(fmt(newStart))} IST</strong>${targets.length > 1 ? `<br>The ${targets.length - 1} later class${targets.length > 2 ? 'es have' : ' has'} moved by the same amount.` : ''}</p><p>You can see every class and the Join button in your student portal.</p>`);
+      emailed = n > 0;
     }
     return NextResponse.json({ ok: true, moved: targets.length, emailed });
   }

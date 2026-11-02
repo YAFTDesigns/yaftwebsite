@@ -17,8 +17,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   const { id } = await ctx.params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) return back(req, 'invalid');
   const admin = getSupabaseAdmin();
-  const { data: c } = await admin.from('class_sessions').select('id, course_slug, starts_at, ends_at, meet_url, cancelled_at, student_id').eq('id', id).maybeSingle();
-  if (!c || c.cancelled_at || (c.student_id && c.student_id !== s.profile.id)) return back(req, 'invalid');
+  const { data: c } = await admin.from('class_sessions').select('id, course_slug, starts_at, ends_at, meet_url, cancelled_at, student_ids').eq('id', id).maybeSingle();
+  if (!c || c.cancelled_at || (c.student_ids && !(c.student_ids as string[]).includes(s.profile.id))) return back(req, 'invalid');
   if (!(await activeSlugsFor(s.profile.id)).has(c.course_slug)) return back(req, 'notenrolled');
   const st = stateOf(c.starts_at, c.ends_at);
   if (st !== 'open') return back(req, st === 'upcoming' ? 'notyet' : 'ended');

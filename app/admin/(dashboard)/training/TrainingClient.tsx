@@ -19,7 +19,7 @@ export default function TrainingClient() {
   const [fb, setFb] = useState<Record<string, string>>({});
   const [rule, setRule] = useState<Record<string, Json>>({});
   const [classes, setClasses] = useState<Json[]>([]);
-  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_id: '', weekdays: [] as number[], notify: true });
+  const [nc, setNc] = useState<Json>({ course_slug: '', title: '', starts_at: '', duration_min: '90', meet_url: '', repeat_count: '1', step_days: '7', notes: '', student_ids: [] as string[], weekdays: [] as number[], notify: true });
   const [roster, setRoster] = useState<Record<string, Json[]>>({});
   const [ed, setEd] = useState<Json | null>(null);
   const loadClasses = useCallback(async () => { const r = await fetch('/api/admin/training/classes', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); setClasses(j.sessions ?? []); setRoster(j.roster ?? {}); } }, []);
@@ -133,8 +133,13 @@ export default function TrainingClient() {
       {tab === 'Classes' && (<>
         <p style={{ fontSize: 13, opacity: 0.75 }}>Add live classes with the Meet link. Students see them in their portal and join through a tracked button, so attendance is logged automatically. Times are India time. To make a weekly series, set how many classes and the gap in days.</p>
         <div style={{ display: 'grid', gap: 8, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', maxWidth: 900, marginBottom: 20 }}>
-          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value, student_id: '' })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
-          <select style={field} value={nc.student_id} onChange={(e) => setNc({ ...nc, student_id: e.target.value })}><option value="">Whole course (everyone enrolled)</option>{(roster[nc.course_slug] ?? []).map((r: Json) => <option key={r.studentId} value={r.studentId}>Private: {r.name}</option>)}</select>
+          <select style={field} value={nc.course_slug} onChange={(e) => setNc({ ...nc, course_slug: e.target.value, student_ids: [] })}><option value="">Course</option>{(d.courses ?? []).map((c: Json) => <option key={c.slug} value={c.slug}>{c.title}</option>)}</select>
+          <div style={{ gridColumn: '1 / -1', fontSize: 13 }}>For:{' '}
+            <span style={{ opacity: 0.7 }}>{nc.student_ids.length ? `Private session (${nc.student_ids.length} of max 3)` : 'Whole course, everyone enrolled. Tick up to 3 students below to make it private.'}</span>
+            <div style={{ marginTop: 4 }}>{(roster[nc.course_slug] ?? []).map((r: Json) => (
+              <label key={r.studentId} style={{ marginRight: 14, display: 'inline-block' }}><input type="checkbox" checked={nc.student_ids.includes(r.studentId)} disabled={!nc.student_ids.includes(r.studentId) && nc.student_ids.length >= 3} onChange={(e) => setNc({ ...nc, student_ids: e.target.checked ? [...nc.student_ids, r.studentId] : nc.student_ids.filter((x: string) => x !== r.studentId) })} /> {r.name}</label>))}
+              {nc.course_slug && !(roster[nc.course_slug] ?? []).length && <span style={{ opacity: 0.6 }}>No paid students in this course yet.</span>}</div>
+          </div>
           <input style={field} placeholder="Title (optional, uses the course name)" value={nc.title} onChange={(e) => setNc({ ...nc, title: e.target.value })} />
           <input style={field} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} />
           <input style={field} placeholder="Minutes" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} />
@@ -146,7 +151,7 @@ export default function TrainingClient() {
             <span style={{ opacity: 0.6 }}> (leave all unticked to repeat every </span><input style={{ ...field, width: 50, padding: '4px 6px' }} value={nc.step_days} onChange={(e) => setNc({ ...nc, step_days: e.target.value })} /><span style={{ opacity: 0.6 }}> days)</span>
           </div>
           <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student (optional)" value={nc.notes} onChange={(e) => setNc({ ...nc, notes: e.target.value })} />
-          <label style={{ fontSize: 13, gridColumn: '1 / -1' }}><input type="checkbox" checked={nc.notify} onChange={(e) => setNc({ ...nc, notify: e.target.checked })} /> Email the student{nc.student_id ? '' : 's'} that classes are scheduled</label>
+          <label style={{ fontSize: 13, gridColumn: '1 / -1' }}><input type="checkbox" checked={nc.notify} onChange={(e) => setNc({ ...nc, notify: e.target.checked })} /> Email the student{nc.student_ids.length === 1 ? '' : 's'} that classes are scheduled</label>
           <div><button style={btn} onClick={() => classAct({ action: 'create', ...nc })}>Add class{Number(nc.repeat_count) > 1 ? 'es' : ''}</button></div>
         </div>
         {ed && (
@@ -158,7 +163,7 @@ export default function TrainingClient() {
               {ed.series && <select style={field} value={ed.scope} onChange={(e) => setEd({ ...ed, scope: e.target.value })}><option value="one">Only this class</option><option value="following">This and all later classes in the series (shift by the same amount)</option></select>}
               <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Title" value={ed.title} onChange={(e) => setEd({ ...ed, title: e.target.value })} />
               <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student" value={ed.notes} onChange={(e) => setEd({ ...ed, notes: e.target.value })} />
-              {ed.private && <label style={{ fontSize: 13 }}><input type="checkbox" checked={ed.notify} onChange={(e) => setEd({ ...ed, notify: e.target.checked })} /> Email the student about the new time</label>}
+              {ed.private && <label style={{ fontSize: 13 }}><input type="checkbox" checked={ed.notify} onChange={(e) => setEd({ ...ed, notify: e.target.checked })} /> Email the student{ed.private ? '(s)' : ''} about the new time</label>}
             </div>
             <div style={{ marginTop: 10 }}>
               <button style={btn} onClick={async () => { await classAct({ action: 'update', id: ed.id, title: ed.title, notes: ed.notes }); await classAct({ action: 'reschedule', id: ed.id, starts_at: ed.starts_at, duration_min: ed.duration_min, scope: ed.scope, notify: ed.notify }); }}>Save changes</button>
@@ -176,7 +181,7 @@ export default function TrainingClient() {
               <td><strong>{c.joined.length}</strong> of {c.enrolledCount}<div style={{ fontSize: 11, opacity: 0.7 }}>{c.joined.map((j: Json) => `${j.name}${j.times > 1 ? ` (x${j.times})` : ''}`).join(', ')}</div></td>
               <td style={{ fontSize: 11, opacity: 0.7 }}>{c.absent.join(', ') || '-'}</td>
               <td>
-                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', series: true, private: !!c.student_id, notify: !!c.student_id }); }}>Reschedule</button>
+                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', series: true, private: !!c.student_ids, notify: !!c.student_ids }); }}>Reschedule</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Meet link', c.meet_url); if (v) classAct({ action: 'update', id: c.id, meet_url: v }); }}>Meet link</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Recording link (shown to students after class)', c.recording_url ?? ''); if (v !== null) classAct({ action: 'update', id: c.id, recording_url: v }); }}>Recording</button>
               </td>

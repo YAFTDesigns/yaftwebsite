@@ -25,7 +25,7 @@ export async function sendPaymentClassEmail(plan: { id: string; client_name: str
     let next: { title: string; starts_at: string } | null = null;
     if (slugs.length) {
       let q = a.from('class_sessions').select('title, starts_at').in('course_slug', slugs).is('cancelled_at', null).gt('starts_at', new Date().toISOString()).order('starts_at').limit(1);
-      q = studentId ? q.or(`student_id.is.null,student_id.eq.${studentId}`) : q.is('student_id', null);
+      q = studentId ? q.or(`student_ids.is.null,student_ids.cs.{${studentId}}`) : q.is('student_ids', null);
       const { data } = await q;
       next = data?.[0] ?? null;
     }
