@@ -162,26 +162,33 @@ export default function TrainingClient() {
               <input style={field} placeholder="Minutes" value={ed.duration_min} onChange={(e) => setEd({ ...ed, duration_min: e.target.value })} />
               {ed.series && <select style={field} value={ed.scope} onChange={(e) => setEd({ ...ed, scope: e.target.value })}><option value="one">Only this class</option><option value="following">This and all later classes in the series (shift by the same amount)</option></select>}
               <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Title" value={ed.title} onChange={(e) => setEd({ ...ed, title: e.target.value })} />
+              <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="New Meet link (optional, leave blank to keep the current one)" value={ed.meet_url} onChange={(e) => setEd({ ...ed, meet_url: e.target.value })} />
               <input style={{ ...field, gridColumn: '1 / -1' }} placeholder="Description for the student" value={ed.notes} onChange={(e) => setEd({ ...ed, notes: e.target.value })} />
               {ed.private && <label style={{ fontSize: 13 }}><input type="checkbox" checked={ed.notify} onChange={(e) => setEd({ ...ed, notify: e.target.checked })} /> Email the student{ed.private ? '(s)' : ''} about the new time</label>}
             </div>
             <div style={{ marginTop: 10 }}>
-              <button style={btn} onClick={async () => { await classAct({ action: 'update', id: ed.id, title: ed.title, notes: ed.notes }); await classAct({ action: 'reschedule', id: ed.id, starts_at: ed.starts_at, duration_min: ed.duration_min, scope: ed.scope, notify: ed.notify }); }}>Save changes</button>
+              <button style={btn} onClick={async () => { await classAct({ action: 'update', id: ed.id, title: ed.title, notes: ed.notes, ...(ed.meet_url?.trim() ? { meet_url: ed.meet_url } : {}) }); await classAct({ action: 'reschedule', id: ed.id, starts_at: ed.starts_at, duration_min: ed.duration_min, scope: ed.scope, notify: ed.notify }); }}>Save changes</button>
               <button style={btn} onClick={() => setEd(null)}>Close</button>
             </div>
           </div>
         )}
-        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>For</th><th>Class</th><th>Joined</th><th>Not joined</th><th>Links</th><th></th></tr></thead><tbody>
+        <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When (IST)</th><th>Course</th><th>For</th><th>Class</th><th colSpan={2}>Attendance (click a name to change)</th><th>Links</th><th></th></tr></thead><tbody>
           {classes.map((c) => (
             <tr key={c.id}>
               <td>{new Date(c.starts_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
               <td>{(d.courses ?? []).find((x: Json) => x.slug === c.course_slug)?.title ?? c.course_slug}</td>
               <td>{c.forName ? `Private: ${c.forName}` : 'Everyone'}</td>
               <td>{c.title}{c.notes ? <div style={{ fontSize: 11, opacity: 0.7 }}>{c.notes}</div> : null}</td>
-              <td><strong>{c.joined.length}</strong> of {c.enrolledCount}<div style={{ fontSize: 11, opacity: 0.7 }}>{c.joined.map((j: Json) => `${j.name}${j.times > 1 ? ` (x${j.times})` : ''}`).join(', ')}</div></td>
-              <td style={{ fontSize: 11, opacity: 0.7 }}>{c.absent.join(', ') || '-'}</td>
+              <td colSpan={2}>
+                <strong>{c.joined.length}</strong> of {c.enrolledCount} present
+                <div style={{ marginTop: 4 }}>{(c.people ?? []).map((p: Json) => (
+                  <button key={p.studentId} title={p.present ? 'Present. Click to mark absent.' : 'Not joined. Click to mark present.'} onClick={() => classAct({ action: 'mark_attendance', id: c.id, student_id: p.studentId, present: !p.present })}
+                    style={{ ...btn, marginBottom: 4, fontSize: 11, padding: '3px 8px', color: p.present ? '#4caf50' : 'var(--ink-soft)', borderColor: p.present ? '#4caf50' : '#555' }}>
+                    {p.present ? '✓' : '○'} {p.name}{p.manual ? ' (marked)' : p.times > 1 ? ` (x${p.times})` : ''}
+                  </button>))}</div>
+              </td>
               <td>
-                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', series: true, private: !!c.student_ids, notify: !!c.student_ids }); }}>Reschedule</button>
+                <button style={btn} onClick={() => { const p = new Date(new Date(c.starts_at).getTime() + 5.5 * 3600_000).toISOString().slice(0, 16); setEd({ id: c.id, title: c.title, notes: c.notes ?? '', starts_at: p, duration_min: String(Math.round((new Date(c.ends_at).getTime() - new Date(c.starts_at).getTime()) / 60000)), scope: 'one', meet_url: '', series: true, private: !!c.student_ids, notify: !!c.student_ids }); }}>Reschedule</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Meet link', c.meet_url); if (v) classAct({ action: 'update', id: c.id, meet_url: v }); }}>Meet link</button>
                 <button style={btn} onClick={() => { const v = window.prompt('Recording link (shown to students after class)', c.recording_url ?? ''); if (v !== null) classAct({ action: 'update', id: c.id, recording_url: v }); }}>Recording</button>
               </td>

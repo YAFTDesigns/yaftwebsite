@@ -54,7 +54,7 @@ export async function GET() {
   const { data: sessions } = await a.from('class_sessions').select('id, course_slug, title, starts_at, ends_at, meet_url, recording_url, notes, cancelled_at, student_ids, series_id').is('cancelled_at', null).order('starts_at', { ascending: false }).limit(200);
   const ids = (sessions ?? []).map((s) => s.id as string);
   const [{ data: att }, roster] = await Promise.all([
-    ids.length ? a.from('class_attendance').select('session_id, student_id, first_joined_at, join_count').in('session_id', ids) : Promise.resolve({ data: [] as { session_id: string; student_id: string; first_joined_at: string; join_count: number }[] }),
+    ids.length ? a.from('class_attendance').select('session_id, student_id, first_joined_at, join_count, source').in('session_id', ids) : Promise.resolve({ data: [] as { session_id: string; student_id: string; first_joined_at: string; join_count: number; source: string }[] }),
     rosterBySlug(),
   ]);
   const out = (sessions ?? []).map((s) => {
@@ -67,6 +67,7 @@ export async function GET() {
       ...s,
       enrolledCount: enrolled.length,
       forName: only ? (enrolled.map((e) => e.name).join(', ') || 'Selected students') : null,
+      people: enrolled.map((e) => { const j = joined.find((x) => x.student_id === e.studentId); return { studentId: e.studentId, name: e.name, present: !!j, manual: j?.source === 'manual', times: j?.join_count ?? 0 }; }),
       joined: enrolled.filter((e) => joinedIds.has(e.studentId)).map((e) => ({ name: e.name, at: joined.find((j) => j.student_id === e.studentId)?.first_joined_at, times: joined.find((j) => j.student_id === e.studentId)?.join_count })),
       absent: enrolled.filter((e) => !joinedIds.has(e.studentId)).map((e) => e.name),
     };
@@ -170,6 +171,23 @@ export async function POST(req: NextRequest) {
     const { error } = await a.from('class_sessions').update(patch).eq('id', b.id);
     if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_session_updated', subject: b.id, detail: {} });
+    return NextResponse.json({ ok: true });
+  }
+  if (b.action === 'mark_attendance') {
+    if (!uuid(b.id) || !uuid(b.student_id)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+    const { data: ses } = await a.from('class_sessions').select('id, course_slug, student_ids').eq('id', b.id).is('cancelled_at', null).maybeSingle();
+    if (!ses) return NextResponse.json({ error: 'Class not found.' }, { status: 404 });
+    const roster = await rosterBySlug();
+    const only = ses.student_ids as string[] | null;
+    if (!(roster[ses.course_slug] ?? []).some((e) => e.studentId === b.student_id) || (only && !only.includes(b.student_id))) return NextResponse.json({ error: 'That student is not part of this class.' }, { status: 400 });
+    if (b.present) {
+      const now = new Date().toISOString();
+      const { data: prev } = await a.from('class_attendance').select('id').eq('session_id', b.id).eq('student_id', b.student_id).maybeSingle();
+      if (!prev) await a.from('class_attendance').insert({ session_id: b.id, student_id: b.student_id, first_joined_at: now, last_joined_at: now, join_count: 0, source: 'manual', marked_by: who });
+    } else {
+      await a.from('class_attendance').delete().eq('session_id', b.id).eq('student_id', b.student_id);
+    }
+    await audit({ actor_type: 'admin', actor_ref: who, action: 'class_attendance_marked', subject: b.id, detail: { student_id: b.student_id, present: !!b.present } });
     return NextResponse.json({ ok: true });
   }
   if (b.action === 'cancel') {
