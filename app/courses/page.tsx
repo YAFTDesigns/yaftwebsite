@@ -62,7 +62,7 @@ export default async function CoursesPage() {
     { title: 'Rhino3D for Architecture', desc: 'Comprehensive Rhino3D training for architecture students and professionals.' },
     { title: 'Grasshopper for Computational Design', desc: 'Parametric and computational design using Grasshopper.' },
     { title: 'Rhino.Inside.Revit', desc: 'BIM integration using Rhino.Inside.Revit for facade and AEC workflows.' },
-    { title: 'Wearables & Product Design', desc: '3D modeling for wearables, footwear, and product design using Rhino3D.' },
+    { title: 'Rhino3D for Wearables & Footwear', desc: '3D modeling for wearables, footwear, and product design using Rhino3D.' },
   ];
 
   const courseJsonLd = {

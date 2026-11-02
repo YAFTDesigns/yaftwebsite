@@ -7,9 +7,12 @@ import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
+import { getCoursePricing, usdApprox, fmtInr, PAYMENT_NOTE } from '@/lib/coursePricing';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: 'Rhino3D for Wearables & Footwear',
+  title: 'Rhino3D Wearables & Footwear Course',
   description: 'Design footwear, neckwear, wrist and arm bands in Rhino3D. 5-day live workshop covering NURBS topology, form-based modeling, and parametric lattice structures. Authorized Rhino Training Center.',
 };
 
@@ -20,19 +23,19 @@ const COURSE_JSON_LD = {
   description: 'A 5-day live workshop covering NURBS topology, form-based modeling, and parametric design for footwear, neckwear, wrist, and arm bands in Rhino3D.',
   provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
   url: 'https://www.yaftdesigns.com/courses/rhino-wearables-footwear',
-  hasCourseInstance: [
-    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Personal training', price: '30000', priceCurrency: 'INR' } },
-  ],
+  hasCourseInstance: [],
 };
 
-export default function RhinoWearablesFootwear() {
+export default async function RhinoWearablesFootwear() {
+  const { fee, combo } = await getCoursePricing('rhino-wearables-footwear');
+  const ld = { ...COURSE_JSON_LD, hasCourseInstance: [{ '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Course fee (excl. 18% GST)', price: String(fee), priceCurrency: 'INR' } }] };
   return (
     <>
       <SiteHeader active="/courses" />
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />
 
       <main className={s.pageGrid}>
@@ -50,8 +53,8 @@ export default function RhinoWearablesFootwear() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>$360 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
-          <div className={s.priceSub}>INR 30,000 + GST</div>
+          <div className={s.priceMain}>${usdApprox(fee)} <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>course fee</span></div>
+          <div className={s.priceSub}>INR {fmtInr(fee)} + GST</div>
           <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
@@ -91,10 +94,10 @@ export default function RhinoWearablesFootwear() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 30,000 + GST<div className={s.feeUsd}>approx. $360</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Course fee</div><div className={s.feeNote}>exclusive of GST (18% added at checkout) • group batches and student pricing on request</div></div><div className={s.feeAmt}>INR {fmtInr(fee)} + GST<div className={s.feeUsd}>approx. ${usdApprox(fee)}</div></div></div>
       </div>
       <CourseActions slug="rhino-wearables-footwear" title="Rhino3D for Wearables & Footwear" />
-      <div className={s.payNote}>Payment: 50% advance upon blocking of dates, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.payNote}>{PAYMENT_NOTE}</div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Computer requirements</p>
@@ -125,7 +128,7 @@ export default function RhinoWearablesFootwear() {
       <div className={s.faqItem}><p className={s.faqQ}>Is this only for footwear?</p><p className={s.faqA}>No. The course covers footwear alongside neckwear, wrist, and arm bands, the same modeling principles apply across wearable categories.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
       <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
-      <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance upon blocking of dates, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
+      <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>{PAYMENT_NOTE}</p></div>
 
       <hr className={s.divider} />
       <div className={s.ctaBottom}>

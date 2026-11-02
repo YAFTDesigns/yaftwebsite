@@ -7,6 +7,9 @@ import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
+import { getCoursePricing, usdApprox, fmtInr, PAYMENT_NOTE } from '@/lib/coursePricing';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Rhino3D for Architecture',
@@ -20,20 +23,19 @@ const COURSE_JSON_LD = {
   description: 'A 5-day live workshop covering NURBS modeling, surface design, and computational geometry in Rhino3D for architects and designers.',
   provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
   url: 'https://www.yaftdesigns.com/courses/rhino3d-architecture',
-  hasCourseInstance: [
-    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Group batch', price: '23000', priceCurrency: 'INR' } },
-    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Personal training', price: '25000', priceCurrency: 'INR' } },
-  ],
+  hasCourseInstance: [],
 };
 
-export default function Rhino3DArchitecture() {
+export default async function Rhino3DArchitecture() {
+  const { fee, combo } = await getCoursePricing('rhino-architecture');
+  const ld = { ...COURSE_JSON_LD, hasCourseInstance: [{ '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P5D', offers: { '@type': 'Offer', category: 'Course fee (excl. 18% GST)', price: String(fee), priceCurrency: 'INR' } }] };
   return (
     <>
       <SiteHeader active="/courses" />
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />
 
       <main className={s.pageGrid}>
@@ -51,13 +53,9 @@ export default function Rhino3DArchitecture() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>$276 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group</span></div>
-          <div className={s.priceSub}>INR 23,000 + GST</div>
-          <div style={{marginTop:10,paddingTop:10,borderTop:'0.5px solid var(--line)'}}>
-            <div className={s.priceMain}>$300 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>personal</span></div>
-            <div className={s.priceSub}>INR 25,000 + GST</div>
-          </div>
-          <div className={s.priceUsd}>approx. rates · subject to change</div>
+          <div className={s.priceMain}>${usdApprox(fee)} <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>course fee</span></div>
+          <div className={s.priceSub}>INR {fmtInr(fee)} + GST</div>
+          <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
         <div className={s.ctaBtns}>
           <a href="/courses#contact" className={s.btnOutline}>Enquire now</a>
@@ -93,14 +91,13 @@ export default function Rhino3DArchitecture() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Group batch</div><div className={s.feeNote}>10% discount for students • exclusive of taxes</div></div><div className={s.feeAmt}>INR 23,000 + GST<div className={s.feeUsd}>approx. $276</div></div></div>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Personal training</div><div className={s.feeNote}>exclusive of taxes</div></div><div className={s.feeAmt}>INR 25,000 + GST<div className={s.feeUsd}>approx. $300</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Course fee</div><div className={s.feeNote}>exclusive of GST (18% added at checkout) • group batches and student pricing on request</div></div><div className={s.feeAmt}>INR {fmtInr(fee)} + GST<div className={s.feeUsd}>approx. ${usdApprox(fee)}</div></div></div>
       </div>
       <CourseActions slug="rhino-architecture" title="Rhino3D for Architecture" />
-      <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.payNote}>{PAYMENT_NOTE}</div>
       <div className={s.comboOffer}>
         <span className={s.comboOfferTag}>Combo offer</span>
-        <span className={s.comboOfferText}>Take <strong>Rhino3D for Architecture</strong> and <strong>Grasshopper for Architecture</strong> together for <strong>INR 40,000 + GST</strong>, personal training.</span>
+        <span className={s.comboOfferText}>Take <strong>Rhino3D for Architecture</strong> and <strong>Grasshopper for Architecture</strong> together for <strong>INR {fmtInr(combo)} + GST</strong> when you enrol in both.</span>
       </div>
 
       <hr className={s.divider} />
@@ -127,7 +124,7 @@ export default function Rhino3DArchitecture() {
       
         <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
-        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>{PAYMENT_NOTE}</p></div>
 
       <hr className={s.divider} />
       <div className={s.ctaBottom}>

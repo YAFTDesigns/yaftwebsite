@@ -149,29 +149,27 @@ const FAQ_JSON_LD = {
 
 const LOCAL_BUSINESS_JSON_LD = {
   '@context': 'https://schema.org',
-  '@type': 'LocalBusiness',
+  '@type': ['LocalBusiness', 'EducationalOrganization'],
+  '@id': 'https://www.yaftdesigns.com/#business',
   name: 'YAFT Designs',
   description: 'Authorized Rhino Training Center offering Rhino3D, Grasshopper, and Rhino.Inside.Revit training and computational design consulting.',
   url: 'https://www.yaftdesigns.com',
-  telephone: '',
+  image: imageUrl('og-image.jpg'),
+  logo: imageUrl('og-image.jpg'),
   email: CONTACT_EMAIL,
+  // Same registered address as on YAFT invoices. No telephone, opening hours or map pin are published
+  // because none have been confirmed for public use; add them here once they are.
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Perundurai Industrial Park',
-    addressLocality: 'Coimbatore',
+    streetAddress: '43, WD-10, ST-5, Thalakaraipudhur',
+    addressLocality: 'Perundurai',
     addressRegion: 'Tamil Nadu',
     postalCode: '638052',
     addressCountry: 'IN',
   },
-  geo: {
-    '@type': 'GeoCoordinates',
-    latitude: 11.0168,
-    longitude: 76.9558,
-  },
-  openingHours: 'Mo-Sa 09:00-18:00',
   priceRange: '₹₹',
   currenciesAccepted: 'INR',
-  paymentAccepted: 'Cash, Credit Card, Bank Transfer',
+  paymentAccepted: 'UPI, Credit Card, Debit Card, Net Banking, Bank Transfer',
   areaServed: [
     { '@type': 'Country', name: 'India' },
     { '@type': 'Country', name: 'Australia' },

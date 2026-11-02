@@ -7,6 +7,9 @@ import CourseGallery from '../CourseGallery';
 import CourseSidebarNav from '../CourseSidebarNav';
 import s from '../course.module.css';
 import { imageUrl } from '@/lib/assetUrl';
+import { getCoursePricing, usdApprox, fmtInr, PAYMENT_NOTE } from '@/lib/coursePricing';
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: 'Rhino3D for AEC and Climate',
@@ -20,9 +23,7 @@ const COURSE_JSON_LD = {
   description: 'A 2-day workshop on Rhino3D for AEC professionals covering Grasshopper climatic analysis and facade optimization using Ladybug.',
   provider: { '@type': 'Organization', name: 'YAFT Designs', sameAs: 'https://www.yaftdesigns.com' },
   url: 'https://www.yaftdesigns.com/courses/rhino3d-aec-climate',
-  hasCourseInstance: [
-    { '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P2D', offers: { '@type': 'Offer', category: 'Individual / group training', price: '10000', priceCurrency: 'INR' } },
-  ],
+  hasCourseInstance: [],
 };
 
 const CL = '/assets/courses/climate';
@@ -40,14 +41,16 @@ const WORKFLOW = [
   { src: `${CL}/honeybee-view-analysis.webp`, caption: 'View based analysis with Radiance: image at a chosen date and hour with false colour legend' },
 ];
 
-export default function Rhino3DAEC() {
+export default async function Rhino3DAEC() {
+  const { fee, combo } = await getCoursePricing('rhino-aec-climate');
+  const ld = { ...COURSE_JSON_LD, hasCourseInstance: [{ '@type': 'CourseInstance', courseMode: 'Blended', courseWorkload: 'P2D', offers: { '@type': 'Offer', category: 'Course fee (excl. 18% GST)', price: String(fee), priceCurrency: 'INR' } }] };
   return (
     <>
       <SiteHeader active="/courses" />
 
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(COURSE_JSON_LD) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }}
       />
       <main className={s.pageGrid}>
       <div className={s.wrap}>
@@ -63,8 +66,8 @@ export default function Rhino3DAEC() {
       </div>
       <div className={s.ctaBar}>
         <div>
-          <div className={s.priceMain}>$120 <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>group / individual</span></div>
-          <div className={s.priceSub}>INR 10,000 · 6 hrs (3+3 sessions)</div>
+          <div className={s.priceMain}>${usdApprox(fee)} <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>per person</span></div>
+          <div className={s.priceSub}>INR {fmtInr(fee)} + GST · 6 hrs (3+3 sessions)</div>
           <div className={s.priceSub}>Institutions: contact for custom pricing</div>
           <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
@@ -114,11 +117,11 @@ export default function Rhino3DAEC() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>6 hours total, split as 3+3 sessions • incl. all taxes</div></div><div className={s.feeAmt}>INR 10,000<div className={s.feeUsd}>approx. $120</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>6 hours total, split as 3+3 sessions • exclusive of GST (18% added at checkout)</div></div><div className={s.feeAmt}>INR {fmtInr(fee)} + GST<div className={s.feeUsd}>approx. ${usdApprox(fee)}</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Institutions / colleges</div><div className={s.feeNote}>Custom pricing, travel expenses borne by institution</div></div><div className={s.feeAmt}>Contact us</div></div>
       </div>
       <CourseActions slug="rhino-aec-climate" title="Rhino3D for AEC and Climate" />
-      <div className={s.payNote}>Payment: 50% advance on booking, balance within 7 days of the invoice date. Via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</div>
+      <div className={s.payNote}>{PAYMENT_NOTE}</div>
 
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Computer requirements</p>
@@ -144,7 +147,7 @@ export default function Rhino3DAEC() {
       
         <div className={s.faqItem}><p className={s.faqQ}>Is this available online?</p><p className={s.faqA}>Yes. Sessions are conducted live online or in-person at our studio in Coimbatore. Both options are available. Students outside India join live online only.</p></div>
         <div className={s.faqItem}><p className={s.faqQ}>How flexible is the schedule?</p><p className={s.faqA}>Learning curve may vary per individual. We are flexible with additional individual practice time beyond the scheduled duration.</p></div>
-        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>50% advance on booking, balance within 7 days of the invoice date. Payment via NEFT to YAFT Designs, Axis Bank, IFSC: UTIB0001293.</p></div>
+        <div className={s.faqItem}><p className={s.faqQ}>What are the payment terms?</p><p className={s.faqA}>{PAYMENT_NOTE}</p></div>
 
       <hr className={s.divider} />
       <div className={s.ctaBottom}>
