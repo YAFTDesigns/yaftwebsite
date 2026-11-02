@@ -25,12 +25,12 @@ type Rev = { id: string; revNo: number; status: string; title: string; descripti
 type Proj = { id: string; planId: string; courseSlug: string; status: string; publishConsent: boolean; publicDisplayName: string | null; published: boolean; latest: Rev | null; hasApproved: boolean; role: string | null; tool: string | null; category: string | null; hasProfilePhoto: boolean };
 const PSTATUS: Record<string, string> = { draft: 'Draft', submitted: 'Submitted', under_review: 'Under review', changes_requested: 'Changes requested', approved: 'Approved' };
 
-const TABS = ['My Courses', 'Classes', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
-const box = { border: '1px solid var(--line)', borderLeft: '3px solid var(--blueprint)', background: 'var(--paper-2)', padding: '20px 22px', marginBottom: 16 } as const;
-const input = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '11px 12px', fontSize: 14, width: '100%', fontFamily: 'var(--display)', marginTop: 4 } as const;
-const btn = { background: '#D42B38', color: '#fff', border: '1px solid #D42B38', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 500, cursor: 'pointer', borderRadius: 0 } as const;
-const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid rgba(255,255,255,0.6)' } as const;
-const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '12px 18px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
+const TABS = ['Home', 'My Courses', 'Classes', 'Payments & Bills', 'My Projects', 'Certificates & Verification'] as const;
+const box = { border: '1px solid var(--line)', borderLeft: '3px solid var(--blueprint)', background: 'var(--paper-2)', padding: '20px 22px', marginBottom: 16, borderRadius: 12, boxShadow: '0 1px 2px rgba(16,24,40,.05)' } as const;
+const input = { background: 'var(--paper)', border: '1px solid #cfd4dc', borderRadius: 8, color: 'var(--ink)', padding: '12px 14px', fontSize: 15, width: '100%', fontFamily: 'var(--display)', marginTop: 4 } as const;
+const btn = { background: '#D42B38', color: '#fff', border: '1px solid #D42B38', padding: '11px 22px', fontSize: 13, fontFamily: 'var(--mono)', letterSpacing: '.04em', fontWeight: 600, cursor: 'pointer', borderRadius: 8, minHeight: 44 } as const;
+const ghost = { ...btn, background: 'transparent', color: 'var(--ink)', border: '1px solid #b8bec9' } as const;
+const tabBtn = (on: boolean) => ({ background: on ? 'var(--ink)' : 'transparent', color: on ? '#fff' : 'var(--ink-soft)', border: `1px solid ${on ? 'var(--ink)' : 'transparent'}`, borderRadius: 999, padding: '10px 18px', fontSize: 13, fontFamily: 'var(--display)', fontWeight: 600, cursor: 'pointer' }) as const;
 const BTN_CSS = `
 .sp{font-family:var(--display);line-height:1.55}
 .sp p,.sp label,.sp td,.sp th,.sp li,.sp div{font-family:var(--display)}
@@ -38,7 +38,7 @@ const BTN_CSS = `
 .sp button:not(:disabled):hover,.sp a[style*="border"]:hover{filter:brightness(1.15)}
 .sp button:disabled{opacity:.4;cursor:not-allowed}
 .sp button:focus-visible,.sp a:focus-visible,.sp input:focus-visible,.sp select:focus-visible,.sp textarea:focus-visible{outline:2px solid var(--blueprint);outline-offset:2px}
-.sp input,.sp select,.sp textarea{border-radius:0}
+.sp input,.sp select,.sp textarea{border-radius:8px}
 .sp input:focus,.sp select:focus,.sp textarea:focus{border-color:var(--blueprint)!important}
 .sp table{border-collapse:collapse;width:100%}
 .sp th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
@@ -46,38 +46,38 @@ const BTN_CSS = `
 .sp a{color:var(--blueprint)}
 .sp a[style*="background"]{color:#fff}
 .sp h2,.sp h3{font-family:var(--display)}
-.sp-iconbtn{position:relative;display:inline-grid;place-items:center;width:46px;height:46px;background:transparent;border:1px solid #fff;color:#fff;cursor:pointer;padding:0}
-.sp-iconbtn:hover{background:rgba(255,255,255,.1)}
-.sp-dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border-radius:50%;background:#E63946;border:2px solid #0A0A0A}
+.sp-iconbtn{position:relative;display:inline-grid;place-items:center;width:46px;height:46px;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--ink);cursor:pointer;padding:0}
+.sp-iconbtn:hover{background:#f1f3f6}
+.sp-dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;border-radius:50%;background:#E63946;border:2px solid #fff}
 .sp-shield{position:absolute;top:-8px;right:-10px;display:inline-flex;cursor:default;outline:none}
 .sp-shield.inl{position:relative;top:auto;right:auto;vertical-align:middle;margin-left:8px}
 .sp-shield.on{cursor:default}
 .sp-shield:not(.on){cursor:pointer}
-.sp-shield-bg{fill:#6b7280;stroke:#0A0A0A;stroke-width:1.5}
+.sp-shield-bg{fill:#9aa3b2;stroke:#fff;stroke-width:1.5}
 .sp-shield.on .sp-shield-bg{fill:#1f6feb}
 .sp-tip{position:absolute;top:calc(100% + 8px);left:0;white-space:nowrap;background:#4b5563;color:#fff;border-radius:6px;padding:7px 12px;font:12px var(--mono);box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .12s;z-index:20}
 .sp-shield:hover .sp-tip,.sp-shield:focus .sp-tip{opacity:1}
-.sp-hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);padding:26px 28px;margin-bottom:26px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.025));box-shadow:0 18px 50px rgba(0,0,0,.16)}
+.sp-hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:16px;padding:26px 28px;margin-bottom:22px;background:#fff;box-shadow:0 8px 28px rgba(16,24,40,.07)}
 .sp-hero{isolation:isolate}
-.sp-hero:after{content:"";position:absolute;z-index:-1;right:-10px;top:40%;transform:translateY(-60%);width:440px;height:320px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right center/contain;opacity:.22;pointer-events:none}
-.sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(52,184,172,.16),transparent 68%);pointer-events:none}
+.sp-hero:after{content:"";position:absolute;z-index:-1;right:-10px;top:40%;transform:translateY(-60%);width:440px;height:320px;background:url(/assets/logos/rhino-icon-flipped.png) no-repeat right center/contain;opacity:.05;pointer-events:none;filter:invert(1)}
+.sp-hero:before{content:"";position:absolute;inset:-35% auto auto -8%;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(14,143,132,.10),transparent 68%);pointer-events:none}
 .sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:22px}
-.sp-stat{border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));padding:15px 16px;min-height:78px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.sp-stat{border:1px solid var(--line);border-radius:12px;background:#f7f8fa;padding:15px 16px;min-height:78px}
 .sp-stat b{display:block;font-family:var(--display);font-size:27px;font-weight:600;color:var(--ink)}
 .sp-stat span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
-.sp-skel{height:78px;border:1px solid var(--line);background:linear-gradient(90deg,var(--paper-2) 25%,#222 50%,var(--paper-2) 75%);background-size:200% 100%;animation:spsh 1.2s linear infinite}
+.sp-skel{height:78px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(90deg,#f1f3f6 25%,#e6e9ee 50%,#f1f3f6 75%);background-size:200% 100%;animation:spsh 1.2s linear infinite}
 @keyframes spsh{to{background-position:-200% 0}}
-.sp-tabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:22px;background:rgba(15,15,15,.72)}
-.sp-next{border:1px solid rgba(52,184,172,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(52,184,172,.09),rgba(255,255,255,.025))!important;box-shadow:0 12px 32px rgba(0,0,0,.12)}
-@supports ((backdrop-filter:blur(12px)) or (-webkit-backdrop-filter:blur(12px))){.sp-hero,.sp-stat,.sp-tabs,.sp-next{backdrop-filter:blur(16px) saturate(125%);-webkit-backdrop-filter:blur(16px) saturate(125%)}}
+.sp-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:22px;background:transparent}
+.sp-next{border:1px solid rgba(14,143,132,.28)!important;border-left:3px solid var(--blueprint)!important;background:linear-gradient(135deg,rgba(14,143,132,.07),#fff)!important}
 @media (max-width:680px){
   .sp-hero:after{width:220px;height:160px;opacity:.16}
   .sp-hero{padding:20px 18px;margin-left:-4px;margin-right:-4px}
   .sp-stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
   .sp-stat{padding:12px 10px;min-width:0}
-  .sp-stat b{font-size:21px}
+  .sp-stat b{font-size:15px;white-space:nowrap}
+  .sp-hero:after{opacity:.03}
   .sp-stat span{font-size:9px;letter-spacing:.06em}
-  .sp-tabs{position:sticky;top:64px;z-index:8;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-18px;margin-right:-18px;padding:0 18px}
+  .sp-tabs{position:sticky;top:64px;z-index:8;background:var(--paper);flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-18px;margin-right:-18px;padding:0 18px}
   .sp-tabs::-webkit-scrollbar{display:none}
   .sp-tabs button{white-space:nowrap!important;padding-left:13px!important;padding-right:13px!important}
   .sp table{min-width:560px}
@@ -94,7 +94,7 @@ const initials = (s: string) => s.split(/\s+/).filter(Boolean).slice(0, 2).map((
 export default function StudentClient() {
   const [me, setMe] = useState<Me | null>(null);
   const [state, setState] = useState<'loading' | 'out' | 'in'>('loading');
-  const [tab, setTab] = useState<(typeof TABS)[number]>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('class') ? 'Classes' : 'My Courses'));
+  const [tab, setTab] = useState<(typeof TABS)[number]>(() => (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('class') ? 'Classes' : 'Home'));
   const [open, setOpen] = useState<string | null>(null);
   const [msg, setMsg] = useState('');
   const [email, setEmail] = useState('');
@@ -302,7 +302,7 @@ export default function StudentClient() {
             <span>I agree to the <a href="/terms" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Terms</a> and <a href="/privacy" target="_blank" rel="noopener" style={{ color: 'var(--blueprint)' }}>Privacy Policy</a>. <span style={{ opacity: 0.6 }}>(required)</span><br /><span style={{ opacity: 0.6, fontSize: 12 }}>By signing in you also let YAFT remember the courses you view, to suggest relevant ones.</span></span>
           </label>
         </div>
-        <button style={{ ...btn, width: '100%', opacity: agree ? 1 : 0.45, cursor: agree ? 'pointer' : 'not-allowed', background: '#fff', color: '#1f1f1f', border: '2px solid #fff', padding: '12px 18px' }} disabled={!agree} onClick={google}><GoogleG />Continue with Google</button>
+        <button style={{ ...btn, width: '100%', opacity: agree ? 1 : 0.45, cursor: agree ? 'pointer' : 'not-allowed', background: '#fff', color: '#1f1f1f', border: '1px solid #cfd4dc', boxShadow: '0 1px 2px rgba(16,24,40,.08)', padding: '12px 18px' }} disabled={!agree} onClick={google}><GoogleG />Continue with Google</button>
         <p style={{ fontSize: 12, opacity: 0.65, margin: '8px 0 16px' }}>We only receive your name, email and picture from Google. Nothing is posted and no contacts are read.</p>
         {sent ? <p style={{ fontSize: 14 }}>Check your inbox. We sent a sign-in link to {email}.</p> : <>
           <input style={input} type="email" placeholder="Or use your email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -364,39 +364,6 @@ export default function StudentClient() {
         </div>
       </div>
 
-      {me.candidates.length === 0 && paymentDue && (
-        <div className="sp-next" style={box}>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
-          <strong>{paymentDue.nextAction === 'pay_balance' ? 'Complete your balance payment' : paymentDue.nextAction === 'pay_full' ? 'Complete your course payment' : 'Confirm your seat'}</strong>
-          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>{paymentDue.title} has {inr(paymentDue.balanceInr)} outstanding.</p>
-          <a href={paymentDue.payUrl} style={{ ...btn, textDecoration: 'none', display: 'inline-block' }}>{paymentDue.nextAction === 'pay_balance' ? 'Pay balance' : paymentDue.nextAction === 'pay_full' ? 'Pay in full' : 'Pay advance'}</a>
-        </div>
-      )}
-      {me.candidates.length === 0 && !paymentDue && revisionNeeded && (
-        <div className="sp-next" style={box}>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
-          <strong>Revision requested on your project</strong>
-          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Open My Projects to review the note and submit the next version.</p>
-          <button style={btn} onClick={() => setTab('My Projects')}>Review project</button>
-        </div>
-      )}
-      {me.candidates.length === 0 && !paymentDue && !revisionNeeded && projectReady && (
-        <div className="sp-next" style={box}>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>NEXT STEP</div>
-          <strong>Ready to submit your course project?</strong>
-          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Your payment is active. Submit a project for review when you are ready.</p>
-          <button style={btn} onClick={() => setTab('My Projects')}>Submit project</button>
-        </div>
-      )}
-      {me.candidates.length === 0 && !paymentDue && !revisionNeeded && !projectReady && certsReady > 0 && (
-        <div className="sp-next" style={box}>
-          <div className="eyebrow" style={{ marginBottom: 8 }}>READY FOR YOU</div>
-          <strong>{certsReady === 1 ? 'Your certificate is ready' : 'Your certificates are ready'}</strong>
-          <p style={{ margin: '6px 0 12px', fontSize: 14, color: 'var(--ink-soft)' }}>Download or open the public verification link from Certificates & Verification.</p>
-          <button style={btn} onClick={() => setTab('Certificates & Verification')}>View certificate{certsReady > 1 ? 's' : ''}</button>
-        </div>
-      )}
-
       {msg && <p style={{ color: 'var(--brass)', marginBottom: 12 }}>{msg}</p>}
 
       {showProfile && (
@@ -408,7 +375,7 @@ export default function StudentClient() {
             <strong style={{ fontSize: 13 }}>About you {!profileDone && <span style={{ color: '#E63946', fontSize: 12, fontWeight: 400 }}>(please complete)</span>}</strong>
             <div style={{ display: 'flex', gap: 10, margin: '10px 0' }}>
               {(['professional', 'student'] as const).map((k) => (
-                <button type="button" key={k} style={{ ...ghost, ...(profile.occupation === k ? { background: '#fff', color: '#0A0A0A' } : {}) }} onClick={() => setProfile({ ...profile, occupation: k })}>{k === 'professional' ? 'Working professional' : 'Student'}</button>
+                <button type="button" key={k} style={{ ...ghost, ...(profile.occupation === k ? { background: 'var(--ink)', color: '#fff' } : {}) }} onClick={() => setProfile({ ...profile, occupation: k })}>{k === 'professional' ? 'Working professional' : 'Student'}</button>
               ))}
             </div>
             {profile.occupation === 'professional' && <>
@@ -445,6 +412,74 @@ export default function StudentClient() {
       <div role="tablist" className="sp-tabs">
         {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} style={tabBtn(tab === t)}>{t}</button>)}
       </div>
+
+      {tab === 'Home' && (() => {
+        const sess = me.classes.sessions;
+        const nextClass = sess.find((c) => c.state !== 'past');
+        const when = (iso: string) => new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', weekday: 'long', day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' });
+        const live = me.enrolments.filter((e) => e.payStatus !== 'cancelled' && e.payStatus !== 'unpaid');
+        const action = me.candidates.length > 0 ? null
+          : paymentDue ? { eyebrow: 'NEXT STEP', title: paymentDue.nextAction === 'pay_balance' ? 'Complete your balance payment' : paymentDue.nextAction === 'pay_full' ? 'Complete your course payment' : 'Confirm your seat', text: `${paymentDue.title} has ${inr(paymentDue.balanceInr)} outstanding.`, label: paymentDue.nextAction === 'pay_balance' ? 'Pay balance' : paymentDue.nextAction === 'pay_full' ? 'Pay in full' : 'Pay advance', href: paymentDue.payUrl as string | null, go: null as (typeof TABS)[number] | null }
+          : revisionNeeded ? { eyebrow: 'NEXT STEP', title: 'Revision requested on your project', text: 'Open My Projects to read the note and submit the next version.', label: 'Review project', href: null, go: 'My Projects' as const }
+          : projectReady ? { eyebrow: 'NEXT STEP', title: 'Ready to submit your course project?', text: 'Your payment is active. Submit a project for review when you are ready.', label: 'Submit project', href: null, go: 'My Projects' as const }
+          : certsReady > 0 ? { eyebrow: 'READY FOR YOU', title: certsReady === 1 ? 'Your certificate is ready' : 'Your certificates are ready', text: 'Download it or share the public verification link.', label: 'View certificates', href: null, go: 'Certificates & Verification' as const }
+          : null;
+        return (<>
+          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', marginBottom: 6 }}>
+            <div style={{ ...box, marginBottom: 0 }}>
+              <div className="eyebrow" style={{ marginBottom: 8 }}>{nextClass?.state === 'open' ? 'CLASS IS OPEN' : 'NEXT CLASS'}</div>
+              {nextClass ? (<>
+                <strong style={{ fontSize: 18 }}>{nextClass.title}</strong>{nextClass.isPrivate && <span style={{ fontSize: 11, marginLeft: 8, color: 'var(--ink-soft)' }}>PRIVATE</span>}
+                <p style={{ margin: '6px 0 14px', fontSize: 14, color: 'var(--ink-soft)' }}>{when(nextClass.startsAt)} IST</p>
+                <form method="post" action={`/api/student/classes/${nextClass.id}/join`} target="_blank">
+                  <button type="submit" style={{ ...btn, width: '100%' }} disabled={nextClass.state !== 'open'}>{nextClass.state === 'open' ? 'Join class' : 'Join opens 15 minutes before'}</button>
+                </form>
+              </>) : (
+                <p style={{ margin: '4px 0 0', fontSize: 14, color: 'var(--ink-soft)' }}>{live.length ? 'No class is scheduled yet. We will email you as soon as the schedule is ready.' : 'Your classes will appear here once your first payment is in.'}</p>
+              )}
+            </div>
+            {action && (
+              <div className="sp-next" style={{ ...box, marginBottom: 0 }}>
+                <div className="eyebrow" style={{ marginBottom: 8 }}>{action.eyebrow}</div>
+                <strong style={{ fontSize: 18 }}>{action.title}</strong>
+                <p style={{ margin: '6px 0 14px', fontSize: 14, color: 'var(--ink-soft)' }}>{action.text}</p>
+                {action.href ? <a href={action.href} style={{ ...btn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>{action.label}</a> : <button style={btn} onClick={() => action.go && setTab(action.go)}>{action.label}</button>}
+              </div>
+            )}
+          </div>
+
+          <h2 style={{ fontSize: 14, fontFamily: 'var(--mono)', letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--ink-soft)', margin: '26px 0 12px' }}>My courses</h2>
+          {live.length === 0 && <div style={box}>No active courses yet. Open <strong>My Courses</strong> to link a payment you made earlier.</div>}
+          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))' }}>
+            {live.flatMap((e) => e.courseSlugs.map((slug) => {
+              const pr = me.projects.find((p) => p.planId === e.planId && p.courseSlug === slug);
+              const att = me.classes.attendance[slug];
+              const cert = me.certificates.some((c) => c.planId === e.planId && c.courseSlug === slug);
+              const [stLabel, stColor] = STATUS[e.payStatus];
+              const pct = att && att.held > 0 ? Math.round((att.attended / att.held) * 100) : null;
+              return (
+                <div key={e.planId + slug} style={{ ...box, marginBottom: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'flex-start' }}>
+                    <strong style={{ fontSize: 16, lineHeight: 1.3 }}>{e.courseSlugs.length > 1 ? `${e.title} (${slug})` : e.title}</strong>
+                    <span style={badge(stColor)}>{stLabel}</span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, margin: '16px 0' }}>
+                    <div><div className="mono" style={{ fontSize: 10, letterSpacing: '.08em', color: 'var(--ink-soft)' }}>ATTENDANCE</div><div style={{ fontSize: 20, fontWeight: 700 }}>{pct === null ? '-' : `${pct}%`}</div></div>
+                    <div><div className="mono" style={{ fontSize: 10, letterSpacing: '.08em', color: 'var(--ink-soft)' }}>PROJECT</div><div style={{ fontSize: 14, fontWeight: 600, marginTop: 3 }}>{pr?.latest ? PSTATUS[pr.latest.status] ?? pr.latest.status : 'Not started'}</div></div>
+                    <div><div className="mono" style={{ fontSize: 10, letterSpacing: '.08em', color: 'var(--ink-soft)' }}>CERTIFICATE</div><div style={{ fontSize: 14, fontWeight: 600, marginTop: 3, color: cert ? '#2e7d32' : undefined }}>{cert ? 'Issued' : 'Pending'}</div></div>
+                  </div>
+                  {e.balanceInr > 0 && <p style={{ margin: '0 0 12px', fontSize: 13, color: 'var(--brass)' }}>{inr(e.balanceInr)} still to pay</p>}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    <button style={{ ...ghost, padding: '9px 16px' }} onClick={() => setTab('Classes')}>Classes</button>
+                    <button style={{ ...ghost, padding: '9px 16px' }} onClick={() => setTab('My Projects')}>Project</button>
+                    <button style={{ ...ghost, padding: '9px 16px' }} onClick={() => setTab('Payments & Bills')}>Bills</button>
+                  </div>
+                </div>
+              );
+            }))}
+          </div>
+        </>);
+      })()}
 
       {tab === 'My Courses' && (<>
         {me.enrolments.length === 0 && <div style={box}>No courses linked to this account yet. If you paid under another email, paste your payment link below and we will email a confirmation to the billing address on it.</div>}
@@ -552,15 +587,17 @@ export default function StudentClient() {
               <div key={slug} style={box}>
                 <strong>{titleOf(slug)}</strong>
                 {at && at.held > 0 && <div style={{ fontSize: 13, opacity: 0.8, margin: '4px 0 8px' }}>Attendance: {at.attended} of {at.held} classes ({Math.round((at.attended / at.held) * 100)}%)</div>}
-                <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-                  <thead><tr style={{ textAlign: 'left' }}><th>Class</th><th>When (IST)</th><th>Status</th><th></th></tr></thead>
-                  <tbody>{rows.map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.title}{c.isPrivate ? ' (private)' : ''}</td><td>{fmt(c.startsAt)}</td>
-                      <td>{c.state === 'past' ? (c.attended ? 'Attended' : 'Missed') : c.state === 'open' ? 'Open now' : 'Upcoming'}</td>
-                      <td>{c.recordingUrl ? <a href={c.recordingUrl} target="_blank" rel="noopener noreferrer">Recording</a> : ''}</td>
-                    </tr>))}</tbody>
-                </table></div>
+                <div style={{ marginTop: 8 }}>{rows.map((c) => (
+                  <div key={c.id} style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderTop: '1px solid var(--line)' }}>
+                    <div style={{ minWidth: 180, flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{c.title}{c.isPrivate ? ' (private)' : ''}</div>
+                      <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>{fmt(c.startsAt)} IST</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                      <span style={badge(c.state === 'past' ? (c.attended ? '#2e7d32' : '#999') : c.state === 'open' ? '#2e7d32' : '#4c8bf5')}>{c.state === 'past' ? (c.attended ? 'Attended' : 'Missed') : c.state === 'open' ? 'Open now' : 'Upcoming'}</span>
+                      {c.recordingUrl && <a href={c.recordingUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13 }}>Recording</a>}
+                    </div>
+                  </div>))}</div>
               </div>
             );
           })}
