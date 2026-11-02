@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import styles from '../admin.module.css';
 import ClassesPanel from './ClassesPanel';
+import LiveBillsPanel from './LiveBillsPanel';
+import StudentsPanel from './StudentsPanel';
 
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const field = { background: 'var(--paper)', border: '1px solid #3a3a3a', color: 'var(--ink)', padding: '8px 10px', fontSize: 13, borderRadius: 0 } as const;
 const btn = { ...field, cursor: 'pointer', marginRight: 6, border: '1px solid #777', fontFamily: 'var(--mono)', letterSpacing: '.03em' } as const;
 const tabBtn = (on: boolean) => ({ background: 'transparent', color: on ? 'var(--ink)' : 'var(--ink-soft)', border: 'none', borderBottom: `2px solid ${on ? 'var(--blueprint)' : 'transparent'}`, padding: '10px 16px', fontSize: 12, fontFamily: 'var(--mono)', letterSpacing: '.06em', textTransform: 'uppercase', cursor: 'pointer', marginBottom: -1 }) as const;
-const h2 = { fontFamily: 'var(--mono)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--ink-soft)', margin: '24px 0 10px' } as const;
 const TABS = ['Live bills', 'Students & Enrolments', 'Courses & Batches', 'Classes', 'Project Reviews', 'Certificates', 'Testimonials', 'Audit log'] as const;
 
 export default function TrainingClient() {
@@ -55,47 +56,9 @@ export default function TrainingClient() {
       <div style={{ marginBottom: 18, borderBottom: '1px solid var(--line)' }}>{TABS.map((t) => <button key={t} style={tabBtn(tab === t)} onClick={() => setTab(t)}>{t}</button>)}</div>
       {msg && <p style={{ color: 'var(--brass)' }}>{msg}</p>}
 
-      {tab === 'Live bills' && (<>
-        <p style={{ fontSize: 13, opacity: 0.75 }}>Every course payment as it comes in, with what that student has paid so far and what is left. Refreshes every 30 seconds. You also get an email at yaftdesigns@gmail.com for each payment.</p>
-        <h3 style={h2}>Classes: live now and coming up</h3>
-        {(() => {
-          const today = new Date().toISOString().slice(0, 10);
-          const rows = (d.courses ?? []).map((c: Json) => { const r = (d.rules ?? []).find((x: Json) => x.course_slug === c.slug); return r?.starts_on ? { title: c.title, batch: r.batch_label, starts: r.starts_on as string, ends: (r.ends_on as string) || '' } : null; }).filter(Boolean) as { title: string; batch?: string; starts: string; ends: string }[];
-          const live = rows.filter((r) => r.starts <= today && (!r.ends || r.ends >= today));
-          const next = rows.filter((r) => r.starts > today).sort((x, y) => x.starts.localeCompare(y.starts));
-          if (!live.length && !next.length) return <p style={{ fontSize: 13, opacity: 0.7 }}>No batch dates set yet. Add them under Courses & Batches.</p>;
-          return <ul style={{ fontSize: 13, lineHeight: 1.8, paddingLeft: 18 }}>{live.map((r) => <li key={r.title + r.starts}><strong style={{ color: '#4caf50' }}>LIVE</strong> {r.title}{r.batch ? ` (${r.batch})` : ''}, {r.starts} to {r.ends || 'open'}</li>)}{next.map((r) => <li key={r.title + r.starts}><strong style={{ color: 'var(--blueprint)' }}>UPCOMING</strong> {r.title}{r.batch ? ` (${r.batch})` : ''}, starts {r.starts}</li>)}</ul>;
-        })()}
-        <h3 style={h2}>Payments</h3>
-        {bills === null ? <p style={{ fontSize: 13, opacity: 0.7 }}>Loading...</p> : bills.length === 0 ? <p style={{ fontSize: 13, opacity: 0.7 }}>No course payments yet.</p> : (
-          <div style={{ overflowX: 'auto' }}><table className={styles.table}><thead><tr><th>When</th><th>Student</th><th>Course</th><th>Paid now</th><th>Paid so far</th><th>Left</th><th>Bill</th></tr></thead><tbody>
-            {bills.map((b) => <tr key={b.id}>
-              <td>{b.paidAt ? new Date(b.paidAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) : '-'}</td>
-              <td>{b.student}{b.test && <span style={{ color: 'var(--brass)' }}> [TEST]</span>}<div style={{ fontSize: 11, opacity: 0.65 }}>{b.email}{b.phone ? ` · ${b.phone}` : ''}</div></td>
-              <td>{b.course}</td>
-              <td><strong>INR {Number(b.amountInr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</strong><div style={{ fontSize: 11, opacity: 0.65 }}>{b.kind}</div></td>
-              <td>INR {Number(b.paidSoFarInr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}<div style={{ fontSize: 11, opacity: 0.65 }}>of {Number(b.courseTotalInr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div></td>
-              <td style={{ color: b.balanceInr > 0 ? 'var(--brass)' : '#4caf50' }}>{b.balanceInr > 0 ? `INR ${Number(b.balanceInr).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : 'Fully paid'}</td>
-              <td>{b.invoiceNo ?? '-'}{b.syncStatus !== 'ok' && <div style={{ fontSize: 11, color: 'var(--brass)' }}>bill step: {b.syncStatus}</div>}</td></tr>)}
-          </tbody></table></div>)}
-      </>)}
+      {tab === 'Live bills' && <LiveBillsPanel bills={bills} courses={d.courses ?? []} rules={d.rules ?? []} />}
 
-      {tab === 'Students & Enrolments' && (<>
-        <h2 style={h2}>Linking requests that need a person ({(d.claims ?? []).length})</h2>
-        <table className={styles.table}><thead><tr><th>When</th><th>Note</th><th></th></tr></thead><tbody>
-          {(d.claims ?? []).map((c: Json) => <tr key={c.id}><td>{new Date(c.created_at).toLocaleString('en-IN')}</td><td>{c.note}</td><td>
-            <button style={btn} disabled={!c.plan_id} onClick={() => post({ action: 'resolve_claim', reviewId: c.id, decision: 'approved' })}>Link it</button>
-            <button style={btn} onClick={() => post({ action: 'resolve_claim', reviewId: c.id, decision: 'rejected' })}>Reject</button></td></tr>)}
-          {!(d.claims ?? []).length && <tr><td colSpan={3}>Nothing waiting.</td></tr>}
-        </tbody></table>
-        <h2 style={h2}>Students ({(d.students ?? []).length})</h2>
-        <table className={styles.table}><thead><tr><th>Name</th><th>Certificate name</th><th>Enrolments</th><th>Joined</th></tr></thead><tbody>
-          {(d.students ?? []).map((s: Json) => {
-            const mine = (d.links ?? []).filter((l: Json) => l.student_id === s.id);
-            return <tr key={s.id}><td>{s.display_name ?? '-'}</td><td>{s.certificate_name ?? '-'}</td><td>{mine.map((l: Json) => <div key={l.plan_id} style={{ fontSize: 12 }}>{l.course_payment_plans?.description} ({l.linked_via}){' '}<button style={{ ...btn, padding: '2px 8px', fontSize: 11 }} onClick={() => { if (window.confirm(`Unlink "${l.course_payment_plans?.description}" from ${s.display_name ?? 'this student'}? They will lose access to it in the portal. Payments and bills stay as they are.`)) post({ action: 'unlink_enrolment', studentId: l.student_id, planId: l.plan_id }); }}>Unlink</button></div>)}</td><td>{new Date(s.created_at).toLocaleDateString('en-IN')}</td></tr>;
-          })}
-        </tbody></table>
-      </>)}
+      {tab === 'Students & Enrolments' && <StudentsPanel d={d} post={post} />}
 
       {tab === 'Courses & Batches' && (<>
         <p style={{ fontSize: 13, opacity: 0.75 }}>Fees and combos are on the <a href="/admin/course-fees" style={{ textDecoration: 'underline' }}>Course fees</a> page. Here: batch dates, balance due date, certificate rules and the certificate print details. Certificates for a course are held back until its print details are filled in.</p>
