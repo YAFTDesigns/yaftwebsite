@@ -7,6 +7,7 @@ import styles from '@/app/admin/(dashboard)/admin.module.css';
 type Hit = { kind: string; title: string; subtitle: string; href: string };
 const actions: Hit[] = [
   { kind: 'Action', title: 'Today command centre', subtitle: 'Open today’s operational queues', href: '/admin/today' },
+  { kind: 'Action', title: 'People / Pipeline', subtitle: 'Search relationships across inbound, BD and clients', href: '/admin/people' },
   { kind: 'Action', title: 'Create invoice', subtitle: 'Open invoices', href: '/admin/invoices' },
   { kind: 'Action', title: 'Students & payments', subtitle: 'Open training operations', href: '/admin/training' },
   { kind: 'Action', title: 'Lead pipeline', subtitle: 'Open sales leads', href: '/admin/leads' },
