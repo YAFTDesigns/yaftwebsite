@@ -7,6 +7,8 @@ export const dynamic = 'force-dynamic';
 
 const money = (n: unknown) => `₹${Number(n ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
 const when = (v: string | null | undefined) => v ? new Date(v).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+type Plan = { id?: string; description?: string | null; client_email?: string | null; base_total?: number | null; status?: string | null };
+type LinkRow = { plan_id: string; linked_via: string; linked_at: string; course_payment_plans: Plan | Plan[] | null };
 
 export default async function Student360Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -51,17 +53,17 @@ export default async function Student360Page({ params }: { params: Promise<{ id:
       <section className={styles.student360Panel}>
         <div className={styles.todaySectionHead}><div><div className="eyebrow">ENROLMENTS & PAYMENTS</div><h2>Course relationships</h2></div><Link href="/admin/payment-plans">Payment plans →</Link></div>
         {!(links ?? []).length && <p className={styles.empty}>No enrolments linked.</p>}
-        {(links ?? []).map((x: any) => {
-          const p = x.course_payment_plans ?? {};
+        {((links ?? []) as unknown as LinkRow[]).map((x) => {
+          const raw = x.course_payment_plans;
+          const p: Plan = Array.isArray(raw) ? (raw[0] ?? {}) : (raw ?? {});
           const pays = paidFor(x.plan_id);
           const paid = pays.reduce((s, y) => s + Number(y.amount_minor ?? 0) / 100, 0);
-          const outstanding = Math.max(0, Number(p.base_total ?? 0) * 1.18 - paid);
           return <div key={x.plan_id} className={styles.student360Row}>
             <div><strong>{p.description ?? 'Course payment plan'}</strong><small>{p.client_email ?? ''} · linked via {x.linked_via} · {when(x.linked_at)}</small></div>
-            <div className={styles.student360Money}><strong>{money(paid)}</strong><small>{outstanding > 0 ? `${money(outstanding)} est. remaining` : 'Paid recorded'}</small></div>
+            <div className={styles.student360Money}><strong>{money(paid)}</strong><small>paid recorded · plan base {money(p.base_total)} · {p.status ?? 'status unavailable'}</small></div>
           </div>;
         })}
-        <p className={styles.student360Note}>Remaining amount is shown only as a quick reference from the plan base + 18% GST minus recorded paid amounts. Use Payment Plans/Invoices as the financial source of truth.</p>
+        <p className={styles.student360Note}>Payment Plans and Invoices remain the financial source of truth. This view only summarizes recorded relationships and paid transactions.</p>
       </section>
 
       <section className={styles.student360Panel}>
