@@ -19,6 +19,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       label: 'Sales',
       links: [
         { href: '/admin/today', label: 'Today', badge: counts.dueToday },
+        { href: '/admin/people', label: 'People / Pipeline' },
         { href: '/admin/leads', label: 'Leads', badge: counts.newLeads },
         { href: '/admin/enquiries', label: 'Enquiries' },
         { href: '/admin/bd-leads', label: 'BD Leads' },
