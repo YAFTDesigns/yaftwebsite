@@ -15,7 +15,7 @@ export default async function Student360Page({ params }: { params: Promise<{ id:
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const a = getSupabaseAdmin();
 
-  const { data: student } = await a.from('students').select('id, user_id, display_name, certificate_name, created_at, deleted_at').eq('id', id).maybeSingle();
+  const { data: student } = await a.from('students').select('id, user_id, display_name, certificate_name, phone, created_at, deleted_at').eq('id', id).maybeSingle();
   if (!student || student.deleted_at) notFound();
 
   const { data: links } = await a.from('student_enrolments')
@@ -25,7 +25,7 @@ export default async function Student360Page({ params }: { params: Promise<{ id:
   const planIds = (links ?? []).map((x) => x.plan_id);
   const [payments, projects, certs, testimonials] = await Promise.all([
     planIds.length ? a.from('course_payments').select('id, plan_id, kind, status, paid_at, amount_minor, invoice_no, sync_status').in('plan_id', planIds).order('paid_at', { ascending: false }) : Promise.resolve({ data: [] }),
-    a.from('student_projects').select('id, plan_id, course_slug, status, public_display_name, created_at, updated_at').eq('student_id', id).order('updated_at', { ascending: false }),
+    a.from('student_projects').select('id, plan_id, course_slug, status, public_display_name, created_at').eq('student_id', id).order('created_at', { ascending: false }),
     a.from('certificates').select('id, certificate_id, student_name, course_suffix, issue_date, revoked, revoked_reason, plan_id, course_slug').eq('student_id', id).order('created_at', { ascending: false }),
     planIds.length ? a.from('student_testimonials').select('id, plan_id, course_slug, status, public_display_name, updated_at').in('plan_id', planIds).order('updated_at', { ascending: false }) : Promise.resolve({ data: [] }),
   ]);
@@ -39,7 +39,7 @@ export default async function Student360Page({ params }: { params: Promise<{ id:
         <Link href="/admin/training" className={styles.student360Back}>← Students & payments</Link>
         <div className="eyebrow">STUDENT 360°</div>
         <h1 className={styles.student360Title}>{student.display_name ?? student.certificate_name ?? 'Student'}</h1>
-        <p className={styles.student360Sub}>Joined {when(student.created_at)} · Certificate name: {student.certificate_name ?? 'not set'}</p>
+        <p className={styles.student360Sub}>Joined {when(student.created_at)} · Certificate name: {student.certificate_name ?? 'not set'}{student.phone ? ` · ${student.phone}` : ''}</p>
       </div>
       <div className={styles.student360Stats}>
         <div><span>Enrolments</span><strong>{(links ?? []).length}</strong></div>
@@ -69,7 +69,7 @@ export default async function Student360Page({ params }: { params: Promise<{ id:
       <section className={styles.student360Panel}>
         <div className={styles.todaySectionHead}><div><div className="eyebrow">PROJECTS</div><h2>Student work</h2></div><Link href="/admin/training">Review queue →</Link></div>
         {!(projects.data ?? []).length && <p className={styles.empty}>No projects yet.</p>}
-        {(projects.data ?? []).map((p) => <div key={p.id} className={styles.student360Row}><div><strong>{p.course_slug}</strong><small>{p.public_display_name ?? 'Private profile'} · updated {when(p.updated_at ?? p.created_at)}</small></div><span className={styles.statusPill}>{String(p.status).replace(/_/g,' ')}</span></div>)}
+        {(projects.data ?? []).map((p) => <div key={p.id} className={styles.student360Row}><div><strong>{p.course_slug}</strong><small>{p.public_display_name ?? 'Private profile'} · created {when(p.created_at)}</small></div><span className={styles.statusPill}>{String(p.status).replace(/_/g,' ')}</span></div>)}
       </section>
 
       <section className={styles.student360Panel}>
