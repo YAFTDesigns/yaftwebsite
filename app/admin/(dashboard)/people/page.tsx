@@ -10,6 +10,10 @@ type Person = {
   kind: Set<string>; status: string | null; funnel: string | null; interest: string | null;
   next: string | null; followUp: string | null; href: string; updated: string | null;
 };
+type LeadRow = { id:string; email:string; name:string|null; status:string|null; funnel:string|null; organisation:string|null; service_interest:string|null; follow_up_date:string|null; last_seen:string|null; declined:boolean };
+type EnquiryRow = { id:string; lead_id:string|null; name:string; email:string; phone:string|null; organisation:string|null; course_interest:string|null; need:string|null; created_at:string|null };
+type ClientRow = { id:string; name:string; email:string|null; phone:string|null; company_name:string|null; active:boolean; updated_at:string|null };
+type BdRow = { id:string; organization:string; contact_name:string|null; status:string|null; relevant_service:string|null; next_action:string|null; follow_up_date:string|null; updated_at:string|null };
 
 const norm = (v: string | null | undefined) => (v ?? '').trim().toLowerCase();
 const fmt = (v: string | null) => v ? new Date(v).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -18,10 +22,10 @@ export default async function PeoplePage({ searchParams }: { searchParams: Promi
   const { q = '', view = 'all' } = await searchParams;
   const a = getSupabaseAdmin();
   const [leads, enquiries, clients, bd] = await Promise.all([
-    safeQuery<any[]>(a.from('leads').select('id,email,name,status,funnel,organisation,service_interest,follow_up_date,last_seen,declined').eq('is_test', false).order('last_seen',{ascending:false}).limit(500), [], 'people leads'),
-    safeQuery<any[]>(a.from('enquiries').select('id,lead_id,name,email,phone,organisation,course_interest,need,created_at').eq('is_test', false).order('created_at',{ascending:false}).limit(500), [], 'people enquiries'),
-    safeQuery<any[]>(a.from('clients').select('id,name,email,phone,company_name,active,updated_at').is('deleted_at', null).order('updated_at',{ascending:false}).limit(500), [], 'people clients'),
-    safeQuery<any[]>(a.from('bd_leads').select('id,organization,contact_name,contact_channel,status,relevant_service,next_action,follow_up_date,updated_at,priority').order('updated_at',{ascending:false}).limit(500), [], 'people bd'),
+    safeQuery<LeadRow[]>(a.from('leads').select('id,email,name,status,funnel,organisation,service_interest,follow_up_date,last_seen,declined').eq('is_test', false).order('last_seen',{ascending:false}).limit(500), [], 'people leads'),
+    safeQuery<EnquiryRow[]>(a.from('enquiries').select('id,lead_id,name,email,phone,organisation,course_interest,need,created_at').eq('is_test', false).order('created_at',{ascending:false}).limit(500), [], 'people enquiries'),
+    safeQuery<ClientRow[]>(a.from('clients').select('id,name,email,phone,company_name,active,updated_at').is('deleted_at', null).order('updated_at',{ascending:false}).limit(500), [], 'people clients'),
+    safeQuery<BdRow[]>(a.from('bd_leads').select('id,organization,contact_name,contact_channel,status,relevant_service,next_action,follow_up_date,updated_at,priority').order('updated_at',{ascending:false}).limit(500), [], 'people bd'),
   ]);
 
   const map = new Map<string, Person>();
