@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { card, chip, ghost, GREEN, heading, input, primary } from './panelStyles';
 
 type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -44,7 +45,7 @@ export default function StudentsPanel({ d, post }: { d: Json; post: (body: Json)
             <div key={s.id} style={{ ...card, borderLeft: `3px solid ${mine.length ? GREEN : '#555'}` }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'space-between' }}>
                 <div>
-                  <div style={{ fontSize: 17, fontWeight: 600 }}>{s.display_name ?? '-'}</div>
+                  <Link href={`/admin/training/student/${s.id}`} style={{ fontSize: 17, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}>{s.display_name ?? '-'}</Link>
                   <div style={{ fontSize: 12, opacity: 0.65, marginTop: 2 }}>Certificate name: {s.certificate_name ?? '-'}</div>
                 </div>
                 <div style={{ fontSize: 12, opacity: 0.6 }}>Joined {new Date(s.created_at).toLocaleDateString('en-IN')}</div>

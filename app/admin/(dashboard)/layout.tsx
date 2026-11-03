@@ -10,6 +10,7 @@ import styles from './admin.module.css';
 export const dynamic = 'force-dynamic';
 
 import AccountsBell from '@/components/admin/AccountsBell';
+import AdminCommandPalette from '@/components/admin/AdminCommandPalette';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Defence in depth: the proxy normally gates /admin, but fail closed here too
@@ -26,6 +27,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </Link>
           <AdminNav counts={counts} />
           <div className={styles.actions}>
+            <AdminCommandPalette />
             <a href="https://www.yaftdesigns.com" target="_blank" rel="noopener noreferrer" className="btn-ghost">
               View website ↗
             </a>
