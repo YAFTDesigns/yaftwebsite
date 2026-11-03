@@ -59,7 +59,7 @@ export default async function Rhino3DAEC() {
       <p className={s.subtitle}>A Design Re-Thinking Workshop</p>
       <p className={s.desc}>Design with the sun. A focused workshop for AEC professionals covering Rhino3D fundamentals and Grasshopper-based climate, daylight and comfort analysis with Ladybug and Honeybee. Learn to read sun paths, direct sun hours and incident radiation, then optimise building orientation, facades and shading with Galapagos.</p>
       <div className={s.badges}>
-        <span className={s.badge}>2 days / 10 to 15 hours</span>
+        <span className={s.badge}>2 days / 8 hours</span>
         <span className={s.badge}>AEC professionals</span>
         <span className={s.badge}>Live online / On-site</span>
         <span className={s.badge}>Ladybug + Honeybee included</span>
@@ -67,7 +67,7 @@ export default async function Rhino3DAEC() {
       <div className={s.ctaBar}>
         <div>
           <div className={s.priceMain}>${usdApprox(fee)} <span style={{fontSize:14,fontWeight:400,color:'var(--ink-soft)'}}>per person</span></div>
-          <div className={s.priceSub}>INR {fmtInr(fee)} + GST · 6 hrs (3+3 sessions)</div>
+          <div className={s.priceSub}>INR {fmtInr(fee)} + GST · 8 hrs (4+4 sessions)</div>
           <div className={s.priceSub}>Institutions: contact for custom pricing</div>
           <div className={s.priceUsd}>approx. rate · subject to change</div>
         </div>
@@ -117,7 +117,7 @@ export default async function Rhino3DAEC() {
       <hr className={s.divider} />
       <p className={s.sectionLabel}>Course fees</p>
       <div className={s.feeBox}>
-        <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>6 hours total, split as 3+3 sessions • exclusive of GST (18% added at checkout)</div></div><div className={s.feeAmt}>INR {fmtInr(fee)} + GST<div className={s.feeUsd}>approx. ${usdApprox(fee)}</div></div></div>
+        <div className={s.feeRow}><div><div className={s.feeLabel}>Individual / group training</div><div className={s.feeNote}>8 hours total, split as 4+4 sessions • exclusive of GST (18% added at checkout)</div></div><div className={s.feeAmt}>INR {fmtInr(fee)} + GST<div className={s.feeUsd}>approx. ${usdApprox(fee)}</div></div></div>
         <div className={s.feeRow}><div><div className={s.feeLabel}>Institutions / colleges</div><div className={s.feeNote}>Custom pricing, travel expenses borne by institution</div></div><div className={s.feeAmt}>Contact us</div></div>
       </div>
       <CourseActions slug="rhino-aec-climate" title="Rhino3D for AEC and Climate" />
