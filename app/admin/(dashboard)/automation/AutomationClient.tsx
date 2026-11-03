@@ -72,7 +72,7 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
       </div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,minmax(0,1fr))', gap:8, marginBottom:18 }}>
         <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Jobs enabled</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{enabledCount}/{controls.length}</strong></div>
-        <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Retry queue</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{Array.isArray((extra.queues as any)?.items) ? (extra.queues as any).items.length : '—'}</strong></div>
+        <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Retry queue</span><strong style={{display:'block',fontSize:16,marginTop:8}}>Monitor below</strong></div>
         <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Scheduled invoices due</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{extra.due_scheduled_invoices?.length ?? 0}</strong></div>
       </div>
       {msg && <p>{msg}</p>}
