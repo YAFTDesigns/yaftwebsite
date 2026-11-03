@@ -37,7 +37,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     {
-      label: 'Accounting',
+      label: 'Finance',
       links: [
         { href: '/admin/invoices', label: 'Invoices' },
         { href: '/admin/payment-plans', label: 'Payment plans' },
@@ -45,7 +45,7 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     {
-      label: 'Website',
+      label: 'Content',
       links: [
         { href: '/admin/projects', label: 'Projects' },
         { href: '/admin/services', label: 'Page images' },
@@ -54,11 +54,12 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     {
-      label: 'Messages',
+      label: 'System',
       links: [
         { href: '/admin/inbox', label: 'Inbox' },
-        { href: '/admin/emails', label: 'Sent emails', badge: counts.failedEmails },
+        { href: '/admin/emails', label: 'Email health', badge: counts.failedEmails },
         { href: '/admin/automation', label: 'Automation' },
+        { href: '/admin/analytics', label: 'Analytics' },
       ],
     },
     {
@@ -72,7 +73,6 @@ export function getNavGroups(counts: NavCounts): NavGroup[] {
       label: 'Admin',
       links: [
         { href: '/admin/team', label: 'Team' },
-        { href: '/admin/analytics', label: 'Analytics' },
       ],
     },
   ];
