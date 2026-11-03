@@ -10,6 +10,7 @@ import { computeSchedule } from '@/lib/coursePayments';
 import { getStudentSession } from '@/lib/student/session';
 import { recordInterest } from '@/lib/student/interest';
 import { audit } from '@/lib/student/audit';
+import { findReusablePlan } from '@/lib/reusablePlan';
 
 import { CONTACT_EMAIL } from '@/lib/contact';
 // POST /api/enroll/order { items: ['course:slug' | 'bundle:slug'], currency: 'INR'|'USD', choice: 'advance'|'full', details }
@@ -33,23 +34,30 @@ export async function POST(request: NextRequest) {
   const advance = canSplit ? advanceFor(sel.baseTotal) : null;
   try { computeSchedule(sel.baseTotal, advance); } catch { return NextResponse.json({ error: 'Invalid fee for this selection.' }, { status: 400 }); }
 
-  const token = randomBytes(24).toString('base64url');
-  const { data: plan, error } = await getSupabaseAdmin().from('course_payment_plans').insert({
-    token, ...v.value, description: sel.description, structure: advance === null ? 'full' : 'instalments',
-    base_total: sel.baseTotal, advance_base: advance, is_test: razorpayConfig().test, currency, source: 'enroll', course_slugs: sel.courseSlugs,
-    details_confirmed_at: new Date().toISOString(),
-  }).select('*').single();
-  if (error || !plan) { console.error('[enroll] plan insert failed:', error); return NextResponse.json({ error: 'Could not start your enrolment. Please try again.' }, { status: 500 }); }
-
-  // Signed-in verified student: attach this enrolment to their account server-side (identity comes from the session, never from the form).
+  // Signed-in verified student (identity comes from the session, never from the form). If they already have an open,
+  // unpaid plan for exactly this selection, they get it back instead of a duplicate.
   const student = await getStudentSession();
-  if (student) {
-    const { error: linkErr } = await getSupabaseAdmin().from('student_enrolments').insert({ student_id: student.profile.id, plan_id: plan.id, linked_via: 'checkout_signed_in' });
-    if (!linkErr) await audit({ actor_type: 'student', actor_ref: student.profile.id, action: 'enrolment_linked_at_checkout', subject: plan.id });
-    for (const slug of sel.courseSlugs) await recordInterest(student.profile.id, slug, 'checkout_started');
+  const structure = advance === null ? 'full' : 'instalments';
+  const existing = student ? await findReusablePlan(student.profile.id, { courseSlugs: sel.courseSlugs, baseTotal: sel.baseTotal, advanceBase: advance, structure, currency, isTest: razorpayConfig().test }) : null;
+
+  type Plan = { id: string; token: string; status: string; is_test: boolean; structure: 'instalments' | 'full'; base_total: number; advance_base: number | null; client_name: string; client_email: string; currency: 'INR' | 'USD' };
+  let plan: Plan | null = existing as Plan | null;
+  if (!plan) {
+    const { data: created, error } = await getSupabaseAdmin().from('course_payment_plans').insert({
+      token: randomBytes(24).toString('base64url'), ...v.value, description: sel.description, structure,
+      base_total: sel.baseTotal, advance_base: advance, is_test: razorpayConfig().test, currency, source: 'enroll', course_slugs: sel.courseSlugs,
+      details_confirmed_at: new Date().toISOString(),
+    }).select('*').single();
+    if (error || !created) { console.error('[enroll] plan insert failed:', error); return NextResponse.json({ error: 'Could not start your enrolment. Please try again.' }, { status: 500 }); }
+    plan = created as Plan;
+    if (student) {
+      const { error: linkErr } = await getSupabaseAdmin().from('student_enrolments').insert({ student_id: student.profile.id, plan_id: created.id, linked_via: 'checkout_signed_in' });
+      if (!linkErr) await audit({ actor_type: 'student', actor_ref: student.profile.id, action: 'enrolment_linked_at_checkout', subject: created.id });
+    }
   }
+  if (student) for (const slug of sel.courseSlugs) await recordInterest(student.profile.id, slug, 'checkout_started');
 
   const r = await createCourseOrder(plan, { choice, details: v.value });
   if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status });
-  return NextResponse.json({ orderId: r.orderId, amount: r.amount, currency: r.currency, keyId: r.keyId, kind: r.kind, name: r.name, email: r.email, token });
+  return NextResponse.json({ orderId: r.orderId, amount: r.amount, currency: r.currency, keyId: r.keyId, kind: r.kind, name: r.name, email: r.email, token: plan.token });
 }
