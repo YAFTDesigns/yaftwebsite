@@ -4,6 +4,7 @@ import BarChart from '@/components/admin/BarChart';
 import LineChart from '@/components/admin/LineChart';
 import { buildJourney, pct, type JourneyEvent, type InterestCount } from '@/lib/serviceJourney';
 import { SEGMENT_LABELS } from '@/lib/enquiryFields';
+import { loadRegFunnel } from '@/lib/registrationFunnel';
 import styles from '../admin.module.css';
 
 export const dynamic = 'force-dynamic';
@@ -110,6 +111,7 @@ async function getAnalytics() {
 
 export default async function AdminAnalyticsPage() {
   const { byEventType, byCourse, bySource, monthlyByEvent, journey, error } = await getAnalytics();
+  const reg = await loadRegFunnel().catch(() => null);
   const th = { textAlign: 'left', fontWeight: 400, padding: '6px 10px', color: 'var(--ink-soft)' } as const;
   const td = { padding: '6px 10px' } as const;
   const cell = (n: number | null) => (n === null ? '–' : n);
@@ -133,6 +135,31 @@ export default async function AdminAnalyticsPage() {
             Some analytics data could not be loaded: {error}
           </p>
         </div>
+      )}
+
+      {reg && (
+        <>
+          <div className={`eyebrow ${styles.eyebrowSpaced}`}>REGISTERED VS BUYING</div>
+          <div className={styles.statGrid} style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            {[
+              ['Registered', reg.registered, 'portal + Labs sign-ups'],
+              ['Started checkout', reg.startedCheckout, `${pct(reg.startedCheckout, reg.registered)} of registered`],
+              ['Paid something', reg.paid, `${pct(reg.paid, reg.registered)} of registered`],
+              ['Fully paid', reg.fullyPaid, `${pct(reg.fullyPaid, reg.paid)} of buyers`],
+            ].map(([label, n, sub]) => (
+              <div key={String(label)} className={styles.stat}>
+                <div className={styles.statValue}>{n}</div>
+                <div className={styles.statLabel}>{label}</div>
+                <div style={{ fontSize: 12, opacity: 0.6, marginTop: 4 }}>{sub}</div>
+              </div>
+            ))}
+          </div>
+          <table style={{ width: '100%', maxWidth: 520, fontFamily: 'var(--mono)', fontSize: 13, marginTop: 16, borderCollapse: 'collapse' }}>
+            <thead><tr><th style={th}>Month</th><th style={th}>Registered</th><th style={th}>First-time buyers</th></tr></thead>
+            <tbody>{reg.months.map((m) => (<tr key={m.key}><td style={td}>{m.key}</td><td style={td}>{m.registered}</td><td style={td}>{m.buyers}</td></tr>))}</tbody>
+          </table>
+          <p style={{ fontSize: 12, opacity: 0.55, marginTop: 8 }}>Real payments only; test plans and test payments are excluded. Buyers are counted in the month of their first payment.</p>
+        </>
       )}
 
       <div className={`eyebrow ${styles.eyebrowSpaced}`}>MONTHLY TREND</div>
