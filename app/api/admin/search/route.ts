@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { isRequestFromAdmin } from '@/lib/admin/requireAdmin';
 
 const NO_STORE = { 'Cache-Control': 'private, no-store' };
-const cleanQ = (v: string | null) => (v ?? '').trim().replace(/[%_]/g, '').slice(0, 80);
+const cleanQ = (v: string | null) => (v ?? '').trim().replace(/[^a-zA-Z0-9@.+\-\s]/g, '').slice(0, 80);
 
 type Result = { kind: string; title: string; subtitle: string; href: string };
 
