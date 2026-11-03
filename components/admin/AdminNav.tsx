@@ -47,7 +47,8 @@ export default function AdminNav({ counts }: { counts: NavCounts }) {
 
   return (
     <nav className={styles.nav} ref={navRef}>
-      <Link href="/admin">Overview</Link>
+      <Link href="/admin/today" style={pathname === '/admin/today' ? { color: 'var(--brass)', borderColor: 'var(--brass)' } : undefined}>Today</Link>
+      <Link href="/admin" style={pathname === '/admin' ? { color: 'var(--brass)', borderColor: 'var(--brass)' } : undefined}>Overview</Link>
 
       {groups.map((group) => {
         const groupBadgeTotal = group.links.reduce((s, l) => s + (l.badge ?? 0), 0);
