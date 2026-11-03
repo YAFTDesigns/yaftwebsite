@@ -79,7 +79,9 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
   const [tab, setTab]           = useState<'logs' | 'templates'>('logs');
   const [logs, setLogs]         = useState<Log[]>(initialLogs ?? []);
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'sent' | 'failed'>('all');
   const filteredLogs = logs.filter(l => {
+    if (statusFilter !== 'all' && l.status !== statusFilter) return false;
     const q = searchQuery.trim().toLowerCase();
     if (!q) return true;
     return l.to_email.toLowerCase().includes(q) || l.to_name.toLowerCase().includes(q) || l.subject.toLowerCase().includes(q);
@@ -149,8 +151,8 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Emails</h1>
-          <p className={styles.sub}>Track sent emails and edit templates.</p>
+          <h1 className={styles.title}>Email health</h1>
+          <p className={styles.sub}>Monitor delivery, isolate failures and maintain templates. Internal test sends are kept separate from customer delivery metrics.</p>
         </div>
       </div>
 
@@ -199,13 +201,24 @@ export default function AdminEmailsClient({ initialLogs }: { initialLogs?: Log[]
       {!loading && tab === 'logs' && (
         <>
           {logs.length > 0 && (
-            <input
-              type="text"
-              placeholder="Search by recipient or subject..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{ width:'100%', background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'9px 12px', color:'#ddd', fontSize:13, marginBottom:16, boxSizing:'border-box' }}
-            />
+            <div style={{ display:'grid', gridTemplateColumns:'1fr auto', gap:8, marginBottom:16 }}>
+              <input
+                type="text"
+                placeholder="Search by recipient or subject..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                style={{ width:'100%', background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'9px 12px', color:'#ddd', fontSize:13, boxSizing:'border-box' }}
+              />
+              <select
+                value={statusFilter}
+                onChange={e => setStatusFilter(e.target.value as 'all' | 'sent' | 'failed')}
+                style={{ background:'#0a0a0a', border:'1px solid #2a2a2a', borderRadius:6, padding:'9px 12px', color:'#ddd', fontSize:12 }}
+              >
+                <option value="all">All delivery</option>
+                <option value="failed">Failed only</option>
+                <option value="sent">Sent only</option>
+              </select>
+            </div>
           )}
         {logs.length === 0
           ? <p className={styles.empty}>No emails sent yet.</p>
