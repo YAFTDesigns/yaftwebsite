@@ -69,6 +69,7 @@ export default async function TodayPage() {
         </div>
         <div className={styles.todayQuickActions}>
           <Link href="/admin/invoices" className={styles.adminActionPrimary}>+ New invoice</Link>
+          <Link href="/admin/people" className={styles.adminAction}>People / Pipeline</Link>
           <Link href="/admin/leads" className={styles.adminAction}>Open leads</Link>
           <Link href="/admin/inbox" className={styles.adminAction}>Open inbox</Link>
         </div>
