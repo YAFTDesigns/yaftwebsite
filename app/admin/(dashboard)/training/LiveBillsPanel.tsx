@@ -14,6 +14,7 @@ export default function LiveBillsPanel({ bills, courses, rules }: { bills: Json[
 
   return (
     <div style={{ maxWidth: 980 }}>
+      <h3 style={{ ...heading, marginTop: 0 }}>Payment summary</h3>
       <p style={{ fontSize: 13, opacity: 0.75, marginTop: 0 }}>Every course payment as it comes in. Refreshes every 30 seconds, and each payment also emails yaftdesigns@gmail.com.</p>
 
       <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', marginBottom: 8 }}>
