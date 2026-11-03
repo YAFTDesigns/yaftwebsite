@@ -42,3 +42,34 @@ export async function loadLiveBills(limit = 40, onlyPaymentId?: string): Promise
   }
   return out;
 }
+
+export type BalanceDue = {
+  planId: string; student: string; email: string; phone: string | null; course: string; courseSlugs: string[];
+  advancePaidAt: string | null; paidSoFarInr: number; courseTotalInr: number;
+  balanceBase: number; balanceGst: number; balanceTotal: number; payToken: string;
+};
+
+/**
+ * Every real student plan that has paid something but still owes the second part: what is left, split into base, GST and total.
+ * Independent of the 40-row live list, so an old unpaid balance never drops off. Oldest advance first.
+ */
+export async function loadBalancesDue(): Promise<BalanceDue[]> {
+  const a = getSupabaseAdmin();
+  const { data: plans } = await a.from('course_payment_plans').select('id, token, client_name, client_email, client_phone, description, structure, base_total, advance_base, is_test, course_slugs').eq('status', 'active').eq('structure', 'instalments').eq('is_test', false);
+  if (!plans?.length) return [];
+  const { data: pays } = await a.from('course_payments').select('plan_id, kind, amount_minor, paid_at, test_mode').in('plan_id', plans.map((p) => p.id as string)).eq('status', 'paid');
+  const out: BalanceDue[] = [];
+  for (const p of plans) {
+    const mine = (pays ?? []).filter((x) => x.plan_id === p.id && !x.test_mode);
+    if (!mine.length || mine.some((x) => x.kind === 'balance' || x.kind === 'full')) continue;
+    const sched = scheduleFor(p as unknown as PlanShape);
+    if (!sched.balance) continue;
+    const paid = mine.reduce((s, x) => s + Number(x.amount_minor) / 100, 0);
+    out.push({
+      planId: p.id as string, student: p.client_name as string, email: p.client_email as string, phone: (p.client_phone as string | null) ?? null, course: p.description as string,
+      courseSlugs: (p.course_slugs as string[] | null) ?? [], advancePaidAt: mine.map((x) => x.paid_at as string | null).filter(Boolean).sort()[0] ?? null,
+      paidSoFarInr: paid, courseTotalInr: sched.total.total, balanceBase: sched.balance.base, balanceGst: sched.balance.gst, balanceTotal: sched.balance.total, payToken: p.token as string,
+    });
+  }
+  return out.sort((x, y) => String(x.advancePaidAt ?? '').localeCompare(String(y.advancePaidAt ?? '')));
+}

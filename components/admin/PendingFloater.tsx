@@ -9,6 +9,7 @@ type PendingProps = {
   pendingPublications: number;
   failedEmails: number;
   outstandingInvoices: { invoice_no: string; client_name: string; balance: number }[];
+  balancesDue: { name: string; course: string; base: number; gst: number; total: number }[];
 };
 
 // Fixed to the bottom of the viewport (not just further down the page)
@@ -21,12 +22,12 @@ type PendingProps = {
 // pulls the true all-time outstanding list, by name, regardless of when
 // the invoice was created.
 export default function PendingFloater({
-  pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, outstandingInvoices,
+  pendingTestimonials, pendingStudentWork, pendingPublications, failedEmails, outstandingInvoices, balancesDue,
 }: PendingProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const outstandingTotal = outstandingInvoices.reduce((s, i) => s + Number(i.balance), 0);
-  const totalPendingItems = pendingTestimonials + pendingStudentWork + pendingPublications + failedEmails + outstandingInvoices.length;
+  const totalPendingItems = pendingTestimonials + pendingStudentWork + pendingPublications + failedEmails + outstandingInvoices.length + balancesDue.length;
 
   if (totalPendingItems === 0) return null;
 
@@ -79,6 +80,21 @@ export default function PendingFloater({
                 <div key={inv.invoice_no} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--mono)', fontSize: 12, color: '#999' }}>
                   <span>{inv.client_name}</span>
                   <span>₹{fmtInt(Number(inv.balance))}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {balancesDue.length > 0 && (
+          <div>
+            <a href="/admin/training" style={{ fontFamily: 'var(--mono)', fontSize: 13, color: 'var(--brass)', textDecoration: 'none' }}>
+              ₹{fmtInt(balancesDue.reduce((s, b) => s + b.total, 0))} part-2 balance, {balancesDue.length} student{balancesDue.length > 1 ? 's' : ''} →
+            </a>
+            <div style={{ marginTop: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {balancesDue.map((b) => (
+                <div key={b.name + b.course} style={{ fontFamily: 'var(--mono)', fontSize: 12, color: '#999' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>{b.name}</span><span>₹{fmtInt(b.total)}</span></div>
+                  <div style={{ fontSize: 11, color: '#666' }}>₹{fmtInt(b.base)} + GST ₹{fmtInt(b.gst)}</div>
                 </div>
               ))}
             </div>

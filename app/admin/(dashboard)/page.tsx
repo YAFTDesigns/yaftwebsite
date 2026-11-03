@@ -8,6 +8,7 @@ import LineChart from '@/components/admin/LineChart';
 import EmailInvoicesWidget from '@/components/admin/EmailInvoicesWidget';
 import PushNotificationToggle from '@/components/admin/PushNotificationToggle';
 import PendingFloater from '@/components/admin/PendingFloater';
+import { loadBalancesDue } from '@/lib/liveBills';
 import { computeInvoiceTotals, type InvoiceLineItem } from '@/lib/invoiceMath';
 import styles from './admin.module.css';
 import { fmtInt } from '@/lib/format';
@@ -98,7 +99,7 @@ async function getCounts() {
     recentEnquiries, recentInvoices,
     sixMonthInvoices, selectableInvoices, accountantOptions,
     allTimeOutstandingInvoices,
-    navCounts,
+    navCounts, balancesDue,
   ] = await Promise.all([
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
@@ -137,6 +138,7 @@ async function getCounts() {
     // same four counts the layout's nav badges use, shared via React cache()
     // so the request fetches them once.
     getNavCounts(),
+    loadBalancesDue().catch(() => []),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -205,6 +207,7 @@ async function getCounts() {
       (m) => !m.role || !m.role.toLowerCase().includes('designer')
     ),
     outstandingInvoices: allTimeOutstandingInvoices.data ?? [],
+    balancesDue: balancesDue.map((b) => ({ name: b.student, course: b.course, base: b.balanceBase, gst: b.balanceGst, total: b.balanceTotal })),
   };
 }
 
@@ -233,6 +236,7 @@ export default async function AdminOverviewPage() {
         pendingPublications={counts.pendingPublications}
         failedEmails={counts.failedEmails}
         outstandingInvoices={counts.outstandingInvoices}
+        balancesDue={counts.balancesDue}
       />
 
       {/* Quick actions -- deliberately only 3, each a real, already-
