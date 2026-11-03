@@ -3,7 +3,7 @@ import { getSupabaseServer } from '@/lib/supabase/server';
 import { isAdminUser } from '@/lib/admin';
 
 // Only these in-site destinations are allowed after sign-in, so the callback can never be turned into an open redirect.
-const ALLOWED_NEXT = new Set(['/student', '/admin', '/enroll']);
+const ALLOWED_NEXT = new Set(['/student', '/admin', '/enroll', '/labs']);
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);

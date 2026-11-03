@@ -99,7 +99,7 @@ async function getCounts() {
     recentEnquiries, recentInvoices,
     sixMonthInvoices, selectableInvoices, accountantOptions,
     allTimeOutstandingInvoices,
-    navCounts, balancesDue,
+    navCounts, balancesDue, studentsReg,
   ] = await Promise.all([
     safe(supabase.from('leads').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
     safe(supabase.from('enquiries').select('id', { count: 'exact', head: true }).eq('is_test', false), null),
@@ -139,6 +139,7 @@ async function getCounts() {
     // so the request fetches them once.
     getNavCounts(),
     loadBalancesDue().catch(() => []),
+    safe(supabase.from('students').select('id', { count: 'exact', head: true }).is('deleted_at', null), null),
   ]);
 
   const invoiceRows = invoicesThisMonth.data ?? [];
@@ -176,6 +177,7 @@ async function getCounts() {
 
   return {
     leads: leads.count ?? 0,
+    studentsRegistered: studentsReg.count ?? 0,
     enquiries: enquiries.count ?? 0,
     enquiriesThisWeek: enquiriesThisWeek.count ?? 0,
     syllabusRequests: syllabusRequests.count ?? 0,
@@ -308,6 +310,10 @@ export default async function AdminOverviewPage() {
         <div className={styles.stat}>
           <div className={styles.statValue}>{counts.enquiriesThisWeek}</div>
           <div className={styles.statLabel}>Enquiries this week</div>
+        </div>
+        <div className={styles.stat}>
+          <div className={styles.statValue}>{counts.studentsRegistered}</div>
+          <div className={styles.statLabel}>Registered (student portal + Labs)</div>
         </div>
       </div>
 

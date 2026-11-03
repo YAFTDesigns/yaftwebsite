@@ -204,6 +204,7 @@ export default function LabsPageClient({ scripts, categories }: { scripts: LabSc
                       >
                         Download {selected.price > 0 ? `(INR ${fmtInt(selected.price)})` : ''} →
                       </a>
+                      <p style={{ fontSize: 12, opacity: 0.65, marginTop: 8 }}>Free sign-in required: you will be asked to register once, then come straight back here.</p>
                     </div>
                   </div>
                 ) : filtered.length === 0 ? (

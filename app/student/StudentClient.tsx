@@ -161,7 +161,7 @@ export default function StudentClient() {
     });
   }, [load]);
 
-  const redirectTo = () => `${window.location.origin}/auth/callback?next=/student`;
+  const redirectTo = () => `${window.location.origin}/auth/callback?next=${new URLSearchParams(window.location.search).get('from') === 'labs' ? '/labs' : '/student'}`;
   function rememberChoices() { try { localStorage.setItem('yaft_interest_pref', '1'); } catch { /* ignore */ } }
   async function google() { rememberChoices(); await getSupabaseBrowser().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: redirectTo(), queryParams: { prompt: 'select_account' } } }); }
   async function emailLink() {

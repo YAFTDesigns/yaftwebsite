@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseAdmin } from '@/lib/supabase/admin';
 import { rateLimit } from '@/lib/rateLimit';
+import { getStudentSession } from '@/lib/student/session';
 
 // GET /api/labs/[id]/download
-// Public, no auth -- this is what "Download" links to on the live
-// site. Increments download_count (the "how many have viewed" number
+// Needs a free student sign-in (registration); getStudentSession also creates the student record.
+// This is what "Download" links to on the live site. Increments download_count (the "how many have viewed" number
 // shown on each card) here, at the moment of an actual download, not
 // on page view -- a page view isn't the same signal as someone
 // genuinely downloading the file.
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (limited) return limited;
 
   const { id } = await params;
+  if (!(await getStudentSession())) return NextResponse.redirect(new URL('/student?from=labs', request.url));
   const supabase = getSupabaseAdmin();
 
   const { data: script, error } = await supabase
