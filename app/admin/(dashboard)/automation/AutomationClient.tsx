@@ -7,6 +7,12 @@ type Control = { job: string; enabled: boolean; max_total_sends: number | null; 
 type Recipient = { email: string; name: string | null; source: string; last_activity: string; status: string; course_interest: string | null; selection_reason: string; subject: string };
 
 const mono = { fontFamily: 'var(--mono)', fontSize: 13 } as const;
+const JOB_LABELS: Record<string,string> = {
+  'lead-follow-up': 'Lead follow-ups',
+  'retry-queue': 'Retry queue',
+  'invoice-reminder': 'Invoice reminders',
+  'testimonial-request': 'Testimonial requests',
+};
 const box = { border: '1px solid var(--border, #333)', padding: 16, marginBottom: 12 } as const;
 const btn = { ...mono, padding: '6px 12px', cursor: 'pointer' } as const;
 
@@ -53,13 +59,27 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
     setMsg(res.ok ? `Test ${j.status} to ${j.to} (rendered for ${j.rendered_for}). Subject: ${j.subject}${j.error ? ' | ' + j.error : ''}` : (j.error ?? 'Failed'));
   }
 
+  const enabledCount = controls.filter((c) => c.enabled).length;
+  const leadFollowUp = controls.find((c) => c.job === 'lead-follow-up');
+
   return (
     <div style={mono}>
+      <div style={{ border: '1px solid #3a2b14', borderLeft: '3px solid #e5a935', background: '#17130b', padding: 14, marginBottom: 18 }}>
+        <strong style={{ display: 'block', marginBottom: 5 }}>Customer sending is controlled</strong>
+        <span style={{ opacity: .72, fontSize: 12 }}>
+          {leadFollowUp?.enabled ? 'Lead follow-up is ON — only the configured approved recipients/cap apply.' : 'Lead follow-up is OFF. Preview and test-to-admin remain available without emailing customers.'}
+        </span>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,minmax(0,1fr))', gap:8, marginBottom:18 }}>
+        <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Jobs enabled</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{enabledCount}/{controls.length}</strong></div>
+        <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Retry queue</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{Array.isArray((extra.queues as any)?.items) ? (extra.queues as any).items.length : '—'}</strong></div>
+        <div style={{...box, marginBottom:0}}><span style={{opacity:.6,fontSize:10,textTransform:'uppercase'}}>Scheduled invoices due</span><strong style={{display:'block',fontSize:24,marginTop:5}}>{extra.due_scheduled_invoices?.length ?? 0}</strong></div>
+      </div>
       {msg && <p>{msg}</p>}
       {controls.map((c) => (
         <div key={c.job} style={box}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <strong>{c.job}</strong>
+            <strong>{JOB_LABELS[c.job] ?? c.job}</strong>
             <label>
               <input type="checkbox" checked={c.enabled} onChange={(e) => patch({ job: c.job, enabled: e.target.checked })} /> {c.enabled ? 'ON' : 'OFF'}
             </label>
@@ -95,7 +115,8 @@ export default function AutomationClient({ initial }: { initial: AutomationData 
       </div>
 
       <div style={box}>
-        <strong>Read-only: retry queue and due scheduled invoices</strong>
+        <strong>System queues</strong>
+        <p style={{ opacity: .65 }}>Read-only diagnostics. These do not send anything from this screen.</p>
         <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify({ queues: extra.queues, due_scheduled_invoices: extra.due_scheduled_invoices }, null, 2)}</pre>
       </div>
     </div>
