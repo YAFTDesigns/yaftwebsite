@@ -19,6 +19,7 @@ const tIST = (iso: string, o: Intl.DateTimeFormatOptions) => new Date(iso).toLoc
 export default function ClassesPanel({ courses }: { courses: Json[] }) {
   const [rows, setRows] = useState<Json[]>([]);
   const [roster, setRoster] = useState<Record<string, Json[]>>({});
+  const [meetAuto, setMeetAuto] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [show, setShow] = useState<'upcoming' | 'past' | 'all'>('upcoming');
   const [adding, setAdding] = useState(false);
@@ -29,7 +30,7 @@ export default function ClassesPanel({ courses }: { courses: Json[] }) {
 
   const load = useCallback(async () => {
     const r = await fetch(API, { cache: 'no-store' });
-    if (r.ok) { const j = await r.json(); setRows(j.sessions ?? []); setRoster(j.roster ?? {}); setNow(Date.now()); }
+    if (r.ok) { const j = await r.json(); setRows(j.sessions ?? []); setRoster(j.roster ?? {}); setMeetAuto(!!j.meetAuto); setNow(Date.now()); }
   }, []);
   useEffect(() => { // eslint-disable-next-line react-hooks/set-state-in-effect
     load(); }, [load]);
@@ -68,7 +69,7 @@ export default function ClassesPanel({ courses }: { courses: Json[] }) {
             <div><label style={label}>First class (India time)</label><input style={input} type="datetime-local" value={nc.starts_at} onChange={(e) => setNc({ ...nc, starts_at: e.target.value })} /></div>
             <div><label style={label}>Minutes per class</label><input style={input} inputMode="numeric" value={nc.duration_min} onChange={(e) => setNc({ ...nc, duration_min: e.target.value })} /></div>
             <div><label style={label}>How many classes</label><input style={input} inputMode="numeric" value={nc.repeat_count} onChange={(e) => setNc({ ...nc, repeat_count: e.target.value })} /></div>
-            <div><label style={label}>Meet link</label><input style={input} placeholder="https://meet.google.com/..." value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} /></div>
+            <div><label style={label}>{meetAuto ? 'Meet link (empty = create one per class)' : 'Meet link'}</label><input style={input} placeholder={meetAuto ? 'Leave empty: a new Google Meet link per class' : 'https://meet.google.com/...'} value={nc.meet_url} onChange={(e) => setNc({ ...nc, meet_url: e.target.value })} /></div>
           </div>
 
           <div style={{ marginTop: 18 }}><label style={label}>Repeat on (leave empty to repeat every {nc.step_days} days)</label>

@@ -8,6 +8,7 @@ import { audit } from '@/lib/student/audit';
 import { cleanMeetUrl, cleanHttps } from '@/lib/student/classes';
 import { sendEmail, isEmailConfigured, escapeHtml } from '@/lib/email';
 import { brandedEmail } from '@/lib/emailLayout';
+import { meetConfigured, createMeetEvent, moveMeetEvent, deleteMeetEvent } from '@/lib/googleMeet';
 
 const NO_STORE = { 'Cache-Control': 'private, no-store' };
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f-]{36}$/i.test(v);
@@ -72,7 +73,7 @@ export async function GET() {
       absent: enrolled.filter((e) => !joinedIds.has(e.studentId)).map((e) => e.name),
     };
   });
-  return NextResponse.json({ sessions: out, roster }, { headers: NO_STORE });
+  return NextResponse.json({ sessions: out, roster, meetAuto: meetConfigured() }, { headers: NO_STORE });
 }
 
 export async function POST(req: NextRequest) {
@@ -85,11 +86,13 @@ export async function POST(req: NextRequest) {
   if (b.action === 'create') {
     const slug = cleanText(b.course_slug, 80);
     let title = cleanText(b.title, 120);
-    const meet = cleanMeetUrl(b.meet_url);
+    const typedMeet = String(b.meet_url ?? '').trim();
+    const meet = typedMeet ? cleanMeetUrl(typedMeet) : null;
     const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
     const dur = Math.round(Number(b.duration_min));
     if (!slug || !m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'Course, start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
-    if (!meet) return NextResponse.json({ error: 'Meeting link must be an https Google Meet, Zoom or Teams link.' }, { status: 400 });
+    if (typedMeet && !meet) return NextResponse.json({ error: 'Meeting link must be an https Google Meet, Zoom or Teams link.' }, { status: 400 });
+    if (!typedMeet && !meetConfigured()) return NextResponse.json({ error: 'Paste a meeting link, or connect Google so the site can create one for you.' }, { status: 400 });
     const { data: course } = await a.from('courses').select('slug, title').eq('slug', slug).maybeSingle();
     if (!course) return NextResponse.json({ error: 'Unknown course.' }, { status: 400 });
     if (!title) title = cleanText(course.title, 100) || 'Class';
@@ -116,9 +119,21 @@ export async function POST(req: NextRequest) {
     }
     if (!starts.length) return NextResponse.json({ error: 'No dates came out of that pattern.' }, { status: 400 });
     const seriesId = crypto.randomUUID();
-    const rows = starts.map((st, i) => ({ course_slug: slug, title: starts.length > 1 ? `${title} ${i + 1}` : title, starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString(), meet_url: meet, notes: cleanText(b.notes, 500) || null, created_by: who, student_ids: studentIds, series_id: seriesId }));
+    const notes = cleanText(b.notes, 500) || null;
+    const base = starts.map((st, i) => ({ title: starts.length > 1 ? `${title} ${i + 1}` : title, startIso: new Date(st).toISOString(), endIso: new Date(st + dur * 60_000).toISOString() }));
+    // A pasted link is shared by every class. With no link, each class gets its own Google Meet.
+    const made: { eventId: string; meetUrl: string }[] = [];
+    if (!meet) {
+      try {
+        for (let i = 0; i < base.length; i += 5) made.push(...await Promise.all(base.slice(i, i + 5).map((r) => createMeetEvent({ title: r.title, startIso: r.startIso, endIso: r.endIso, description: notes }))));
+      } catch (e) {
+        await Promise.all(made.map((m2) => deleteMeetEvent(m2.eventId)));
+        return NextResponse.json({ error: `Could not create the Meet links, nothing was added. ${e instanceof Error ? e.message : ''}`.trim() }, { status: 502 });
+      }
+    }
+    const rows = base.map((r, i) => ({ course_slug: slug, title: r.title, starts_at: r.startIso, ends_at: r.endIso, meet_url: meet ?? made[i].meetUrl, calendar_event_id: meet ? null : made[i].eventId, notes, created_by: who, student_ids: studentIds, series_id: seriesId }));
     const { error } = await a.from('class_sessions').insert(rows);
-    if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
+    if (error) { await Promise.all(made.map((m2) => deleteMeetEvent(m2.eventId))); return NextResponse.json({ error: 'Could not save' }, { status: 500 }); }
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_sessions_created', subject: slug, detail: { count: rows.length, private: !!studentIds } });
     let emailed = 0;
     if (b.notify !== false) {
@@ -136,19 +151,20 @@ export async function POST(req: NextRequest) {
     const m = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})$/.exec(String(b.starts_at ?? ''));
     const dur = Math.round(Number(b.duration_min));
     if (!m || !(dur >= 15 && dur <= 480)) return NextResponse.json({ error: 'A new start time and a duration of 15 to 480 minutes are needed.' }, { status: 400 });
-    const { data: cur } = await a.from('class_sessions').select('id, title, starts_at, series_id, student_ids, course_slug').eq('id', b.id).is('cancelled_at', null).maybeSingle();
+    const { data: cur } = await a.from('class_sessions').select('id, title, starts_at, series_id, student_ids, course_slug, calendar_event_id').eq('id', b.id).is('cancelled_at', null).maybeSingle();
     if (!cur) return NextResponse.json({ error: 'Class not found.' }, { status: 404 });
     const newStart = new Date(`${m[1]}T${m[2]}:00+05:30`).getTime();
     const delta = newStart - new Date(cur.starts_at).getTime();
-    let targets = [{ id: cur.id as string, starts_at: cur.starts_at as string }];
+    let targets = [{ id: cur.id as string, starts_at: cur.starts_at as string, ev: (cur.calendar_event_id as string | null) ?? null }];
     if (b.scope === 'following' && cur.series_id) {
-      const { data: later } = await a.from('class_sessions').select('id, starts_at').eq('series_id', cur.series_id).is('cancelled_at', null).gt('starts_at', cur.starts_at).order('starts_at');
-      targets = [...targets, ...(later ?? []).map((l) => ({ id: l.id as string, starts_at: l.starts_at as string }))];
+      const { data: later } = await a.from('class_sessions').select('id, starts_at, calendar_event_id').eq('series_id', cur.series_id).is('cancelled_at', null).gt('starts_at', cur.starts_at).order('starts_at');
+      targets = [...targets, ...(later ?? []).map((l) => ({ id: l.id as string, starts_at: l.starts_at as string, ev: (l.calendar_event_id as string | null) ?? null }))];
     }
     for (const t of targets) {
       const st = new Date(t.starts_at).getTime() + delta;
       const { error } = await a.from('class_sessions').update({ starts_at: new Date(st).toISOString(), ends_at: new Date(st + dur * 60_000).toISOString() }).eq('id', t.id);
       if (error) return NextResponse.json({ error: 'Could not save' }, { status: 500 });
+      if (t.ev && meetConfigured()) await moveMeetEvent(t.ev, new Date(st).toISOString(), new Date(st + dur * 60_000).toISOString());
     }
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_session_rescheduled', subject: cur.id, detail: { moved: targets.length } });
     let emailed = false;
@@ -192,7 +208,8 @@ export async function POST(req: NextRequest) {
   }
   if (b.action === 'cancel') {
     if (!uuid(b.id)) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
-    await a.from('class_sessions').update({ cancelled_at: new Date().toISOString() }).eq('id', b.id);
+    const { data: gone } = await a.from('class_sessions').update({ cancelled_at: new Date().toISOString() }).eq('id', b.id).select('calendar_event_id').maybeSingle();
+    if (gone?.calendar_event_id && meetConfigured()) await deleteMeetEvent(gone.calendar_event_id as string);
     await audit({ actor_type: 'admin', actor_ref: who, action: 'class_session_cancelled', subject: b.id, detail: {} });
     return NextResponse.json({ ok: true });
   }
