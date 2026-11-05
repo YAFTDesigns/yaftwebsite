@@ -88,6 +88,9 @@ export default async function RhinoWearablesFootwear() {
         images={[
           { src: imageUrl('courses/rhino-wearables-footwear-1.jpg'), caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
           { src: imageUrl('courses/rhino-wearables-footwear-2.jpg'), caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
+          { src: '/course-gallery/rhino-wearables-footwear-3.webp', caption: 'Footwear components laid out: lattice insole, gyroid midsole, upper strips and shoe last' },
+          { src: '/course-gallery/rhino-wearables-footwear-4.webp', caption: 'Gyroid lattice generated for a full insole in Grasshopper' },
+          { src: '/course-gallery/rhino-wearables-footwear-5.webp', caption: 'Perforated and gridded shoe uppers from a Grasshopper definition, with the remeshed surface in red' },
         ]}
       />
 
@@ -147,6 +150,9 @@ export default async function RhinoWearablesFootwear() {
           photos: [
             { src: imageUrl('courses/rhino-wearables-footwear-1.jpg'), caption: 'Recreating complex surfaces with reference wearables, from wireframe development to finished form' },
             { src: imageUrl('courses/rhino-wearables-footwear-2.jpg'), caption: 'Parametric lattice structures for insoles and midsoles, mapping and texturing' },
+            { src: '/course-gallery/rhino-wearables-footwear-3.webp', caption: 'Footwear components laid out: lattice insole, gyroid midsole, upper strips and shoe last' },
+            { src: '/course-gallery/rhino-wearables-footwear-4.webp', caption: 'Gyroid lattice generated for a full insole in Grasshopper' },
+            { src: '/course-gallery/rhino-wearables-footwear-5.webp', caption: 'Perforated and gridded shoe uppers from a Grasshopper definition, with the remeshed surface in red' },
           ],
         }]}
       />
