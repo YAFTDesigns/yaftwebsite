@@ -12,6 +12,9 @@ export default function LiveBillsPanel({ bills, courses, rules }: { bills: Json[
   const real = (bills ?? []).filter((b) => !b.test);
   const todays = real.filter((b) => b.paidAt && new Date(b.paidAt).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }) === new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }));
 
+  const transit = real.filter((b) => !b.settledAt);
+  const inBank = real.filter((b) => b.settledAt);
+
   return (
     <div style={{ maxWidth: 980 }}>
       <h3 style={{ ...heading, marginTop: 0 }}>Payment summary</h3>
@@ -21,6 +24,7 @@ export default function LiveBillsPanel({ bills, courses, rules }: { bills: Json[
         <div style={card}><div style={{ fontSize: 12, opacity: 0.6 }}>Paid today</div><div style={{ fontSize: 26, fontWeight: 700 }}>{todays.length}</div><div style={{ fontSize: 13, opacity: 0.7 }}>{inr(todays.reduce((a, b) => a + Number(b.amountInr), 0))}</div></div>
         <div style={card}><div style={{ fontSize: 12, opacity: 0.6 }}>Real payments, all time</div><div style={{ fontSize: 26, fontWeight: 700 }}>{real.length}</div><div style={{ fontSize: 13, opacity: 0.7 }}>{inr(real.reduce((a, b) => a + Number(b.amountInr), 0))}</div></div>
         <div style={card}><div style={{ fontSize: 12, opacity: 0.6 }}>Still to collect</div><div style={{ fontSize: 26, fontWeight: 700 }}>{inr([...new Map([...real].sort((x, y) => String(x.paidAt ?? '').localeCompare(String(y.paidAt ?? ''))).map((b) => [b.student + b.course, b])).values()].reduce((a, b) => a + Number(b.balanceInr), 0))}</div><div style={{ fontSize: 13, opacity: 0.7 }}>across students shown here</div></div>
+        <div style={card}><div style={{ fontSize: 12, opacity: 0.6 }}>With Razorpay, not in bank yet</div><div style={{ fontSize: 26, fontWeight: 700 }}>{inr(transit.reduce((a, b) => a + Number(b.amountInr), 0))}</div><div style={{ fontSize: 13, opacity: 0.7 }}>{transit.length} payment{transit.length === 1 ? '' : 's'} · {inBank.length} already paid out</div></div>
       </div>
 
       <h3 style={heading}>Batches live now and coming up</h3>
@@ -56,6 +60,13 @@ export default function LiveBillsPanel({ bills, courses, rules }: { bills: Json[
                 <span style={{ color: full ? GREEN : 'var(--brass)', fontWeight: 600 }}>{full ? 'Fully paid' : `${inr(b.balanceInr)} left`}</span>
                 <span style={{ opacity: 0.7 }}>Bill {b.invoiceNo ?? '-'}{b.syncStatus !== 'ok' && <span style={{ color: 'var(--brass)' }}> · bill step: {b.syncStatus}</span>}</span>
               </div>
+              {!b.test && (
+                <div style={{ fontSize: 12, marginTop: 8, color: b.settledAt ? GREEN : 'var(--brass)' }}>
+                  {b.settledAt
+                    ? `In your bank on ${new Date(b.settledAt).toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric' })} · received ${inr(b.bankInr)} after Razorpay fee ${inr(b.feeInr)} (incl. GST)${b.settlementUtr ? ` · UTR ${b.settlementUtr}` : ''}`
+                    : 'With Razorpay, not yet paid out to your bank'}
+                </div>
+              )}
             </div>
           </div>
         );

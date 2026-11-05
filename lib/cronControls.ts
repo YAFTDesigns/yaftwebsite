@@ -8,6 +8,7 @@ export const CRON_JOBS = [
   'accountant-reminder',
   'send-scheduled-invoices',
   'retry-queue',
+  'razorpay-settlements',
 ] as const;
 export type CronJob = (typeof CRON_JOBS)[number];
 

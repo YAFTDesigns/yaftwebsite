@@ -30,6 +30,10 @@
     {
       "path": "/api/cron/instagram-token-refresh",
       "schedule": "0 8 1,15 * *"
+    },
+    {
+      "path": "/api/cron/razorpay-settlements",
+      "schedule": "30 9 * * *"
     }
   ]
 }
